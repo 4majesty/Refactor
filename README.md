@@ -1,4 +1,5 @@
 # Refactor(Extract Interface)
+
 You can choose one or more packages and class files to extract interface.
 ---
 
