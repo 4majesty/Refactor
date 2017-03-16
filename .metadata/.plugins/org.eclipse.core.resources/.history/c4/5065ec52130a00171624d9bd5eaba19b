@@ -1,0 +1,49 @@
+package com.successfactors.cdp.bean;
+
+import java.io.Serializable;
+
+/**
+ * VO for transferring filter settings between UI and server side
+ * @author root
+ *
+ */
+public class SuggestedRolesFilterSettingBean implements Serializable {
+    private String flagKey;
+    private String flagLabel;
+    private boolean enabled;
+    
+    
+    public SuggestedRolesFilterSettingBean() {
+        super();
+    }
+    public String getFlagLabel() {
+        return flagLabel;
+    }
+    public void setFlagLabel(String flagLabel) {
+        this.flagLabel = flagLabel;
+    }
+
+    public String getFlagKey() {
+        return flagKey;
+    }
+    public void setFlagKey(String flagKey) {
+        this.flagKey = flagKey;
+    }
+    
+    public SuggestedRolesFilterSettingBean(String flagKey, String flagLabel,
+            boolean enabled) {
+        super();
+        this.flagKey = flagKey;
+        this.flagLabel = flagLabel;
+        this.enabled = enabled;
+    }
+    public boolean isEnabled() {
+      return enabled;
+    }
+    public void setEnabled(boolean enabled) {
+      this.enabled = enabled;
+    }
+
+    
+    
+}

@@ -1,0 +1,71 @@
+package com.successfactors.cdp.app.mentoring;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.vo.MatchingResult;
+import com.successfactors.cdp.service.util.mentoring.MatchingAlgorithmFactory;
+import com.successfactors.sca.ServiceApplicationException;
+
+public class MatchingFacade {
+  private static Map<Integer, MatchingResult> matchingResultCache = new HashMap<Integer, MatchingResult>();
+
+  /**
+   * get matching score for recommendation list
+   * 
+   * @param context
+   * @return
+   * @throws ServiceApplicationException
+   */
+  public MatchingResult getRecommendationList(MatchingAlgorithmContext context) throws ServiceApplicationException {
+    MatchingAlgorithmFactory factory = new MatchingAlgorithmFactory();
+    MatchingAlgorithmStrategy standardAlgorithm = factory.getAlgorithm("Standard", context);
+    MatchingResult result;
+
+    // generate batch ID according to context, if cache exist, get cached recommendation list. Otherwise, re-generate recommendation list
+    int batchId = generateBatchId(context);
+
+    if (matchingResultCache.containsKey(batchId)) {
+      result = matchingResultCache.get(batchId);
+    } else {
+      result = standardAlgorithm.getMatchingResult();
+    }
+
+    return result;
+  }
+
+  /**
+   * according to mentee/mentor's chosen value, generate batch ID
+   * 
+   * @param context
+   * @return
+   */
+  private int generateBatchId(MatchingAlgorithmContext context) {
+    int batchId = 0;
+    return batchId;
+  }
+
+  public Set<String> getUnavailableMentorIdSet(MatchingResult matchingResult, MentoringProgram program) {
+    Set<String> result = new HashSet<String>();
+    Set<String> allProgramUnavailableMentorSet = new HashSet<String>();
+    for (MentoringProgramMentor mentor : program.getMentors()) {
+      if (mentor.getUnavailableEndDate() != null) {
+        allProgramUnavailableMentorSet.add(mentor.getUser());
+      }
+    }
+    if (allProgramUnavailableMentorSet.isEmpty()) {
+      return result;
+    }
+    for (String mentorId : matchingResult.getUserProfileMap().keySet()) {
+      if (allProgramUnavailableMentorSet.contains(mentorId)) {
+        result.add(mentorId);
+      }
+    }
+    return result;
+  }
+
+}

@@ -1,0 +1,190 @@
+/*
+ * $Id$
+ */
+package com.successfactors.cdp.bean.mentoring.processor;
+
+import static com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum.ACTIVE;
+import static com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum.CLOSED_BY_MENTEE;
+import static com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum.CLOSED_BY_MENTOR;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.service.mentoring.SendMentoringProgramClosureEmail;
+import com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum;
+import com.successfactors.fo.app.exception.ValidationException;
+import com.successfactors.genericobject.api.messages.Message;
+import com.successfactors.genericobject.api.model.DataOperation;
+import com.successfactors.genericobject.api.processor.OperationContext;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.app.processor.AbstractProcessor;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.user.bean.UserBean;
+
+@Name("com.successfactors.cdp.bean.mentoring.processor.MentorshipProcessor")
+@javax.inject.Named("com.successfactors.cdp.bean.mentoring.processor.MentorshipProcessor")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+public class MentorshipProcessor extends AbstractProcessor{
+  /** Logger */
+  private static Logger logger = LogManager.getLogger();
+  
+  @Inject
+  @In(create=true)
+  private MentoringServiceBase mentoringServiceBase; 
+  
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+  
+  @Override
+  public void validate(ValidationContext context) throws ValidationException {
+    validateMentorshipStatus(context);
+  }
+  
+  @Override
+  public void postSave(ValidationContext context) throws ValidationException {
+    handleChangeStatus(context);
+  }
+
+  /**
+   * Verifies the status change
+   * It is valid:
+   *  - If remains the same status
+   *  - Or
+   *  CASE 1: ACTIVE-> CLOSED_BY_MENTEE/CLOSED_BY_MENTOR -> ACTIVE
+   *  CASE 2 :ACTIVE-> CLOSED_BY_INACTIVE
+   * @param context
+   * @throws ValidationException
+   */
+  protected void validateMentorshipStatus(ValidationContext context) throws ValidationException {
+    for (OperationContext operationContext : context.getSuccessfullOperationContexts()) {
+      if (operationContext.getDataOperation() != DataOperation.CORRECT) {
+        //no data change
+        continue;
+      }
+      MentoringProgramMatchedParticipant beanOriginal = (MentoringProgramMatchedParticipant) operationContext.getOriginalBean();
+      MentoringProgramMatchedParticipant beanModified = (MentoringProgramMatchedParticipant) operationContext.getBean();
+      
+      if (beanOriginal.getMentorshipStatus() == beanModified.getMentorshipStatus()) {//keep it here for performance
+        continue;
+      }
+      try {
+        if (checkParticipantClosure(beanOriginal, beanModified) ||
+            checkInactiveParticipant(beanOriginal, beanModified)) {
+          //valid cases
+          continue;
+        } else {  //invalid cases
+          operationContext.addErrorMessages(new Message("DEVELOPMENT_MENTORING_INVALID_MENTORSHIP_STATUS_ERROR"));
+        }
+      } catch (ServiceApplicationException sae) {
+        logger.error("Failed to validate MentoringProgramMatchedParticipant state",sae);
+        operationContext.addErrorMessages(new Message(sae.getMessage()));
+      }
+    }
+  }
+
+  /**
+   * CASE 2: Closing relationship in case user gets inactivated
+   */
+  protected boolean checkInactiveParticipant(
+      MentoringProgramMatchedParticipant original,
+      MentoringProgramMatchedParticipant modified) throws ServiceApplicationException {
+    MentorshipStatusEnum stat1 = original.getMentorshipStatus();
+    MentorshipStatusEnum stat2 = modified.getMentorshipStatus();
+    boolean isValid = (stat1 == ACTIVE && stat2 == MentorshipStatusEnum.CLOSED_INACTIVE);
+    if (isValid) {
+      List<String> ids = new ArrayList(2);
+      ids.add(original.getMentor());
+      ids.add(original.getMentee());
+      Map<String, UserBean> maps = mentoringServiceBase.getUsernameMapByIds(ids);
+      if (maps.get(original.getMentor()) != null && maps.get(original.getMentor()).isValidUser() &&
+          maps.get(original.getMentee()) != null && maps.get(original.getMentee()).isValidUser() ) {
+        logger.error("Neither mentor or mentee is inactive, the relationship can not be closed as CLOSED_INACTIVE");
+        isValid = false;
+      }
+    }
+    return isValid;
+  }
+
+  /**
+   * Case 1: Closing relationship in case user request closure 
+   */
+  protected boolean checkParticipantClosure(MentoringProgramMatchedParticipant original, MentoringProgramMatchedParticipant modified) throws ServiceApplicationException {
+    MentorshipStatusEnum statusBefore = original.getMentorshipStatus();
+    MentorshipStatusEnum statusAfter = modified.getMentorshipStatus();
+    boolean isValid = isMentorshipClosed(statusBefore, statusAfter) || 
+        isMentorshipClosed(statusAfter, statusBefore);
+    if (isValid) {
+      MentoringProgram program = mentoringServiceBase.getProgramById(original.getProgramId());
+      isValid = program.isMentorshipClosureEnabled();
+      if (!isValid) {
+        logger.error("The mentorship closure enabled flag is false, it is not allowed to close relationship");
+      }
+    }
+    return isValid;
+  }
+
+  private boolean isMentorshipClosed(MentorshipStatusEnum stat1,
+      MentorshipStatusEnum stat2) {
+    return stat1 == ACTIVE && (stat2 == CLOSED_BY_MENTEE || stat2 == CLOSED_BY_MENTOR);
+  }
+
+  /**
+   * Handles the following:
+   *  - If mentor/mentee closes the relationship, send an email to notify about the closure
+   * @param context
+   * @throws ValidationException 
+   */
+  private void handleChangeStatus(ValidationContext context) throws ValidationException {
+    for (OperationContext operationContext : context.getSuccessfullOperationContexts()) {
+      
+      if (operationContext.getDataOperation() != DataOperation.CORRECT) {
+        continue;
+      }
+      MentoringProgramMatchedParticipant beanOriginal = (MentoringProgramMatchedParticipant) operationContext.getOriginalBean();
+      
+      MentoringProgramMatchedParticipant beanModified = (MentoringProgramMatchedParticipant) operationContext.getBean();
+      if (beanOriginal.getMentorshipStatus() == beanModified.getMentorshipStatus()){ 
+        return;
+      }
+      boolean closureEmail = false;
+      MentorshipStatusEnum closedStatus = null;
+      if (beanOriginal.getMentorshipStatus() == MentorshipStatusEnum.CLOSED_BY_MENTEE || //case reopened by mentor/mentee
+          beanOriginal.getMentorshipStatus() == MentorshipStatusEnum.CLOSED_BY_MENTOR) {
+        closedStatus = beanOriginal.getMentorshipStatus();
+        closureEmail = false;
+      } else if (beanModified.getMentorshipStatus() == MentorshipStatusEnum.CLOSED_BY_MENTEE || //case closed by mentor/mentee
+          beanModified.getMentorshipStatus() == MentorshipStatusEnum.CLOSED_BY_MENTOR) {
+        closedStatus = beanModified.getMentorshipStatus();
+        closureEmail = true;
+      } else {
+        return;
+      }
+      String sender = (closedStatus == MentorshipStatusEnum.CLOSED_BY_MENTEE)? beanModified.getMentee() : beanModified.getMentor();
+      String recipient = (closedStatus == MentorshipStatusEnum.CLOSED_BY_MENTEE)? beanModified.getMentor() : beanModified.getMentee();
+      try {
+        SendMentoringProgramClosureEmail cmd = new SendMentoringProgramClosureEmail(beanModified.getProgramId(), beanModified.getExternalId(), sender, recipient, closureEmail);
+        scaHandler.execute(cmd);
+      } catch (ServiceApplicationException sae) {
+        logger.error("Unable to send email to mentor/mentee about closure", sae);
+      }
+    }
+  }
+
+}

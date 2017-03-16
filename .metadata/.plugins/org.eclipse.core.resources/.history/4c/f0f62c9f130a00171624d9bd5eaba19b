@@ -1,0 +1,333 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramEmailTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentee;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplateSection;
+import com.successfactors.cdp.service.mentoring.CreateMentoringJamGroup;
+import com.successfactors.cdp.service.mentoring.SaveProgram;
+import com.successfactors.cdp.service.util.mentoring.MentoringProgramMDFException;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormStatusEnum;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+/**
+ * Service command to save a program entity. If it's an existing program, we will update it. If it is a new program, we will create it.
+ *
+ * @author I309618
+ */
+@Service
+public class SaveProgramImpl implements ServiceCommandImpl<SaveProgram, SaveProgram> {
+    /**
+     * params 
+     */
+    @Inject
+    @In
+    private ParamBean params;
+
+
+    @Inject
+    @In
+    private transient ServiceCommandHandler scaHandler;
+
+    @Inject
+    @In(create = true)
+    private ConfigurationProvider configurationProvider;
+    
+    @Inject
+    @In(create = true)
+    private IMentoringServiceBase mentoringServiceBase;
+
+    
+    /**
+     * Logger
+     */
+    private static Logger logger = LogManager.getLogger();
+
+    @Override
+    public SaveProgram execute(SaveProgram cmd) throws ServiceApplicationException {
+        MentoringProgram program = cmd.getProgram();
+        MentoringProgram savedProgram = null;
+
+        if (program.getStatus()!=ProgramStatusEnum.DRAFT && !validateProgramParticipants(program)) {
+            throw new ServiceApplicationException("The program contains invalid data. Check the log for details.");
+        }
+
+        if (program.getExternalId() != null && Integer.valueOf(program.getExternalId()) > 0) {
+            // Get existing program
+            savedProgram = mentoringServiceBase.getProgramById(program.getExternalId());
+            if (savedProgram.getStatus()!=ProgramStatusEnum.DRAFT) {
+                throw new ServiceApplicationException("Only target program in draft status  can be saved");
+            }
+            program = mergeProgram(savedProgram, program);
+        }
+
+        if (program.getExternalId() == null || Integer.valueOf(program.getExternalId()) <= 0) {
+            //if new program, set order for each section
+            int order = 1;
+            for (MentoringProgramSignupTemplateSection section : program.getSignupFormTemplate().getSections()) {
+                if (!section.getSectionId().trim().equals("")) {
+                    section.setOrder(order++);
+                }
+            }
+        } else {
+            //sort sections by order, whatever new program or not
+            MentoringUtils.sortSignupSections(program.getSignupFormTemplate().getSections());
+        }
+        for (MentoringProgramMentee participant : program.getMentees()) {
+            participant.setThreshold(program.getMaximumOfMentor());
+        }
+        //Save new/existing program
+        ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgram.class, program));
+        validateContext(context);
+        MentoringProgram savedBean = (MentoringProgram) context.getSuccessfullOperationContexts().get(0).getBean();
+        boolean isOpenEndedInProgress = program.getMatchingType() == ProgramMatchingTypeEnum.OPEN_ENDED
+                && program.getStatus() == ProgramStatusEnum.INPROGRESS;
+        if(isOpenEndedInProgress) {
+            savedBean.setActualStartDate(new Date());
+        }
+        cmd.setProgram(savedBean);
+
+        if (program.isJamEnabled()) {
+            if(isOpenEndedInProgress || program.getStatus() == ProgramStatusEnum.CONFIRMED) {
+                scaHandler.execute(new CreateMentoringJamGroup(cmd.getProgram(),
+                        cmd.getJamGroupName(), cmd.getJamDescription()));
+            }
+        }
+
+        return cmd;
+    }
+    
+
+    /**
+     * Merges two beans, one is the persisted data and the second is the new data.
+     * @param savedProgram The entity to be merged and saved. 
+     * @param program entity received from user
+     * @return
+     * @throws ServiceApplicationException
+     */
+    private MentoringProgram mergeProgram(MentoringProgram savedProgram, MentoringProgram program) throws ServiceApplicationException {
+        // Save program details
+        savedProgram.setDescription(program.getDescription());
+        savedProgram.setName(program.getName());
+        savedProgram.setMentorSignupDate(program.getMentorSignupDate());
+        savedProgram.setMenteeSignupDate(program.getMenteeSignupDate());
+        savedProgram.setMatchingDate(program.getMatchingDate());
+        savedProgram.setStartDate(program.getStartDate());
+        savedProgram.setEndDate(program.getEndDate());
+        savedProgram.setCompletedDate(program.getCompletedDate());
+        savedProgram.setPhotoId(program.getPhotoId());
+        savedProgram.setMaximumOfMentee(program.getMaximumOfMentee());
+        savedProgram.setMaximumOfMentor(program.getMaximumOfMentor());
+        savedProgram.setMatchingType(program.getMatchingType());
+        savedProgram.setNeedMentorApproval(program.isNeedMentorApproval());
+        savedProgram.setMentorshipClosureEnabled(program.isMentorshipClosureEnabled());
+        savedProgram.setJamEnabled(program.isJamEnabled());
+        
+        // Save mentor list
+        savedProgram.setMentors(mergeParticipant(savedProgram, savedProgram.getMentors(), program.getMentors(), program.getMaximumOfMentee()));
+
+        // Save mentee list
+        savedProgram.setMentees(mergeParticipant(savedProgram, savedProgram.getMentees(), program.getMentees(), program.getMaximumOfMentor()));
+
+        // Save sign up form template
+        if (savedProgram.getSignupFormTemplate() != null || program.getSignupFormTemplate() != null) {
+            // If there is no saved form template, create a new one.
+            if (savedProgram.getSignupFormTemplate() == null) {
+                savedProgram.setSignupFormTemplate(new MentoringProgramSignupTemplate());
+            }
+
+            updateSignupTemplate(savedProgram.getSignupFormTemplate(), program.getSignupFormTemplate());
+        }
+
+        // Save email template
+        updateEmailTemplate(savedProgram.getEmailTemplates(), program.getEmailTemplates());
+        savedProgram.setOwners(program.getOwners());
+
+        //status is the last to change
+        savedProgram.setStatus(program.getStatus());
+        
+        return savedProgram;
+    }
+
+    private <T extends MentoringProgramParticipant> List<T> mergeParticipant(MentoringProgram program, List<T> savedList, List<T> newList, Integer threshold)
+            throws ServiceApplicationException {
+        Map<String, T> newMap = new HashMap<String, T>();
+        List<T> finalList = new ArrayList<T>();
+
+        if (newList != null && newList.size() > 0) {
+            for (T participant : newList) {
+                newMap.put(participant.getUser(), participant);
+            }
+        }
+
+        for (T participant : savedList) {
+            if (newMap.get(participant.getUser()) == null) {
+                // If participant has a sign up form, set status to deleted either.
+                if (participant.getSignupForm() != null) {
+                    participant.getSignupForm().setStatus(SignupFormStatusEnum.DELETED);
+                }
+            } else {
+                // If participant has a sign up form, set status to draft.
+                if (participant.getSignupForm() != null) {
+                    participant.getSignupForm().setStatus(SignupFormStatusEnum.DRAFT);
+                    participant.setThreshold(threshold);
+                }
+                // If a participant is already saved, remove it from map.
+                newMap.remove(participant.getUser());
+
+                finalList.add(participant);
+            }
+        }
+
+        // Add all participants not saved
+        for (T participant : newMap.values()) {
+            finalList.add(participant);
+        }
+
+        return finalList;
+    }
+
+    /**
+     * update sign up template data
+     *
+     * @param savedTemplate
+     * @param newTemplate
+     * @return
+     * @throws ServiceApplicationException
+     * @throws MentoringProgramMDFException
+     */
+    private MentoringProgramSignupTemplate updateSignupTemplate(MentoringProgramSignupTemplate savedTemplate,
+                                                                MentoringProgramSignupTemplate newTemplate) throws ServiceApplicationException, MentoringProgramMDFException {
+
+        Map<String, MentoringProgramSignupTemplateSection> newMap = new HashMap<String, MentoringProgramSignupTemplateSection>();
+        List<MentoringProgramSignupTemplateSection> savedSections = new ArrayList<MentoringProgramSignupTemplateSection>();
+
+        //set order for each new section, it's latest order
+        int order = 1;
+        for (MentoringProgramSignupTemplateSection section : newTemplate.getSections()) {
+            section.setOrder(order++);
+            newMap.put(section.getSectionId(), section);
+        }
+
+        for (MentoringProgramSignupTemplateSection section : savedTemplate.getSections()) {
+            MentoringProgramSignupTemplateSection newSection = newMap.get(section.getSectionId());
+
+            if (newSection != null) {
+                // Set visibility
+                section.setMenteeVisible(newSection.isMenteeVisible());
+                section.setMentorVisible(newSection.isMentorVisible());
+                section.setMentorQuestion(newSection.isMentorVisible() ? newSection.getMentorQuestion() : null);
+                section.setMenteeQuestion(newSection.isMenteeVisible() ? newSection.getMenteeQuestion() : null);
+                section.setOrder(newSection.getOrder());
+
+                //if the section both exists in old and new version, add it into final list, with latest order
+                savedSections.add(section);
+
+                // If a section is already saved, then move it from map.
+                newMap.remove(section.getSectionId());
+            }
+        }
+
+        // Add all sections not saved to final list
+        for (MentoringProgramSignupTemplateSection section : newMap.values()) {
+            savedSections.add(section);
+        }
+
+        //clean old sections
+        savedTemplate.getSections().clear();
+        //add new sections, with latest order
+        savedTemplate.getSections().addAll(savedSections);
+
+        return savedTemplate;
+    }
+
+    /**
+     * update email template data
+     *
+     * @param savedEmailTemplates
+     * @param newEmailTemplates
+     * @return
+     */
+    private List<MentoringProgramEmailTemplate> updateEmailTemplate(List<MentoringProgramEmailTemplate> savedEmailTemplates, List<MentoringProgramEmailTemplate> newEmailTemplates) {
+        Map<String, MentoringProgramEmailTemplate> newTemplates = new HashMap<String, MentoringProgramEmailTemplate>();
+
+        for (MentoringProgramEmailTemplate template : newEmailTemplates) {
+            newTemplates.put(template.getEmailType().toString(), template);
+        }
+
+        for (int i = 0; i < savedEmailTemplates.size(); i++) {
+            MentoringProgramEmailTemplate oldTemplate = savedEmailTemplates.get(i);
+            MentoringProgramEmailTemplate newTemplate = newTemplates.get(oldTemplate.getEmailType().toString());
+            if (newTemplate != null) {
+                oldTemplate.setEmailContent(newTemplate.getEmailContent());
+                oldTemplate.setEmailSubject(newTemplate.getEmailSubject());
+            }
+        }
+
+        return savedEmailTemplates;
+    }
+
+    private void validateContext(ValidationContext context) throws MentoringProgramMDFException {
+        if (context.getFailedOperationContexts() != null && context.getFailedOperationContexts().size() > 0) {
+            throw new MentoringProgramMDFException(context.getFailedOperationContexts().get(0).toString());
+        }
+    }
+    
+    /**
+     * Validate the participants
+     * @param program
+     * @throws ServiceApplicationException throw exception if there is an error
+     */
+    protected boolean validateProgramParticipants(MentoringProgram program) throws ServiceApplicationException {
+      List<String> list = new ArrayList(program.getMentors().size()+program.getMentees().size());
+      
+      addParticipants(list, program.getMentors());
+      addParticipants(list, program.getMentees());
+      
+      if (list.isEmpty()) {
+        return true;
+      }
+      
+      Map<String, UserBean> map = mentoringServiceBase.getUsernameMapByIds(list);
+      for (String userId : list) {
+        UserBean user = map.get(userId);
+        if (user == null || !user.isValidUser()) {
+          logger.error("The program should not contain inactive mentors or mentees for launch.");
+          return false;
+        }
+      }
+      return true;
+    }
+
+    private void addParticipants(List<String> list,
+        List<? extends MentoringProgramParticipant> participantList) {
+      for (MentoringProgramParticipant participant : participantList) {
+        list.add(participant.getUser());
+      }
+    }
+}

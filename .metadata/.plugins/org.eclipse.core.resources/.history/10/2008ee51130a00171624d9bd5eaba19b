@@ -1,0 +1,27 @@
+package com.successfactors.cdp.bean;
+
+import java.io.Serializable;
+
+public interface IAutoCompleteRoleSearchVO {
+	int compareTo(AutoCompleteRoleSearchVO o);
+
+	long getRoleId();
+
+	void setRoleId(long roleId);
+
+	String getRoleName();
+
+	void setRoleName(String roleName);
+
+	boolean isCanAdd();
+
+	void setCanAdd(boolean canAdd);
+
+	String getFamilyName();
+
+	void setFamilyName(String familyName);
+
+	int hashCode();
+
+	boolean equals(Object obj);
+}

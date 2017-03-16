@@ -1,0 +1,14 @@
+package com.successfactors.cdp.app.mentoring;
+
+import java.util.Set;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.vo.MatchingResult;
+import com.successfactors.cdp.service.util.mentoring.MatchingAlgorithmFactory;
+import com.successfactors.sca.ServiceApplicationException;
+
+public interface IMatchingFacade {
+	MatchingResult getRecommendationList(MatchingAlgorithmContext context) throws ServiceApplicationException;
+
+	Set<String> getUnavailableMentorIdSet(MatchingResult matchingResult, MentoringProgram program);
+}

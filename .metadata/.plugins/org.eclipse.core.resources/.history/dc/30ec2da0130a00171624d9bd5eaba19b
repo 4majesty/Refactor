@@ -1,0 +1,123 @@
+/*
+ * $Id$
+ */
+package com.successfactors.cdp.service.mentoring.impl;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.jam.Group;
+import com.successfactors.cdp.service.mentoring.CheckJAMPermission;
+import com.successfactors.cdp.service.mentoring.CreateMentoringJamGroup;
+import com.successfactors.cdp.service.mentoring.jam.CreateJamGroup;
+import com.successfactors.cdp.service.mentoring.jam.GetJamAuthToken;
+import com.successfactors.cdp.service.mentoring.jam.exception.DuplicateJamGroupException;
+import com.successfactors.cdp.service.util.mentoring.CreateJAMGroupException;
+import com.successfactors.cdp.service.util.mentoring.CreateJAMGroupException.REASON;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+@Service
+public class CreateMentoringJamGroupImpl implements ServiceCommandImpl<Boolean, CreateMentoringJamGroup>{
+  private static final int MAXIMUM_JAM_FIELD_LENGTH = 255;
+
+  private static Logger logger = LogManager.getLogger();
+
+  @Inject
+  @In
+  private ParamBean params;
+  
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+  
+  @Inject
+  @In(create = true)
+  private ConfigurationProvider configurationProvider;
+  
+  /** Message resource */
+  @Inject
+  @In(create = true, value = "v10msgs")
+  private IMessageBundle msgs;
+  
+  @Inject
+  @In(create=true)
+  private MentoringServiceBase mentoringServiceBase; 
+  
+
+  @Override
+  public Boolean execute(CreateMentoringJamGroup cmd)
+      throws ServiceApplicationException {
+    boolean hasPermission =  scaHandler.execute(new CheckJAMPermission());
+    if (!hasPermission) {
+      throw new CreateJAMGroupException(REASON.SYSTEM_FAIL, msgs.getString("DEVELOPMENT_MENTORING_FAILED_JAM_PERMISSION"), null);
+    }
+    MentoringProgram program = cmd.getProgram();
+    createJAMGroup(program, cmd.getJamGroupName(), cmd.getJamGroupDescription());
+    persistProgram(program);
+    return null;
+  }
+  
+  /**
+   * Needs to reload object first...
+   * @param program
+   */
+  private void persistProgram(MentoringProgram program) throws ServiceApplicationException {
+    MentoringProgram toSaveProgram = mentoringServiceBase.getProgramById(program.getExternalId());
+    if (toSaveProgram == null) {
+      logger.info("Invalid Mentoring program "+program.getExternalId());
+      return;
+    }
+    toSaveProgram.setJamGroupId(program.getJamGroupId());
+    
+    ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgram.class, toSaveProgram));
+    mentoringServiceBase.validateContext(context);
+  }
+  /**
+   * Creates a new JAM group and populate the program with the JAM group id.
+   * @param program
+   * @throws ServiceApplicationException
+   */
+  public void createJAMGroup(MentoringProgram program, String optionalJamGroupName, String optionalJamDescription) throws ServiceApplicationException {
+    String jamGroupName = program.getName();
+    String jamDescription= program.getDescription();
+    
+    if (optionalJamGroupName != null) {
+      jamGroupName = optionalJamGroupName;
+      jamDescription = optionalJamDescription;
+    }
+    
+    if (jamGroupName == null || jamGroupName.length() > 255 || (jamDescription != null && jamDescription.length() > 255)) {
+      throw new CreateJAMGroupException(REASON.INVALID_NAME, msgs.getString("DEVELOPMENT_MENTORING_FAILED_JAM_INVALID"), null);
+    }
+
+    try {
+      GetJamAuthToken cmd = new GetJamAuthToken(params.getUserId());
+      String authToken = scaHandler.execute(cmd);
+      Group jamGroup = scaHandler.execute(new CreateJamGroup(jamGroupName, 
+          jamDescription, authToken));
+
+      program.setJamGroupId(jamGroup.getGroupId());
+    } catch (DuplicateJamGroupException djge) {
+      //rollback
+      throw new CreateJAMGroupException(REASON.DUPLICATE_NAME, msgs.getString("DEVELOPMENT_MENTORING_FAILED_JAM_DUPLICATE"), djge);
+    } catch (ServiceApplicationException sae) {
+      logger.error("Unexpected error accessing JAM API", sae);
+      //rollback 
+      throw new CreateJAMGroupException(REASON.SYSTEM_FAIL, msgs.getString("DEVELOPMENT_MENTORING_FAILED_JAM_SYSTEM"), null);
+    }
+  }
+
+}

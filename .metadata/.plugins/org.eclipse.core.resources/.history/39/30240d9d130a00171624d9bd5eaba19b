@@ -1,0 +1,79 @@
+package com.successfactors.cdp.app.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramEmailTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupForm;
+import com.successfactors.cdp.bean.mentoring.vo.overview.ProgramDetailsTabVO;
+import com.successfactors.cdp.bean.mentoring.vo.overview.ProgramMenteesTabVO;
+import com.successfactors.cdp.bean.mentoring.vo.overview.ProgramMentorsTabVO;
+import com.successfactors.cdp.service.util.mentoring.MentoringProgramMDFException;
+import com.successfactors.cdp.service.util.mentoring.ProgramEmailTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramParticipantTypeEnum;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.user.bean.UserBean;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+public interface IMentoringServiceBase {
+	MentoringProgram getProgramById(String programId) throws ServiceApplicationException;
+
+	MentoringProgramMentorRequest getMentoringRequestById(String requestId) throws ServiceApplicationException;
+
+	void validateContext(ValidationContext context) throws MentoringProgramMDFException;
+
+	MentoringProgramEmailTemplate getEmailTemplateByType(MentoringProgram program, ProgramEmailTypeEnum type);
+
+	<T extends MentoringProgramSignupForm, U extends MentoringProgramParticipant> void saveSignupForm(
+			MentoringProgram program, Class<T> clasz, List<U> participants) throws ServiceApplicationException;
+
+	<T extends MentoringProgramParticipant> void sendSignupEmail(MentoringProgram program,
+			MentoringProgramEmailTemplate emailTemplate, List<T> participants) throws ServiceApplicationException;
+
+	Map<String, UserBean> getUsernameMapByIds(List<String> userIdList) throws ServiceApplicationException;
+
+	<T extends MentoringProgramSignupForm, U extends MentoringProgramParticipant> void autoDeclineParticipants(
+			Class<T> clasz, List<U> participants, boolean draftOnly) throws ServiceApplicationException;
+
+	void sendMatchedEmailToMentor(MentoringProgram program, String mentorId, List<String> mentees)
+			throws ServiceApplicationException;
+
+	void sendMatchedEmailToMentee(MentoringProgram program, String mentorId, String menteeId)
+			throws ServiceApplicationException;
+
+	void sendDeclineEmail(MentoringProgram program, String menteeId, String comment) throws ServiceApplicationException;
+
+	void sendMatchingRequestEmail(MentoringProgram program, Map<String, Set<String>> mentorMenteeMap)
+			throws ServiceApplicationException;
+
+	boolean isMentorAvailable(String programId, String mentorId) throws ServiceApplicationException;
+
+	void assignPropertyValueFromVO(MentoringProgram program, ProgramDetailsTabVO vo) throws ServiceApplicationException;
+
+	void saveOverviewMenteesTabChange(MentoringProgram program, ProgramMenteesTabVO addedVOList,
+			ProgramMenteesTabVO updateVOList, ProgramMenteesTabVO deletedVOList) throws ServiceApplicationException;
+
+	void saveOverviewMentorsTabChange(MentoringProgram program, ProgramMentorsTabVO addedVOList,
+			ProgramMentorsTabVO updatedVOList, ProgramMentorsTabVO deletedVOList) throws ServiceApplicationException;
+
+	void declineUnprocessedRequests(MentoringProgram program) throws ServiceApplicationException;
+
+	int declineUnmatchedParticipants(MentoringProgram program) throws ServiceApplicationException;
+
+	boolean isTroubleShootingModeEnabled();
+
+	Map<ProgramParticipantTypeEnum, Set<String>> getProgramMatchedParticipantCount(MentoringProgram program);
+
+	String getMessageByLocale(String messageKey, Locale locale);
+
+	Messages getMessageBundleByLocale(Locale locale);
+
+	String getLocalizedUserFullName(UserBean userBean);
+}

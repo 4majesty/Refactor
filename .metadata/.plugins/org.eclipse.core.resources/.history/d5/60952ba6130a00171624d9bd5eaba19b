@@ -1,0 +1,25 @@
+package com.successfactors.cdp.app.mentoring;
+
+import java.util.List;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentee;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMenteeSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSendEmailRecord;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSection;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplateSection;
+import com.successfactors.genericobject.bean.model.impl.AbstractMDFEntityRegistry;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+
+public interface IMentoringEntitiesRegisterer {
+	List<Class> getEntitiesToBeRegistered();
+
+	boolean isFeatureEnabled();
+}

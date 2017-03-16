@@ -1,0 +1,123 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang.StringUtils;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupInviteToParticipants;
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceSystemException;
+
+/**
+ * Observer for Unsupervised Match Jam group invite
+ * 
+ * @author rsrigiri
+ *
+ */
+@Name("unsupervisedMatchJamGroupInviteObserver")
+@javax.inject.Named("unsupervisedMatchJamGroupInviteObserver")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+public class UnsupervisedMatchJamGroupInviteObserver extends AbstractJamGroupInviteObserver {
+
+  /** logger */
+  private static final Logger log = LogManager.getLogger(); 
+
+  /** SCA Handler */ 
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+
+  @Inject
+  @In(create=true)
+  private MentoringServiceBase mentoringServiceBase;
+
+  // TBD - to make it an annoted observer (@Observer?) supported for both seam / spring
+  public void onMatchSuccess(ProcessMentoringRequest cmd) {
+    if(log.isDebugEnabled()) {
+      log.debug("Program Id:" + cmd.getProgramId());
+    }
+
+    MentoringProgram program = getProgram(cmd.getProgramId());
+
+    if(program == null) {
+      log.error("Invalid program:"+cmd.getProgramId());
+      return;
+    }
+
+    MentoringProgramMentorRequest mentoringRequest = getMentoringRequest(cmd.getRequestId());
+
+    if(mentoringRequest == null) {
+      log.error("Invalid mentoring request:"+cmd.getRequestId());
+      return;
+    }
+
+    if (isJamGroupInviteRequired(program, mentoringRequest)) {
+      sendJamGroupInvite(program.getExternalId(), Arrays.asList(mentoringRequest.getMentor(), mentoringRequest.getMentee()));
+    }
+  }
+
+  private MentoringProgram getProgram(String programId) {
+
+    try {
+      return mentoringServiceBase.getProgramById(programId);
+    } catch (ServiceApplicationException e) {
+      log.error("Exception occured while fetching program for id:"+programId,e);
+    }
+
+    return null;
+  }
+
+  private MentoringProgramMentorRequest getMentoringRequest(String mentoringRequestId) {
+
+    try {
+      return mentoringServiceBase.getMentoringRequestById(mentoringRequestId);
+    } catch (ServiceApplicationException e) {
+      log.error("Exception occured while fetching mentoring request for id:"+mentoringRequestId,e);
+    }
+
+    return null;
+  }
+
+  private boolean isJamGroupInviteRequired(MentoringProgram program, MentoringProgramMentorRequest mentoringRequest) {
+    return (program.isJamEnabled()
+             && !StringUtils.isBlank(program.getJamGroupId()) // checking jam groupid to be extra cautious
+             && isAcceptedRequest(mentoringRequest));
+  }
+
+  private boolean isAcceptedRequest(MentoringProgramMentorRequest mentoringRequest) {
+    return (MentorRequestStatusEnum.ACCEPTED.equals(mentoringRequest.getMentoringRequestStatus()));
+  }
+
+  private void sendJamGroupInvite(String programId, Collection<String> participants) {
+    try {
+      scaHandler.execute(new SendJamGroupInviteToParticipants(programId, participants));
+    } catch (ServiceApplicationException e) {
+      log.error("Exception occured while sending jam group invite job.",e);
+      sendFailureEmail(programId, participants);
+    } catch (ServiceSystemException e) {
+      log.error("Exception occured while sending jam group invite job.",e);
+      sendFailureEmail(programId, participants);
+    }
+  }
+
+  @Override
+  protected ServiceCommandHandler getSCAHandler() {
+    return scaHandler;
+  }
+}

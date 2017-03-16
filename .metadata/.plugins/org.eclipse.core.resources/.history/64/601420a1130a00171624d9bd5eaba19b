@@ -1,0 +1,414 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.*;
+import static org.testng.Assert.*;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramEmailTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentee;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplateSection;
+import com.successfactors.cdp.service.mentoring.impl.SaveProgramImpl;
+import com.successfactors.cdp.service.util.mentoring.ProgramEmailTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.genericobject.bean.model.impl.GOLocalizedData;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+
+public class SaveProgramImplTest {
+  private SaveProgramImpl saveProgramImpl;
+  private IMentoringServiceBase mentoringServiceBase;
+  
+  @BeforeMethod(groups = { "checkin" })
+  public void setup() {
+    saveProgramImpl = new SaveProgramImpl();
+    mentoringServiceBase = mock(MentoringServiceBase.class);
+    
+    TestUtils.setField(saveProgramImpl, "mentoringServiceBase", mentoringServiceBase);
+  }
+  
+  @Test(groups = {"checkin"})
+  public void mergeProgram(){
+    MentoringProgram oldProgram = getOldProgram();
+    MentoringProgram newProgram = getNewProgram();
+    try {
+      //Method method = saveProgramImpl.getClass().getDeclaredMethod("mergeProgram", MentoringProgram.class, MentoringProgram.class);
+      Method targetMethod = null;
+      for(Method method : saveProgramImpl.getClass().getDeclaredMethods()){
+        if(method.getName().toUpperCase().equals("MERGEPROGRAM")){
+          targetMethod = method;
+          break;
+        }
+      }
+      
+      targetMethod.setAccessible(true);
+      Object rtnVal = targetMethod.invoke(saveProgramImpl, oldProgram, newProgram);
+      MentoringProgram actualProgram = (MentoringProgram) rtnVal;
+      
+      MentoringProgram expected = getAcutalProgram();
+      
+      Assert.assertEquals(actualProgram.getMentees().get(0).getUser(), expected.getMentees().get(0).getUser());
+      Assert.assertEquals(actualProgram.getDescription(), expected.getDescription());
+      Assert.assertEquals(actualProgram.isMentorshipClosureEnabled(), true);
+
+    } catch (SecurityException e) {    
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      e.printStackTrace();
+    }
+    
+  }
+  
+  private MentoringProgram getOldProgram(){
+    MentoringProgram oldProgram = new MentoringProgram();
+    oldProgram.setName("test");
+    oldProgram.setDescription("abcdefg!@#$%^&*()");
+    oldProgram.setStartDate(new Date("2000/1/1"));
+    oldProgram.setEndDate(new Date("2001/1/1"));
+    oldProgram.setMentorSignupDate(new Date("2001/2/1"));
+    oldProgram.setMenteeSignupDate(new Date("2001/3/1"));
+    oldProgram.setMatchingDate(new Date("2001/4/1"));
+    oldProgram.setStatus(ProgramStatusEnum.CONFIRMED);
+    oldProgram.setExternalId("8888");
+    oldProgram.setMentorshipClosureEnabled(false);
+    
+    
+    List<MentoringProgramMentor> mentors = new ArrayList<MentoringProgramMentor>();
+    MentoringProgramMentor mentor1 = new MentoringProgramMentor();
+    mentor1.setUser("admin");
+    MentoringProgramMentor mentor2 = new MentoringProgramMentor();
+    mentor2.setUser("cgrant");
+    mentors.add(mentor1);
+    mentors.add(mentor2);
+    oldProgram.setMentors(mentors);
+    
+    
+    List<MentoringProgramMentee> mentees = new ArrayList<MentoringProgramMentee>();
+    MentoringProgramMentee mentee1 = new MentoringProgramMentee();
+    mentee1.setUser("alan");
+    MentoringProgramMentee mentee2 = new MentoringProgramMentee();
+    mentee2.setUser("jack");
+    mentees.add(mentee1);
+    mentees.add(mentee2);
+    oldProgram.setMentees(mentees);
+    
+    
+    MentoringProgramSignupTemplate signupFormTemplate = new MentoringProgramSignupTemplate();
+    List<MentoringProgramSignupTemplateSection> sections = new ArrayList<MentoringProgramSignupTemplateSection>();
+    MentoringProgramSignupTemplateSection section1 = new MentoringProgramSignupTemplateSection();
+    section1.setSectionId("SKILL");
+    MentoringProgramSignupTemplateSection section2 = new MentoringProgramSignupTemplateSection();
+    section2.setSectionId("LOCATION");
+    sections.add(section1);
+    sections.add(section2);
+    signupFormTemplate.setSections(sections);
+    oldProgram.setSignupFormTemplate(signupFormTemplate);
+    
+    List<MentoringProgramEmailTemplate> oldEmailTemplates = new ArrayList<MentoringProgramEmailTemplate>();
+    MentoringProgramEmailTemplate email1 = new MentoringProgramEmailTemplate();
+    email1.setEmailSubject("1");
+    email1.setEmailContent("2");
+    email1.setEmailType(ProgramEmailTypeEnum.MENTOR_SIGN_UP);
+    MentoringProgramEmailTemplate email2 = new MentoringProgramEmailTemplate();
+    email2.setEmailSubject("11");
+    email2.setEmailContent("22");
+    email2.setEmailType(ProgramEmailTypeEnum.MENTEE_SIGN_UP);
+    oldEmailTemplates.add(email1);
+    oldEmailTemplates.add(email2);
+    oldProgram.setEmailTemplates(oldEmailTemplates);
+    
+    return oldProgram;
+  }
+  
+  private MentoringProgram getNewProgram(){
+    MentoringProgram newProgram = new MentoringProgram();
+    newProgram.setName("test");
+    newProgram.setDescription("aaaaaaaaaaaaaa");
+    newProgram.setStartDate(new Date("2000/1/1"));
+    newProgram.setEndDate(new Date("2001/1/1"));
+    newProgram.setMentorSignupDate(new Date("2001/2/1"));
+    newProgram.setMenteeSignupDate(new Date("2001/3/1"));
+    newProgram.setMatchingDate(new Date("2001/4/1"));
+    newProgram.setStatus(ProgramStatusEnum.CONFIRMED);
+    newProgram.setExternalId("8888");
+    newProgram.setMentorshipClosureEnabled(true);
+    
+    List<MentoringProgramMentor> mentors = new ArrayList<MentoringProgramMentor>();
+    MentoringProgramMentor mentor1 = new MentoringProgramMentor();
+    mentor1.setUser("admin");
+    MentoringProgramMentor mentor2 = new MentoringProgramMentor();
+    mentor2.setUser("anna");
+    mentors.add(mentor1);
+    mentors.add(mentor2);
+    newProgram.setMentors(mentors);
+    
+    
+    List<MentoringProgramMentee> mentees = new ArrayList<MentoringProgramMentee>();
+    MentoringProgramMentee mentee1 = new MentoringProgramMentee();
+    mentee1.setUser("alan");
+    MentoringProgramMentee mentee2 = new MentoringProgramMentee();
+    mentee2.setUser("stack");
+    mentees.add(mentee1);
+    mentees.add(mentee2);
+    newProgram.setMentees(mentees);
+    
+    
+    MentoringProgramSignupTemplate signupFormTemplate = new MentoringProgramSignupTemplate();
+    List<MentoringProgramSignupTemplateSection> sections = new ArrayList<MentoringProgramSignupTemplateSection>();
+    MentoringProgramSignupTemplateSection section1 = new MentoringProgramSignupTemplateSection();
+    section1.setSectionId("SKILL");
+    MentoringProgramSignupTemplateSection section2 = new MentoringProgramSignupTemplateSection();
+    section2.setSectionId("COMPETENCY");
+    sections.add(section1);
+    sections.add(section2);
+    signupFormTemplate.setSections(sections);
+    newProgram.setSignupFormTemplate(signupFormTemplate);
+    
+    List<MentoringProgramEmailTemplate> newEmailTemplates = new ArrayList<MentoringProgramEmailTemplate>();
+    MentoringProgramEmailTemplate email1 = new MentoringProgramEmailTemplate();
+    email1.setEmailSubject("1");
+    email1.setEmailContent("2");
+    email1.setEmailType(ProgramEmailTypeEnum.MENTOR_SIGN_UP);
+    MentoringProgramEmailTemplate email2 = new MentoringProgramEmailTemplate();
+    email2.setEmailSubject("11");
+    email2.setEmailContent("22");
+    email2.setEmailType(ProgramEmailTypeEnum.MENTEE_SIGN_UP);
+    newEmailTemplates.add(email1);
+    newEmailTemplates.add(email2);
+    newProgram.setEmailTemplates(newEmailTemplates);
+    
+    return newProgram;
+  }
+  
+  private MentoringProgram getAcutalProgram(){
+    MentoringProgram actualProgram = new MentoringProgram();
+    actualProgram.setName("test");
+    actualProgram.setDescription("aaaaaaaaaaaaaa");
+    actualProgram.setStartDate(new Date("2000/1/1"));
+    actualProgram.setEndDate(new Date("2001/1/1"));
+    actualProgram.setMentorSignupDate(new Date("2001/2/1"));
+    actualProgram.setMenteeSignupDate(new Date("2001/3/1"));
+    actualProgram.setMatchingDate(new Date("2001/4/1"));
+    actualProgram.setStatus(ProgramStatusEnum.CONFIRMED);
+    actualProgram.setExternalId("8888");
+    actualProgram.setMentorshipClosureEnabled(true);
+
+    
+    List<MentoringProgramMentor> mentors = new ArrayList<MentoringProgramMentor>();
+    MentoringProgramMentor mentor1 = new MentoringProgramMentor();
+    mentor1.setUser("admin");
+    MentoringProgramMentor mentor2 = new MentoringProgramMentor();
+    mentor2.setUser("anna");
+    mentors.add(mentor1);
+    mentors.add(mentor2);
+    actualProgram.setMentors(mentors);
+    
+    
+    List<MentoringProgramMentee> mentees = new ArrayList<MentoringProgramMentee>();
+    MentoringProgramMentee mentee1 = new MentoringProgramMentee();
+    mentee1.setUser("alan");
+    MentoringProgramMentee mentee2 = new MentoringProgramMentee();
+    mentee2.setUser("stack");
+    mentees.add(mentee1);
+    mentees.add(mentee2);
+    actualProgram.setMentees(mentees);
+    
+    
+    MentoringProgramSignupTemplate signupFormTemplate = new MentoringProgramSignupTemplate();
+    List<MentoringProgramSignupTemplateSection> sections = new ArrayList<MentoringProgramSignupTemplateSection>();
+    MentoringProgramSignupTemplateSection section1 = new MentoringProgramSignupTemplateSection();
+    section1.setSectionId("SKILL");
+    MentoringProgramSignupTemplateSection section2 = new MentoringProgramSignupTemplateSection();
+    section2.setSectionId("COMPETENCY");
+    sections.add(section1);
+    sections.add(section2);
+    signupFormTemplate.setSections(sections);
+    actualProgram.setSignupFormTemplate(signupFormTemplate);
+    
+    
+    List<MentoringProgramEmailTemplate> newEmailTemplates = new ArrayList<MentoringProgramEmailTemplate>();
+    MentoringProgramEmailTemplate email1 = new MentoringProgramEmailTemplate();
+    email1.setEmailSubject("1");
+    email1.setEmailContent("2");
+    email1.setEmailType(ProgramEmailTypeEnum.MENTOR_SIGN_UP);
+    MentoringProgramEmailTemplate email2 = new MentoringProgramEmailTemplate();
+    email2.setEmailSubject("11");
+    email2.setEmailContent("22");
+    email2.setEmailType(ProgramEmailTypeEnum.MENTEE_SIGN_UP);
+    newEmailTemplates.add(email1);
+    newEmailTemplates.add(email2);
+    actualProgram.setEmailTemplates(newEmailTemplates);
+    
+    return actualProgram;
+  }
+  
+  @Test(groups = {"checkin"})
+  public void updateSignupTemplateTest(){
+    Method targetMethod = null;
+    for( Method method : saveProgramImpl.getClass().getDeclaredMethods()){
+      if(method.getName().toUpperCase().equals("UPDATESIGNUPTEMPLATE")){
+        targetMethod = method;
+      }
+    }
+    
+    MentoringProgramSignupTemplate savedTemplate = getSavedTemplate();
+    MentoringProgramSignupTemplate newTemplate = getNewTemplate();
+    
+    try {
+      targetMethod.setAccessible(true);
+      Object rtnVal = targetMethod.invoke(saveProgramImpl, savedTemplate, newTemplate);
+      MentoringProgramSignupTemplate rtnTemplate = (MentoringProgramSignupTemplate) rtnVal;
+        if (rtnTemplate.getSections().get(0).getMentorQuestion() != null) {
+            Assert.assertEquals(rtnTemplate.getSections().get(0).getMentorQuestion().getEn_US(), newTemplate.getSections().get(0).getMentorQuestion().getEn_US());
+        }
+    } catch (IllegalAccessException | IllegalArgumentException
+        | InvocationTargetException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testValidateParticipants() throws ServiceApplicationException{
+    MentoringProgram program = new MentoringProgram();
+    MentoringProgramMentee mentee = new MentoringProgramMentee();
+    mentee.setUser("mentee");
+    MentoringProgramMentor mentor = new MentoringProgramMentor();
+    mentor.setUser("mentor");
+    
+    program.setMentees(Collections.singletonList(mentee));
+    program.setMentors(Collections.singletonList(mentor));
+    
+    when(mentoringServiceBase.getUsernameMapByIds(any(List.class))).thenReturn(createUserMap("mentee", "mentor"));
+    
+    boolean result = saveProgramImpl.validateProgramParticipants(program);
+    assertTrue(result);
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testInvalidParticipants() throws ServiceApplicationException{
+    MentoringProgram program = new MentoringProgram();
+    MentoringProgramMentee mentee = new MentoringProgramMentee();
+    mentee.setUser("mentee");
+    MentoringProgramMentor mentor = new MentoringProgramMentor();
+    mentor.setUser("mentor");
+    
+    program.setMentees(Collections.singletonList(mentee));
+    program.setMentors(Collections.singletonList(mentor));
+    
+    when(mentoringServiceBase.getUsernameMapByIds(any(List.class))).thenReturn(Collections.EMPTY_MAP);
+    
+    boolean result = saveProgramImpl.validateProgramParticipants(program);
+    assertFalse(result);
+  }
+  
+  private Map<String, UserBean> createUserMap(String... users) {
+    Map<String, UserBean> map = new HashMap();
+    for (String id : users) {
+      UserBeanImpl impl =  new UserBeanImpl();
+      impl.setUserIsValid(UserBean.FLAG_VALID_USER);
+      map.put(id, impl);
+    }
+    return map;
+  }
+
+  private MentoringProgramSignupTemplate getSavedTemplate(){
+    MentoringProgramSignupTemplate savedTemplate = new MentoringProgramSignupTemplate();
+    
+    List<MentoringProgramSignupTemplateSection> sections = new ArrayList<MentoringProgramSignupTemplateSection>();
+    MentoringProgramSignupTemplateSection section = new MentoringProgramSignupTemplateSection();
+    section.setMenteeVisible(true);
+    section.setMentorVisible(true);
+    GOLocalizedData question = new GOLocalizedData();
+    question.setFieldVsValue(Locale.US.toString(), "question content");
+    section.setMentorQuestion(question);
+    sections.add(section);
+    
+    savedTemplate.setSections(sections);
+    return savedTemplate;
+  }
+  
+  private MentoringProgramSignupTemplate getNewTemplate(){
+    MentoringProgramSignupTemplate newTemplate = new MentoringProgramSignupTemplate();
+    
+    List<MentoringProgramSignupTemplateSection> sections = new ArrayList<MentoringProgramSignupTemplateSection>();
+    MentoringProgramSignupTemplateSection section = new MentoringProgramSignupTemplateSection();
+    section.setMenteeVisible(true);
+    section.setMentorVisible(true);
+    GOLocalizedData question = new GOLocalizedData();
+    question.setFieldVsValue(Locale.US.toString(), "question content new");
+    section.setMentorQuestion(question);
+    sections.add(section);
+    
+    newTemplate.setSections(sections);
+    return newTemplate;
+  }
+  
+  @Test
+  public void mergeEmailTemplateTest(){
+    SaveProgramImpl spImpl = new SaveProgramImpl();
+    Method mergeEmail = null;
+    for(Method method : SaveProgramImpl.class.getDeclaredMethods()){
+      if(method.getName().equals("updateEmailTemplate")){
+        mergeEmail = method;
+      }
+    }
+    
+    List<MentoringProgramEmailTemplate> oldTemplateList = new ArrayList<MentoringProgramEmailTemplate>();
+    MentoringProgramEmailTemplate oldTemplate1 = new MentoringProgramEmailTemplate();
+    oldTemplate1.setEmailSubject("oldSubject1");
+    oldTemplate1.setEmailContent("oldContent1");
+    oldTemplate1.setEmailType(ProgramEmailTypeEnum.MENTEE_SIGN_UP);
+    MentoringProgramEmailTemplate oldTemplate2 = new MentoringProgramEmailTemplate();
+    oldTemplate2.setEmailSubject("oldSubject2");
+    oldTemplate2.setEmailContent("oldContent2");
+    oldTemplate2.setEmailType(ProgramEmailTypeEnum.MENTOR_MATCHING_CONFIRMATION);
+    oldTemplateList.add(oldTemplate1);
+    oldTemplateList.add(oldTemplate2);
+    
+    List<MentoringProgramEmailTemplate> newTemplateList = new ArrayList<MentoringProgramEmailTemplate>();
+    MentoringProgramEmailTemplate newTemplate1 = new MentoringProgramEmailTemplate();
+    newTemplate1.setEmailSubject("newSubject1");
+    newTemplate1.setEmailContent("newContent1");
+    newTemplate1.setEmailType(ProgramEmailTypeEnum.MENTEE_SIGN_UP);
+    MentoringProgramEmailTemplate newTemplate2 = new MentoringProgramEmailTemplate();
+    newTemplate2.setEmailSubject("newSubject2");
+    newTemplate2.setEmailContent("newContent2");
+    newTemplate2.setEmailType(ProgramEmailTypeEnum.MENTOR_MATCHING_CONFIRMATION);
+    newTemplateList.add(newTemplate1);
+    newTemplateList.add(newTemplate2);
+    
+    if(mergeEmail!=null){
+      try {
+        mergeEmail.setAccessible(true);
+        List<MentoringProgramEmailTemplate> actualResult = (List<MentoringProgramEmailTemplate>) mergeEmail.invoke(spImpl, oldTemplateList, newTemplateList);
+        Assert.assertEquals(actualResult.get(0).getEmailSubject(), newTemplateList.get(0).getEmailSubject());        
+      } catch (IllegalAccessException | IllegalArgumentException
+          | InvocationTargetException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+}

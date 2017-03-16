@@ -1,0 +1,66 @@
+package com.successfactors.cdp.app.mentoring;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+
+public class MatchingAlgorithmContext {
+  // Mentoring program: it should include all entities nested inside
+  private MentoringProgram program;
+  
+  // Matching type: supervised or unsupervised matching
+  private ProgramMatchingTypeEnum matchingType;
+
+  // Currently it's mentee's mentoring profile
+  private Map<String, Set<String>> mentoringProfiles = new HashMap<String, Set<String>>();
+
+  // Currently it's mentee user ID used in unsupervised matching
+  private String drivenUserId;
+  
+  // indicate whether we should limit mentee threshold. Currently, mentee signup form don't need to limit, but supervised matching page does.
+  private boolean needLimitMenteeThreshold;
+
+  public MentoringProgram getProgram() {
+    return program;
+  }
+
+  public void setProgram(MentoringProgram program) {
+    this.program = program;
+  }
+
+  public Map<String, Set<String>> getMentoringProfiles() {
+    return mentoringProfiles;
+  }
+
+  public void setMentoringProfiles(Map<String, Set<String>> mentoringProfiles) {
+    this.mentoringProfiles = mentoringProfiles;
+  }
+
+  public String getDrivenUserId() {
+    return drivenUserId;
+  }
+
+  public void setDrivenUserId(String drivenUserId) {
+    this.drivenUserId = drivenUserId;
+  }
+
+  public ProgramMatchingTypeEnum getMatchingType() {
+    return matchingType;
+  }
+
+  public void setMatchingType(ProgramMatchingTypeEnum matchingType) {
+    this.matchingType = matchingType;
+  }
+
+  public boolean isNeedLimitMenteeThreshold() {
+    return needLimitMenteeThreshold;
+  }
+
+  public void setNeedLimitMenteeThreshold(boolean needLimitMenteeThreshold) {
+    this.needLimitMenteeThreshold = needLimitMenteeThreshold;
+  }
+  
+}

@@ -1,0 +1,13 @@
+package com.successfactors.cdp.app.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.vo.MatchingResult;
+import com.successfactors.sca.ServiceApplicationException;
+import java.util.Set;
+
+public interface IStandardMatchingAlgorithmStrategy {
+	void setFinalMatchingResult(MatchingResult matchResult);
+
+	MatchingResult getFinalMatchingResult();
+
+	MatchingResult getMatchingResult() throws ServiceApplicationException;
+}

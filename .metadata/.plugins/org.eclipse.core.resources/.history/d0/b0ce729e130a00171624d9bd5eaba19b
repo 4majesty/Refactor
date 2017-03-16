@@ -1,0 +1,60 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import javax.inject.Inject;
+
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMenteeSignupForm;
+import com.successfactors.cdp.service.mentoring.StartMatching;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+
+import java.util.Date;
+
+/**
+ * Service command to start matching
+ * @author Keqin Liu
+ */
+@Service
+public class StartMatchingImpl implements ServiceCommandImpl<Void, StartMatching> {
+  @Inject
+  @In(create = true)
+  private IMentoringServiceBase mentoringServiceBase;
+  
+  private ServiceCommandHandler scaHandler = ServiceCommandHandlerFactory.getSCAHandler();
+
+  private static Logger logger = LogManager.getLogger();
+
+  @Override
+  public Void execute(StartMatching cmd) throws ServiceApplicationException {
+    // Get mentoring program by program ID
+    MentoringProgram program = mentoringServiceBase.getProgramById(cmd.getProgramId());
+    if (program.getStatus().getNextStatus(program) != ProgramStatusEnum.MATCHING) {
+      logger.error("The next status of the program(current status:" + program.getStatus() + ") is not " + ProgramStatusEnum.MATCHING);
+      return null;
+    }
+    // Set program status to macthing and save it
+    program.setStatus(ProgramStatusEnum.MATCHING);
+    program.setActualMatchingDate(new Date());
+    ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgram.class, program));
+    mentoringServiceBase.validateContext(context);
+    
+    // Automatically reject mentees who haven't signed up yet only if program is supervised matching
+    if (ProgramMatchingTypeEnum.SUPERVISED.equals(program.getMatchingType())) {
+      mentoringServiceBase.autoDeclineParticipants(MentoringProgramMenteeSignupForm.class, program.getMentees(), true);
+    }
+    
+    return null;
+  }
+}

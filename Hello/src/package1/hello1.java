@@ -2,8 +2,10 @@ package package1;
 
 import package2.hello2;
 import package2.hello3;
+import package2.Ihello2;
+import package2.Ihello3;
 
-public class hello1 implements Ihello1 {
-	hello2 h = new hello2();
-	hello3 hh = new hello3();
+public class hello1 extends A implements Ihello1 {
+	Ihello2 h = new hello2();
+	Ihello3 hh = new hello3();
 }

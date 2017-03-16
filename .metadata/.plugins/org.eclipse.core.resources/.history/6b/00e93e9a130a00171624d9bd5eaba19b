@@ -1,0 +1,77 @@
+package com.successfactors.cdp.app.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgramParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSection;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.bean.mentoring.vo.MatchedParticipantVO;
+import com.successfactors.cdp.bean.mentoring.vo.MatchingResult;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionValueVO;
+import com.successfactors.cdp.bean.mentoring.vo.UserProfileVO;
+import com.successfactors.cdp.service.mentoring.GetMentoringRequest;
+import com.successfactors.cdp.service.util.mentoring.DMFieldWhiteListEnum;
+import com.successfactors.cdp.service.util.mentoring.MatchingScoreTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.MentoringConstants;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramParticipantTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SectionMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormSectionCategoryEnum;
+import com.successfactors.competency.bean.CompetencyBean;
+import com.successfactors.competency.service.GetCompetenciesByIdSet;
+import com.successfactors.competency.service.GetCompetenciesByUserJobCode;
+import com.successfactors.competency.service.GetCompetenciesByUserIds;
+import com.successfactors.competency.service.GetRolesByJobCode;
+import com.successfactors.datamodel.api.DataModelFacade;
+import com.successfactors.edu.api.EmployeeProfileFacade;
+import com.successfactors.edu.api.bean.EmployeeProfileBean;
+import com.successfactors.edu.api.bean.ProfileLoadCriteria;
+import com.successfactors.edu.api.bean.ProfileLoadCriteria.OtherParam;
+import com.successfactors.edu.api.bean.ProfileLoadCriteria.UserDataParam;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.sql.MDFCriteria;
+import com.successfactors.genericobject.api.sql.MDFResultSet;
+import com.successfactors.genericobject.api.sql.Projections;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.exception.ExtCodeInternalIdIntegrityViolationException;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.jdmng.JDAccessException;
+import com.successfactors.jdmng.app.skillprofile.SkillProfileService;
+import com.successfactors.jdmng.bean.skillprofile.RatedSkillMapping;
+import com.successfactors.jdmng.bean.skillprofile.SelfReportSkillMapping;
+import com.successfactors.jdmng.bean.skillprofile.SkillProfile;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceSystemException;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.util.UserFormatUtils;
+import com.successfactors.user.service.FetchUserInfoRecordsInBatch;
+import com.successfactors.xi.util.SeamEnvUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+public interface IStandardMatchingAlgorithmStrategy {
+	void setFinalMatchingResult(MatchingResult matchResult);
+
+	MatchingResult getFinalMatchingResult();
+
+	MatchingResult getMatchingResult() throws ServiceApplicationException;
+}

@@ -1,0 +1,1479 @@
+package com.successfactors.cdp.app.mentoring;
+
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.StandardElement;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.StandardElementEnum;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentee;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSection;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.bean.mentoring.vo.MatchedParticipantVO;
+import com.successfactors.cdp.bean.mentoring.vo.MatchingResult;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionValueVO;
+import com.successfactors.cdp.bean.mentoring.vo.UserProfileVO;
+import com.successfactors.cdp.service.mentoring.GetMentoringRequest;
+import com.successfactors.cdp.service.util.mentoring.DMFieldWhiteListEnum;
+import com.successfactors.cdp.service.util.mentoring.MatchingScoreTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.MentoringConstants;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramParticipantTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SectionMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormSectionCategoryEnum;
+import com.successfactors.competency.bean.CompetencyBean;
+import com.successfactors.competency.service.GetCompetenciesByIdSet;
+import com.successfactors.competency.service.GetCompetenciesByUserJobCode;
+import com.successfactors.competency.service.GetCompetenciesByUserIds;
+import com.successfactors.competency.service.GetRolesByJobCode;
+import com.successfactors.datamodel.api.DataModelFacade;
+import com.successfactors.edu.api.EmployeeProfileFacade;
+import com.successfactors.edu.api.bean.EmployeeProfileBean;
+import com.successfactors.edu.api.bean.ProfileLoadCriteria;
+import com.successfactors.edu.api.bean.ProfileLoadCriteria.OtherParam;
+import com.successfactors.edu.api.bean.ProfileLoadCriteria.UserDataParam;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.sql.MDFCriteria;
+import com.successfactors.genericobject.api.sql.MDFResultSet;
+import com.successfactors.genericobject.api.sql.Projections;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.exception.ExtCodeInternalIdIntegrityViolationException;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.jdmng.JDAccessException;
+import com.successfactors.jdmng.app.skillprofile.SkillProfileService;
+import com.successfactors.jdmng.bean.skillprofile.RatedSkillMapping;
+import com.successfactors.jdmng.bean.skillprofile.SelfReportSkillMapping;
+import com.successfactors.jdmng.bean.skillprofile.SkillProfile;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceSystemException;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.util.UserFormatUtils;
+import com.successfactors.user.service.FetchUserInfoRecordsInBatch;
+import com.successfactors.xi.util.SeamEnvUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+public class StandardMatchingAlgorithmStrategy extends MatchingAlgorithmTemplate implements MatchingAlgorithmStrategy {
+  private ConfigurationProvider configurationProvider;
+  private SkillProfileService skillProfileService;
+  private ParamBean params;
+
+  private ServiceCommandHandler scaHandler;
+
+  private static Logger logger = LogManager.getLogger();
+
+  // Available mentor list
+  private List<MentoringProgramMentor> mentors = new ArrayList<MentoringProgramMentor>();
+  // Available mentee list
+  private List<MentoringProgramMentee> mentees = new ArrayList<MentoringProgramMentee>();
+  // Mentee's mentoring preferences: first level map key is mentee user ID, value is mentee's mentoring profile, Second level map key is section ID,
+  // value is section values
+  private Map<String, Map<String, Set<String>>> menteePreference = new HashMap<String, Map<String, Set<String>>>();
+  // Mentor's mentoring preferences: first level map key is mentor user ID, value is mentor's mentoring profile, Second level map key is section ID,
+  // value is section values
+  private Map<String, Map<String, Set<String>>> mentorPreference = new HashMap<String, Map<String, Set<String>>>();
+  // Mentee's employee profiles: first level map key is mentee user ID, value is mentee's employee profile, Second level map key is standard
+  // element ID/Competency/Skills, value is value set
+  private Map<String, Map<String, Set<String>>> employeeProfiles = new HashMap<String, Map<String, Set<String>>>();
+  // user bean map: key is user ID, value is user bean
+  Map<String, UserBean> userBeanMap = new HashMap<String, UserBean>();
+  //Mentor's counter, the initial value is mentor's threshold. The counter maintains dynamic mentor's available slot.
+  private Map<String, Integer> mentorCounter = new HashMap<String, Integer>();
+  //Mentee's threshold counter, the initial value is mentee's threshold. The counter maintains dynamic number of mentors who have been recommended to mentee.
+  private Map<String, Integer> menteeCounter = new HashMap<String, Integer>();
+  //Mentee's threshold counter, this counter will not be changed, and used to check mentee original threshold
+  private Map<String, Integer> menteeOriginalCounter = new HashMap<String, Integer>();
+  //final matching result, including preferred, excellent, good and average matching.
+  private MatchingResult finalMatchingResult = new MatchingResult();
+  //existing matched combinations of mentor and mentee
+  private Map<String, Set<String>> matchedCombinations = new HashMap<String, Set<String>>();
+
+  //keep temporary matched combinations, only used when calculating score
+  private Map<String, Set<String>> tempMatchedCombinations = new HashMap<String, Set<String>>();
+  //keep final matched combinations, only used when selecting mentors
+  private Map<String, Set<String>> finalMatchedCombinations = new HashMap<String, Set<String>>();
+  //keep candidate mentor for each mentee
+  private MatchingResult tempMatchingResult = new MatchingResult();
+  //cache preferred mentors for each mentee
+  private Map<String, List<MentoringProgramMentorRequest>> cachePreferredMentors = new HashMap<String, List<MentoringProgramMentorRequest>>();
+
+  private List<String> unavailableMentorIdSet = new ArrayList<String>();
+
+  public StandardMatchingAlgorithmStrategy(MatchingAlgorithmContext context){
+    this.context = context;
+  }
+
+  public void setFinalMatchingResult(MatchingResult matchResult){
+    this.finalMatchingResult = matchResult;
+  }
+
+  public MatchingResult getFinalMatchingResult(){
+    return this.finalMatchingResult;
+  }
+
+  private MentoringServiceBase mentoringServiceBase;
+
+  private DataModelFacade dataModelFacade;
+
+  @Override
+  protected void loadConfiguration() {
+    configurationProvider = (ConfigurationProvider) SeamEnvUtils.getInstance("configurationProvider", true);
+    params = (ParamBean) SeamEnvUtils.getInstance("params", false);
+    skillProfileService = (SkillProfileService) SeamEnvUtils.getInstance("skillProfileService", true);
+    scaHandler = (ServiceCommandHandler)SeamEnvUtils.getInstance("scaHandler", true);
+    mentoringServiceBase = (MentoringServiceBase) SeamEnvUtils.getInstance("mentoringServiceBase", true);
+    dataModelFacade = (DataModelFacade) SeamEnvUtils.getInstance(DataModelFacade.NAME, true);
+  }
+
+  @Override
+  protected void loadEntitiesWithinCalc() throws ServiceApplicationException {
+    unavailableMentorIdSet.clear();
+    // Get all available mentees and their user beans
+    List<String> menteeIdList = getMenteeIdList();
+
+    filterValidUserMap(mentoringServiceBase.getUsernameMapByIds(menteeIdList), userBeanMap);
+    menteeIdList.retainAll(userBeanMap.keySet());
+
+    // Load mentoring profiles of all available mentees
+    if (ProgramMatchingTypeEnum.SUPERVISED.equals(context.getMatchingType())) {
+      loadMenteeMentoringProfiles();
+      sortMenteeBySignupDate();
+    } else {
+      for (MentoringProgramMentee mentee : context.getProgram().getMentees()) {
+        // To unsupervised matching, add driven user to mentee list
+        if (mentee.getUser().equals(context.getDrivenUserId())) {
+          mentees.add(mentee);
+
+          break;
+        }
+      }
+
+      // To unsupervised matching, mentee's mentoring profile is passed from context
+      menteePreference.put(context.getDrivenUserId(), context.getMentoringProfiles());
+    }
+
+    // Load employee profiles of all available mentees
+    employeeProfiles.putAll(loadEmployeeProfiles(menteeIdList, userBeanMap));
+
+    // Get all available mentors
+    List<String> mentorIdList = new ArrayList<String>();
+
+    for (MentoringProgramMentor mentor : context.getProgram().getMentors()) {
+      if (MentoringUtils.isParticipantSigned(mentor)) {
+        if (!isMentorAvailable(mentor)) {
+          unavailableMentorIdSet.add(mentor.getUser());
+        }
+        mentorIdList.add(mentor.getUser());
+      }
+    }
+    filterValidUserMap(mentoringServiceBase.getUsernameMapByIds(mentorIdList), userBeanMap);
+    mentorIdList.retainAll(userBeanMap.keySet());
+
+    // Load mentors' mentoring profiles
+    loadMentorMentoringProfiles();
+
+    // Get employee profiles of all mentors
+    employeeProfiles.putAll(loadEmployeeProfiles(mentorIdList, userBeanMap));
+  }
+
+  //TODO test
+  protected void filterValidUserMap(Map<String, UserBean> allUsersMap, Map<String, UserBean> validUserMap)
+      throws ServiceApplicationException {
+    if (allUsersMap == null || allUsersMap.isEmpty()) {
+      return;
+    }
+    
+    // Filter inactive users
+    for (UserBean user : allUsersMap.values()) {
+      if (user.isValidUser()) {
+        validUserMap.put(user.getUserId(), user);
+      }
+    }
+  }
+
+
+  private boolean needContinueMatching(){
+    boolean result = false;
+    for(String menteeId : menteeCounter.keySet()){
+      if(menteeCounter.get(menteeId)!=null && menteeCounter.get(menteeId)>0){
+        int candidateCount = tempMatchingResult.getMatchedParticipantMap().get(menteeId)==null?0:tempMatchingResult.getMatchedParticipantMap().get(menteeId).size();
+        int canMatchedMaxCount = candidateCount>menteeOriginalCounter.get(menteeId) ? menteeOriginalCounter.get(menteeId) : candidateCount;
+        int matchedCount = menteeOriginalCounter.get(menteeId) - menteeCounter.get(menteeId);
+        if(canMatchedMaxCount <= matchedCount){
+          continue;
+        }
+        result = true;
+        break;
+      }
+    }
+    return result;
+  }
+
+  @Override
+  protected MatchingResult calcMatchingScore() throws ServiceApplicationException {
+    //initialize mentor and mentee's counter
+    initCounter();
+
+    if(context.getMatchingType().equals(ProgramMatchingTypeEnum.SUPERVISED)){
+
+      for(MentoringProgramMentee mentee : mentees){
+        String menteeUserId = mentee.getUser();
+
+        //deal with preferred mentors
+        getPreferredMentorsByMentee(menteeUserId);
+
+        //calculate matching score for non-preferred mentor
+        if(!calcScoreByPriority(1, menteeUserId)){
+          if(!calcScoreByPriority(2, menteeUserId)){
+            if(!calcScoreByPriority(3, menteeUserId)){
+                calcScoreByPriority(4, menteeUserId);
+            }
+          }
+        }
+      }
+
+      //sort matched mentors by score
+      sortTempMatchingResult();
+
+      if(context.isNeedLimitMenteeThreshold()){
+        //choose matched mentors limited to mentee threshold
+        while(needContinueMatching()){
+          for(MentoringProgramMentee mentee : mentees){
+            selectTempMatchedMentorsByMenteeThreshold(mentee.getUser());
+          }
+        }
+      }
+    }
+    //if unsupervised matching, need to calculate matching score with every available mentor
+    else if(context.getMatchingType().equals(ProgramMatchingTypeEnum.UNSUPERVISED)){
+      String menteeUserId = context.getDrivenUserId();
+      if(!calcScoreByPriority(1, menteeUserId)){
+        if(!calcScoreByPriority(2, menteeUserId)){
+          if(!calcScoreByPriority(3, menteeUserId)){
+              calcScoreByPriority(4, menteeUserId);
+          }
+        }
+      }
+
+      //sort matched mentors by score
+      sortFinalMatchingResult();
+    }
+
+    //put unmatched mentors into final result
+    if(!context.isNeedLimitMenteeThreshold()){
+      if(context.getMatchingType().equals(ProgramMatchingTypeEnum.SUPERVISED)){
+        while(needContinueMatching()){
+          for(MentoringProgramMentee mentee : mentees){
+            handleUnmatchedParticipants(mentee.getUser());
+          }
+        }
+      }
+    }
+
+    //prepare mentee/mentor's profile info for UI display
+    prepareUserProfiles();
+
+    //print matching result
+    printCandidateMentorsLog();
+    printMatchingInfo();
+
+    return finalMatchingResult;
+  }
+
+  /**
+   * initialize mentor's counter
+   */
+  private void initCounter() throws ServiceApplicationException{
+    String programId = context.getProgram().getExternalId();
+    //retrieve mentor's threshold from mentor object, and put the values into Map mentorCounter
+    for(MentoringProgramMentor mentor : mentors){
+      mentorCounter.put(mentor.getUser(), mentor.getThreshold());
+    }
+
+    //retrieve mentee's threshold from mentee object, and put the values into Map menteeThresholdCounter
+    for(MentoringProgramMentee mentee : mentees){
+      menteeCounter.put(mentee.getUser(), mentee.getThreshold());
+      menteeOriginalCounter.put(mentee.getUser(), mentee.getThreshold());
+    }
+
+    //we have to exclude accepted ones from both mentor and mentee's slots.
+    //exclude finished matching from mentor's slot.
+    for (MentoringProgramMentor mentor : mentors){
+      String mentorUserId = mentor.getUser();
+      int currMentorThreshold = mentorCounter.get(mentorUserId);
+      int matchecMenteeCount = getMatchedParticipantsByUserId(programId, mentorUserId, true).size();
+      mentorCounter.put(mentorUserId, currMentorThreshold-matchecMenteeCount);
+    }
+    //exclude finished matching from mentee's slot.
+    for (MentoringProgramMentee mentee : mentees){
+      String menteeUserId = mentee.getUser();
+      int currMenteeThreshold = menteeCounter.get(menteeUserId);
+      int matchecMentorCount = getMatchedParticipantsByUserId(programId, menteeUserId, false).size();
+      menteeCounter.put(menteeUserId, currMenteeThreshold-matchecMentorCount);
+    }
+  }
+
+  /**
+   * get all request of target program
+   * @param programId
+   * @return
+   * @throws ServiceApplicationException
+   */
+  private List<MentoringProgramMentorRequest> getAllRequestsWithinProgram(String programId, String menteeUserId) throws ServiceApplicationException{
+    //As of b1608, only request whose status=DRAFT is considered preferred request
+    GetMentoringRequest cmd = new GetMentoringRequest();
+    cmd.setProgramId(programId);
+    cmd.setStatus(MentorRequestStatusEnum.DRAFT);
+    cmd.setMenteeIds(menteeUserId);
+
+    return scaHandler.execute(cmd);
+  }
+
+  /**
+   * query all mentor or mentee who has matched
+   * @param programId
+   * @param isMentor
+   * @return
+   * @throws ServiceApplicationException
+   */
+  private List getMatchedParticipantsByUserId(String programId, String userId, boolean isMentor) throws ServiceApplicationException{
+    ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgramMatchedParticipant.class);
+    MDFCriteria search = new GOSQLGeneratorContext(def, params);
+    search.setProjection(Projections.all());
+    if(isMentor){
+        search.add(Restrictions.and(Restrictions.in("mentor", userId), Restrictions.eq("programId", programId)));
+    }else{
+        search.add(Restrictions.and(Restrictions.in("mentee", userId), Restrictions.eq("programId", programId)));
+    }
+    MDFResultSet resultSet = search.execute();
+
+    return resultSet.getBeans();
+  }
+
+  /**
+   * get mentor from mentorList
+   * @param mentors
+   * @param mentorUserId
+   * @return
+   */
+  private MentoringProgramMentor getCurrMentorFromList(List<MentoringProgramMentor> mentorUsers, String mentorUserId){
+    MentoringProgramMentor result = null;
+    for(MentoringProgramMentor mentor : mentorUsers){
+      if(mentor.getUser().equals(mentorUserId)){
+        result = mentor;
+        break;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * format mentoring profile into List<ProgramSignupFormSectionVO>
+   * @param mentoringProfile
+   * @param userId
+   * @return
+   * @throws ServiceApplicationException
+   */
+  private List<ProgramSignupFormSectionVO> formatPreference(String userId) throws ServiceApplicationException {
+    List<ProgramSignupFormSectionVO> result = new ArrayList<>();
+    Map<String, Set<String>> currMentoringProfile;
+    currMentoringProfile = menteePreference.get(userId);
+    if(currMentoringProfile == null){
+      currMentoringProfile = mentorPreference.get(userId);
+    }
+    if (currMentoringProfile != null) {
+      for (String sectionId : currMentoringProfile.keySet()) {
+        ProgramSignupFormSectionVO sectionVO = new ProgramSignupFormSectionVO();
+        sectionVO.setSectionId(sectionId);
+
+        Set<String> values = currMentoringProfile.get(sectionId);
+        List<ProgramSignupFormSectionValueVO> valueVOs = new ArrayList<>();
+        for (String value : values) {
+          valueVOs.add(new ProgramSignupFormSectionValueVO(value));
+        }
+        sectionVO.setSectionValues(valueVOs);
+        result.add(sectionVO);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * calculate matching score by priority
+   */
+  private boolean calcScoreByPriority(int priority, String menteeUserId) throws ServiceApplicationException{
+    //current mentee's mentoring preference
+    Map<String, Set<String>> menteeMentoringProfile = menteePreference.get(menteeUserId)==null?new HashMap<String, Set<String>>():menteePreference.get(menteeUserId);
+    //current mentee's employee profile
+    Map<String, Set<String>> menteeEmployeeProfile = employeeProfiles.get(menteeUserId)==null?new HashMap<String, Set<String>>():employeeProfiles.get(menteeUserId);
+    //current mentee's threshold
+    int currMenteeThreshold = menteeCounter.get(menteeUserId);
+
+    float denominator = getDenominator(priority, menteeUserId, menteeMentoringProfile, menteeEmployeeProfile);
+    //if denominator is 0, then numerator must be 0. So we don't need to do the next step.
+    if(denominator==0){
+      return false;
+    }
+
+    Iterator<String> allMentors = mentorCounter.keySet().iterator();
+
+    //loop all mentors and calculate matching score with every available mentor
+    String currMentorUserId = null;
+    while(allMentors.hasNext()){
+      currMentorUserId = allMentors.next();
+      if (unavailableMentorIdSet.contains(currMentorUserId)) {
+        continue;
+      }
+      Integer remainingSlot = mentorCounter.get(currMentorUserId);
+
+      //if have matched combination in this priority, don't do further priority anymore
+      if(context.getMatchingType().equals(ProgramMatchingTypeEnum.UNSUPERVISED)){
+        if(matchedCombinations.containsKey(menteeUserId) && matchedCombinations.get(menteeUserId).contains(currMentorUserId)){
+          continue;
+        }
+      }else{
+        if(tempMatchedCombinations.containsKey(menteeUserId) && tempMatchedCombinations.get(menteeUserId).contains(currMentorUserId)){
+          continue;
+        }
+      }
+
+      //to check whether mentor is available
+      if(remainingSlot>0){
+        Map<String, Set<String>> mentorMentoringProfile = mentorPreference.get(currMentorUserId);
+        Map<String, Set<String>> mentorEmployeeProfile = employeeProfiles.get(currMentorUserId);
+        Numerator numerator = getNumerator(priority, menteeMentoringProfile, mentorMentoringProfile, menteeEmployeeProfile, mentorEmployeeProfile);
+
+        if(numerator.getNumertorScore()>0){
+          //calculate matching score and put matching relationship into matching result
+          int matchingScore = denominator==0 ? 0 : Math.round(numerator.getNumertorScore()*100/denominator);
+          if(matchingScore>0){
+            MatchedParticipantVO matchingUser = new MatchedParticipantVO();
+            matchingUser.setPriority(priority);
+            matchingUser.setScore(matchingScore);
+            matchingUser.setMatchedAreas(numerator.getMatchedAreas());
+            matchingUser.setMentorId(currMentorUserId);
+            matchingUser.setMenteeId(menteeUserId);
+
+            //if existMatchingResult has the matchingUser already, will remove the old one and store the new one.
+            Map existMatching = null;
+            if(context.getMatchingType().equals(ProgramMatchingTypeEnum.UNSUPERVISED)){
+              existMatching = finalMatchingResult.getMatchedParticipantMap();
+            }else{
+              existMatching = tempMatchingResult.getMatchedParticipantMap();
+            }
+            List<MatchedParticipantVO> existMatchedUser = (List<MatchedParticipantVO>) existMatching.get(menteeUserId);
+            if (existMatchedUser == null) {
+              existMatchedUser = new ArrayList<MatchedParticipantVO>();
+              existMatching.put(menteeUserId, existMatchedUser);
+            }
+            existMatchedUser.add(matchingUser);
+
+            if(context.getMatchingType().equals(ProgramMatchingTypeEnum.UNSUPERVISED)){
+              if(matchedCombinations.get(menteeUserId)!=null){
+                matchedCombinations.get(menteeUserId).add(currMentorUserId);
+              }else{
+                Set<String> matchedMentors = new HashSet<String>();
+                matchedMentors.add(currMentorUserId);
+                matchedCombinations.put(menteeUserId, matchedMentors);
+              }
+            }else{
+              if(tempMatchedCombinations.get(menteeUserId)!=null){
+                tempMatchedCombinations.get(menteeUserId).add(currMentorUserId);
+              }else{
+                Set<String> matchedMentors = new HashSet<String>();
+                matchedMentors.add(currMentorUserId);
+                tempMatchedCombinations.put(menteeUserId, matchedMentors);
+              }
+            }
+
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  private Numerator getNumerator(int priority, Map<String, Set<String>> menteeMentoringProfile, Map<String, Set<String>> mentorMentoringProfile,
+          Map<String, Set<String>> menteeEmployeeProfile, Map<String, Set<String>> mentorEmployeeProfile) throws ServiceApplicationException{
+    float numeratorScore = 0;
+    Numerator numerator= new Numerator();
+
+    Map<String, Set<String>> matchedArea=new  HashMap<String, Set<String>>();
+    Set<String> menteeSections = new HashSet<String>();
+
+
+    if(priority==1 || priority==2){
+      menteeSections = menteeMentoringProfile.keySet();
+    }else if(priority==3 || priority==4){
+      //for priority 3 and 4, currently, only Location and Competency is considered.
+      menteeSections.add(DMFieldWhiteListEnum.LOCATION.getId());
+      menteeSections.add(SignupFormSectionCategoryEnum.COMPETENCY.toString());
+    }
+
+    //based on mentee sections, to search mentor's section. If same section, compare section value. If different section, ignore and continue.
+    Set<String> menteeProfileValues = new HashSet<String>();
+    Set<String> mentorProfileValues = new HashSet<String>();
+    for(String menteeSection : menteeSections){
+      //remove inactive elements in data model
+      StandardElement dmEle = dataModelFacade.getDataModel().lookupStandardElementById(menteeSection);
+      if(dmEle == null){
+        continue;
+      }
+
+      if (menteeSection.startsWith(SignupFormSectionCategoryEnum.FREE_TEXT.toString())) {
+        continue;
+      }
+      if(priority == 1){
+        if(!mentorMentoringProfile.containsKey(menteeSection)){
+          continue;
+        }
+        MentoringUtils.setValue(menteeMentoringProfile.get(menteeSection), menteeProfileValues);
+        MentoringUtils.setValue(mentorMentoringProfile.get(menteeSection), mentorProfileValues);
+      }else if(priority == 2){
+        MentoringUtils.setValue(menteeMentoringProfile.get(menteeSection), menteeProfileValues);
+        MentoringUtils.setValue(mentorEmployeeProfile.get(menteeSection), mentorProfileValues);
+      }else if(priority == 3){
+        if(!mentorMentoringProfile.containsKey(menteeSection)){
+          continue;
+        }
+        MentoringUtils.setValue(menteeEmployeeProfile.get(menteeSection), menteeProfileValues);
+        MentoringUtils.setValue(mentorMentoringProfile.get(menteeSection), mentorProfileValues);
+      }else if(priority == 4){
+        MentoringUtils.setValue(menteeEmployeeProfile.get(menteeSection), menteeProfileValues);
+        MentoringUtils.setValue(mentorEmployeeProfile.get(menteeSection), mentorProfileValues);
+      }
+
+      //remove meaningless or illegal values from mentor/mentee profile
+      menteeProfileValues.removeAll(MentoringConstants.EXCLUDED_MATCHING_VALUES);
+      mentorProfileValues.removeAll(MentoringConstants.EXCLUDED_MATCHING_VALUES);
+
+      //only when mentor and mentee's profile is both not null, comparison makes sense.
+      if(menteeProfileValues != null && mentorProfileValues != null){
+        Set<String> matchedValues = new HashSet<String>();
+        if (menteeSection.equals(SignupFormSectionCategoryEnum.COMPETENCY.toString()) || (menteeSection.equals(SignupFormSectionCategoryEnum.SKILLS.toString()))&&(params.isFeatureExist(FeatureEnum.JDM_NG))) {
+          menteeProfileValues.retainAll(mentorProfileValues);
+          numeratorScore = numeratorScore + menteeProfileValues.size();
+        } else {
+          DMFieldWhiteListEnum currSection = DMFieldWhiteListEnum.forName(menteeSection);
+          if(currSection !=null) {
+            SectionMatchingTypeEnum currSectionMatchingType = currSection.getMatchType();
+            if(currSectionMatchingType.equals(SectionMatchingTypeEnum.MATCH_ALL)){
+              menteeProfileValues.retainAll(mentorProfileValues);
+              numeratorScore = numeratorScore + menteeProfileValues.size();
+            }else if(currSectionMatchingType.equals(SectionMatchingTypeEnum.MATCH_ANY)){
+              menteeProfileValues.retainAll(mentorProfileValues);
+              if(menteeProfileValues.size()>0){
+                numeratorScore++;
+              }
+            }
+          }
+        }
+
+        //only set matching area when section matched
+        if(menteeProfileValues.size()>0){
+          setMatchingArea(matchedArea, menteeSection, menteeProfileValues, matchedValues);
+        }
+
+      }
+    }
+    numerator.setMatchedAreas(matchedArea);
+    numerator.setNumertorScore(numeratorScore);
+    return numerator;
+  }
+
+  /**
+   * get denominator by priority
+   * @param priority
+   * @return
+   */
+  private int getDenominator(int priority, String menteeUserId, Map<String, Set<String>> menteeMentoringProfile, Map<String, Set<String>> menteeEmployeeProfile) throws ServiceApplicationException{
+    int result = 0;
+
+    //if priority 1&2, denominator is total amount of content in Mentee's Mentoring Profile
+    //if priority 3&4, denominator is total number of section competencies + location
+    //if match all, denominator is number of content
+    //if match any, denominator is always 1
+    switch (priority){
+      case 1:
+      case 2:
+        for(String section : menteeMentoringProfile.keySet()){
+          //remove inactive elements in data model
+          StandardElement dmEle = dataModelFacade.getDataModel().lookupStandardElementById(section);
+          if(dmEle == null){
+            continue;
+          }
+
+          if (section.startsWith(SignupFormSectionCategoryEnum.FREE_TEXT.toString())) {
+            continue;
+          }
+          if (section.equals(SignupFormSectionCategoryEnum.SKILLS.toString()) && (params.isFeatureExist(FeatureEnum.JDM_NG))) {
+          //if (section.equals(SignupFormSectionCategoryEnum.SKILLS.toString())){
+            result = result + getSecValueNumberBySecId(menteeMentoringProfile, section);
+          } else if (section.equals(SignupFormSectionCategoryEnum.COMPETENCY.toString())) {
+            result = result + getSecValueNumberBySecId(menteeMentoringProfile, section);
+          } else {
+            DMFieldWhiteListEnum currSection = DMFieldWhiteListEnum.forName(section);
+            if(currSection!=null){
+              if (currSection.getMatchType().equals(SectionMatchingTypeEnum.MATCH_ALL)) {
+                result = result + getSecValueNumberBySecId(menteeMentoringProfile, section);
+              } else if (currSection.getMatchType().equals(SectionMatchingTypeEnum.MATCH_ANY)) {
+                Set<String> currSectionValues = menteeMentoringProfile.get(section);
+
+                //remove meaningless or illegal values from mentor/mentee profile
+                currSectionValues.removeAll(MentoringConstants.EXCLUDED_MATCHING_VALUES);
+
+                if(currSectionValues!=null && currSectionValues.size()>0){
+                  result = result + 1;
+                }
+              }
+            }
+          }
+        }
+        break;
+      case 3:
+      case 4:
+        //1. to consider competency and location is not configured
+        //2. if configured, direct to get value from employee profile for this two sections menteeEmployeeProfile.get(COMPETENCY)
+        //3. for priority3&4, only location and competency is considered
+        //4. if MATCH_ANY section value is empty, this section will not be considered as part of denominator
+        for(String section : menteeEmployeeProfile.keySet()){
+          if (section.startsWith(SignupFormSectionCategoryEnum.FREE_TEXT.toString())) {
+            continue;
+          }
+          DMFieldWhiteListEnum currSection = DMFieldWhiteListEnum.forName(section);
+
+          if(currSection!=null && currSection.getId().equals(DMFieldWhiteListEnum.LOCATION.getId())){
+            if (currSection.getMatchType().equals(SectionMatchingTypeEnum.MATCH_ALL)) {
+              result = result + getSecValueNumberBySecId(menteeEmployeeProfile, section);
+            } else if (currSection.getMatchType().equals(SectionMatchingTypeEnum.MATCH_ANY)) {
+              Set<String> currSectionValues = menteeEmployeeProfile.get(section);
+                currSectionValues.removeAll(MentoringConstants.EXCLUDED_MATCHING_VALUES);
+              if(currSectionValues!=null && currSectionValues.size()>0){
+                result = result + 1;
+              }
+            }
+          }else if(section.toUpperCase().equals(SignupFormSectionCategoryEnum.COMPETENCY.toString())){
+            result = result + getSecValueNumberBySecId(menteeEmployeeProfile, section);
+          }
+
+        }
+        break;
+      default:
+        //if priority out of 1 ~ 4, set default value -1 in order to prevent ArithmeticException.
+        //In addition, value -1 can lead matching score will be minimum value.
+        break;
+    }
+
+    return result;
+  }
+
+  /**
+   * prepare mentee and mentor's profile for UI display
+   * @throws ServiceApplicationException
+   */
+  private void prepareUserProfiles() throws ServiceApplicationException {
+    Map<String, UserProfileVO> userProfile = new HashMap<>();
+    List<MentoringProgramParticipant> participants = new ArrayList<>();
+    participants.addAll(context.getProgram().getMentees());
+    participants.addAll(context.getProgram().getMentors());
+    for (MentoringProgramParticipant participant : participants) {
+      //for UNSUPERVISED match, only need to display info of mentors and driven mentee
+      if (context.getMatchingType().equals(ProgramMatchingTypeEnum.UNSUPERVISED)) {
+        if (participant.getType() == ProgramParticipantTypeEnum.MENTEE && !participant.getUser().equals(context.getDrivenUserId())) {
+          continue;
+        }
+      }
+
+      if (!MentoringUtils.isParticipantSigned(participant)) {
+        continue;
+      }
+
+      UserBean userBean = userBeanMap.get(participant.getUser());
+      if (userBean==null || userBean.isInvalidUser()) {
+        continue;
+      }
+      Map<String, Set<String>> employeeProfile = employeeProfiles.get(participant.getUser());
+
+      UserProfileVO item = new UserProfileVO();
+      item.setFullname(UserFormatUtils.formatFullName(params.getFullNameFormat(), userBean.getFullNameBean()));
+      item.setJobFamily(MentoringUtils.formatSetToString(employeeProfile.get(MentoringConstants.FAMILY_NAME), ","));
+      item.setJobTitle(MentoringUtils.formatSetToString(employeeProfile.get(MentoringConstants.ROLE_NAME), ","));
+      item.setThreshold(participant.getThreshold());
+      item.setUserId(participant.getUser());
+      item.setPreferences(formatPreference(participant.getUser()));
+      item.setUserName(userBean.getUsername());
+      item.setType(participant.getType());
+      userProfile.put(participant.getUser(), item);
+
+    }
+
+    finalMatchingResult.setUserProfileMap(userProfile);
+  }
+
+  @Override
+  public MatchingResult getMatchingResult() throws ServiceApplicationException {
+    return getMatchingScore();
+  }
+
+  private List<String> getMenteeIdList() throws ServiceApplicationException {
+    List<String> menteeIdList = new ArrayList<String>();
+
+    switch (context.getMatchingType()) {
+    case UNSUPERVISED:
+      // To unsupervised matching, mentee is passed from context
+      menteeIdList.add(context.getDrivenUserId());
+
+      break;
+    case SUPERVISED:
+      // To supervised matching, get all mentees accepted sign up form in program
+      for (MentoringProgramMentee mentee : context.getProgram().getMentees()) {
+        if (MentoringUtils.isParticipantSigned(mentee)) {
+          menteeIdList.add(mentee.getUser());
+        }
+      }
+
+      break;
+    }
+
+    return menteeIdList;
+  }
+
+  private boolean isMentorAvailable(MentoringProgramMentor targetMentor) throws ServiceApplicationException {
+    if (!MentoringUtils.isMentorValidUser(targetMentor)) {
+        return false;
+    }
+    if (!MentoringUtils.isMentorAvailable(targetMentor)) {
+        return false;
+    }
+    int matchedMenteeCount = getMatchedParticipantsByUserId(context.getProgram().getExternalId(), targetMentor.getUser(), true).size();
+
+    // If mentor request count less than threshold, then this participant is still available
+    if (matchedMenteeCount < targetMentor.getThreshold()){
+      return true;
+    }
+
+    return false;
+  }
+
+  private void loadMenteeMentoringProfiles() throws ServiceApplicationException {
+    for (MentoringProgramMentee mentee : context.getProgram().getMentees()) {
+      if (userBeanMap.get(mentee.getUser()) != null) {
+        mentees.add(mentee);
+
+        // Get mentoring profiles of all available mentees
+        menteePreference.put(mentee.getUser(), loadMentoringProfiles(mentee));
+      }
+    }
+  }
+
+  private void loadMentorMentoringProfiles() throws ServiceApplicationException {
+    for (MentoringProgramMentor mentor : context.getProgram().getMentors()) {
+      if (userBeanMap.get(mentor.getUser()) != null) {
+        mentors.add(mentor);
+
+        // Get mentoring profiles of all available mentors
+        mentorPreference.put(mentor.getUser(), loadMentoringProfiles(mentor));
+      }
+    }
+  }
+
+  private Map<String, Set<String>> loadMentoringProfiles(MentoringProgramParticipant participant) throws ServiceApplicationException{
+    Map<String, Set<String>> mentoringProfile = new HashMap<String, Set<String>>();
+    MentoringProgramSignupForm form = participant.getSignupForm();
+
+    for (MentoringProgramSignupFormSection section : form.getSections()) {
+      StandardElement dmEle = dataModelFacade.getDataModel().lookupStandardElementById(section.getSectionId());
+      if(dmEle == null){
+        continue;
+      }
+
+      Set<String> sectionValues = new HashSet<String>();
+
+      for (MentoringProgramSignupFormSectionValue value : section.getSectionValue()) {
+        sectionValues.add(value.getItemId());
+      }
+      if(section.getSectionId().equals(SignupFormSectionCategoryEnum.COMPETENCY.toString())) {
+        Set<CompetencyBean> competencyBeans = scaHandler.execute(new GetCompetenciesByIdSet(sectionValues));
+        for(CompetencyBean competency : competencyBeans)
+        {
+          if (competency.getCompetencyFlag() == CompetencyBean.HIDDEN){
+            sectionValues.remove(String.valueOf(competency.getCompetencyId()));
+          }
+        }
+      }
+
+      mentoringProfile.put(section.getSectionId(), sectionValues);
+    }
+
+    return mentoringProfile;
+  }
+
+  private Map<String, Map<String, Set<String>>> loadEmployeeProfiles(List<String> userIdList, Map<String, UserBean> tempUserBeanMap)
+    throws ServiceApplicationException {
+    Map<String, Map<String, Set<String>>> tempEmployeeProfiles = new HashMap<String, Map<String, Set<String>>>();
+
+    
+    if (userIdList == null || userIdList.size() == 0) {
+      return tempEmployeeProfiles;
+    }
+
+    //cache job code and role mapping. the key is jobCode, the value is role
+    Map<String, RoleBean> jobCodeToRoleMapping = new HashMap<String, RoleBean>();
+
+    // Get user info records of all users
+    FetchUserInfoRecordsInBatch fetchUserInfos = new FetchUserInfoRecordsInBatch(userIdList.toArray(new String[userIdList.size()]));
+    Map<String, Properties> userInfos = scaHandler.execute(fetchUserInfos);
+
+    // Get profile of all users
+    EmployeeProfileFacade employeeProfileFacade = (EmployeeProfileFacade) SeamEnvUtils.getInstance(EmployeeProfileFacade.NAME, true);
+
+    Map<String, EmployeeProfileBean> profiles = employeeProfileFacade.getEmployeeProfiles(
+        userIdList, new ProfileLoadCriteria().fetchUser(UserDataParam.USERS_INFO, UserDataParam.EXT_INFO).addOtherParams(OtherParam.MASK_DATA));
+
+    // Get data model and all standard elements defined in data model
+    SuccessionDataModelBean dataModel = dataModelFacade.getDataModel();
+    Map<StandardElementEnum, StandardElement> elementMap = dataModel.getStandardElements();
+    List<StandardElementEnum> elements = new ArrayList<StandardElementEnum>();
+
+    // Get supported standard elements only
+    for (StandardElementEnum element : elementMap.keySet()) {
+      if (DMFieldWhiteListEnum.forName(element.getId()) != null) {
+        elements.add(element);
+      }
+    }
+
+    String strKey[] = new String[tempUserBeanMap.keySet().size()];
+    int i = 0;
+    for( String userId : tempUserBeanMap.keySet()){
+      strKey[i] = ("" + userId + "");
+      i++;
+    }
+    GetCompetenciesByUserIds getCompetencies = new GetCompetenciesByUserIds(strKey);
+    Map<String, Set<String>> competencies = scaHandler.execute(getCompetencies);
+
+    for (String key : tempUserBeanMap.keySet()) {
+      UserBean userBean = tempUserBeanMap.get(key);
+      Properties userInfo = userInfos.get(key)==null?new Properties():userInfos.get(key);
+      EmployeeProfileBean profile = profiles.get(key);
+      Map<String, Set<String>> employeeProfile = new HashMap<String, Set<String>>();
+
+      for (StandardElementEnum element : elements) {
+        Set<String> values = new HashSet<String>();
+
+        switch (element.getDataLocation()) {
+        case StandardElementEnum.DATALOCATION_USERBEAN:
+          // Get standard element value from user bean
+          values.add(element.getValueFrom(userBean)==null?"":String.valueOf(element.getValueFrom(userBean)));
+          employeeProfile.put(element.getId(), values);
+
+          break;
+        case StandardElementEnum.DATALOCATION_USERINFORECORD:
+          // Get standard element value from user info record
+          values.add(userInfo.get(element.getUserInfoKey())==null?"":String.valueOf(userInfo.get(element.getUserInfoKey())));
+          employeeProfile.put(element.getId(), values);
+
+          break;
+        case StandardElementEnum.DATALOCATION_SUCCESSIONPROFILEBEAN:
+          // Get profile value from succession profile bean
+          values.add(element.getValueFrom(profile)==null?"":String.valueOf(element.getValueFrom(profile)));
+          employeeProfile.put(element.getId(), values);
+
+          break;
+        }
+      }
+
+      Set<String> values = new HashSet<String>();
+      employeeProfile.put(SignupFormSectionCategoryEnum.COMPETENCY.toString(), competencies.get(key));
+
+      // Load job title and job family
+      loadAndSetRoleInfo(jobCodeToRoleMapping, userBean, employeeProfile);
+
+      // Load skills by user ID
+    if (params.isFeatureExist(FeatureEnum.JDM_NG)) {
+        try {
+          SkillProfile skillProfile = skillProfileService.getSkillProfile(key);
+          values = new HashSet<String>();
+
+          // Rated skills
+          for (RatedSkillMapping skill : skillProfile.getRatedSkills()) {
+            values.add(skill.getSkill().getExternalCode());
+          }
+
+          // Self reported skills
+          for (SelfReportSkillMapping skill : skillProfile.getAvailableSelfReportSkills()) {
+            values.add(skill.getSkill().getExternalCode());
+          }
+
+          employeeProfile.put(SignupFormSectionCategoryEnum.SKILLS.toString(), values);
+        } catch (JDAccessException|ExtCodeInternalIdIntegrityViolationException|ServiceSystemException ex) {
+          logger.error("error occurs when querying skill due to "+ex.getMessage(), ex);
+          //if error occurs when querying skill, just ignore skill and don't block other elements
+        }
+      }
+
+      tempEmployeeProfiles.put(key, employeeProfile);
+    }
+    return tempEmployeeProfiles;
+  }
+
+  /**
+   * get how many section values in profiles by section id. If section or section value is null, 0 is considered as return value
+   * @param profiles
+   * @param section
+   * @return
+   */
+  private int getSecValueNumberBySecId(Map<String, Set<String>> profiles, String section){
+    if(profiles == null || profiles.get(section) == null){
+      return 0;
+    }else{
+      //remove meaningless or illegal values from mentor/mentee profile
+      profiles.get(section).removeAll(MentoringConstants.EXCLUDED_MATCHING_VALUES);
+
+      return profiles.get(section).size();
+    }
+  }
+
+  /**
+   * print candidate mentors log for each mentee
+   */
+  private void printCandidateMentorsLog(){
+    StringBuilder sb = new StringBuilder();
+    Map<String, List<MatchedParticipantVO>> matchedParticipants = tempMatchingResult.getMatchedParticipantMap();
+    for(String menteeUserId : matchedParticipants.keySet()){
+      sb.append("mentee:[userId:").append(menteeUserId).append(",");
+      List<MatchedParticipantVO> matchedMentors = matchedParticipants.get(menteeUserId);
+      for(MatchedParticipantVO user : matchedMentors){
+        sb.append("{mentorId:").append(user.getMentorId()).append(",")
+          .append("score:").append(user.getScore()).append(",")
+          .append("priority:").append(user.getPriority()).append(",")
+        ;
+        sb.append("matchedArea:[");
+        sb.append(user.getMatchedAreas());
+        sb.append("]},");
+      }
+      sb.delete(sb.length()-1, sb.length());
+      sb.append("],");
+    }
+    if(matchedParticipants.size()>0){
+      sb.delete(sb.length()-1, sb.length());
+    }
+    if(mentoringServiceBase.isTroubleShootingModeEnabled()){
+      logger.info("candidate mentor list start");
+      logger.info(sb.toString());
+      logger.info("candidate mentor list end");
+    }
+  }
+
+  /**
+   * print matching log
+   */
+  private void printMatchingInfo(){
+    StringBuilder sb = new StringBuilder();
+    Map<String, List<MatchedParticipantVO>> matchedParticipants = finalMatchingResult.getMatchedParticipantMap();
+    for(String menteeUserId : matchedParticipants.keySet()){
+      sb.append("mentee:[userId:").append(menteeUserId).append(",");
+      List<MatchedParticipantVO> matchedMentors = matchedParticipants.get(menteeUserId);
+      for(MatchedParticipantVO user : matchedMentors){
+        sb.append("{mentorId:").append(user.getMentorId()).append(",")
+          .append("score:").append(user.getScore()).append(",")
+          .append("priority:").append(user.getPriority()).append(",")
+        ;
+        sb.append("matchedArea:[");
+        sb.append(user.getMatchedAreas());
+        sb.append("]},");
+      }
+      sb.delete(sb.length()-1, sb.length());
+      sb.append("],");
+    }
+    if(matchedParticipants.size()>0){
+      sb.delete(sb.length()-1, sb.length());
+    }
+    if(mentoringServiceBase.isTroubleShootingModeEnabled()){
+      logger.info("matchingResult information start");
+      logger.info(sb.toString());
+      logger.info("matchingResult information end");
+    }
+  }
+
+  /**
+   * deal with preferred mentors
+   * @param menteeUserId
+   * @throws ServiceApplicationException
+   */
+  private void getPreferredMentorsByMentee(String menteeUserId) throws ServiceApplicationException{
+    //retrieve related mentee request
+    List<MentoringProgramMentorRequest> mentorReceivedRequests = null;
+    if(cachePreferredMentors.containsKey(menteeUserId)){
+      mentorReceivedRequests = cachePreferredMentors.get(menteeUserId);
+    }else{
+      mentorReceivedRequests = getAllRequestsWithinProgram(context.getProgram().getExternalId(), menteeUserId);
+    }
+
+    List<MentoringProgramMentorRequest> orderedPreferredMentors = new ArrayList<MentoringProgramMentorRequest>();
+
+    //ordering preferred mentors by score and pick them according to mentee's threshold
+    sortPreferredMentorsByScore(menteeUserId, mentorReceivedRequests, orderedPreferredMentors);
+
+    //truncate preferred mentor list by mentee threshold
+    //orderedPreferredMentors = truncatePreferredMentorList(menteeUserId, orderedPreferredMentors);
+
+    for(MentoringProgramMentorRequest request : orderedPreferredMentors){
+      //generate preferred matching user
+      generatePreferredMatchingUser(request);
+    }
+  }
+
+  /**
+   * sorting mentors by matching score
+   * @param menteeUserId
+   * @param mentorReceivedRequests
+   * @param orderedPreferredMentors
+   */
+  private void sortPreferredMentorsByScore(String menteeUserId, List<MentoringProgramMentorRequest> mentorReceivedRequests,
+      List<MentoringProgramMentorRequest> orderedPreferredMentors) {
+    for(MentoringProgramMentorRequest request : mentorReceivedRequests){
+      if(request.getMentee().equals(menteeUserId)){
+        orderedPreferredMentors.add(request);
+      }
+    }
+
+    Comparator c = new Comparator<MentoringProgramMentorRequest>(){
+      @Override
+      public int compare(MentoringProgramMentorRequest o1, MentoringProgramMentorRequest o2) {
+        if(o1.getMatchingScore()>o2.getMatchingScore()){
+          return -1;
+        }else if(o1.getMatchingScore()==o2.getMatchingScore()){
+          return 0;
+        }else{
+          return 1;
+        }
+      }
+    };
+
+    Collections.sort(orderedPreferredMentors, c);
+  }
+
+  /**
+   * truncate preferred mentor list by mentee threshold
+   * @param menteeUserId
+   * @param mentorList
+   * @return
+   */
+  private List<MentoringProgramMentorRequest> truncatePreferredMentorList(String menteeUserId, List<MentoringProgramMentorRequest> mentorList){
+    int currMenteeSlot = menteeCounter.get(menteeUserId);
+
+    //copy new list to do filter
+    List<MentoringProgramMentorRequest> availableMentors = new ArrayList<MentoringProgramMentorRequest>();
+    availableMentors.addAll(mentorList);
+
+    //filter mentors whose slot is full, and remove them from candidate list
+    for(MentoringProgramMentorRequest mentorRequest : mentorList){
+      Integer currMentorRemainingSlot = mentorCounter.get(mentorRequest.getMentor());
+      if(currMentorRemainingSlot<=0){
+        availableMentors.remove(mentorRequest);
+      }
+    }
+
+    if(currMenteeSlot>=availableMentors.size()){
+      return availableMentors;
+    }else{
+      List<MentoringProgramMentorRequest> mentorListNew = availableMentors.subList(0, currMenteeSlot);
+      return mentorListNew;
+    }
+  }
+
+  /**
+   * put preferred matching combination into final matching result
+   */
+  private void generatePreferredMatchingUser(MentoringProgramMentorRequest request) throws ServiceApplicationException{
+    String mentorUserId = request.getMentor();
+    MentoringProgramMentor mentor = getMentor(request.getProgramId(), mentorUserId);
+    if (mentor.getUnavailableEndDate() != null) {
+      return;
+    }
+    Map existMatching = tempMatchingResult.getMatchedParticipantMap();
+    List<MatchedParticipantVO> existMatchedUser;
+    String menteeUserId = request.getMentee();
+
+    if(existMatching.containsKey(menteeUserId)){
+        existMatchedUser = (List<MatchedParticipantVO>)existMatching.get(menteeUserId);
+    }else{
+        existMatchedUser = new ArrayList<MatchedParticipantVO>();
+        existMatching.put(menteeUserId, existMatchedUser);
+    }
+
+    //init MatchedParticipantVO
+    MatchedParticipantVO matchingUser = new MatchedParticipantVO();
+    matchingUser.setPriority(0);
+    matchingUser.setMentorId(mentorUserId);
+    matchingUser.setMenteeId(menteeUserId);
+    matchingUser.setScore(request.getMatchingScore());
+    matchingUser.setMatchedCategory(MatchingScoreTypeEnum.PREFERRED);
+
+    existMatchedUser.add(matchingUser);
+
+    if(tempMatchedCombinations.get(menteeUserId)!=null){
+      tempMatchedCombinations.get(menteeUserId).add(mentorUserId);
+    }else{
+      Set<String> matchedMentorSet = new HashSet<String>();
+      matchedMentorSet.add(mentorUserId);
+      tempMatchedCombinations.put(menteeUserId, matchedMentorSet);
+    }
+  }
+
+  private MentoringProgramMentor getMentor(String programId, String mentorUserId) throws ServiceApplicationException {
+    ObjectDefinition mentoringProgramObjectDefinition = configurationProvider.getObjectDefinition(MentoringProgram.class);
+    MDFCriteria criteria = new GOSQLGeneratorContext(mentoringProgramObjectDefinition, params);
+    criteria.setProjection(Projections.all()).add(Restrictions.eq("externalId", programId));
+    MDFResultSet resultSet = criteria.execute();
+    List<MentoringProgram> mentorList = resultSet.getBeans();
+    MentoringProgram mentoringProgram = mentorList.get(0);
+    for (MentoringProgramMentor mentor : mentoringProgram.getMentors()) {
+      if (mentorUserId.equals(mentor.getUser())) {
+        return mentor;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * sort mentee list by signup date
+   */
+  private void sortMenteeBySignupDate(){
+    Comparator<MentoringProgramMentee> c = new Comparator<MentoringProgramMentee>(){
+      @Override
+      public int compare(MentoringProgramMentee o1, MentoringProgramMentee o2) {
+        Date lastModifiedDate1 = o1.getSignupForm().getLastModifiedDate();
+        Date lastModifiedDate2 = o2.getSignupForm().getLastModifiedDate();
+
+        if(lastModifiedDate1.getTime()>lastModifiedDate2.getTime()){
+          return 1;
+        }else if(lastModifiedDate1.getTime()==lastModifiedDate2.getTime()){
+          return 0;
+        }else{
+          return -1;
+        }
+      }
+    };
+    Collections.sort(mentees, c);
+  }
+
+  private void loadAndSetRoleInfo(Map<String, RoleBean> jobCodeToRoleMapping, UserBean userBean, Map<String, Set<String>> employeeProfile) throws ServiceApplicationException{
+    //Load role name and role family name by jobCode, and set them in employeeProfiles
+    //these two elements are only used to show in mentor/mentee card of matching page, engine will still use jobTile/jobFamily from users_info to calculate matching score
+    RoleBean role = jobCodeToRoleMapping.get(userBean.getUserJobCode());
+    if(role == null){
+      List<RoleBean> roles =scaHandler.execute(new GetRolesByJobCode(userBean.getUserJobCode()));
+      role = roles.size()<=0?null:roles.get(0);
+    }
+
+    Set<String> roleNames = new HashSet<String>();
+    roleNames.add(role==null?"":role.getRoleName());
+    employeeProfile.put(MentoringConstants.ROLE_NAME, roleNames);
+
+    Set<String> roleFamilies = new HashSet<String>();
+    roleFamilies.add(role==null?"":role.getFamilyName());
+    employeeProfile.put(MentoringConstants.FAMILY_NAME, roleFamilies);
+  }
+
+  private void sortMatchingResultByPriorityAndScore(List<MatchedParticipantVO> matchedMentors){
+    //sort by priority
+    Comparator c = new Comparator<MatchedParticipantVO>(){
+
+      @Override
+      public int compare(MatchedParticipantVO o1, MatchedParticipantVO o2) {
+        if(o1.getPriority()>o2.getPriority()){
+          return 1;
+        }else if(o1.getPriority()==o2.getPriority()){
+          return 0;
+        }else{
+          return -1;
+        }
+      }
+
+    };
+
+    //sort by score
+    Comparator c1 = new Comparator<MatchedParticipantVO>(){
+      @Override
+      public int compare(MatchedParticipantVO o1, MatchedParticipantVO o2) {
+        if(o1.getPriority()==o2.getPriority()){
+          if(o1.getScore()>o2.getScore()){
+            return -1;
+          }else if(o1.getScore()==o2.getScore()){
+            return 0;
+          }else{
+            return 1;
+          }
+        }
+        return 0;
+      }
+    };
+
+    Collections.sort(matchedMentors, c);
+    Collections.sort(matchedMentors, c1);
+  }
+
+  /**
+   * sort final matching result by matching score
+   * if score is same, the order will be random.
+   */
+  private void sortFinalMatchingResult(){
+    Map<String, List<MatchedParticipantVO>> allMatchingResult = finalMatchingResult.getMatchedParticipantMap();
+    for(String menteeUserId : allMatchingResult.keySet()){
+      List<MatchedParticipantVO> matchedMentors = allMatchingResult.get(menteeUserId);
+      sortMatchingResultByPriorityAndScore(matchedMentors);
+
+      allMatchingResult.put(menteeUserId, matchedMentors);
+    }
+    finalMatchingResult.setMatchedParticipantMap(allMatchingResult);
+  }
+
+  private void sortTempMatchingResult(){
+    Map<String, List<MatchedParticipantVO>> allMatchingResult = tempMatchingResult.getMatchedParticipantMap();
+    for(String menteeUserId : allMatchingResult.keySet()){
+      List<MatchedParticipantVO> matchedMentors = allMatchingResult.get(menteeUserId);
+      sortMatchingResultByPriorityAndScore(matchedMentors);
+
+      allMatchingResult.put(menteeUserId, matchedMentors);
+    }
+    tempMatchingResult.setMatchedParticipantMap(allMatchingResult);
+  }
+
+  private void setMatchingArea(Map<String, Set<String>> matchedArea, String menteeSection, Set<String> menteeProfileValues, Set<String> matchedValues){
+    MentoringUtils.setValue(menteeProfileValues, matchedValues);
+    matchedArea.put(menteeSection, matchedValues);
+  }
+
+  private void handleUnmatchedParticipants(String menteeUserId) throws ServiceApplicationException{
+    for(MentoringProgramMentor mentor : context.getProgram().getMentors()){
+
+      if(!MentoringUtils.isParticipantSigned(mentor)){
+        continue;
+      }
+
+      String mentorUserId = mentor.getUser();
+      if(matchedCombinations.size()<=0 || (matchedCombinations.get(menteeUserId)!=null && !matchedCombinations.get(menteeUserId).contains(mentorUserId))){
+        MatchedParticipantVO matchingUser = new MatchedParticipantVO();
+        matchingUser.setPriority(4);
+        matchingUser.setMentorId(mentorUserId);
+        matchingUser.setMenteeId(menteeUserId);
+        matchingUser.setScore(0);
+        matchingUser.setMatchedAreas(Collections.EMPTY_LIST);
+
+        if(finalMatchingResult.getMatchedParticipantMap().get(menteeUserId) != null){
+          finalMatchingResult.getMatchedParticipantMap().get(menteeUserId).add(matchingUser);
+        }else{
+          List<MatchedParticipantVO> matchedMentors = new ArrayList<MatchedParticipantVO>();
+          matchedMentors.add(matchingUser);
+          finalMatchingResult.getMatchedParticipantMap().put(menteeUserId, matchedMentors);
+        }
+      }
+    }
+  }
+
+  /**
+   * select matched mentors according to mentee threshold
+   */
+  private void selectMatchedMentorsByMenteeThreshold(String menteeUserId) {
+    int currMenteeThreshold = menteeOriginalCounter.get(menteeUserId);
+    Map<String, List<MatchedParticipantVO>> matchedResult = finalMatchingResult.getMatchedParticipantMap();
+
+    List<MatchedParticipantVO> matchedMentors = matchedResult.get(menteeUserId);
+    List<MatchedParticipantVO> mentorsListLimitedToMenteeThreshold = new ArrayList<MatchedParticipantVO>();
+    if (matchedMentors != null) {
+      for (MatchedParticipantVO matchedMentor : matchedMentors) {
+        if (currMenteeThreshold <= 0) {
+          break;
+        }
+
+        mentorsListLimitedToMenteeThreshold.add(matchedMentor);
+        currMenteeThreshold--;
+
+        // refresh mentor's threshold
+        if(matchedMentor.getPriority()!=0){
+          //because preferred mentor counter has been set when calculating preferred mentor, we don't set it here again
+          Integer currMentorThreshold = mentorCounter.get(matchedMentor.getMentorId());
+          mentorCounter.put(matchedMentor.getMentorId(), currMentorThreshold - 1);
+        }
+      }
+    }
+
+    matchedResult.put(menteeUserId, mentorsListLimitedToMenteeThreshold);
+  }
+
+  /**
+   * check whether mentee needs to continue matching
+   * @param menteeUserId
+   * @param matchingResult TODO
+   * @param matched TODO
+   * @param mentorCounterMap TODO
+   * @return
+   */
+  protected boolean needMenteeContinueMatching(String menteeUserId, MatchingResult matchingResult, Map<String, Set<String>> matched, Map<String, Integer> mentorCounterMap){
+    //if mentor candidate list are empty, no need to do matching any more
+    if(matchingResult.getMatchedParticipantMap().get(menteeUserId)==null){
+      return false;
+    }
+
+    List<MatchedParticipantVO> mentorCandidates = matchingResult.getMatchedParticipantMap().get(menteeUserId);
+    Set<String> matchedMentors = matched.get(menteeUserId)==null?new HashSet<String>():matched.get(menteeUserId);
+    for(MatchedParticipantVO mentorCandidate : mentorCandidates){
+      if(matchedMentors.contains(mentorCandidate.getMentorId())){
+        continue;
+      }
+
+      //to check whether mentor candidate is available
+      Integer counter = mentorCounterMap.get(mentorCandidate.getMentorId());
+      if(counter != null && counter > 0){
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * select mentor from candidates for mentee
+   * @param menteeUserId
+   */
+  private void selectTempMatchedMentorsByMenteeThreshold(String menteeUserId) {
+    int currMenteeThreshold = menteeCounter.get(menteeUserId);
+    Map<String, List<MatchedParticipantVO>> matchedResult = tempMatchingResult.getMatchedParticipantMap();
+    //if mentee slot exceeds, no need to do matching any more
+    if (currMenteeThreshold <= 0) {
+      return;
+    }
+    
+    List<MatchedParticipantVO> matchedMentors = matchedResult.get(menteeUserId)==null?new ArrayList<MatchedParticipantVO>():matchedResult.get(menteeUserId);
+
+    for (MatchedParticipantVO matchedMentor : matchedMentors) {
+    
+      if (!checkMentorAvailable(menteeUserId, matchedMentor.getMentorId(), mentorCounter,
+          tempMatchingResult, finalMatchedCombinations,
+          menteeCounter)) {
+        continue;
+      }
+    
+      if (refreshMatchedCombination(menteeUserId,
+          finalMatchedCombinations, matchedMentor)) {
+        continue;
+      }
+    
+      // refresh mentor's threshold
+      //because preferred mentor counter has been set when calculating preferred mentor, we don't set it here again
+      decrementCounter(mentorCounter, matchedMentor.getMentorId());
+    
+      decrementCounter(menteeCounter, menteeUserId);
+    
+      finalMatchingResult.addMatchedParticipant(menteeUserId, matchedMentor);
+      break;
+    }
+  }
+
+  //TODO move to a counter object
+  protected Integer decrementCounter(Map<String, Integer> counterMap,
+       String userId) {
+    Integer counter = counterMap.get(userId);
+    if (counter != null) {
+      counterMap.put(userId, --counter);
+    }
+    return counter;
+  }
+
+  //if candidate mentor is not available, need to check whether mentee needs to do further matching
+  protected boolean checkMentorAvailable(String menteeUserId,
+      String mentorUserId, 
+      Map<String, Integer> localMentorCounter,
+      MatchingResult localTempMatchingResult,
+      Map<String, Set<String>> localFinalMatchedCombinations,
+      Map<String, Integer> localMenteeCounter) {
+    Integer currMentorThreshold = localMentorCounter.get(mentorUserId);
+    if (currMentorThreshold != null && currMentorThreshold > 0) {
+      return true;
+    }
+    if(!needMenteeContinueMatching(menteeUserId, localTempMatchingResult, localFinalMatchedCombinations, localMentorCounter)) {
+      localMenteeCounter.put(menteeUserId, 0);
+    }
+    return false;
+  }
+
+  protected boolean refreshMatchedCombination(String menteeUserId,
+      Map<String, Set<String>> localFinalMatchedCombinations,
+      MatchedParticipantVO matchedMentor) {
+    if(localFinalMatchedCombinations.get(menteeUserId)!=null && localFinalMatchedCombinations.get(menteeUserId).contains(matchedMentor.getMentorId())){
+      return true;
+    } else if(localFinalMatchedCombinations.get(menteeUserId)!=null && !localFinalMatchedCombinations.get(menteeUserId).contains(matchedMentor.getMentorId())){
+      localFinalMatchedCombinations.get(menteeUserId).add(matchedMentor.getMentorId());
+    }else{
+      Set<String> matchedMentorSet = new HashSet<String>();
+      matchedMentorSet.add(matchedMentor.getMentorId());
+      localFinalMatchedCombinations.put(menteeUserId, matchedMentorSet);
+    }
+    return false;
+  }
+}
+
+class Numerator {
+
+  private Map<String, Set<String>> matchedAreas = new HashMap<String, Set<String>>();
+
+  private float numertorScore;
+
+  public float getNumertorScore() {
+    return numertorScore;
+  }
+
+  public void setNumertorScore(float numertorScore) {
+    this.numertorScore = numertorScore;
+  }
+
+  public List<ProgramSignupFormSectionVO> getMatchedAreas() {
+    List<ProgramSignupFormSectionVO> matchedAreaVOs = new ArrayList<>();
+    for(String sectionId : this.matchedAreas.keySet()){
+      ProgramSignupFormSectionVO matchedArea = new ProgramSignupFormSectionVO();
+      matchedArea.setSectionId(sectionId);
+      List<ProgramSignupFormSectionValueVO> sectionValues = new ArrayList<>();
+      for(String value: this.matchedAreas.get(sectionId)){
+        ProgramSignupFormSectionValueVO valueVO = new ProgramSignupFormSectionValueVO(value);
+        sectionValues.add(valueVO);
+      }
+      matchedArea.setSectionValues(sectionValues);
+      matchedAreaVOs.add(matchedArea);
+    }
+    return matchedAreaVOs;
+  }
+
+  public void setMatchedAreas(Map<String, Set<String>> matchedAreas) {
+    this.matchedAreas = matchedAreas;
+  }
+
+
+}
+ 
+  

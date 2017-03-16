@@ -1,0 +1,137 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramParticipant;
+import com.successfactors.cdp.service.mentoring.SaveOverview;
+import com.successfactors.cdp.service.util.mentoring.SignupFormStatusEnum;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+/**
+ * Service command to save a program entity. If it's an existing program, we will update it. If it is a new program, we will create it.
+ * @author I309618
+ */
+@Service
+public class SaveOverviewImpl implements ServiceCommandImpl<SaveOverview, SaveOverview> {
+  /** params */
+  @Inject
+  @In
+  private ParamBean params;
+
+  @Inject
+  @In
+  private transient ServiceCommandHandler scaHandler;
+
+  @Inject
+  @In(create = true)
+  private ConfigurationProvider configurationProvider;
+  
+  @Inject
+  @In(create = true)
+  private IMentoringServiceBase mentoringServiceBase;
+
+  /** Logger */
+  private static Logger logger = LogManager.getLogger();
+
+  @Override
+  public SaveOverview execute(SaveOverview cmd) throws ServiceApplicationException {
+    MentoringProgram program = cmd.getProgram();
+    
+    //Get existing program
+    MentoringProgram savedProgram = mentoringServiceBase.getProgramById(program.getExternalId());
+
+    //merge program
+    program = mergeProgram(savedProgram, program);           
+    
+    //Save new/existing program
+    ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgram.class, program));
+    mentoringServiceBase.validateContext(context);
+    program = (MentoringProgram) context.getSuccessfullOperationContexts().get(0).getBean();
+
+    cmd.setProgram(program);
+    
+    return cmd;
+  }
+  
+  private MentoringProgram mergeProgram(MentoringProgram savedProgram, MentoringProgram program) throws ServiceApplicationException {
+    // Save program details
+    savedProgram.setDescription(program.getDescription());
+    savedProgram.setName(program.getName());
+    savedProgram.setMentorSignupDate(program.getMentorSignupDate());
+    savedProgram.setMenteeSignupDate(program.getMenteeSignupDate());
+    savedProgram.setMatchingDate(program.getMatchingDate());
+    savedProgram.setStartDate(program.getStartDate());
+    savedProgram.setEndDate(program.getEndDate());
+    savedProgram.setStatus(program.getStatus());
+    savedProgram.setCompletedDate(program.getCompletedDate());
+    savedProgram.setPhotoId(program.getPhotoId());
+    savedProgram.setMaximumOfMentee(program.getMaximumOfMentee());
+    savedProgram.setMaximumOfMentor(program.getMaximumOfMentor());
+    savedProgram.setMatchingType(program.getMatchingType());
+    savedProgram.setNeedMentorApproval(program.isNeedMentorApproval());
+
+    // Save owner
+    if(program.getOwners()!=null){
+      savedProgram.setOwners(program.getOwners());
+    }
+    
+    // Save mentor list
+    savedProgram.setMentors(mergeParticipant(savedProgram, savedProgram.getMentors(), program.getMentors(), program.getMaximumOfMentee()));
+
+    // Save mentee list
+    savedProgram.setMentees(mergeParticipant(savedProgram, savedProgram.getMentees(), program.getMentees(), program.getMaximumOfMentor()));
+    
+    return savedProgram;
+  }
+
+  private <T extends MentoringProgramParticipant> List<T> mergeParticipant(MentoringProgram program, List<T> savedList, List<T> newList, Integer threshold)
+    throws ServiceApplicationException {
+    Map<String, T> newMap = new HashMap<String, T>();
+    List<T> finalList = new ArrayList<T>();
+    
+    if (newList != null && newList.size() > 0) {
+      for (T participant : newList) {
+        newMap.put(participant.getUser(), participant);
+      }
+    }
+
+    for (T participant : savedList) {
+      if (newMap.get(participant.getUser()) == null) {        
+        // If participant has a sign up form, set status to deleted either.
+        if (participant.getSignupForm() != null) {
+          participant.getSignupForm().setStatus(SignupFormStatusEnum.DELETED);
+        }
+      } else {        
+        // If a participant is already saved, remove it from map.
+        newMap.remove(participant.getUser());
+        
+        finalList.add(participant);
+      }      
+    }    
+  
+    // Add all participants not saved
+    for (T participant : newMap.values()) {
+      finalList.add(participant);
+    }
+
+    return finalList;
+  }
+}

@@ -1,0 +1,358 @@
+package com.successfactors.cdp.service.impl;
+
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.service.GetMentoringProgramsForMentorUnavailabilityExpirationCheck;
+import com.successfactors.cdp.service.UpdateMentorUnavailableEndDate;
+import com.successfactors.cdp.service.util.mentoring.MentoringDateUtils;
+import com.successfactors.cdp.service.util.mentoring.MentoringPermissionChecker;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailContent;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailTokenEnum;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailUtils;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.sql.MDFCriteria;
+import com.successfactors.genericobject.api.sql.Projections;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.MailInvalidAddressException;
+import com.successfactors.platform.bean.MailSendException;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.DateUtils;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.util.UserFormatUtils;
+
+/**
+ * Get MentoringPrograms for Mentor unavailability expiration notification
+ *
+ * @author Zhang, Xiuzhu
+ */
+@Service
+public class GetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl
+        implements ServiceCommandImpl<Void, GetMentoringProgramsForMentorUnavailabilityExpirationCheck> {
+
+    @Inject
+    @In(create = true)
+    private MentoringEmailUtils mentoringEmailUtils;
+
+    @Inject
+    @In
+    private ServiceCommandHandler scaHandler;
+
+    @Inject
+    @In
+    private ParamBean params;
+
+    @Inject
+    @In(create = true)
+    private ConfigurationProvider configurationProvider;
+
+    /**
+     * V10 Messages.
+     */
+    @Inject
+    @In(create = true, value = "v10msgs")
+    private IMessageBundle messages;
+
+    @Inject
+    @In(create = true)
+    private IMentoringServiceBase mentoringServiceBase;
+
+    private static Logger logger = LogManager.getLogger();
+
+    public Void execute(GetMentoringProgramsForMentorUnavailabilityExpirationCheck mentoringProgramsNotification) throws ServiceApplicationException {
+        if (!MentoringPermissionChecker. isMentoringFeatureEnabled (params)) {
+            logger.info("Mentoring feature has been disabled.");
+            return null;
+        }
+        //A map holding programs with mentor's unavailability expired in 1 days.
+        Map<MentoringProgram, List<MentoringProgramMentor>> oneDayProgramMap = new HashMap<MentoringProgram, List<MentoringProgramMentor>>();
+        //A map holding programs with mentor's unavailability expired in 7 days.
+        Map<MentoringProgram, List<MentoringProgramMentor>> sevenDayProgramMap = new HashMap<MentoringProgram, List<MentoringProgramMentor>>();
+        //A map holding programs with mentor's unavailability expired today.
+        Map<MentoringProgram, List<MentoringProgramMentor>> zeroDayProgramMap = new HashMap<MentoringProgram, List<MentoringProgramMentor>>();
+        List<MentoringProgram> programList = loadMentoringPrograms();
+        collectMentoringProgramMentors(oneDayProgramMap, sevenDayProgramMap, zeroDayProgramMap, programList);
+        notifyMentors(oneDayProgramMap, NotificationType.ONE_DAY_NOTIFICATION);
+        notifyMentors(sevenDayProgramMap, NotificationType.SEVEN_DAYS_NOTIFICATION);
+        notifyMentors(zeroDayProgramMap, NotificationType.TODAY_NOTIFICATION);
+        return null;
+    }
+
+    /**
+     * Collect mentoring program mentors
+     *
+     * @param oneDayProgramMap
+     * @param sevenDayProgramMap
+     * @param zeroDayProgramMap
+     * @param programList
+     */
+    protected void collectMentoringProgramMentors(Map<MentoringProgram, List<MentoringProgramMentor>> oneDayProgramMap,
+                                                Map<MentoringProgram, List<MentoringProgramMentor>> sevenDayProgramMap,
+                                                Map<MentoringProgram, List<MentoringProgramMentor>> zeroDayProgramMap,
+                                                List<MentoringProgram> programList) {
+      Date today = calculateLocal0Hour(new Date());
+      
+      for (MentoringProgram program : programList) {
+        List<MentoringProgramMentor> programMentorList = program.getMentors();
+        for (MentoringProgramMentor programMentor : programMentorList) {
+          Date unavailableEndDate = programMentor.getUnavailableEndDate();
+          if (unavailableEndDate == null) {
+            continue;
+          }
+          int daysDifference = calculateDaysDifferenceWithToday(today, unavailableEndDate);
+          if (daysDifference == 1) {
+            addMentorToProgramMap(oneDayProgramMap, program, programMentor);
+          } else if (daysDifference == 7) {
+            addMentorToProgramMap(sevenDayProgramMap, program, programMentor);
+          } else if (daysDifference <= 0) {
+            addMentorToProgramMap(zeroDayProgramMap, program, programMentor);
+            //Set unavailable mentor to available
+            setUnavailableMentorToAvailable(program, programMentor);
+          }
+        }
+      }
+    }
+
+
+    /**
+     * Notify Mentors
+     * @param programMap
+     * @param notificationType
+     */
+    private void notifyMentors(Map<MentoringProgram, List<MentoringProgramMentor>> programMap, NotificationType notificationType) {
+      try {
+        Map<String, UserBean> userMap = mentoringServiceBase.getUsernameMapByIds(gatherAllUsers(programMap));
+        
+        UserBean emailSender = mentoringEmailUtils.getDummyEmailSender();
+        for (Map.Entry<MentoringProgram, List<MentoringProgramMentor>> programEntry : programMap.entrySet()) {
+          for (MentoringProgramMentor programMentor : programEntry.getValue()) {
+            UserBean mentorUserBean = userMap.get(programMentor.getUser());
+            if (mentorUserBean != null && mentorUserBean.isValidUser()) {
+              sendEmail(mentorUserBean, notificationType, programEntry.getKey(), programMentor, emailSender);
+            }
+          }
+        }
+      } catch (ServiceApplicationException sae) {
+        logger.error("GetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl notifyMentors() error occurs", sae);
+      }
+    }
+
+    protected List<String> gatherAllUsers(Map<MentoringProgram, List<MentoringProgramMentor>> programMap)  {
+      if (programMap == null || programMap.isEmpty()) {
+        return Collections.emptyList();
+      }
+      List<String> userList = new ArrayList();
+      for (List<MentoringProgramMentor> mentors : programMap.values()) {
+        for (MentoringProgramMentor programMentor : mentors) {
+          userList.add(programMentor.getUser());
+        }
+      }
+      return userList;
+    }
+
+
+    /**
+     * Load mentoring programs
+     *
+     * @return
+     */
+    public List<MentoringProgram> loadMentoringPrograms() {
+        List<MentoringProgram> programList = new ArrayList<MentoringProgram>();
+        try {
+            ObjectDefinition mentoringProgramDefinition = configurationProvider.getObjectDefinition(MentoringProgram.class);
+            MDFCriteria criteria = new GOSQLGeneratorContext(mentoringProgramDefinition, params);
+            criteria.setProjection(Projections.all());
+            criteria.add(
+                    Restrictions.and(
+                            Restrictions.or(
+                                    Restrictions.eq("status", ProgramStatusEnum.CONFIRMED),
+                                    Restrictions.eq("status", ProgramStatusEnum.MENTOR_SIGNUP),
+                                    Restrictions.eq("status", ProgramStatusEnum.MENTEE_SIGNUP),
+                                    Restrictions.eq("status", ProgramStatusEnum.MATCHING),
+                                    Restrictions.eq("status", ProgramStatusEnum.MATCHED),
+                                    Restrictions.eq("status", ProgramStatusEnum.MENTOR_APPROVAL),
+                                    Restrictions.eq("status", ProgramStatusEnum.INPROGRESS)
+                            )
+                    )
+            );
+            programList = criteria.execute().getBeans();
+        } catch (ServiceApplicationException e) {
+            logger.error("GetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl loadMentoringPrograms(...) error occurs", e);
+        }
+        return programList;
+    }
+
+    /**
+     * Add mentor to programMap
+     *
+     * @param programMap
+     * @param program
+     * @param programMentor
+     */
+    private void addMentorToProgramMap(Map<MentoringProgram, List<MentoringProgramMentor>> programMap,
+                                       MentoringProgram program,
+                                       MentoringProgramMentor programMentor) {
+        if (!programMap.containsKey(program)) {
+            programMap.put(program, new ArrayList<MentoringProgramMentor>());
+        }
+        programMap.get(program).add(programMentor);
+    }
+
+    /**
+     * Set unavailable mentor to available
+     *
+     * @param programMentor
+     */
+    private void setUnavailableMentorToAvailable(MentoringProgram program, MentoringProgramMentor programMentor) {
+        UpdateMentorUnavailableEndDate cmd = new UpdateMentorUnavailableEndDate();
+        cmd.setUnavailableEndDate(null);
+        cmd.setMentorId(programMentor.getExternalId());
+        cmd.setProgramId(program.getExternalId());
+        programMentor.setUnavailableEndDate(null);
+        try {
+            scaHandler.execute(new SaveBean(MentoringProgramMentor.class, programMentor));
+        } catch (ServiceApplicationException e) {
+            logger.error("GetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl setUnavailableMentorToAvailable(...) error occurs", e);
+        }
+    }
+
+    private Date calculateLocal0Hour(Date date) {
+      return MentoringDateUtils.calculateDate0Hour(date, TimeZone.getDefault());
+
+    }
+    /**
+     * Calculate days difference with today, needs to be 24 hour apart
+     * @param unavailableEndDate
+     *
+     * @return
+     */
+    protected int calculateDaysDifferenceWithToday(Date today, Date unavailableEndDate) {
+      return (int) com.successfactors.sfutil.util.date.DateUtils.daysBetweenDates(today, unavailableEndDate);
+    }
+
+    /**
+     * Get email content
+     *
+     * @param notificationType
+     * @return
+     */
+    private MentoringEmailContent getEmailContent(NotificationType notificationType, Locale locale) {
+        MentoringEmailContent emailContent = new MentoringEmailContent();
+        switch (notificationType) {
+            case SEVEN_DAYS_NOTIFICATION:
+                emailContent.setSubject(mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTOR_UVAILABILITY_IN_SEVEN_DAYS_SUBJECT", locale));
+                emailContent.setBody(mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTOR_UVAILABILITY_IN_SEVEN_DAYS_BODY", locale));
+                break;
+            case ONE_DAY_NOTIFICATION:
+                emailContent.setSubject(mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTOR_UVAILABILITY_IN_ONE_DAY_SUBJECT", locale));
+                emailContent.setBody(mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTOR_UVAILABILITY_IN_ONE_DAY_BODY", locale));
+                break;
+            case TODAY_NOTIFICATION:
+                emailContent.setSubject(mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTORING_UNSET_MENTOR_UNAVAILABLE_END_DATE_SUBJECT", locale));
+                emailContent.setBody(mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTORING_UNSET_MENTOR_UNAVAILABLE_END_DATE_BODY", locale));
+                break;
+        }
+        return emailContent;
+    }
+
+    /**
+     * Get email TokenMap
+     *
+     * @param mentoringProgram
+     * @param programMentor
+     * @return
+     */
+    private Map<MentoringEmailTokenEnum, String> getEmailTokenMap(MentoringProgram mentoringProgram,
+                                                                  MentoringProgramMentor programMentor,
+                                                                  UserBean userBean) {
+        Map<MentoringEmailTokenEnum, String> tokenMap = new HashMap<MentoringEmailTokenEnum, String>();
+        tokenMap.put(MentoringEmailTokenEnum.MENTOR_NAME, (userBean.getFullName() != null? userBean.getFullName() : 
+                mentoringEmailUtils.escapleHtmlTag(UserFormatUtils.formatFullName(messages, userBean.getFullNameBean()))));
+        tokenMap.put(MentoringEmailTokenEnum.PLAIN_PROGRAM_NAME, mentoringEmailUtils.escapleHtmlTag(mentoringProgram.getName()));
+        try {
+            String linkUrl = mentoringEmailUtils.generateUrlToken(mentoringProgram, userBean, mentoringEmailUtils.escapleHtmlTag(mentoringProgram.getName()));
+            tokenMap.put(MentoringEmailTokenEnum.PROGRAM_NAME, linkUrl);
+        } catch (NoSuchAlgorithmException|UnsupportedEncodingException e) {
+            logger.error("error occurred in GetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl.getEmailTokenMap:", e.getMessage());
+        }
+        return tokenMap;
+    }
+
+    /**
+     * Send email
+     *
+     * @param emailRecipient
+     * @param notificationType
+     * @param mentoringProgram
+     * @param programMentor
+     * @param dummyEmailSender TODO
+     */
+    private void sendEmail(UserBean emailRecipient,
+                           NotificationType notificationType,
+                           MentoringProgram mentoringProgram,
+                           MentoringProgramMentor programMentor, UserBean emailSender) {
+        MentoringEmailContent emailContent = getEmailContent(notificationType, emailRecipient.getUserLocale());
+        Map<MentoringEmailTokenEnum, String> emailTokenMap = getEmailTokenMap(mentoringProgram, programMentor,
+                emailRecipient);
+        try {
+            mentoringEmailUtils.sendEmail(emailContent, emailTokenMap, emailSender, emailRecipient);
+            switch (notificationType) {
+                case ONE_DAY_NOTIFICATION:
+                    logger.info("Send email: MentoringProgramMentor will be expire after one day " +
+                            "MentoringProgram row_id: " + mentoringProgram.getRowId() + " relevant MentoringProgramMentor row_id: " + programMentor.getRowId());
+                    break;
+                case SEVEN_DAYS_NOTIFICATION:
+                    logger.info("Send email: MentoringProgramMentor will be expire after seven days " +
+                            "MentoringProgram row_id: " + mentoringProgram.getRowId() + " relevant MentoringProgramMentor row_id: " + programMentor.getRowId());
+                    break;
+                case TODAY_NOTIFICATION:
+                    logger.info("Send email: MentoringProgramMentor will be expire after seven days " +
+                            "MentoringProgram row_id: " + mentoringProgram.getRowId() + " relevant MentoringProgramMentor row_id: " + programMentor.getRowId());
+                    break;
+            }
+        } catch (ServiceApplicationException e) {
+            logger.error("GetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl sendEmail(...) error occurs", e);
+        } catch (MailInvalidAddressException e) {
+            logger.error("GetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl sendEmail(...) error occurs", e);
+        } catch (MailSendException e) {
+            logger.error("GetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl sendEmail(...) error occurs", e);
+        }
+    }
+
+    /**
+     * NotificationType enum
+     */
+    private static enum NotificationType {
+        SEVEN_DAYS_NOTIFICATION,
+        ONE_DAY_NOTIFICATION,
+        TODAY_NOTIFICATION
+    }
+}
+

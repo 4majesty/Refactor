@@ -1,0 +1,360 @@
+package com.successfactors.cdp.service.util.mentoring.email;
+
+import com.sf.sfv4.util.LocalPool;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.service.util.deeplink.MentoringResolver;
+import com.successfactors.email.util.EmailTemplate;
+import com.successfactors.legacy.service.ejb.SysConfig;
+import com.successfactors.legacy.util.Mailbox;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.FullNameBean;
+import com.successfactors.platform.bean.MailDispatcherFactory;
+import com.successfactors.platform.bean.MailInvalidAddressException;
+import com.successfactors.platform.bean.MailMessage;
+import com.successfactors.platform.bean.MailSendException;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.platform.util.mail.CommonEmailHelper;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.systemprop.service.ejb.SysConfigEJBException;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.user.bean.util.UserFormatUtils;
+import com.successfactors.user.service.FindUserById;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+
+import javax.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.rmi.RemoteException;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+
+/**
+ * Mentoring email utility class
+ * @author Frank Peng
+ */
+@Name("mentoringEmailUtils")
+@javax.inject.Named("mentoringEmailUtils")
+@Scope(ScopeType.EVENT)
+public class MentoringEmailUtils {
+  /** Logger */
+  private Logger logger = LogManager.getLogger();
+  private ServiceCommandHandler scaHandler = ServiceCommandHandlerFactory.getSCAHandler();
+  
+  /** Parameter bean */
+  @Inject
+  @In
+  private ParamBean params;
+
+  @Inject
+  @In
+  private SysConfig sysConfigService;
+
+  @Inject
+  @In(create = true)
+  private IMentoringServiceBase mentoringServiceBase;
+  /**
+   * Method to send email using CommonEmailHelper without tokens.
+   * 
+   * @param subject
+   * @param body
+   * @param senderuserbean
+   * @param List of recipient userbeans
+   * 
+   * @throws ServiceApplicationException If error occurs
+   */
+  public void sendEmail(String subject, String body, UserBean sender, UserBean[] recipients, Messages msgs)
+      throws ServiceApplicationException {
+    sendEmail(subject, body, null /* tokenMap*/, sender, recipients, msgs);
+  }
+
+  /**
+   * Method to send email using CommonEmailHelper with default dummy sender and without tokens.
+   * 
+   * @param subject
+   * @param body
+   * @param senderuserbean
+   * @param List of recipient userbeans
+   * 
+   * @throws ServiceApplicationException If error occurs
+   */
+  public void sendEmail(String subject, String body, UserBean[] recipients, Messages msgs)
+      throws ServiceApplicationException {
+    sendEmail(subject, body, null /* tokenMap*/, getDummyEmailSender(), recipients, msgs);
+  }
+
+  /**
+   * Method to send email using CommonEmailHelper.
+   * 
+   * @param subject
+   * @param body
+   * @param tokenMap
+   * @param senderuserbean
+   * @param List of recipient userbeans
+   * 
+   * @throws ServiceApplicationException If error occurs
+   */
+  public void sendEmail(String subject, String body, 
+      Map<String, String> tokenMap, UserBean sender, UserBean[] recipients, Messages msgs)
+      throws ServiceApplicationException {
+      List<UserBean> realRecipients = excludeEmailRecipient(recipients);
+      if (realRecipients.isEmpty()) {
+        return;
+      }
+
+      if(tokenMap == null) { // guard against nullpointerexception, create an empty map
+        tokenMap = new HashMap<String, String>();
+      }
+
+      String formattedSubject = getFormattedSubject(subject, tokenMap);
+      String formattedBody = getFormattedBody(formattedSubject, body, tokenMap, msgs);
+
+      try {
+        CommonEmailHelper.sendMessage(params, sender, null /* no CCs */, realRecipients, formattedSubject, 
+            /* no non-html email message */ null, formattedBody, false, msgs, /* no attachment */ null);
+      } catch (MailInvalidAddressException | MailSendException e) {
+        throw new ServiceApplicationException(e);
+      }
+    }
+
+  private String getFormattedSubject(String subject, Map<String, String> tokenMap) {
+    EmailTemplate emailTemplate = new EmailTemplate(tokenMap);
+    return emailTemplate.generateEmail(subject);
+  }
+
+  private String getFormattedBody(String subject, String content, Map<String, String> tokenMap, Messages msgs)
+      throws ServiceApplicationException {
+    try {
+      return CommonEmailHelper.constructHtmlEmailBody(subject,
+                                     content, tokenMap, msgs, params, sysConfigService);
+    } catch (SysConfigEJBException e) {
+      throw new ServiceApplicationException(e);
+    } catch (RemoteException e) {
+      throw new ServiceApplicationException(e);
+    }
+  }
+
+  /**
+   * Compose email sent to mentor/mentee, replace tokens in email content with values and send email out.
+   * @param emailContent Email content
+   * @param tokenMap Token name and value map
+   * @param sender Email sender
+   * @param recipients Email recipients
+   * @throws ServiceApplicationException If error occurs
+   * @throws MailInvalidAddressException If email address is invalid
+   * @throws MailSendException If email failes to send
+   */
+  public void sendEmail(MentoringEmailContent emailContent, Map<MentoringEmailTokenEnum, String> tokenMap, UserBean sender, UserBean...recipients)
+    throws ServiceApplicationException, MailInvalidAddressException, MailSendException {
+    if (recipients.length == 0) {
+      throw new ServiceApplicationException("At least one recipient should be specified");
+    }
+    
+    for (UserBean recipient : recipients) {
+      if (recipient == null) {
+        throw new ServiceApplicationException("Recipient should not be null.");
+      }
+    }
+    List<UserBean> realRecipients = excludeEmailRecipient(recipients);
+    if (realRecipients.isEmpty()) {
+      return;
+    }
+    emailContent.setSubject(replaceEmailTemplateTokens(emailContent.getSubject(), tokenMap));
+    emailContent.setBody(replaceEmailTemplateTokens(emailContent.getBody(), tokenMap));
+
+    MailMessage mailMessage = new MailMessage();
+    mailMessage.setFrom(new Mailbox(UserFormatUtils.formatFullName(params.getFullNameFormat(), sender.getFullNameBean()), sender.getUserEmail()));
+    
+    for (UserBean userBean : realRecipients) {
+      mailMessage.addRecipient(new Mailbox(UserFormatUtils.formatFullName(params.getFullNameFormat(), userBean.getFullNameBean()),
+        userBean.getUserEmail()));
+    }
+    
+    mailMessage.setSubject(emailContent.getSubject());
+    mailMessage.setHtmlMessage(generateHtmlMessage(emailContent.getBody()));
+
+    MailDispatcherFactory.getRegularDispatcher().send(params, mailMessage);
+  }
+
+
+  private List<UserBean> excludeEmailRecipient(UserBean[] recipients) {
+    List<UserBean> result = new LinkedList<UserBean>();
+    for (UserBean recipient : recipients) {
+      if (recipient.getUserNotification() == UserBean.EMAIL_ENABLED) {
+        result.add(recipient);
+      }
+    }
+    excludeInvalidRecipient(result);    
+    return result;
+  }
+  
+  protected List<UserBean> excludeInvalidRecipient(List<UserBean> recipients) {
+    for (Iterator<UserBean> it = recipients.iterator(); it.hasNext(); ) {
+      UserBean recipient = it.next();
+      if (!recipient.isValidUser()) {
+        it.remove();
+      }
+    }
+    return recipients;
+  }
+
+
+  /**
+   * Escapes a string for HTML content.  Suitable for any content
+   * outside of a tag.  Only ampersands, less-than, and greater-than
+   * signs are escaped.
+   * @param value html value
+   * @return string
+   */
+  public String escapleHtmlTag(String value) {
+    if (null == value) {
+      return "";
+    }
+    int len = value.length();
+    char[] buf = LocalPool.getCharBuffer(len * 5);
+    int j = escapeContent(buf, value);
+    String str = new String(buf, j, buf.length - j);
+    zeroBuffer(buf, len, j);
+    return str;
+  }
+
+  /**
+   * Generate a token value with URL
+   * @param program Mentoring program
+   * @param recipient Homepage ownerj
+   * @param label Link label
+   * @return URL token
+   * @throws NoSuchAlgorithmException If hash algorithm is not supported
+   * @throws UnsupportedEncodingException if encoding is not supported
+   */
+  public String generateUrlToken(MentoringProgram program, UserBean recipient, String label)
+    throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    String signupUrl = MentoringResolver.generateHomepageUrl(params, recipient, program.getExternalId()).toString();
+
+    return "<a href=" + signupUrl + ">" + escapleHtmlTag(label) + "</a>";
+  }
+
+  /**
+   * Generate a token value represents a list of mentee separated by comma
+   * @param mentees List of mentee
+   * @return Mentee list token value
+   */
+  public String generateMenteeListToken(List<UserBean> mentees) {
+    StringBuilder menteeList = new StringBuilder();
+
+    for (UserBean mentee : mentees) {
+      menteeList.append(mentoringServiceBase.getLocalizedUserFullName(mentee)).append(", ");
+    }
+
+    // Return a string without trailing comma and space
+    return Matcher.quoteReplacement(menteeList.toString().substring(0, menteeList.length() - 2));
+  }
+  
+  private String replaceEmailTemplateTokens (String template, Map<MentoringEmailTokenEnum, String> tokenMap) {
+    String output = escapleHtmlTag(template);
+    if (tokenMap.get(MentoringEmailTokenEnum.DECLINE_MESSAGE) != null) {
+      output = output.replaceAll("\\[" + MentoringEmailTokenEnum.DECLINE_MESSAGE.toString() + "\\]",
+              tokenMap.get(MentoringEmailTokenEnum.DECLINE_MESSAGE));
+    } else {
+       output = output.replaceAll("\\[" + MentoringEmailTokenEnum.DECLINE_MESSAGE.toString() + "\\]","");
+    }
+    for (MentoringEmailTokenEnum token : tokenMap.keySet()) {
+      output = output.replaceAll("\\[" + token.toString() + "\\]", Matcher.quoteReplacement(tokenMap.get(token)));
+    }
+    return output;
+  }
+
+  private String generateHtmlMessage(String content) {
+    StringBuilder htmlMessage = new StringBuilder();
+
+    htmlMessage.append("<html><body>");
+    htmlMessage.append(content.replaceAll("\n", "\n<br>"));
+    htmlMessage.append("</html></body>");
+    
+    return htmlMessage.toString();
+  }
+
+  public UserBean getDummyEmailSender() throws ServiceApplicationException{
+    UserBean sender = scaHandler.execute(new FindUserById(UserBean.DEFAULT_SYSUSER, false));
+    if(sender == null) {
+      sender = new UserBeanImpl();
+      FullNameBean fullName = new FullNameBean();
+      fullName.setFirstName("dummyFirstName");
+      fullName.setLastName("dummyLastName");
+      fullName.setMi("dummyMi");
+      fullName.setUsername("dummyUserName");
+      sender.setFullNameBean(fullName);
+      sender.setUserEmail("dummy@dummy.com");
+    }
+
+    return sender;
+  }
+
+  private int escapeContent(char[] buf, String src) {
+    int i = src.length();
+    int j = buf.length;
+
+    src.getChars(0, i, buf, 0);
+
+    while (--i >= 0) {
+      char c = buf[i];
+      switch (c) {
+        /*case '&':
+          buf[--j] = ';';
+          buf[--j] = 'p';
+          buf[--j] = 'm';
+          buf[--j] = 'a';
+          buf[--j] = '&';
+          break;*/
+        case '<':
+          buf[--j] = ';';
+          buf[--j] = 't';
+          buf[--j] = 'l';
+          buf[--j] = '&';
+          break;
+        case '>':
+          buf[--j] = ';';
+          buf[--j] = 't';
+          buf[--j] = 'g';
+          buf[--j] = '&';
+          break;
+        default:
+          buf[--j] = c;
+      }
+    }
+    return j;
+  }
+
+  private void zeroBuffer(char[] buf, int len, int target) {
+    int j = target;
+    int length = len;
+    if (!LocalPool.isLocalBuffer(buf)) {
+      return;
+    }
+    int n = buf.length;
+    if (length >= j) {
+      while (--n >= 0) {
+        buf[n] = '\0';
+      }
+    } else {
+      for (; j < n; ++j) {
+        buf[j] = '\0';
+      }
+      while (--length >= 0) {
+        buf[length] = '\0';
+      }
+    }
+  }
+}

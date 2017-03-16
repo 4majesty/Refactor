@@ -1,0 +1,40 @@
+package com.successfactors.cdp.app.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.vo.MatchingResult;
+import com.successfactors.sca.ServiceApplicationException;
+
+public abstract class MatchingAlgorithmTemplate {
+
+  public IMatchingAlgorithmContext context;
+
+  /**
+   * loading necessary configuration within calculation
+   */
+  protected abstract void loadConfiguration();
+
+  /**
+   * loading entities or elements that is required in calculation
+   * 
+   * @throws ServiceApplicationException
+   */
+  protected abstract void loadEntitiesWithinCalc()
+      throws ServiceApplicationException;
+
+  /**
+   * calculate matching score and return the scores
+   */
+  protected abstract MatchingResult calcMatchingScore()
+      throws ServiceApplicationException;
+
+  /**
+   * force a few steps executed by orders
+   * 
+   * @throws ServiceApplicationException
+   */
+  public final MatchingResult getMatchingScore()
+      throws ServiceApplicationException {
+    loadConfiguration();
+    loadEntitiesWithinCalc();
+    return calcMatchingScore();
+  }
+}

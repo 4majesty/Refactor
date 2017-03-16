@@ -1,0 +1,51 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.service.mentoring.jam.GetJamAuthToken;
+import com.successfactors.cdp.service.mentoring.jam.JamGroupInviteBySyncIds;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupInviteToParticipants;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+@Service
+public class SendJamGroupInviteToParticipantsImpl implements ServiceCommandImpl<Void, SendJamGroupInviteToParticipants> {
+
+  /** logger. */
+  private static Logger log = LogManager.getLogger();
+
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+  
+  @Inject
+  @In(create=true)
+  private MentoringServiceBase mentoringServiceBase;
+
+  @Override
+  public Void execute(SendJamGroupInviteToParticipants cmd) throws ServiceApplicationException {
+    MentoringProgram program = getProgram(cmd.getProgramId());
+
+    String authToken = getAuthToken(program.getCreatedBy()); // program creator will be sending invites on behalf of the participants. UserBean.DEFAULT_SYSUSER does not work
+
+    scaHandler.execute(new JamGroupInviteBySyncIds(cmd.getParticipants(), program.getJamGroupId(), authToken));
+
+    return null;
+  }
+
+  private String getAuthToken(String userId) throws ServiceApplicationException {
+    return scaHandler.execute(new GetJamAuthToken(userId));
+  }
+
+  private MentoringProgram getProgram(String programId) throws ServiceApplicationException {
+      return mentoringServiceBase.getProgramById(programId);
+  }
+}

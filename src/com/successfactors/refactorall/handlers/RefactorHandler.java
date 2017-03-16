@@ -484,7 +484,7 @@ public class RefactorHandler extends AbstractHandler {
 		    Found = true;
 		    Class.add(node);
 		} else {
-		  
+
 		    otherClass.add(node);
 		}
 		return false;

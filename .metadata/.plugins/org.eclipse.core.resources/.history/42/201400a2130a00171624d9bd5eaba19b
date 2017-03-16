@@ -1,0 +1,68 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import javax.inject.Inject;
+
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorSignupForm;
+import com.successfactors.cdp.service.mentoring.SignUpMentors;
+import com.successfactors.cdp.service.util.mentoring.ProgramEmailTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+
+import java.util.Date;
+
+/**
+ * Service command to start mentor sign-up
+ * @author Keqin Liu
+ */
+@Service
+public class SignUpMentorsImpl implements ServiceCommandImpl<MentoringProgram, SignUpMentors> {
+  @Inject
+  @In(create = true)
+  private IMentoringServiceBase mentoringServiceBase;
+  
+  private ServiceCommandHandler scaHandler = ServiceCommandHandlerFactory.getSCAHandler();
+
+  private static Logger logger = LogManager.getLogger();
+
+  @Override
+  public MentoringProgram execute(SignUpMentors cmd) throws ServiceApplicationException {
+    // Get mentoring program by program ID
+    MentoringProgram program = mentoringServiceBase.getProgramById(cmd.getProgramId());
+    if((!StringUtils.isBlank(cmd.getAutoForwardJobToken()) && !MentoringUtils.verifyMentoringProgramMD5Token(program, cmd.getAutoForwardJobToken()))
+            || (StringUtils.isBlank(cmd.getAutoForwardJobToken()) && program.getStatus().getNextStatus(program) != ProgramStatusEnum.MENTOR_SIGNUP)) {
+      logger.error("The next status of the program(current status:" + program.getStatus() + ") is not " + ProgramStatusEnum.MENTOR_SIGNUP);
+      return program;
+    }
+    // Set program status to mentor sign-up and save program
+    program.setStatus(ProgramStatusEnum.MENTOR_SIGNUP);
+    program.setActualMentorSignupDate(new Date());
+    ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgram.class, program));
+    mentoringServiceBase.validateContext(context);
+    
+    program = (MentoringProgram) context.getSuccessfullOperationContexts().get(0).getBean();
+    
+    // Create mentor sign-up form for each mentor and save them
+    mentoringServiceBase.saveSignupForm(program, MentoringProgramMentorSignupForm.class, program.getMentors());
+    
+    // Send sign-up email to all mentors
+    mentoringServiceBase.sendSignupEmail(program, mentoringServiceBase.getEmailTemplateByType(program, ProgramEmailTypeEnum.MENTOR_SIGN_UP),
+      program.getMentors());
+    
+    return program;
+  }
+}
