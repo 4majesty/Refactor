@@ -1,0 +1,40 @@
+package org.eclipse.jdt.internal.ui.dialogs;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.ui.JavaUI;
+
+public interface IStatusInfo {
+	boolean isOK();
+
+	boolean isWarning();
+
+	boolean isInfo();
+
+	boolean isError();
+
+	String getMessage();
+
+	void setError(String errorMessage);
+
+	void setWarning(String warningMessage);
+
+	void setInfo(String infoMessage);
+
+	void setOK();
+
+	boolean matches(int severityMask);
+
+	boolean isMultiStatus();
+
+	int getSeverity();
+
+	String getPlugin();
+
+	Throwable getException();
+
+	int getCode();
+
+	IStatus[] getChildren();
+
+	String toString();
+}

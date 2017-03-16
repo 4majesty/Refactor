@@ -1,0 +1,20 @@
+package com.successfactors.cdp.bean;
+
+import org.testng.annotations.Test;
+
+import com.successfactors.unittest.AbstractComparableTest;
+
+@Test(groups = "compare")
+public class UserReadinessVOComparableTest extends AbstractComparableTest<UserReadinessVO> {
+  public UserReadinessVOComparableTest() {
+    super();
+    a = new UserReadinessVO();
+    b = new UserReadinessVO();
+    c = new UserReadinessVO();
+    
+    a.setReadiness(0.2);
+    b.setReadiness(0.5);
+    c.setReadiness(0.2);
+    
+  }
+}

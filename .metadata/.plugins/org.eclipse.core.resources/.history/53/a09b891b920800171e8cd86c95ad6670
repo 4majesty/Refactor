@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
+
+public interface IWorkingSetAwareContentProvider {
+	void dispose();
+
+	boolean hasChildren(Object element);
+
+	Object[] getChildren(Object element);
+
+	TreePath[] getTreePaths(Object element);
+
+	Object getParent(Object child);
+}

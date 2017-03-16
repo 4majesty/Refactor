@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
+
+public interface IFocusOnTypeAction {
+	void run();
+}

@@ -1,0 +1,25 @@
+package com.successfactors.cdp.bean;
+
+import com.successfactors.unittest.AbstractComparatorTest;
+
+public class CareerWorksheetSuggestedRoleVONullNameComparatorTest extends AbstractComparatorTest<CareerWorksheetSuggestedRoleVO> {
+
+  public CareerWorksheetSuggestedRoleVONullNameComparatorTest() {
+      super();
+      comparatorT = new SuggestedRoleVOComparator();
+      
+      a = new CareerWorksheetSuggestedRoleVO();
+      a.setScore(9);
+      a.setRoleName(null);
+      a.setRoleId(1);
+      
+      b = new CareerWorksheetSuggestedRoleVO();
+      b.setScore(9);
+      b.setRoleName("b");
+      
+      c = new CareerWorksheetSuggestedRoleVO();
+      c.setScore(9);
+      c.setRoleName(null);
+      c.setRoleId(1);
+  }
+}

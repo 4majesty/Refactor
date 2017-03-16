@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+public interface IMemberFilter {
+	void addFilter(int filter);
+
+	void removeFilter(int filter);
+
+	boolean hasFilter(int filter);
+
+	boolean select(Viewer viewer, Object parentElement, Object element);
+}

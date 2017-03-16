@@ -1,0 +1,264 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.successfactors.datamodel.api.DataModelFacade;
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSection;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.service.mentoring.GetMentoringRequest;
+import com.successfactors.cdp.service.mentoring.ProcessMentoringRequest;
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.api.sql.MDFCriteria;
+import com.successfactors.genericobject.api.sql.MDFResultSet;
+import com.successfactors.genericobject.api.sql.Projections;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.user.bean.UserBean;
+
+/**
+ * Accept or reject a mentoring request
+ * @author Jojo Wang
+ */
+@Service
+public class ProcessMentoringRequestImpl implements ServiceCommandImpl<Void, ProcessMentoringRequest> {
+  /** Logger */
+  private static Logger logger = LogManager.getLogger();
+  
+  /** Parameter Bean */
+  @Inject
+  @In
+  private ParamBean params;
+  
+  /** MDF configuration provider */
+  @Inject
+  @In(create = true)
+  private ConfigurationProvider configurationProvider;
+  
+  @Inject
+  @In(create = true)
+  private MentoringServiceBase mentoringServiceBase;
+
+  /** Messages */
+  @Inject
+  @In(create = true)
+  private IMessageBundle msgs;
+  
+  /** Service command handler */
+  private ServiceCommandHandler scaHandler = ServiceCommandHandlerFactory.getSCAHandler();
+
+  /** Data Model Facade **/
+  @Inject
+  @In(value = DataModelFacade.NAME, create = true)
+  DataModelFacade dataModelFacade;
+
+  @Override
+  public Void execute(ProcessMentoringRequest cmd) throws ServiceApplicationException {
+    MentoringProgram program = mentoringServiceBase.getProgramById(cmd.getProgramId());
+
+    // Get mentoring request to be processed
+    MentoringProgramMentorRequest savedRequest = mentoringServiceBase.getMentoringRequestById(cmd.getRequestId());
+    validateUserRequest(savedRequest);
+    
+    //check does the request has been accepted already, if not do the process, if yes throw a message
+    if (MentorRequestStatusEnum.ACCEPTED.equals(savedRequest.getMentoringRequestStatus())||MentorRequestStatusEnum.REJECTED.equals(savedRequest.getMentoringRequestStatus())) {
+      throw new ServiceApplicationException(msgs.getString("DEVELOPMENT_MENTORING_MATCHED_EXISTED"));
+    }
+    savedRequest.setMentoringRequestStatus(cmd.getStatus());
+    
+    if (MentorRequestStatusEnum.ACCEPTED.equals(savedRequest.getMentoringRequestStatus())) {
+      acceptRequest(program, savedRequest);
+    } else if (MentorRequestStatusEnum.REJECTED.equals(savedRequest.getMentoringRequestStatus())) {
+      rejectRequest(program, savedRequest, cmd.getComment());
+    }
+    return null;
+  }
+  
+  protected void validateUserRequest(MentoringProgramMentorRequest request) throws ServiceApplicationException {
+    Map<String, UserBean> map = mentoringServiceBase.getUsernameMapByIds(Collections.singletonList(request.getMentee()));
+    if (map.get(request.getMentee()) == null || 
+        !map.get(request.getMentee()).isValidUser()) {
+      throw new ServiceApplicationException(msgs.getString("DEVELOPMENT_MENTORING_MATCHED_INACTIVE"));
+    }
+  }
+
+  private void acceptRequest(MentoringProgram program, MentoringProgramMentorRequest request) throws ServiceApplicationException {
+    // TODO Need a way to prevent accept multiple requests in the same time so that available slot is less than 0
+    
+    int mentorThreshold = MentoringUtils.getMentorThreshold(program, request.getMentor()); // Get mentor threshold
+    int menteeThreshold = program.getMaximumOfMentor(); // Get mentee threshod defined in program since mentee doesn't have own threshold
+    
+    // Calculate remaining slot of mentor/mentee according to matched participants
+    int avaibleMentorSlot = mentorThreshold - getMatchedNumber(program.getExternalId(), request.getMentor(), true);
+    int avaibleMenteeSlot = menteeThreshold - getMatchedNumber(program.getExternalId(), request.getMentee(), false);
+    
+    // Throw exception if there is no mentor slot
+    if (avaibleMentorSlot <= 0) {
+      throw new ServiceApplicationException(msgs.getString("DEVELOPMENT_MENTORING_MEET_MENTOR_THRESHOLD"));
+    }
+    
+    // Throw exception if there is no mentee slot
+    if (avaibleMenteeSlot <= 0) {
+      throw new ServiceApplicationException(msgs.getString("DEVELOPMENT_MENTORING_MEET_MENTEE_THRESHOLD"));
+    }
+    
+    request.setAcceptDate(Calendar.getInstance().getTime());
+    // Create a macthed participant for this request
+    MentoringProgramMatchedParticipant matchedParticipant = new MentoringProgramMatchedParticipant();
+    matchedParticipant.setMentee(request.getMentee());
+    matchedParticipant.setMentor(request.getMentor());
+    matchedParticipant.setProgramId(request.getProgramId());
+    matchedParticipant.setMatchingCategory(request.getMatchingCategory());
+    matchedParticipant.setMentoringProgramMatchedArea(getMatchingAreasByDeepCopy(request.getMentoringProgramMatchedArea()));
+    matchedParticipant.setMatchingScore(request.getMatchingScore());
+    
+    ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgramMatchedParticipant.class, matchedParticipant));
+    mentoringServiceBase.validateContext(context);
+    
+    // Save request
+    context = scaHandler.execute(new SaveBean(MentoringProgramMentorRequest.class, request));
+    mentoringServiceBase.validateContext(context);
+
+    // Send matched email to mentee if mentoring request needs mentor approval
+    if (ProgramMatchingTypeEnum.UNSUPERVISED.equals(program.getMatchingType()) || program.isNeedMentorApproval()) {
+      mentoringServiceBase.sendMatchedEmailToMentee(program, request.getMentor(), request.getMentee());
+    }
+    
+    // Calculate remaining slot of mentor/mentee again in case there is request of the same mentor/mentee is being processed
+    avaibleMentorSlot = mentorThreshold - getMatchedNumber(program.getExternalId(), request.getMentor(), true);
+    avaibleMenteeSlot = menteeThreshold - getMatchedNumber(program.getExternalId(), request.getMentee(), false);
+
+    if (avaibleMentorSlot <= 0) {
+      // Automatically reject requests sent to this mentor since there is no mentor slot
+      autoReject(program.getExternalId(), request.getMentor(), true);
+    }
+    
+    if (avaibleMenteeSlot <= 0) {
+      // Automatically reject request sent by this mentee since there is no mentee slot
+      autoReject(program.getExternalId(), request.getMentee(), false);
+    }
+    
+    return;
+  }
+  
+  private void rejectRequest(MentoringProgram program, MentoringProgramMentorRequest request, String comment) throws ServiceApplicationException {
+    request.setRejectComment(comment);
+    request.setRejectDate(Calendar.getInstance().getTime());
+    // Save request
+    ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgramMentorRequest.class, request));
+    mentoringServiceBase.validateContext(context);
+    
+    if (ProgramMatchingTypeEnum.UNSUPERVISED.equals(program.getMatchingType())) {
+      // Send decline email to mentee sent this request
+      mentoringServiceBase.sendDeclineEmail(program, request.getMentee(), comment);
+    }
+    
+    return;
+  }
+
+  private int getMatchedNumber(String programId, String userId, boolean isMentor) throws ServiceApplicationException {
+    // Get number of matched participants for mentor or mentee
+    ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgramMatchedParticipant.class);
+    MDFCriteria search = new GOSQLGeneratorContext(def, params);
+    search.setProjection(Projections.rowCount());
+    
+    if (isMentor) {
+      search.add(Restrictions.and(Restrictions.eq("mentor", userId), Restrictions.eq("programId", programId)));
+    } else {
+      search.add(Restrictions.and(Restrictions.eq("mentee", userId), Restrictions.eq("programId", programId)));
+    }
+    
+    MDFResultSet resultSet = search.execute();
+
+    return ((Long) resultSet.getResultRows().get(0).getValue(0)).intValue();
+  }
+
+  private List<MentoringProgramSignupFormSection> getMatchingAreasByDeepCopy(List<MentoringProgramSignupFormSection> matchedAreas) throws ServiceApplicationException {
+    // Deep clone matched areas from mentoring request
+    List<MentoringProgramSignupFormSection> clonedAreas = new ArrayList<MentoringProgramSignupFormSection>();
+
+    SuccessionDataModelBean dataModel = dataModelFacade.getDataModel();
+    if (matchedAreas != null && matchedAreas.size() > 0) {
+      for (MentoringProgramSignupFormSection matchedArea : matchedAreas) {
+        SuccessionDataModelBean.StandardElement dmEle = dataModel.lookupStandardElementById(matchedArea
+                .getSectionId());
+        if(dmEle == null){
+          continue;
+        }
+
+        MentoringProgramSignupFormSection clonedArea = new MentoringProgramSignupFormSection();
+        clonedArea.setSectionId(matchedArea.getSectionId());
+        clonedArea.setSectionType(matchedArea.getSectionType());
+        
+        List<MentoringProgramSignupFormSectionValue> matchedValues = new ArrayList<MentoringProgramSignupFormSectionValue>();
+        
+        if (matchedArea.getSectionValue() != null && matchedArea.getSectionValue().size() > 0) {
+          for (MentoringProgramSignupFormSectionValue matchedValue : matchedArea.getSectionValue()) {
+            MentoringProgramSignupFormSectionValue clonedValue = new MentoringProgramSignupFormSectionValue();
+
+            clonedValue.setItemId(matchedValue.getItemId());
+            clonedValue.setItemLabel(matchedValue.getItemLabel());
+            matchedValues.add(clonedValue);
+          }
+          
+          clonedArea.setSectionValue(matchedValues);
+          clonedAreas.add(clonedArea);
+        }
+      }
+    }
+    
+    return clonedAreas;
+  }
+
+  private void autoReject(String programId, String userId, boolean isMentor) throws ServiceApplicationException {
+    // Automatically reject requests sent to the same mentor or by the same mentee
+    GetMentoringRequest getMentoringRequest = new GetMentoringRequest();
+    getMentoringRequest.setProgramId(programId);
+    getMentoringRequest.setStatus(MentorRequestStatusEnum.CONFIRMED);
+    
+    if (isMentor) {
+      getMentoringRequest.setMentorIds(userId);
+    } else {
+      getMentoringRequest.setMenteeIds(userId);
+    }
+
+    List<MentoringProgramMentorRequest> requests = scaHandler.execute(getMentoringRequest);
+
+    if (requests != null && requests.size() > 0) {
+      for (MentoringProgramMentorRequest request : requests) {
+        request.setMentoringRequestStatus(MentorRequestStatusEnum.SYSTEM_REJECTED);
+        request.setRejectDate(Calendar.getInstance().getTime());
+      }
+    }
+
+    ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgramMentorRequest.class, requests));
+    mentoringServiceBase.validateContext(context);
+  }
+}

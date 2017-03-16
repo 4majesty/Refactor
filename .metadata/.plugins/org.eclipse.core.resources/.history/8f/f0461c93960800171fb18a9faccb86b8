@@ -1,0 +1,31 @@
+package org.eclipse.jdt.internal.ui.refactoring.contentassist;
+
+import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.IImageDescriptorRegistry;
+import org.eclipse.jdt.internal.corext.refactoring.code.IPromoteTempToFieldRefactoring;
+
+public interface IFieldNameProcessor {
+	ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset);
+
+	IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset);
+
+	char[] getCompletionProposalAutoActivationCharacters();
+
+	char[] getContextInformationAutoActivationCharacters();
+
+	String getErrorMessage();
+
+	IContextInformationValidator getContextInformationValidator();
+
+	IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubject, int documentOffset);
+
+	ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubject, int documentOffset);
+}

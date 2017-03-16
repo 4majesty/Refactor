@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jdt.internal.ui.text.JavaIndenter;
+
+public interface IIndentUtil {
+	boolean hasChanged();
+}

@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.corext.refactoring.util;
+
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
+public interface ICommentAnalyzer {
+}

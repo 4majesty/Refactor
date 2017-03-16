@@ -1,0 +1,37 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
+
+import java.util.Iterator;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
+
+public interface IArraySuperTypeSet {
+	TType anyMember();
+
+	boolean contains(TType t);
+
+	boolean containsAll(TypeSet s);
+
+	EnumeratedTypeSet enumerate();
+
+	boolean hasUniqueUpperBound();
+
+	boolean isSingleton();
+
+	boolean isUniverse();
+
+	Iterator iterator();
+
+	TypeSet makeClone();
+
+	TypeSet superTypes();
+
+	TType uniqueUpperBound();
+
+	TypeSet upperBound();
+
+	boolean equals(Object obj);
+
+	TypeSet subTypes();
+
+	String toString();
+}

@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
+
+public interface IAddFolderToBuildpathAction {
+	String getDetailedDescription();
+
+	void run();
+}

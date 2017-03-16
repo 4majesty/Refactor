@@ -1,0 +1,36 @@
+package com.successfactors.cdp.bean;
+
+import com.successfactors.sfutil.comparator.AbstractNullSafeComparator;
+
+/**
+ * comparator for suggested role to display in UI.
+ * Score: desc
+ * Role Name: asc
+ * @author I309618
+ *
+ */
+public class SuggestedRoleVOComparator extends AbstractNullSafeComparator<CareerWorksheetSuggestedRoleVO> {
+
+  private static final long serialVersionUID = 1L;
+  
+  @Override
+  protected int compareNonNull(CareerWorksheetSuggestedRoleVO o1,
+      CareerWorksheetSuggestedRoleVO o2) {
+    if(o2.getScore()>o1.getScore()){//desc
+      return 1;
+    }else if (o2.getScore()==o1.getScore()){
+      if(o1.getRoleName() == null && o2.getRoleName() == null) {
+        return 0;
+      } else if(o1.getRoleName() == null){
+         return -1;
+      } else if(o2.getRoleName() == null) {
+        return 1;
+      } else {
+        return o1.getRoleName().compareTo(o2.getRoleName());
+      }
+    }else{
+      return -1;
+    }
+  }
+  
+}

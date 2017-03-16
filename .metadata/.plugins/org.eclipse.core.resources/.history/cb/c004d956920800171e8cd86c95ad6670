@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+public interface IJavaUIPreferenceInitializer {
+	void initializeDefaultPreferences();
+}

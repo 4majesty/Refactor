@@ -1,0 +1,22 @@
+package com.successfactors.cdp.bean;
+
+import java.io.Serializable;
+import java.util.Set;
+
+public interface ISuggestedRolesSubItemBean {
+	String getWeightKey();
+
+	void setWeightKey(String weightKey);
+
+	String getItemKey();
+
+	void setItemKey(String itemKey);
+
+	boolean isEnabled();
+
+	void setEnabled(boolean enabled);
+
+	Set<SuggestedRolesSubItemBean> getSubItems();
+
+	void setSubItems(Set<SuggestedRolesSubItemBean> subItems);
+}

@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.ui.viewsupport.LinkedProposalModelPresenter;
+
+public interface ICUCorrectionProposal {
+	void setLinkedProposalModel(LinkedProposalModel model);
+
+	Object getAdditionalProposalInfo(IProgressMonitor monitor);
+
+	void apply(IDocument document);
+
+	TextChange getTextChange();
+
+	ICompilationUnit getCompilationUnit();
+
+	String getPreviewContent();
+
+	String toString();
+}

@@ -1,0 +1,27 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.GenerateConstructorUsingFieldsContentProvider;
+import org.eclipse.jdt.internal.ui.actions.GenerateConstructorUsingFieldsSelectionDialog;
+import org.eclipse.jdt.internal.ui.actions.GenerateConstructorUsingFieldsValidator;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitEditor;
+
+public interface IGenerateNewConstructorUsingFieldsAction {
+	void run(IStructuredSelection selection);
+
+	void run(ITextSelection selection);
+
+	void selectionChanged(IStructuredSelection selection);
+
+	void selectionChanged(ITextSelection selection);
+}

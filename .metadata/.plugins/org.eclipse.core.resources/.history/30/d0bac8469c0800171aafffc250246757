@@ -1,0 +1,141 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import java.text.ParseException;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.http.HttpStatus;
+import org.apache.http.message.BasicNameValuePair;
+import org.jboss.seam.annotations.In;
+import org.json.JSONObject;
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.bean.mentoring.jam.Group;
+import com.successfactors.cdp.service.mentoring.jam.GetJamGroup;
+import com.successfactors.cdp.service.mentoring.jam.exception.JamAuthenticationException;
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.cdp.service.mentoring.jam.util.JamConstants;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+@Service
+public class GetJamGroupImpl extends AbstractJamService 
+               implements ServiceQueryImpl<Group, GetJamGroup> {
+
+  /** Logger. */
+  private static final Logger log = LogManager.getLogger();
+
+  /** param bean. */
+  @Inject
+  @In
+  protected ParamBean params;
+
+  /** scaHandler. */
+  @Inject
+  @In
+  protected ServiceCommandHandler scaHandler;
+
+  public Group execute(GetJamGroup cmd) throws ServiceApplicationException {
+    
+      if(StringUtils.isEmpty(cmd.getGroupId())) {
+        throw new ServiceApplicationException("groupId is empty.");
+      }
+
+      String url = getGroupURL(cmd.getGroupId());
+      List<BasicNameValuePair> requestHeaders = getHeaderContent(cmd.getAccessToken());
+
+      BasicHttpResponse response = invoke(url, JamConstants.REQUEST_TYPE_GET, requestHeaders);
+
+      if (isSuccess(response)) {
+        return getResult(response);
+      } else {
+        int errorCode = response.getResponseCode();
+        String errorResponse = getPayload(response);
+
+        if (isForbidden(response)) {
+           throw new JamAuthenticationException("Jam Authentication failed for user:"+params.getUserId()
+               +"; groupId:"+cmd.getGroupId()
+               +". Jam Response Code:"+ errorCode +"; Jam Error Response:" + errorResponse);
+        } else {
+           throw new ServiceApplicationException("Get Group API failed for user:"+params.getUserId()
+               +"; groupId:"+cmd.getGroupId()
+               +". Jam Response Code:"+ errorCode +"; Jam Error Response:" + errorResponse);
+        }
+      }
+  }
+
+  /**
+   * Fetches get group URL
+   * 
+   * @return getGroupURL String
+   */
+  private String getGroupURL(String groupId) throws ServiceApplicationException {
+    StringBuilder urlBuilder = new StringBuilder();
+
+    urlBuilder.append(getJamBaseURL())
+              .append(JamConstants.GROUPS_API_ODATA_URL)
+              .append(JamConstants.OPEN_BRACKET)
+              .append(JamConstants.SINGLE_QUOTE)
+              .append(groupId)
+              .append(JamConstants.SINGLE_QUOTE)
+              .append(JamConstants.CLOSE_BRACKET);
+
+    return urlBuilder.toString();
+  }
+
+  private Group getResult(BasicHttpResponse response) throws ServiceApplicationException {
+    Group group = new Group();
+
+    try {
+      String payload = getPayload(response);
+
+      log.info("Get Group response payload:"+payload);
+
+      JSONObject responseJson = new JSONObject(payload);
+
+      JSONObject bodyTag = responseJson.getJSONObject(JamConstants.ODATA_BODY_TAG);
+
+      if (bodyTag != null) {
+        JSONObject groupJson = bodyTag.getJSONObject(JamConstants.GROUP_RESULTS);
+
+            if(groupJson != null) {
+              String groupId = groupJson.getString(JamConstants.GROUP_ID_ODATA);
+
+              if(StringUtils.isEmpty(groupId)) {
+                throw new ServiceApplicationException("Unable to find group Id in OData Response."+responseJson);
+              }
+
+              group.setGroupId(groupId);
+            } else {
+              throw new ServiceApplicationException("Unable to find group data in OData Response."+responseJson);
+            }
+      } else {
+        throw new ServiceApplicationException("Unable to find OData Response Body Tag 'd'."+responseJson);
+      }
+    } catch (ParseException e) {
+      throw new ServiceApplicationException(e);
+    }
+
+    return group;
+  }
+
+  private boolean isSuccess(BasicHttpResponse response) {
+    return (response.getResponseCode() == HttpStatus.SC_OK);
+  }
+
+  @Override
+  public ServiceCommandHandler getSCAHandler() {
+    return scaHandler;
+  }
+
+  @Override
+  public ParamBean getParams() {
+    return params;
+  }
+}

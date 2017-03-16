@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.jarpackager;
+
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface IJarRefactoringDialog {
+	void create();
+}

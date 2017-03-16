@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+
+public interface IBindingLabelProvider {
+	Image getImage(Object element);
+
+	String getText(Object element);
+}

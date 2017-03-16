@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.corext.refactoring;
+
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+public interface IJavaRefactoringDescriptorUtil {
+}

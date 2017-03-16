@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.LegacyHandlerSubmissionExpression;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
+import org.eclipse.ui.handlers.IHandlerActivation;
+import org.eclipse.ui.handlers.IHandlerService;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+
+public interface ICorrectionCommandInstaller {
+	void registerCommands(CompilationUnitEditor editor);
+
+	void deregisterCommands();
+}

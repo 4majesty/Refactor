@@ -1,0 +1,30 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IMemento;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
+import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterAction;
+import org.eclipse.jdt.internal.ui.viewsupport.IMemberFilter;
+
+public interface IMemberFilterActionGroup {
+	void setMemberFilter(int filterProperty, boolean set);
+
+	boolean hasMemberFilter(int filterProperty);
+
+	void saveState(IMemento memento);
+
+	void restoreState(IMemento memento);
+
+	void fillActionBars(IActionBars actionBars);
+
+	void contributeToToolBar(IToolBarManager tbm);
+
+	void contributeToViewMenu(IMenuManager menu);
+
+	void dispose();
+}

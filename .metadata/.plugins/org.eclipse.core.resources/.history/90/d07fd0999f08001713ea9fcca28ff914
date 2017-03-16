@@ -1,0 +1,6 @@
+package com.successfactors.cdp.ui.util.mentoring;
+
+import com.successfactors.sca.ServiceApplicationException;
+
+public interface IMentoringViewHelper {
+}

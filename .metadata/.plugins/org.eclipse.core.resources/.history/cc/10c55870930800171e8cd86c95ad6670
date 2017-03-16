@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface IRenameNodeCorrectionProposal {
+}

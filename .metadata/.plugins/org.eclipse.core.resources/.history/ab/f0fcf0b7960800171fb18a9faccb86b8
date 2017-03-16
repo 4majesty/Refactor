@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls;
+
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IExternalizeWizard {
+	boolean canFinish();
+}

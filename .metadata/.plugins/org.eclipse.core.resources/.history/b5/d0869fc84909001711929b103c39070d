@@ -1,0 +1,8 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.cdp.service.mentoring.jam.ScheduleProgramLaunchJamGroupActivityJob;
+import com.successfactors.sca.ServiceApplicationException;
+
+public interface IScheduleProgramLaunchJamGroupActivityJobImpl {
+	Void execute(ScheduleProgramLaunchJamGroupActivityJob cmd) throws ServiceApplicationException;
+}

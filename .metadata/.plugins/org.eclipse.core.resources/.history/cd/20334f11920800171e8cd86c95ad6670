@@ -1,0 +1,29 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.ui.JavaUI;
+
+public interface ISemanticHighlighting {
+	String getPreferenceKey();
+
+	RGB getDefaultDefaultTextColor();
+
+	RGB getDefaultTextColor();
+
+	boolean isBoldByDefault();
+
+	boolean isItalicByDefault();
+
+	boolean isStrikethroughByDefault();
+
+	boolean isUnderlineByDefault();
+
+	boolean isEnabledByDefault();
+
+	String getDisplayName();
+
+	boolean consumes(SemanticToken token);
+
+	boolean consumesLiteral(SemanticToken token);
+}

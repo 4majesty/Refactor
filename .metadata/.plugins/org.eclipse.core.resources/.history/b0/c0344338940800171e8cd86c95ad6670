@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+public interface IMatchLocations {
+	int getCurrentSelection();
+}

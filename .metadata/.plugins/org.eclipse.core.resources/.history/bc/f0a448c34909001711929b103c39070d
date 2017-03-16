@@ -1,0 +1,16 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.Map;
+import com.successfactors.cdp.service.util.mentoring.MatchingScoreTypeEnum;
+
+public interface IGetMatchingCounts {
+	String getProgramId();
+
+	Map<MatchingScoreTypeEnum, Integer> getMatchingCounts();
+
+	void setMatchingCounts(Map<MatchingScoreTypeEnum, Integer> matchingCounts);
+
+	int getMatchedMentees();
+
+	void setMatchedMentees(int matchedMentees);
+}

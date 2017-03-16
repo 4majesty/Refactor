@@ -1,0 +1,19 @@
+package com.successfactors.rbp.integration.grc.xml.binding;
+
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+public interface IFieldId {
+	String getId();
+
+	void setId(String value);
+
+	Message getMessage();
+
+	void setMessage(Message value);
+}

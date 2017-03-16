@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.ui.part.PluginDropAdapter;
+import org.eclipse.ui.part.PluginTransfer;
+
+public interface IPluginTransferDropAdapter {
+	Transfer getTransfer();
+
+	boolean isEnabled(DropTargetEvent event);
+}

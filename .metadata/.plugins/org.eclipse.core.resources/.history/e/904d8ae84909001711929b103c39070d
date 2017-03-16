@@ -1,0 +1,6 @@
+package com.successfactors.cdp.service.upgrade;
+
+import com.successfactors.sca.ServiceCommand;
+
+public interface ICorrectMentoringCompetencyIdToCommonCompetencyId {
+}

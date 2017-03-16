@@ -1,0 +1,37 @@
+package org.eclipse.jdt.internal.corext.refactoring.surround;
+
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyzer;
+
+public interface IExceptionAnalyzer {
+	int compare(Object o1, Object o2);
+
+	boolean visit(ThrowStatement node);
+
+	boolean visit(MethodInvocation node);
+
+	boolean visit(SuperMethodInvocation node);
+
+	boolean visit(ClassInstanceCreation node);
+
+	boolean visit(ConstructorInvocation node);
+
+	boolean visit(SuperConstructorInvocation node);
+}

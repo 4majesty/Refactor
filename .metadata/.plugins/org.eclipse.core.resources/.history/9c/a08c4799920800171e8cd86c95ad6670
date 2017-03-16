@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.dialogs.IStatusInfo;
+
+public interface IJavadocSpecificsWizardPage {
+	void createControl(Composite parent);
+
+	void setVisible(boolean visible);
+
+	void init();
+
+	boolean generateAnt();
+}

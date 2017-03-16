@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.AddSourceFolderWizard;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+
+public interface ICreateSourceFolderAction {
+	String getDetailedDescription();
+
+	void run();
+}

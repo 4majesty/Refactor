@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jdt.ui.text.IColorManager;
+
+public interface ISingleTokenJavaScanner {
+}

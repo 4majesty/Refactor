@@ -1,0 +1,107 @@
+package com.successfactors.cdp.ui.util;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.successfactors.gm.api.bean.IField;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+
+public class CWSV12ViewConstants {
+  /***
+   * constrcutor
+   */
+  private CWSV12ViewConstants(){
+
+  }
+  
+  /** SELECTPLAN_PREF_KEY */
+  public static final String SELECTPLAN_PREF_KEY = "tgm_" + "select_plan" + ObjPlanTypeEnum.CAREER_WORKSHEET_ORDINAL;
+  /**  DEFAULT ROLE KEY */
+  public static final String DEFAULTROLE_PREF_KEY = "tgm_" + "default_target_role" + ObjPlanTypeEnum.CAREER_WORKSHEET_ORDINAL;
+  /**  CWS INSTRUCTION PREF_KEY */
+  public static final String CWS_INSTRUCTION_PREF_KEY = "dev_" + "show_instruction" + ObjPlanTypeEnum.CAREER_WORKSHEET_ORDINAL;
+
+  /**GAP_GRPAH_DECIMAL*/
+  public static final int GAP_GRPAH_DECIMAL = 5;
+  /**EMPLOYEES_PAGINATION_START*/
+  public static final int EMPLOYEES_PAGINATION_START = 1;
+  /**EMPLOYEES_PAGINATION_SIZE*/
+  public static final int EMPLOYEES_PAGINATION_SIZE = 20;
+  /**NUM_MONTHS_IN_A_YEAR normally it is 12, 13 only for leap year*/
+  public static final int NUM_MONTHS_IN_A_YEAR = 12;
+  /** percent unit*/
+  public static final int ONE_HUNDRED_INT = 100;
+  /** default goal fields to display*/
+  public static final List<String> GOAL_FIELDS = new ArrayList<String>();
+  static{
+    GOAL_FIELDS.add(IField.ID_NAME);
+    GOAL_FIELDS.add(IField.ID_DUE);
+    GOAL_FIELDS.add(IField.ID_STATE);
+    GOAL_FIELDS.add(IField.ID_PERCENTDONE);
+  }
+  
+  //====================Merged from CareerWorksheetConstants Start========
+  /**JSON key definition .*/
+  public static final String JSON_KEY_SUCCESS = "success";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_MESSAGE = "msg";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_CAN_READ = "canRead";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_ADDROLE_FAMILIES = "families";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_ADDROLE_ROLE_ID = "roleId";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_FAMILY_ID = "familyId";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_COMPETENCY_IDS = "competencyIDs";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_INDUSTRIES = "industries";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_ADDROLE_JOB_DESC = "JobDesc";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_ADDROLE_COMPETENCIES = "Competencies";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_IS_INDUSTRY_FILTER_ENABLED = "isIndustryFilterEnabled";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_IS_COMPETENCY_FILTER_ENABLED = "isCompetenciesFilterEnabled";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_IS_JOB_FAMILY_FILTER_ENABLED = "isJobFamiliesFilterEnabled";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_IS_INDUSTRY_FILTER_LABEL = "industryFilterLabel";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_IS_JOB_FAMILY_FILTER_LABEL = "jobFamilyFilterLabel";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_IS_COMPETENCY_FILTER_LABEL = "competencyFilterLabel";
+  
+  /**JSON key definition*/
+  public static final String JSON_KEY_ID = "id";
+  /**JSON key definition*/
+  public static final String JSON_KEY_NAME = "name";
+  /**JSON key definition*/
+  public static final String JSON_KEY_DESC = "desc";
+  /**JSON key definition*/
+  public static final String JSON_KEY_PERCENT = "percent";
+  /**JSON key definition*/
+  public static final String JSON_KEY_PLAN_LIST = "planList";
+  /**JSON key definition*/
+  public static final String JSON_KEY_SELECTED_PLAN = "selectedPlan";
+  /**JSON key definition*/
+  public static final String JSON_KEY_ROLE_LIST = "roleList";
+  /**JSON key definition*/
+  public static final String JSON_KEY_COMPETENCY_LIST = "competencies";
+  /**JSON key definition*/
+  public static final String JSON_KEY_DEFAULT_ROLE = "defaultRole";
+  /**JSON key definition*/
+  public static final String JSON_KEY_CURRENT_ROLE = "currentRole";
+  /**JSON key definition .*/
+  public static final String JSON_KEY_ERROR = "error";
+  /** label*/
+  public static final String JSON_KEY_LABEL="label";
+  /** style*/
+  public static final String JSON_KEY_STYLE="style";
+  /** style*/
+  public static final String JSON_KEY_VALUE="value";
+  //====================Merged from CareerWorksheetConstants End========
+
+}

@@ -1,0 +1,89 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
+
+import java.util.Collection;
+import java.util.Iterator;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ImmutableTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SubTypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ITType;
+
+public interface ISuperTypeConstraintsModel {
+	boolean add(final Object object);
+
+	Object addExisting(final Object object);
+
+	void clear();
+
+	boolean contains(final Object object);
+
+	boolean isEmpty();
+
+	Iterator iterator();
+
+	boolean remove(final Object object);
+
+	int size();
+
+	void beginCreation();
+
+	ConstraintVariable2 createCastVariable(final CastExpression expression, final ConstraintVariable2 variable);
+
+	void createConditionalTypeConstraint(final ConstraintVariable2 expressionVariable, final ConstraintVariable2 thenVariable, final ConstraintVariable2 elseVariable);
+
+	void createCovariantTypeConstraint(final ConstraintVariable2 descendant, final ConstraintVariable2 ancestor);
+
+	ConstraintVariable2 createDeclaringTypeVariable(ITypeBinding type);
+
+	void createEqualityConstraint(final ConstraintVariable2 left, final ConstraintVariable2 right);
+
+	ConstraintVariable2 createExceptionVariable(final Name name);
+
+	ConstraintVariable2 createImmutableTypeVariable(ITypeBinding type);
+
+	ConstraintVariable2 createIndependentTypeVariable(ITypeBinding type);
+
+	ConstraintVariable2 createMethodParameterVariable(final IMethodBinding method, final int index);
+
+	ConstraintVariable2 createReturnTypeVariable(final IMethodBinding method);
+
+	void createSubtypeConstraint(final ConstraintVariable2 descendant, final ConstraintVariable2 ancestor);
+
+	TType createTType(final ITypeBinding binding);
+
+	ConstraintVariable2 createTypeVariable(ITypeBinding type, final CompilationUnitRange range);
+
+	ConstraintVariable2 createTypeVariable(final Type type);
+
+	ConstraintVariable2 createVariableVariable(final IVariableBinding binding);
+
+	void endCreation();
+
+	Collection getCastVariables();
+
+	int getCompliance();
+
+	Collection getConstraintVariables();
+
+	TType getSubType();
+
+	TType getSuperType();
+
+	Collection getTypeConstraints();
+
+	void setCompliance(final int level);
+}

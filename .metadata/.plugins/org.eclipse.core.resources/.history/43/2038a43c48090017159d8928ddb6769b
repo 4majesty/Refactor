@@ -1,0 +1,18 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import javax.persistence.OneToOne;
+import com.successfactors.cdp.service.util.mentoring.ProgramParticipantTypeEnum;
+import com.successfactors.genericobject.api.model.APISubVersion;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.api.model.Type;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+
+public interface IMentoringProgramMentee {
+	MentoringProgramMenteeSignupForm getSignupForm();
+
+	void setSignupForm(MentoringProgramMenteeSignupForm signupForm);
+}

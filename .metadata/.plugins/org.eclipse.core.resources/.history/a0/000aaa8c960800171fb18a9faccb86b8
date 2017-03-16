@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.refactoring.actions;
+
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
+
+public interface IRefactoringActions {
+}

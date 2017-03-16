@@ -1,0 +1,13 @@
+package com.successfactors.cdp.service.impl;
+
+import java.util.List;
+import com.successfactors.cdp.bean.CareerWorksheetSuggestedRoleVO;
+import com.successfactors.cdp.service.GetCareerWorksheetSuggestedRoles;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.dao.UserDAO;
+
+public interface IGetCareerWorksheetSuggestedRolesImpl {
+	List<CareerWorksheetSuggestedRoleVO> execute(GetCareerWorksheetSuggestedRoles cmd)
+			throws ServiceApplicationException;
+}

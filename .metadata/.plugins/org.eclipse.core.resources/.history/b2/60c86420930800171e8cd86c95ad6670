@@ -1,0 +1,12 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jdt.ui.wizards.NewEnumWizardPage;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.wizards.NewEnumCreationWizard;
+import org.eclipse.jdt.ui.wizards.INewEnumWizardPage;
+
+public interface IOpenNewEnumWizardAction {
+	void setConfiguredWizardPage(NewEnumWizardPage page);
+
+	void setOpenEditorOnFinish(boolean openEditorOnFinish);
+}

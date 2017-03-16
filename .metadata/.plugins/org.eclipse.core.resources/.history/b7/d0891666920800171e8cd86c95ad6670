@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ISaveParticipantPreferencePage {
+}

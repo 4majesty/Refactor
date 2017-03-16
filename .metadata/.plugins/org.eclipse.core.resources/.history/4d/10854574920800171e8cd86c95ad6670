@@ -1,0 +1,45 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.text.ITextPresentationListener;
+import org.eclipse.jface.text.formatter.IFormattingContext;
+import org.eclipse.jface.text.information.IInformationPresenter;
+import org.eclipse.jface.text.reconciler.IReconciler;
+import org.eclipse.jface.text.source.IOverviewRuler;
+import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
+import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
+import org.eclipse.jdt.internal.ui.text.ISmartBackspaceManager;
+
+public interface IJavaSourceViewer {
+	IFormattingContext createFormattingContext();
+
+	void doOperation(int operation);
+
+	boolean canDoOperation(int operation);
+
+	void configure(SourceViewerConfiguration configuration);
+
+	void unconfigure();
+
+	Point rememberSelection();
+
+	void restoreSelection();
+
+	void propertyChange(PropertyChangeEvent event);
+
+	void setPreferenceStore(IPreferenceStore store);
+
+	SmartBackspaceManager getBackspaceManager();
+
+	void prependTextPresentationListener(ITextPresentationListener listener);
+}

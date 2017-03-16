@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+
+public interface ISelectFieldModeAction {
+	int getMode();
+
+	void run();
+}

@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.refactoring.code;
+
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.corext.refactoring.code.IInlineMethodRefactoring;
+
+public interface IInlineMethodInputPage {
+	void createControl(Composite parent);
+}

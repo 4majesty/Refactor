@@ -1,0 +1,9 @@
+package com.successfactors.cdp.bean.mentoring.jam;
+
+import java.io.Serializable;
+
+public interface IProgramLaunchJamActivityJobPayload {
+	String getProgramId();
+
+	void setProgramId(String programId);
+}

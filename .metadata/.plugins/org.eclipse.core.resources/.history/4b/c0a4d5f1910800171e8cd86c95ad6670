@@ -1,0 +1,35 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
+import org.eclipse.ui.actions.RetargetAction;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
+
+public interface IOccurrencesSearchMenuAction {
+	boolean isEnabled();
+
+	Menu getMenu(Menu parent);
+
+	Menu getMenu(Control parent);
+
+	void dispose();
+
+	void init(IWorkbenchWindow window);
+
+	void run(IAction a);
+
+	void selectionChanged(IAction action, ISelection selection);
+
+	void fillMenu(Menu menu);
+}

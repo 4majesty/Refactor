@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
+
+public interface IRemoveLinkedFolderDialog {
+	void widgetSelected(final SelectionEvent event);
+
+	int getRemoveStatus();
+}

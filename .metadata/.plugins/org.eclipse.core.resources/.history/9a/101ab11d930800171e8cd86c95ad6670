@@ -1,0 +1,33 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import java.io.StringWriter;
+import java.util.HashSet;
+import java.util.Set;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
+import org.eclipse.jface.text.templates.persistence.TemplateReaderWriter;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IProjectTemplateStore {
+	TemplatePersistenceData[] getTemplateData();
+
+	Template findTemplateById(String id);
+
+	void load();
+
+	boolean isProjectSpecific(String id);
+
+	void setProjectSpecific(String id, boolean projectSpecific);
+
+	void restoreDefaults();
+
+	void save();
+
+	void revertChanges();
+}

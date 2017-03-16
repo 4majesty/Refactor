@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.jdt.core.util.IInnerClassesAttribute;
+import org.eclipse.jdt.core.util.IInnerClassesAttributeEntry;
+import org.eclipse.jdt.core.util.IMethodInfo;
+import org.eclipse.jdt.internal.corext.fix.AbstractSerialVersionOperation;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ISerialVersionHashOperation {
+}

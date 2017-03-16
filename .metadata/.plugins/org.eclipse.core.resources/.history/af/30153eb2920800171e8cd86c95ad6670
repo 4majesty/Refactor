@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.wizards.dialogfields;
+
+import org.eclipse.swt.widgets.Control;
+
+public interface ILayoutUtil {
+}

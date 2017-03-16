@@ -1,0 +1,116 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure;
+
+import java.util.List;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Message;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterObjectDescriptor.Parameter;
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IIntroduceParameterObjectProcessor {
+	Expression createDefaultExpression(List invocationArguments, ParameterInfo addedInfo, List parameterInfos, MethodDeclaration enclosingMethod, boolean isRecursive,
+			CompilationUnitRewrite cuRewrite);
+
+	Type createType(String newTypeName, int startPosition, CompilationUnitRewrite cuRewrite);
+
+	Type importBinding(ITypeBinding newTypeBinding, CompilationUnitRewrite cuRewrite);
+
+	void updateBody(MethodDeclaration methodDeclaration, final CompilationUnitRewrite cuRewrite, RefactoringStatus result) throws CoreException;
+
+	boolean needsParameterUsedCheck();
+
+	RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException, OperationCanceledException;
+
+	RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException;
+
+	String getClassName();
+
+	ITypeBinding getContainingClass();
+
+	String getFieldName(ParameterInfo element);
+
+	Change[] getAllChanges();
+
+	String getProcessorName();
+
+	String getIdentifier();
+
+	JavaRefactoringDescriptor createDescriptor();
+
+	String getParameterName();
+
+	boolean isCreateGetter();
+
+	boolean isCreateSetter();
+
+	boolean isCreateAsTopLevel();
+
+	void moveFieldDown(ParameterInfo selected);
+
+	void moveFieldUp(ParameterInfo selected);
+
+	void setClassName(String className);
+
+	void setCreateGetter(boolean createGetter);
+
+	void setCreateSetter(boolean createSetter);
+
+	void setPackageName(String packageName);
+
+	void setParameterName(String paramName);
+
+	void setCreateAsTopLevel(boolean topLevel);
+
+	void updateParameterPosition();
+
+	String getPackage();
+
+	void setPackage(String typeQualifier);
+
+	String getNewTypeName();
+
+	ICompilationUnit getCompilationUnit();
+}

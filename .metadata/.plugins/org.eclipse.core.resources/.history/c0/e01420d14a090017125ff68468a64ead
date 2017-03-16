@@ -1,0 +1,31 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import org.apache.http.HttpStatus;
+import org.apache.http.message.BasicNameValuePair;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.bean.mentoring.jam.Member;
+import com.successfactors.cdp.service.mentoring.jam.FindJamMemberBySyncId;
+import com.successfactors.cdp.service.mentoring.jam.exception.JamAuthenticationException;
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.unittest.TestUtils;
+
+public interface IFindJamMemberBySyncIdImplTest {
+	ParamBean getDefaultParam();
+
+	void setUp();
+
+	void testSuccessResponse();
+
+	void testwithAccessToken();
+
+	void testAuthFailure();
+
+	void testServiceUnavailable();
+}

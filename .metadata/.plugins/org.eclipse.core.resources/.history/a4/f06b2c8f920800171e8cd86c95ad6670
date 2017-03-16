@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.text.template.contentassist;
+
+import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IPositionUpdater;
+import org.eclipse.jface.text.Position;
+
+public interface IInclusivePositionUpdater {
+	void update(DocumentEvent event);
+
+	String getCategory();
+}

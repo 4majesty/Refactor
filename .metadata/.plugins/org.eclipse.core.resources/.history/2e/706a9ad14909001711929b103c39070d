@@ -1,0 +1,7 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+public interface IProgramMentorVO {
+	String getUnavailableEndDate();
+
+	void setUnavailableEndDate(String unavailableEndDate);
+}

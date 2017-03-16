@@ -1,0 +1,14 @@
+package org.eclipse.jdt.ui;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
+
+public interface IJavaElementSorter {
+	boolean isSorterProperty(Object element, Object property);
+
+	int category(Object element);
+
+	int compare(Viewer viewer, Object e1, Object e2);
+
+	java.text.Collator getCollator();
+}

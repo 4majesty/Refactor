@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+
+public interface IEditVariableEntryDialog {
+	IPath getPath();
+
+	void changeControlPressed(DialogField field);
+
+	void dialogFieldChanged(DialogField field);
+}

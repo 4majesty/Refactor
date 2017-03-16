@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+
+public interface IJavaFieldWithCastedReceiverCompletionProposal {
+}

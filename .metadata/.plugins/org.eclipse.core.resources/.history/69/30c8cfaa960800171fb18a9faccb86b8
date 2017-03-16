@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.refactoring.actions;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+public interface IRenameResourceAction {
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(IStructuredSelection selection);
+}

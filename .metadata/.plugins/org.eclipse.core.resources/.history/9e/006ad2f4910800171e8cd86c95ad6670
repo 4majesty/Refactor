@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jdt.internal.ui.preferences.EditTemplateDialog;
+import org.eclipse.jdt.internal.ui.preferences.JavaSourcePreviewerUpdater;
+import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
+import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
+
+public interface IJavaTemplatesPage {
+}

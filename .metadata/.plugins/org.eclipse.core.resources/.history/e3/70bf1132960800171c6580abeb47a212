@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
+
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.internal.corext.dom.TypeRules;
+
+public interface IConstraintVariable {
+	boolean canBeAssignedTo(ConstraintVariable targetVariable);
+
+	String toResolvedString();
+
+	String toString();
+
+	ITypeBinding getBinding();
+
+	Object getData();
+
+	void setData(Object data);
+}

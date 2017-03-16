@@ -1,0 +1,53 @@
+package com.successfactors.platform.util;
+
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+
+/** System Properties */
+public enum AdminDashboardSettingsEnum {
+  /** Dashboards*/
+  DASHBOARDS("ADMINV2_ANALYTICS_DASHBOARD", "Dashboards", FeatureEnum.DASHBOARD),
+
+  /** Portlet Permissions*/
+  PORTLET_PERMISSIONS("ADMIN_ANALYTICS_PORTLET_PERMISSIONS","Portlet_Permissions",null),
+
+  /**Report Configuration*/
+  REPORT_CONFIGURATION("ADMIN_DASHBOARD_SETTINGS_REPORT_CONFIG","Report_Config",null);
+
+  /** message key */
+  private String msgKey;
+
+  /** system property id */
+  private String dashSettingId;
+
+  /** dependent feature */
+  private FeatureEnum dependentFeature;
+
+  AdminDashboardSettingsEnum(String msgKey, String sysPropId, FeatureEnum dependentFeature) {
+    this.msgKey = msgKey;
+    this.dashSettingId = sysPropId;
+    this.dependentFeature = dependentFeature;
+  }
+  /**
+   * This method gives the msg key for enum
+   * @return Message Key
+   */
+  public String getMsgKey() {
+    return msgKey;
+  }
+  /**
+   * This method gives system property id for enum
+   * @return System property id
+   */
+  public String getDashSettingId() {
+    return dashSettingId;
+  }
+  /**
+   * This method gives dependent feature
+   * @return returns the dependent feature for enum
+   */
+  public FeatureEnum getDependentFeature() {
+    return dependentFeature;
+  }
+
+}
+  

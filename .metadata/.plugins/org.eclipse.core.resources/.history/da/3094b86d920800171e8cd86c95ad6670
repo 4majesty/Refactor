@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.search.ui.text.Match;
+
+public interface IJavaElementMatch {
+	int getAccuracy();
+
+	boolean isWriteAccess();
+
+	boolean isReadAccess();
+
+	boolean isJavadoc();
+
+	boolean isSuperInvocation();
+
+	int getMatchRule();
+}

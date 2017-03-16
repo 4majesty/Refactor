@@ -1,0 +1,23 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.service.mentoring.jam.GetJamSingleUseToken;
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.cdp.service.mentoring.jam.util.SingleUseTokenConstants;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+public interface IGetJamSingleUseTokenImpl {
+	String execute(GetJamSingleUseToken cmd) throws ServiceApplicationException;
+
+	ServiceCommandHandler getSCAHandler();
+
+	ParamBean getParams();
+}

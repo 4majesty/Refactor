@@ -1,0 +1,76 @@
+package org.eclipse.jdt.internal.ui.jarpackager;
+
+import java.util.zip.ZipFile;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.ui.jarpackager.IManifestProvider;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.ui.jarpackager.JarWriter3;
+import org.eclipse.jdt.ui.jarpackager.IJarWriter3;
+
+/** 
+ * Jar builder for the plain jar exported. Does not export archives.
+ * @since 3.4
+ */
+public class PlainJarBuilder extends JarBuilder implements IPlainJarBuilder {
+	public static final String BUILDER_ID= "org.eclipse.jdt.ui.plain_jar_builder";
+
+	private JarPackageData fJarPackage;
+
+	private IJarWriter3 fJarWriter;
+
+	/** 
+	* {@inheritDoc}
+	*/
+	@Override
+	public String getId() {
+		return BUILDER_ID;
+	}
+
+	/** 
+	* {@inheritDoc}
+	*/
+	@Override
+	public IManifestProvider getManifestProvider() {
+		return new ManifestProvider();
+	}
+
+	/** 
+	* {@inheritDoc}
+	*/
+	@Override
+	public void open(JarPackageData jarPackage, Shell displayShell, MultiStatus statusMsg) throws CoreException {
+		super.open(jarPackage, displayShell, statusMsg);
+		fJarPackage= jarPackage;
+		fJarWriter= new JarWriter3(fJarPackage, displayShell);
+	}
+
+	/** 
+	* {@inheritDoc}
+	*/
+	@Override
+	public void writeFile(IFile resource, IPath destinationPath) throws CoreException {
+		fJarWriter.write(resource, destinationPath);
+	}
+
+	/** 
+	* {@inheritDoc}
+	*/
+	@Override
+	public void writeArchive(ZipFile archiveRoot, IProgressMonitor progressMonitor) {
+	}
+
+	/** 
+	* {@inheritDoc}
+	*/
+	@Override
+	public void close() throws CoreException {
+		if (fJarWriter != null) {
+			fJarWriter.close();
+		}
+	}
+}

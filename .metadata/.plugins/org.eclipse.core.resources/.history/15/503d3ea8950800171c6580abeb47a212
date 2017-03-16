@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.corext.refactoring;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface ITypeContextChecker {
+	RefactoringStatus[] checkAndResolveMethodTypes();
+
+	RefactoringStatus[] checkSyntax();
+}

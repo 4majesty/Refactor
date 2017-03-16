@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.IBuildPathsBlock;
+
+public interface IBuildPathsPropertyPage {
+	void createControl(Composite parent);
+
+	boolean okToLeave();
+
+	void setVisible(boolean visible);
+
+	boolean performOk();
+
+	void statusChanged(IStatus status);
+
+	void applyData(Object data);
+}

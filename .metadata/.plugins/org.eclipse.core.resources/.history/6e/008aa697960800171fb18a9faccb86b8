@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.jdt.core.dom.Modifier;
+
+public interface IVisibilityControlUtil {
+}

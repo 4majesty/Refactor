@@ -1,0 +1,10 @@
+package com.successfactors.cdp.service.mentoring.jam;
+
+import java.util.Collection;
+import com.successfactors.sca.ServiceCommand;
+
+public interface IScheduleProgramJamGroupInviteJob {
+	String getProgramId();
+
+	Collection<String> getParticipants();
+}

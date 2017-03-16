@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.ui.JavaElementComparator;
+import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionComparator;
+
+public interface IAbstractHierarchyViewerSorter {
+	boolean isSortByDefiningType();
+
+	boolean isSortAlphabetically();
+
+	int category(Object element);
+
+	int compare(Viewer viewer, Object e1, Object e2);
+}

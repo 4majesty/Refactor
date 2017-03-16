@@ -1,0 +1,30 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.text.java.ProposalSorterHandle;
+import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+
+public interface ICodeAssistConfigurationBlock {
+	void initialize();
+
+	void performDefaults();
+}

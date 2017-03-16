@@ -1,0 +1,10 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.sca.ServiceQuery;
+import java.util.List;
+
+public interface IGetMentoringProgramByUserID {
+	List<String> getMentoringProgramList();
+
+	void setMentoringProgramList(List<String> mentoringProgramList);
+}

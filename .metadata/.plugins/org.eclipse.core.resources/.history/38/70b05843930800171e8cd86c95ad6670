@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+public interface IStructureSelectNextAction {
+}

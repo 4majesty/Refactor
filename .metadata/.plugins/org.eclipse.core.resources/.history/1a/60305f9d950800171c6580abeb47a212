@@ -1,0 +1,103 @@
+package org.eclipse.jdt.internal.corext.refactoring.rename;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
+import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
+import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IRenameFieldProcessor {
+	String getIdentifier();
+
+	boolean isApplicable();
+
+	String getProcessorName();
+
+	IField getField();
+
+	Object[] getElements();
+
+	String getCurrentElementName();
+
+	String getCurrentElementQualifier();
+
+	RefactoringStatus checkNewElementName(String newName) throws CoreException;
+
+	Object getNewElement();
+
+	boolean canEnableTextUpdating();
+
+	boolean getUpdateTextualMatches();
+
+	void setUpdateTextualMatches(boolean update);
+
+	void setUpdateReferences(boolean update);
+
+	boolean getUpdateReferences();
+
+	String canEnableGetterRenaming();
+
+	String canEnableSetterRenaming();
+
+	boolean getRenameGetter();
+
+	void setRenameGetter(boolean renameGetter);
+
+	boolean getRenameSetter();
+
+	void setRenameSetter(boolean renameSetter);
+
+	IMethod getGetter();
+
+	IMethod getSetter();
+
+	String getNewGetterName();
+
+	String getNewSetterName();
+
+	boolean canEnableDelegateUpdating();
+
+	boolean getDelegateUpdating();
+
+	void setDelegateUpdating(boolean update);
+
+	void setDeprecateDelegates(boolean deprecate);
+
+	boolean getDeprecateDelegates();
+
+	int getDelegateCount();
+
+	int getSaveMode();
+
+	RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException;
+
+	Change createChange(IProgressMonitor monitor) throws CoreException;
+
+	String getDelegateUpdatingTitle(boolean plural);
+}

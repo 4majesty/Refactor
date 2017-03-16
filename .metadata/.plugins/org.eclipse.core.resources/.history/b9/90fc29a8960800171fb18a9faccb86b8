@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
+
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ISelectionButtonDialogField;
+
+public interface IRenameTypeWizardSimilarElementsOptionsDialog {
+	int getSelectedStrategy();
+}

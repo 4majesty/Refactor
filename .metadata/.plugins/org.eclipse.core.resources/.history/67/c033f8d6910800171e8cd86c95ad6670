@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.core.runtime.Status;
+
+public interface IJavaUIStatus {
+}

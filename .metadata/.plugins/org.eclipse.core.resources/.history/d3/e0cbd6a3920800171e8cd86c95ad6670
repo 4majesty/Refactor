@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+
+public interface IFocusOnSelectionAction {
+	void run();
+
+	boolean canActionBeAdded();
+}

@@ -1,0 +1,133 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import java.text.ParseException;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.http.HttpStatus;
+import org.apache.http.message.BasicNameValuePair;
+import org.jboss.seam.annotations.In;
+import org.json.JSONObject;
+
+import com.successfactors.appsec.SFKeyStore;
+import com.successfactors.cdp.service.mentoring.jam.GetJamAuthToken;
+import com.successfactors.cdp.service.mentoring.jam.util.AuthTokenConstants;
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+@Service
+public class GetJamAuthTokenImpl extends AbstractJamService 
+              implements ServiceCommandImpl<String, GetJamAuthToken>, AuthTokenConstants {
+
+  /** param bean. */
+  @Inject
+  @In
+  protected ParamBean params;
+
+  /** scaHandler. */
+  @Inject
+  @In
+  protected ServiceCommandHandler scaHandler;
+
+  @Override
+  public String execute(GetJamAuthToken cmd) throws ServiceApplicationException {
+    String url = getAuthTokenURL();
+
+    List<BasicNameValuePair> requestHeaders = getRequestHeader();
+    String requestBody = getRequestBody(cmd.getUserId());
+
+    BasicHttpResponse response = invoke(url, REQUEST_TYPE_POST, requestHeaders, requestBody);
+
+    if (!isSuccess(response)) {
+      throw new ServiceApplicationException("Failed to get Auth Token for userId:" + cmd.getUserId()
+                                            + ";Response Code = " + response.getResponseCode()
+                                            + "; Reason = " + getPayload(response));
+    }
+
+    return getToken(response);
+}
+
+  /**
+   * Fetches Auth Token URL
+   * 
+   * @return createGroupURL String
+   */
+  private String getAuthTokenURL() throws ServiceApplicationException {
+    StringBuilder urlBuilder = new StringBuilder();
+
+    urlBuilder.append(getJamBaseURL()).append(AUTH_TOKEN_API_URL);
+
+    return urlBuilder.toString();
+  }
+
+  private List<BasicNameValuePair> getRequestHeader() {
+    List<BasicNameValuePair> requestHeaders = new LinkedList<BasicNameValuePair>();
+
+    requestHeaders.add(new BasicNameValuePair(HEADER_CONTENT_TYPE, CONTENT_TYPE_JSON));
+
+    return requestHeaders;
+  }
+
+  private String getRequestBody(String userId) {
+    JSONObject reqBodyJson = new JSONObject();
+
+    reqBodyJson.put(JSON_PARAM_CLIENT_ID, getClientId());
+    reqBodyJson.put(JSON_PARAM_CLIENT_SECRET,getClientSecret());
+    reqBodyJson.put(JSON_PARAM_GRANT_TYPE,JSON_PARAM_GRANT_TYPE_VALUE);
+    reqBodyJson.put(JSON_PARAM_SCOPE, getScopeValue(userId));
+
+    return reqBodyJson.toString();
+  }
+
+  private String getClientId() {
+    return CLIENT_ID;
+  }
+
+  private String getClientSecret() {
+    return SFKeyStore.getKey(CLIENT_SECRET_KEYSTORE_PROPERTY);
+  }
+
+  /**
+   * Method to get the scope value
+   * 
+   * @return scope String
+   */
+  private String getScopeValue(String userId) {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append(JSON_SCOPE_PARAM_SF_USER_ID).append(OPERATOR_EQUALS).append(userId)
+      .append(COMMA_SEPERATOR)
+      .append(JSON_SCOPE_PARAM_SF_COMPANY_ID).append(OPERATOR_EQUALS).append(params.getCompanyId());
+
+    return sb.toString();
+  }
+
+  private String getToken(BasicHttpResponse response) throws ServiceApplicationException {
+    try {
+      JSONObject responseJson = new JSONObject(getPayload(response));
+      return responseJson.getString(JSON_PARAM_ACCESS_TOKEN);
+    } catch (ParseException e) {
+      throw new ServiceApplicationException(e);
+    }
+  }
+
+  private boolean isSuccess(BasicHttpResponse response) {
+    return (response.getResponseCode() == HttpStatus.SC_OK);
+  }
+
+  @Override
+  public ServiceCommandHandler getSCAHandler() {
+    return scaHandler;
+  }
+
+  @Override
+  public ParamBean getParams() {
+    return params;
+  }
+}

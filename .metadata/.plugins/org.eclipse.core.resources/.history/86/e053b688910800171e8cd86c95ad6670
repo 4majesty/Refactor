@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextUtilities;
+
+public interface IPartitionDoubleClickSelector {
+}

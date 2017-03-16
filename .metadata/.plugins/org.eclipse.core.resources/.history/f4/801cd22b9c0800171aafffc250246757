@@ -1,0 +1,54 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Used for storing matchingResult in mentoring matching matching algorithm
+ */
+public class MatchingResult {
+  // final matching combination: key is mentee ID, values is matchinfo list
+  /**matchedParticipantMap */
+  private Map<String, List<MatchedParticipantVO>> matchedParticipantMap = new HashMap<>();
+  
+  // mentor/mentee profile for UI display, including basic info, threshold and signup preferences
+  /** userProfileMap */
+  private Map<String, UserProfileVO> userProfileMap = new HashMap<>();
+  /**
+   * getMatchedParticipantMap
+   * @return matchedParticipantMap
+   */
+  public Map<String, List<MatchedParticipantVO>> getMatchedParticipantMap() {
+    return matchedParticipantMap;
+  }
+ /**
+  * setMatchedParticipantMap
+  * @param matchingUsersMap matchingUsersMap
+  */
+  public void setMatchedParticipantMap(Map<String, List<MatchedParticipantVO>> matchingUsersMap) {
+    this.matchedParticipantMap = matchingUsersMap;
+  }
+  /**
+   * getUserProfileMap
+   * @return userProfileMap
+   */
+  public Map<String, UserProfileVO> getUserProfileMap() {
+    return userProfileMap;
+  }
+  /**
+   * userProfileMap
+   * @param userProfileMap userProfileMap
+   */
+  public void setUserProfileMap(Map<String, UserProfileVO> userProfileMap) {
+    this.userProfileMap = userProfileMap;
+  }
+  
+  public void addMatchedParticipant(String menteeUserId, MatchedParticipantVO mentor) {
+    if(!matchedParticipantMap.containsKey(menteeUserId)){
+      matchedParticipantMap.put(menteeUserId, new ArrayList<MatchedParticipantVO>());
+    }
+    matchedParticipantMap.get(menteeUserId).add(mentor);
+  }
+}

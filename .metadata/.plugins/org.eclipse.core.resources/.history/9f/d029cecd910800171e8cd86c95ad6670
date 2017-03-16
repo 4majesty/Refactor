@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
+
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+public interface IGoToNextPreviousMemberAction {
+	void update();
+
+	void run();
+
+	ISourceRange getNewSelectionRange(ISourceRange oldSourceRange, IType[] types);
+}

@@ -1,0 +1,11 @@
+package com.successfactors.cdp.service.util.mentoring.email;
+
+public interface IMentoringEmailContent {
+	String getSubject();
+
+	void setSubject(String subject);
+
+	String getBody();
+
+	void setBody(String body);
+}

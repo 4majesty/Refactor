@@ -1,0 +1,8 @@
+package com.successfactors.cdp.service.mentoring.jam;
+
+import com.successfactors.cdp.bean.mentoring.jam.JamFeedWidgetInfo;
+import com.successfactors.sca.ServiceQuery;
+
+public interface IGetJamFeedWidgetInfo {
+	String getProgramId();
+}

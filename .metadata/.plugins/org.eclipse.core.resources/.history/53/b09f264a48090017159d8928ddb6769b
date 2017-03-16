@@ -1,0 +1,10 @@
+package com.successfactors.cdp.app.mentoring.upgradecenter;
+
+import com.successfactors.upgradecenter.core.UpgradeDependencyResult;
+import java.util.List;
+
+public interface IMentoringProgramUpgradeActionProcessor {
+	boolean upgrade();
+
+	UpgradeDependencyResult checkUpgradeDependencies();
+}

@@ -1,0 +1,38 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import java.util.List;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+import org.eclipse.jdt.internal.ui.dnd.ViewerInputDropAdapter;
+
+class CallHierarchyTransferDropAdapter extends ViewerInputDropAdapter implements ICallHierarchyTransferDropAdapter {
+	private CallHierarchyViewPart fCallHierarchyViewPart;
+
+	public CallHierarchyTransferDropAdapter(CallHierarchyViewPart viewPart, StructuredViewer viewer) {
+		super(viewer);
+		fCallHierarchyViewPart= viewPart;
+	}
+
+	/** 
+	* {@inheritDoc}
+	*/
+	protected void doInputView(Object inputElements) {
+		fCallHierarchyViewPart.setInputElements((IMember[])inputElements);
+	}
+
+	/** 
+	* {@inheritDoc}
+	*/
+	protected Object getInputElement(ISelection selection) {
+		if (selection instanceof IStructuredSelection) {
+			List elements= ((IStructuredSelection)selection).toList();
+			if (CallHierarchy.arePossibleInputElements(elements)) {
+				return elements.toArray(new IMember[elements.size()]);
+			}
+		}
+		return null;
+	}
+}

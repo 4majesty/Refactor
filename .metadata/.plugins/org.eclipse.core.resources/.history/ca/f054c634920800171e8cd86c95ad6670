@@ -1,0 +1,39 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionGroup;
+
+public interface IWorkingSetFilterActionGroup {
+	boolean isFiltered(Object parent, Object object);
+
+	IWorkingSet getWorkingSet();
+
+	void setWorkingSet(IWorkingSet workingSet, boolean refreshViewer);
+
+	void saveState(IMemento memento);
+
+	void restoreState(IMemento memento);
+
+	void fillActionBars(IActionBars actionBars);
+
+	void fillViewMenu(IMenuManager mm);
+
+	void cleanViewMenu(IMenuManager menuManager);
+
+	void dispose();
+
+	ViewerFilter getWorkingSetFilter();
+}

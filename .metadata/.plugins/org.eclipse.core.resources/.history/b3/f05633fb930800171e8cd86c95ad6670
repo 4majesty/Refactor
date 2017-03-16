@@ -1,0 +1,100 @@
+package org.eclipse.jdt.ui.text;
+
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.text.IAutoEditStrategy;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.ITextDoubleClickStrategy;
+import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.formatter.IContentFormatter;
+import org.eclipse.jface.text.information.IInformationPresenter;
+import org.eclipse.jface.text.presentation.IPresentationReconciler;
+import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
+import org.eclipse.jface.text.reconciler.IReconciler;
+import org.eclipse.jface.text.source.IAnnotationHover;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+import org.eclipse.jdt.internal.ui.text.HTMLAnnotationHover;
+import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
+import org.eclipse.jdt.internal.ui.text.JavaCompositeReconcilingStrategy;
+import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
+import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
+import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
+import org.eclipse.jdt.internal.ui.text.JavaReconciler;
+import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
+import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
+import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
+import org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor;
+import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
+import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavadocDoubleClickStrategy;
+import org.eclipse.jdt.internal.ui.text.java.PartitionDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProcessor;
+import org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl;
+import org.eclipse.jdt.internal.ui.text.IAbstractJavaScanner;
+import org.eclipse.jdt.internal.ui.text.java.IJavaDoubleClickSelector;
+
+public interface IJavaSourceViewerConfiguration {
+	IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer);
+
+	IContentAssistant getContentAssistant(ISourceViewer sourceViewer);
+
+	IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer);
+
+	IReconciler getReconciler(ISourceViewer sourceViewer);
+
+	IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType);
+
+	ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType);
+
+	String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType);
+
+	String[] getIndentPrefixes(ISourceViewer sourceViewer, String contentType);
+
+	int getTabWidth(ISourceViewer sourceViewer);
+
+	IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer);
+
+	IAnnotationHover getOverviewRulerAnnotationHover(ISourceViewer sourceViewer);
+
+	int[] getConfiguredTextHoverStateMasks(ISourceViewer sourceViewer, String contentType);
+
+	ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask);
+
+	ITextHover getTextHover(ISourceViewer sourceViewer, String contentType);
+
+	String[] getConfiguredContentTypes(ISourceViewer sourceViewer);
+
+	String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer);
+
+	IContentFormatter getContentFormatter(ISourceViewer sourceViewer);
+
+	IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer);
+
+	IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer);
+
+	IInformationPresenter getOutlinePresenter(ISourceViewer sourceViewer, boolean doCodeResolve);
+
+	IInformationPresenter getHierarchyPresenter(ISourceViewer sourceViewer, boolean doCodeResolve);
+
+	boolean affectsTextPresentation(PropertyChangeEvent event);
+
+	void handlePropertyChangeEvent(PropertyChangeEvent event);
+}

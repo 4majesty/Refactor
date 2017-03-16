@@ -1,0 +1,36 @@
+package org.eclipse.jdt.internal.ui.jarpackagerfat;
+
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.jarpackager.IManifestProvider;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
+
+public interface IFatJarRsrcUrlBuilder {
+	String getId();
+
+	boolean isMergeManifests();
+
+	boolean isRemoveSigners();
+
+	String getManifestClasspath();
+
+	IManifestProvider getManifestProvider();
+
+	void open(JarPackageData jarPackage, Shell displayShell, MultiStatus status) throws CoreException;
+
+	void writeArchive(ZipFile jarFile, IProgressMonitor progressMonitor);
+
+	void writeRsrcUrlClasses();
+}

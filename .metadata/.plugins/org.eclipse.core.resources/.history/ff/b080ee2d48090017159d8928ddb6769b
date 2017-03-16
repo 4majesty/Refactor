@@ -1,0 +1,41 @@
+package com.successfactors.cdp.service.mentoring.jam;
+
+import javax.validation.constraints.NotNull;
+
+import com.successfactors.cdp.bean.mentoring.jam.Group;
+import com.successfactors.sca.ServiceQuery;
+
+/**
+ * Command to fetch a specific Jam Group.
+ * 
+ * @author rsrigiri
+ * 
+ * SAP SuccessFactors
+*/
+public class GetJamGroup implements ServiceQuery<Group> {
+
+  @NotNull
+  /** Group Id **/
+  private String groupId;
+
+  /** access token to be used for the API. 
+   * if this is null, then token will be generated for login user. **/
+  private String accessToken;
+
+  public GetJamGroup(String groupId) {
+    this.groupId = groupId;
+  }
+
+  public GetJamGroup(String groupId, String accessToken) {
+    this.groupId = groupId;
+    this.accessToken = accessToken;
+  }
+
+  public String getGroupId() {
+    return groupId;
+  }
+
+  public String getAccessToken() {
+    return accessToken;
+  }
+}

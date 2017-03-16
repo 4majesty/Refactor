@@ -1,0 +1,8 @@
+package org.eclipse.jdt.ui;
+
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+
+public interface ICodeGeneration {
+}

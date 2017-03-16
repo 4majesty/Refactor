@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.infoviews;
+
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+public interface ITextSelectionConverter {
+}

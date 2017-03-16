@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import java.util.Set;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.search.LRUWorkingSetsList;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetComparator;
+
+public interface ISearchUtil {
+}

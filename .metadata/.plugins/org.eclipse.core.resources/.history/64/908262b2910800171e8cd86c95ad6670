@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+public interface IOverrideCompletionProposal {
+	CharSequence getPrefixCompletionText(IDocument document, int completionOffset);
+
+	boolean isAutoInsertable();
+}

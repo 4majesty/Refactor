@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.wizards;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.IUIConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface INewElementWizard {
+	IJavaElement getCreatedElement();
+
+	boolean performFinish();
+
+	void init(IWorkbench workbench, IStructuredSelection currentSelection);
+
+	IStructuredSelection getSelection();
+
+	IWorkbench getWorkbench();
+}

@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls.search;
+
+import java.io.IOException;
+import java.io.Reader;
+
+public interface ILineReader {
+	int readLine(StringBuffer sb) throws IOException;
+
+	void close();
+}

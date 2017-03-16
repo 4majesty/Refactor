@@ -1,0 +1,37 @@
+package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IRemoveDeclarationCorrectionProposal {
+	boolean visit(Assignment node);
+
+	boolean visit(PostfixExpression node);
+
+	boolean visit(PrefixExpression node);
+
+	boolean visit(MethodInvocation node);
+
+	boolean visit(ClassInstanceCreation node);
+
+	boolean visit(SuperMethodInvocation node);
+
+	String getName();
+}

@@ -1,0 +1,52 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.service.util.mentoring.MentoringProgramSectionComparator;
+import com.successfactors.unittest.AbstractComparatorTest;
+
+@Test(groups = "compare")
+public class MentoringProgramSectionComparatorTest extends AbstractComparatorTest<Map<String,String>>{
+    public MentoringProgramSectionComparatorTest(){
+        super();
+        expectedNullBehavior = NullBehavior.NULLS_SORT_LAST;
+        
+        comparatorT = new MentoringProgramSectionComparator(new Locale("en", "US"));
+        a=new HashMap<String, String>() {
+          {
+            put("category", SignupFormSectionCategoryEnum.COMPETENCY.toString());
+            put("id", SignupFormSectionCategoryEnum.COMPETENCY.toString());
+            put("label", "First Name");
+            put("type", String.class.getName());
+          }
+        };
+        b = new HashMap<String, String>() {
+          {
+            put("category", SignupFormSectionCategoryEnum.COMPETENCY.toString());
+            put("id", SignupFormSectionCategoryEnum.COMPETENCY.toString());
+            put("label", "Location");
+            put("type", String.class.getName());
+          }
+        };
+        c= new HashMap<String, String>() {
+          {
+            put("category", SignupFormSectionCategoryEnum.COMPETENCY.toString());
+            put("id", SignupFormSectionCategoryEnum.COMPETENCY.toString());
+            put("label", "First Name");
+            put("type", String.class.getName());
+          }
+        };
+        HashMap<String, String> d = new HashMap<String, String>() {
+          {
+            put("category", SignupFormSectionCategoryEnum.COMPETENCY.toString());
+            put("id", SignupFormSectionCategoryEnum.COMPETENCY.toString());
+            put("label", "First Name");
+            put("type", String.class.getName());
+          }
+        };
+    }
+}

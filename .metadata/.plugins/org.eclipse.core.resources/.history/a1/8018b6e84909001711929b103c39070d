@@ -1,0 +1,38 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Service command to start mentee sign-up
+ * @author Keqin Liu
+ */
+public class SignUpMentees implements ServiceCommand<MentoringProgram> {
+  private String programId;
+
+  private String autoForwardJobToken;
+  
+  /**
+   * Constructor
+   * @param programId Program ID
+   */
+  public SignUpMentees(String programId) {
+    this.programId = programId;
+  }
+
+  /**
+   * Get program ID
+   * @return Program ID
+   */
+  public String getProgramId() {
+    return programId;
+  }
+
+  public String getAutoForwardJobToken() {
+    return autoForwardJobToken;
+  }
+
+  public void setAutoForwardJobToken(String autoForwardJobToken) {
+    this.autoForwardJobToken = autoForwardJobToken;
+  }
+}

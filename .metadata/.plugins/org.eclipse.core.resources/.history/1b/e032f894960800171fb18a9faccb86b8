@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
+
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.util.RowLayouter;
+
+public interface IRenamePackageWizard {
+	void dispose();
+}

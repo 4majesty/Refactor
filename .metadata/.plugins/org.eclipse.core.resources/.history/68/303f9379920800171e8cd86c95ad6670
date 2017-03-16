@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.text.java.hover;
+
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider.ProblemAnnotation;
+import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
+import org.eclipse.jdt.internal.ui.text.java.hover.AnnotationExpansionControl.AnnotationHoverInput;
+
+public interface IJavaExpandHover {
+	void paint(GC gc, Canvas canvas, Rectangle bounds);
+
+	int getLayer();
+}

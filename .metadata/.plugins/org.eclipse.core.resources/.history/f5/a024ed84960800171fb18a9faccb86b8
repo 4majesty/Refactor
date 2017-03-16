@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
+
+import org.eclipse.ui.part.ISetSelectionTarget;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IRenameSelectionState {
+	void restore(Object newElement);
+}

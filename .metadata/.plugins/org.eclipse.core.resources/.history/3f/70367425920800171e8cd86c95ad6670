@@ -1,0 +1,28 @@
+package org.eclipse.jdt.internal.ui.text.javadoc;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.rules.ICharacterScanner;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.IWordDetector;
+import org.eclipse.jface.text.rules.SingleLineRule;
+import org.eclipse.jface.text.rules.Token;
+import org.eclipse.jface.text.rules.WhitespaceRule;
+import org.eclipse.jface.text.rules.WordRule;
+import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jdt.ui.text.IJavaColorConstants;
+import org.eclipse.jdt.internal.ui.text.CombinedWordRule;
+import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
+import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
+import org.eclipse.jdt.internal.ui.text.CombinedWordRule.CharacterBuffer;
+import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
+
+public interface IJavaDocScanner {
+	boolean isWordStart(char c);
+
+	boolean isWordPart(char c);
+
+	IToken evaluate(ICharacterScanner scanner);
+
+	IDocument getDocument();
+}

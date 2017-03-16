@@ -1,0 +1,22 @@
+package com.successfactors.cdp.bean.mentoring.processor;
+
+import com.successfactors.cdp.service.mentoring.SendMentoringProgramClosureEmail;
+import com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum;
+import com.successfactors.fo.app.exception.ValidationException;
+import com.successfactors.genericobject.api.messages.Message;
+import com.successfactors.genericobject.api.model.DataOperation;
+import com.successfactors.genericobject.api.processor.OperationContext;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.app.processor.AbstractProcessor;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.user.bean.UserBean;
+
+public interface IMentorshipProcessor {
+	void validate(ValidationContext context) throws ValidationException;
+
+	void postSave(ValidationContext context) throws ValidationException;
+}

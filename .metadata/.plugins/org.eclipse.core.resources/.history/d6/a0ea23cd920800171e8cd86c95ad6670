@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
+import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IConfigureBuildPathAction {
+	String getDetailedDescription();
+
+	void run();
+}

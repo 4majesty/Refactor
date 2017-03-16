@@ -1,0 +1,12 @@
+package com.successfactors.cdp.service.mentoring.jam;
+
+import com.successfactors.cdp.bean.mentoring.jam.Group;
+import com.successfactors.sca.ServiceCommand;
+
+public interface ICreateJamGroup {
+	String getName();
+
+	String getDescription();
+
+	String getAccessToken();
+}

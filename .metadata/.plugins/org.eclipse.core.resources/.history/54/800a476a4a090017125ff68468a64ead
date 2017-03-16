@@ -1,0 +1,43 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.gm.util.permission.ObjectiveRulesEngineException;
+import com.successfactors.gm.util.permission.TGMPermissionUtils;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.util.JSONUtils;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.rbp.app.api.RBPFacade;
+import com.successfactors.rbp.app.api.TargetPopulationCriteria;
+import com.successfactors.rbp.app.collector.ContextualPermissionSpec;
+import com.successfactors.rbp.app.collector.PermissionSpec;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import java.io.Serializable;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+public interface ICDPDevGoalController {
+	String getDefaultDevGoalList(String selectedUserId);
+}

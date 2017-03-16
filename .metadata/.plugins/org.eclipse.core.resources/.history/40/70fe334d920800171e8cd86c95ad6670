@@ -1,0 +1,33 @@
+package org.eclipse.jdt.internal.ui.wizards.dialogfields;
+
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+
+public interface IStringDialogField {
+	void setContentAssistProcessor(IContentAssistProcessor processor);
+
+	IContentAssistProcessor getContentAssistProcessor();
+
+	Control[] doFillIntoGrid(Composite parent, int nColumns);
+
+	int getNumberOfControls();
+
+	boolean setFocus();
+
+	Text getTextControl(Composite parent);
+
+	String getText();
+
+	void setText(String text);
+
+	void setTextWithoutUpdate(String text);
+
+	void refresh();
+}

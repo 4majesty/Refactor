@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.ui.jarpackagerfat;
+
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.jarpackager.IManifestProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IUnpackFatJarBuilder {
+	String getId();
+
+	IManifestProvider getManifestProvider();
+
+	String getManifestClasspath();
+
+	boolean isMergeManifests();
+
+	boolean isRemoveSigners();
+
+	void writeArchive(ZipFile jarFile, IProgressMonitor progressMonitor);
+}

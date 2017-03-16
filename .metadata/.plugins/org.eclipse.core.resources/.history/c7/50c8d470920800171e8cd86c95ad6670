@@ -1,0 +1,25 @@
+package org.eclipse.jdt.internal.ui.fix;
+
+import java.util.Map;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.StringFix;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
+public interface IStringCleanUp {
+	CleanUpRequirements getRequirements();
+
+	String[] getStepDescriptions();
+
+	String getPreview();
+
+	boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem);
+
+	int computeNumberOfFixes(CompilationUnit compilationUnit);
+}

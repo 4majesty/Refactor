@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.commands;
+
+import org.eclipse.core.commands.ParameterValueConversionException;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+
+public interface IJavaElementReferenceConverter {
+	Object convertToObject(String parameterValue) throws ParameterValueConversionException;
+
+	String convertToString(Object parameterValue) throws ParameterValueConversionException;
+}

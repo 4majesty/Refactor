@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
+
+public interface IJavadocTagsSubProcessor {
+}

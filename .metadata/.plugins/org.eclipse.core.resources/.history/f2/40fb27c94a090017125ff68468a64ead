@@ -1,0 +1,10 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import java.util.Locale;
+import java.util.Map;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.service.util.mentoring.MentoringProgramSectionComparator;
+import com.successfactors.unittest.AbstractComparatorTest;
+
+public interface IMentoringProgramSectionComparatorTest {
+}

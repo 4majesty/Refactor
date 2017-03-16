@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IJavaElementInfoPage {
+	void createControl(Composite parent);
+}

@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface IToggleOrientationAction {
+	int getOrientation();
+
+	void run();
+}

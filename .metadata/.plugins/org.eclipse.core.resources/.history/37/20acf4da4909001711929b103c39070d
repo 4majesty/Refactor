@@ -1,0 +1,15 @@
+package com.successfactors.cdp.service.mentoring;
+
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import com.successfactors.cdp.service.mentoring.jam.ScheduleProgramJamGroupInviteJob;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceSystemException;
+
+public interface ISupervisedMatchJamGroupInviteObserver {
+	void onMatchSuccess(final ConfirmMatchingResult cmd);
+}

@@ -1,0 +1,115 @@
+package com.successfactors.smb.ui.login.determinator;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+import com.mockobjects.servlet.MockHttpServletRequest;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.legacy.service.ejb.SysConfig;
+import com.successfactors.user.service.ejb.User;
+import com.successfactors.express.service.ExpressSelfService;
+import com.successfactors.platform.ui.login.determinator.EndPointContext;
+import com.successfactors.platform.util.UIVersionManager.UIVersion;
+import org.jboss.seam.mock.SeamTest;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+public class SMBEndPointDeterminatorTest extends SeamTest {
+
+  ParamBean params = new ParamBean();
+  CompanyBean cbean;
+  EndPointContext context;
+  SysConfig config;
+  private ExpressSelfService expSelfService;
+  private User userService;
+
+  IFeatureEnum selectedFeature = null;
+
+  @BeforeMethod(groups={"checkin"})
+  public void beforeTest() {
+    cbean = new CompanyBean();
+    context = new EndPointContext();
+    context.setRequest(new MockHttpServletRequest());
+    params.setCompanyBean(cbean);
+    expSelfService = new ExpressSelfService();
+  }
+
+  @Test(groups={"checkin", "broken", "scaconverter"})
+  public void testExpressCompany() throws Exception {
+    SMBEndPointDeterminator pcd = new SMBEndPointDeterminator();
+
+    cbean.setCompanyStatus(CompanyBean.STATUS_COMPANY_EDITION_TYPE_EXPRESS);
+    setField(pcd, "companybean", cbean);
+    setField(pcd, "expSelfService", expSelfService);
+    
+    MockUserServiceTwoUsers mockUserService = new MockUserServiceTwoUsers();
+    userService = (User) Proxy.newProxyInstance(Thread.currentThread()
+        .getContextClassLoader(), new Class<?>[] { User.class },
+        mockUserService);
+    setField(expSelfService, "userService", userService);
+
+    String result = pcd.determine(UIVersion.EXPRESS, context);
+    assert result.equals("/xi/ui/express/pages/express.xhtml");
+  }
+  
+  @Test(groups={"checkin", "broken", "scaconverter"})
+  public void testExpressCompanyToSetup() throws Exception {
+    SMBEndPointDeterminator pcd = new SMBEndPointDeterminator();
+
+    cbean.setCompanyStatus(CompanyBean.STATUS_COMPANY_EDITION_TYPE_EXPRESS);
+    setField(pcd, "companybean", cbean);
+    setField(pcd, "expSelfService", expSelfService);
+    
+    MockUserServiceOneUser mockUserService = new MockUserServiceOneUser();
+    userService = (User) Proxy.newProxyInstance(Thread.currentThread()
+        .getContextClassLoader(), new Class<?>[] { User.class },
+        mockUserService);
+    setField(expSelfService, "userService", userService);
+
+    String result = pcd.determine(UIVersion.EXPRESS, context);
+    assert result.equals("/xi/ui/express/pages/express_selfservice.xhtml");
+  }
+
+  @Test(groups={"checkin", "broken", "scaconverter"})
+  public void testNonExpressCompany() throws Exception {
+    SMBEndPointDeterminator pcd = new SMBEndPointDeterminator();
+
+    cbean.setCompanyStatus(CompanyBean.STATUS_COMPANY_EDITION_TYPE_PE);
+    setField(pcd, "companybean", cbean);
+
+    String result = pcd.determine(UIVersion.V11, context);
+    assert null == result;
+  }
+  
+  /**
+   * For returning 1 user.
+   * @author jng
+   *
+   */
+  public class MockUserServiceOneUser implements InvocationHandler {
+	  /**
+	   * return 1 as the user count.
+	   */
+      public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+          return 1;
+      }
+  }
+  
+  /**
+   * For returning 2 users
+   * @author jng
+   *
+   */
+  public class MockUserServiceTwoUsers implements InvocationHandler {
+	  /**
+	   * return 2 as the user count.
+	   */
+      public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+          return 2;
+      }
+  }
+
+}

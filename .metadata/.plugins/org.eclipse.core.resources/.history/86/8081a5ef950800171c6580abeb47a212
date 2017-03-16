@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.corext.refactoring.reorg;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+public interface ILoggedNewNameQueries {
+	String getNewName();
+
+	INewNameQuery createNewCompilationUnitNameQuery(final ICompilationUnit unit, final String initialSuggestedName);
+
+	INewNameQuery createNewPackageFragmentRootNameQuery(final IPackageFragmentRoot root, final String initialSuggestedName);
+
+	INewNameQuery createNewPackageNameQuery(final IPackageFragment fragment, final String initialSuggestedName);
+
+	INewNameQuery createNewResourceNameQuery(final IResource resource, final String initialSuggestedName);
+
+	INewNameQuery createNullQuery();
+
+	INewNameQuery createStaticQuery(final String name);
+}

@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.wizards;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface INewElementWizard {
+	IJavaElement getCreatedElement();
+
+	boolean performFinish();
+
+	void init(IWorkbench workbench, IStructuredSelection currentSelection);
+
+	IStructuredSelection getSelection();
+
+	IWorkbench getWorkbench();
+}

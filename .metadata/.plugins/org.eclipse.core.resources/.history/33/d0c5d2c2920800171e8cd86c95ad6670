@@ -1,0 +1,89 @@
+package org.eclipse.jdt.internal.ui.preferences.formatter;
+
+import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+
+/** 
+ * The code formatter preference page.
+ */
+public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock implements ICodeFormatterConfigurationBlock {
+	private static final String FORMATTER_DIALOG_PREFERENCE_KEY= "formatter_page";
+
+	private static final String DIALOGSTORE_LASTSAVELOADPATH= JavaUI.ID_PLUGIN + ".codeformatter";
+
+	/** 
+	* Some Java source code used for preview.
+	*/
+	protected final String PREVIEW= "/**\n* " + FormatterMessages.CodingStyleConfigurationBlock_preview_title + "\n*/\n\n" + "package mypackage; import java.util.LinkedList; public class MyIntStack {"
+			+ "private final LinkedList fStack;" + "public MyIntStack(){fStack= new LinkedList();}" + "public int pop(){return ((Integer)fStack.removeFirst()).intValue();}"
+			+ "public void push(int elem){fStack.addFirst(new Integer(elem));}" + "public boolean isEmpty() {return fStack.isEmpty();}" + "}";
+
+	private class PreviewController implements Observer {
+		public PreviewController(ProfileManager profileManager) {
+			profileManager.addObserver(this);
+			fJavaPreview.setWorkingValues(profileManager.getSelected().getSettings());
+			fJavaPreview.update();
+		}
+
+		@Override
+		public void update(Observable o, Object arg) {
+			final int value= ((Integer)arg).intValue();
+			switch (value) {
+				case ProfileManager.PROFILE_CREATED_EVENT:
+				case ProfileManager.PROFILE_DELETED_EVENT:
+				case ProfileManager.SELECTION_CHANGED_EVENT:
+				case ProfileManager.SETTINGS_CHANGED_EVENT:
+					fJavaPreview.setWorkingValues(((ProfileManager)o).getSelected().getSettings());
+					fJavaPreview.update();
+			}
+		}
+	}
+
+	/** 
+	 * The JavaPreview.
+	 */
+	private JavaPreview fJavaPreview;
+
+	public CodeFormatterConfigurationBlock(IProject project, PreferencesAccess access) {
+		super(project, access, DIALOGSTORE_LASTSAVELOADPATH);
+	}
+
+	protected IProfileVersioner createProfileVersioner() {
+		return new ProfileVersioner();
+	}
+
+	protected ProfileStore createProfileStore(IProfileVersioner versioner) {
+		return new FormatterProfileStore(versioner);
+	}
+
+	protected ProfileManager createProfileManager(List profiles, IScopeContext context, PreferencesAccess access, IProfileVersioner profileVersioner) {
+		return new FormatterProfileManager(profiles, context, access, profileVersioner);
+	}
+
+	protected void configurePreview(Composite composite, int numColumns, ProfileManager profileManager) {
+		createLabel(composite, FormatterMessages.CodingStyleConfigurationBlock_preview_label_text, numColumns);
+		CompilationUnitPreview result= new CompilationUnitPreview(profileManager.getSelected().getSettings(), composite);
+		result.setPreviewText(PREVIEW);
+		fJavaPreview= result;
+		final GridData gd= new GridData(GridData.FILL_VERTICAL | GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= numColumns;
+		gd.verticalSpan= 7;
+		gd.widthHint= 0;
+		gd.heightHint= 0;
+		fJavaPreview.getControl().setLayoutData(gd);
+		new PreviewController(profileManager);
+	}
+
+	protected ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile) {
+		return new FormatterModifyDialog(shell, profile, profileManager, profileStore, newProfile, FORMATTER_DIALOG_PREFERENCE_KEY, DIALOGSTORE_LASTSAVELOADPATH);
+	}
+}

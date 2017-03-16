@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.ui.preferences.cleanup;
+
+import java.util.Map;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.ICleanUpConfigurationUI;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IContributedCleanUpTabPage {
+	void setWorkingValues(Map workingValues);
+
+	void setOptions(CleanUpOptions options);
+
+	String getPreview();
+
+	int getSelectedCleanUpCount();
+
+	int getCleanUpCount();
+}

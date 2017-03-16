@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface IMoveInnerToTopWizard {
+	void createControl(Composite parent);
+
+	void setVisible(boolean visible);
+}

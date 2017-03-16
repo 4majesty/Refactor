@@ -1,0 +1,37 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import java.util.List;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.IBuildPathsBlock;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListDialogField;
+
+public interface INewSourceContainerWorkbookPage {
+	void init(IJavaProject javaProject);
+
+	void dispose();
+
+	Control getControl(Composite parent);
+
+	List getSelection();
+
+	void setSelection(List selection, boolean expand);
+
+	boolean isEntryKind(int kind);
+
+	void buildpathChanged(BuildpathDelta delta);
+
+	void commitDefaultOutputFolder();
+
+	void setFocus();
+
+	IJavaProject getJavaProject();
+}

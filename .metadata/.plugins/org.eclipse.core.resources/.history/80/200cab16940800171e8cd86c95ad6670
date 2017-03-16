@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.util;
+
+import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.jface.resource.JFaceResources;
+
+public interface ISWTUtil {
+}

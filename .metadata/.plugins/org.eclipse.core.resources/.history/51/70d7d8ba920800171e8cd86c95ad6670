@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.IBreadcrumb;
+
+public interface IShowInBreadcrumbAction {
+	void run();
+}

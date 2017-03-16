@@ -1,0 +1,41 @@
+package com.successfactors.cdp.bean;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+/***
+ * DevPlanPortletRowVO
+ * @author haixunlu
+ *
+ */
+public class DevPlanPortletRowVO {
+  /**HTML format columns each row*/
+  private List<Map<String, Object>> columns;
+  /** obj category*/
+  private String objCategory;
+
+  /***
+   * constructor
+   */
+  public DevPlanPortletRowVO() {
+    super();
+    this.columns = new ArrayList<Map<String, Object>>();
+  }
+
+  public String getObjCategory() {
+    return objCategory;
+  }
+
+  public void setObjCategory(String objCategory) {
+    this.objCategory = objCategory;
+  }
+
+  public List<Map<String, Object>> getColumns() {
+    return columns;
+  }
+
+  public void setColumns(List<Map<String, Object>> columns) {
+    this.columns = columns;
+  }
+
+}

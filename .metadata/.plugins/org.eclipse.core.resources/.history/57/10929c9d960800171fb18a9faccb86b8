@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls.search;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.search.TextSearchLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.IAppearanceAwareLabelProvider;
+
+public interface INLSSearchResultLabelProvider2 {
+	StyledString getStyledText(Object element);
+
+	String getText(Object element);
+
+	Image getImage(Object element);
+
+	void dispose();
+}

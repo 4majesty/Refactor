@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IEditFilterWizard {
+	void addPages();
+
+	boolean performFinish();
+
+	void cancel();
+}

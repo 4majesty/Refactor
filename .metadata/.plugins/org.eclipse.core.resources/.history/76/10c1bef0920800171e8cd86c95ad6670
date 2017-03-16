@@ -1,0 +1,28 @@
+package org.eclipse.jdt.internal.ui.jarimport;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
+import org.eclipse.jdt.internal.ui.refactoring.binary.BinaryRefactoringHistoryWizard;
+
+public interface IJarImportWizard {
+	RefactoringDescriptorProxy[] getDescriptors();
+
+	boolean isEmpty();
+
+	RefactoringHistory removeAll(final RefactoringHistory history);
+
+	boolean canFinish();
+
+	JarImportData getImportData();
+
+	IWizardPage getNextPage(final IWizardPage page);
+
+	void init(final IWorkbench workbench, final IStructuredSelection selection);
+
+	boolean performFinish();
+}

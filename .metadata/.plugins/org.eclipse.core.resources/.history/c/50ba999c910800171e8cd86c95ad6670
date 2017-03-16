@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.filters;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
+
+public interface ISyntheticMembersFilter {
+	boolean select(Viewer viewer, Object parent, Object element);
+}

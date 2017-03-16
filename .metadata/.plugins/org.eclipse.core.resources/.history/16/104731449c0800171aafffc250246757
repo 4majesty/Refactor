@@ -1,0 +1,18 @@
+package com.successfactors.cdp.bean.mentoring.jam;
+
+/**
+ * Used for Jam member information
+ */
+public class Member {
+
+  /** member Id */
+  private String memberId;
+
+  public String getMemberId() {
+    return memberId;
+  }
+
+  public void setMemberId(String memberId) {
+    this.memberId = memberId;
+  }
+}

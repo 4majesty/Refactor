@@ -1,0 +1,27 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jface.action.Action;
+
+/** 
+ * Remove occurrence annotations action.
+ * @since 3.0
+ */
+class RemoveOccurrenceAnnotations extends Action implements IRemoveOccurrenceAnnotations {
+	/** 
+	* The Java editor to which this actions belongs. 
+	*/
+	private final JavaEditor fEditor;
+
+	/** 
+	* Creates this action.
+	* @param editor the Java editor for which to remove the occurrence annotations
+	*/
+	RemoveOccurrenceAnnotations(JavaEditor editor) {
+		fEditor= editor;
+	}
+
+	@Override
+	public void run() {
+		fEditor.removeOccurrenceAnnotations();
+	}
+}

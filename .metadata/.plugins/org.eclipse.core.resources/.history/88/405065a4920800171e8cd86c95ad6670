@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.navigator;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.navigator.ICommonActionExtensionSite;
+import org.eclipse.jdt.ui.actions.IGenerateActionGroup;
+
+public interface IJavaNavigatorActionProvider {
+	void fillActionBars(IActionBars actionBars);
+
+	void fillContextMenu(IMenuManager menu);
+
+	void init(ICommonActionExtensionSite site);
+
+	void setContext(ActionContext context);
+
+	void dispose();
+}

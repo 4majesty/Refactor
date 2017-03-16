@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.propertiesfileeditor;
+
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.hyperlink.IHyperlink;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+public interface IOpenAction {
+	void selectionChanged(ITextSelection selection);
+
+	void run(ITextSelection selection);
+}

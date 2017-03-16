@@ -1,0 +1,14 @@
+package com.successfactors.rbp.integration.grc.xml.binding;
+
+import java.util.List;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+public interface IMessage {
+	String getKey();
+
+	void setKey(String value);
+
+	List<Content> getContent();
+}

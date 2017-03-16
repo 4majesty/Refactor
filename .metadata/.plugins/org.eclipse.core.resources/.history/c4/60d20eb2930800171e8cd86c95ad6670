@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.jarpackager;
+
+import org.eclipse.ltk.ui.refactoring.RefactoringUI;
+import org.eclipse.ltk.ui.refactoring.history.ISortableRefactoringHistoryControl;
+import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryControlConfiguration;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface IJarRefactoringDialog {
+	void create();
+}

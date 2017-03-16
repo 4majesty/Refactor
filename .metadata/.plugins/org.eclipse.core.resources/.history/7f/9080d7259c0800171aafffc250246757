@@ -1,0 +1,11 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceSystemException;
+
+public interface ISupervisedMatchJamGroupInviteObserver {
+	void onMatchSuccess(final ConfirmMatchingResult cmd);
+}

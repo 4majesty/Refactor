@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+public interface IMembersOrderPreferenceCache {
+	void install(IPreferenceStore store);
+
+	void dispose();
+
+	void propertyChange(PropertyChangeEvent event);
+
+	int getCategoryIndex(int kind);
+
+	boolean isSortByVisibility();
+
+	int getVisibilityIndex(int modifierFlags);
+}

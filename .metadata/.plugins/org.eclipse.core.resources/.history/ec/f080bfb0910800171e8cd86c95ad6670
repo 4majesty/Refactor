@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.dnd;
+
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
+
+public interface IViewerInputDropAdapter {
+	boolean performDrop(Object data);
+
+	boolean isEnabled(DropTargetEvent event);
+}

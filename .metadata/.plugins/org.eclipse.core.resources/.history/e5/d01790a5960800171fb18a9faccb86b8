@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.refactoring.code;
+
+import org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
+public interface IReplaceInvocationsWizard {
+}

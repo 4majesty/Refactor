@@ -1,0 +1,17 @@
+package com.successfactors.cdp.service.util.deeplink;
+
+import com.successfactors.sca.ServiceApplicationException;
+
+public interface IMentoringProgramManageOtherCheckTest {
+	void setup();
+
+	void tearDown();
+
+	void testFeatureDisabled();
+
+	void testIsAdmin();
+
+	void testIsOwner();
+
+	void testFeatureDisabledForNullObjDefinition();
+}

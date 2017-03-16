@@ -1,0 +1,31 @@
+package com.successfactors.cdp.service.mentoring.jam;
+
+import javax.validation.constraints.NotNull;
+
+import com.successfactors.cdp.bean.mentoring.jam.JamFeedWidgetInfo;
+import com.successfactors.sca.ServiceQuery;
+
+/**
+ * Command to fetch Jam Feed Widget Information
+ * 
+ * @author rsrigiri
+ * 
+ * SAP SuccessFactors
+*/
+public class GetJamFeedWidgetInfo implements ServiceQuery<JamFeedWidgetInfo> {
+
+  @NotNull
+  /** program id */
+  private String programId;
+
+  public GetJamFeedWidgetInfo() {
+  }
+
+  public GetJamFeedWidgetInfo(String programId) {
+    this.programId = programId;
+  }
+
+  public String getProgramId() {
+    return programId;
+  }
+}

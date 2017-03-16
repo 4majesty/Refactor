@@ -1,0 +1,9 @@
+package test2;
+
+import test1.a;
+
+public class test2 {
+	a test = new a();
+	a test2;
+	if(a test3 instance of a){}
+}

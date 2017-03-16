@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.jface.action.IMenuCreator;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+public interface IClasspathModifierDropDownAction {
+	String getDetailedDescription();
+
+	void run();
+
+	IMenuCreator getMenuCreator();
+
+	Menu getMenu(Control parent);
+
+	Menu getMenu(Menu parent);
+
+	void addAction(BuildpathModifierAction action);
+
+	void removeAction(BuildpathModifierAction action);
+
+	void dispose();
+}

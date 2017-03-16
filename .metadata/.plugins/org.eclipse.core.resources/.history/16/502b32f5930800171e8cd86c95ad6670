@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+import org.eclipse.jdt.internal.ui.preferences.ClasspathContainerPreferencePage;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IConfigureContainerAction {
+	void setActivePart(IAction action, IWorkbenchPart targetPart);
+
+	void run(IAction action);
+
+	void selectionChanged(IAction action, ISelection selection);
+}

@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.infoviews;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.ui.actions.OpenAction;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface IGotoInputAction {
+	void run();
+}

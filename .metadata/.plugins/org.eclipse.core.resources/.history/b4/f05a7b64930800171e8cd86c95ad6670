@@ -1,0 +1,9 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
+
+public interface IOpenNewSourceFolderWizardAction {
+}

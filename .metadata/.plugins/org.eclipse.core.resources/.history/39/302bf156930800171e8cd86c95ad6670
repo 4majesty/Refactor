@@ -1,0 +1,28 @@
+package org.eclipse.jdt.internal.ui.jarimport;
+
+import java.net.URI;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
+public interface IJarImportData {
+	long getExistingTimeStamp();
+
+	IPackageFragmentRoot getPackageFragmentRoot();
+
+	URI getRefactoringFileLocation();
+
+	RefactoringHistory getRefactoringHistory();
+
+	boolean isRenameJarFile();
+
+	void setExistingTimeStamp(final long stamp);
+
+	void setPackageFragmentRoot(final IPackageFragmentRoot root);
+
+	void setRefactoringFileLocation(final URI uri);
+
+	void setRefactoringHistory(final RefactoringHistory history);
+
+	void setRenameJarFile(final boolean rename);
+}

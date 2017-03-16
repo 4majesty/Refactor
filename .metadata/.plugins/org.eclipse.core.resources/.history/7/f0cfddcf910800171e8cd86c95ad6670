@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jface.text.DocumentCommand;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
+import org.eclipse.jdt.internal.ui.text.JavaIndenter;
+import org.eclipse.jdt.internal.ui.text.Symbols;
+
+public interface IJavaAutoIndentStrategy {
+	void customizeDocumentCommand(IDocument d, DocumentCommand c);
+}

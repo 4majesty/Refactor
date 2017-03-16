@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface IConfigureWorkingSetAction {
+	void setWorkingSetModel(WorkingSetModel model);
+
+	void run();
+}

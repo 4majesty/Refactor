@@ -1,0 +1,18 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.xi.ui.messages.SFMessages;
+
+public interface ICDPAdminControllerTest {
+	void setUp();
+
+	void testNoPermission();
+
+	void testHasPermission();
+
+	void testNoNPE();
+
+	void testSumCheck();
+
+	void testGetSetting();
+}

@@ -1,0 +1,43 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.window.Window;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+
+public interface ITodoTaskConfigurationBlock {
+	Image getImage(Object element);
+
+	String getText(Object element);
+
+	Image getColumnImage(Object element, int columnIndex);
+
+	String getColumnText(Object element, int columnIndex);
+
+	Font getFont(Object element);
+
+	int compare(Viewer viewer, Object e1, Object e2);
+
+	void setEnabled(boolean isEnabled);
+
+	void customButtonPressed(ListDialogField field, int index);
+
+	void selectionChanged(ListDialogField field);
+
+	void doubleClicked(ListDialogField field);
+
+	void dialogFieldChanged(DialogField field);
+}

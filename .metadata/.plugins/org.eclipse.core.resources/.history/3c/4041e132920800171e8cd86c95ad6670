@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
+import org.eclipse.ui.PlatformUI;
+
+public interface IColoredViewersManager {
+	void installColoredLabels(ColoringLabelProvider labelProvider);
+
+	void uninstallColoredLabels(ColoringLabelProvider labelProvider);
+
+	void propertyChange(PropertyChangeEvent event);
+}

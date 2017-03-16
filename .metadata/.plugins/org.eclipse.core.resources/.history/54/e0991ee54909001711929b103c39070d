@@ -1,0 +1,10 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.service.mentoring.CheckJAMPermission;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+public interface ICheckJAMPermissionImpl {
+	Boolean execute(CheckJAMPermission arg0) throws ServiceApplicationException;
+}

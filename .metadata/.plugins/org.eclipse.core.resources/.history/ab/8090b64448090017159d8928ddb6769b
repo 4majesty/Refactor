@@ -1,0 +1,374 @@
+package com.successfactors.cdp.service.impl;
+
+import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.bean.idp.CareerWorkSheetTemplateBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerEntryBean;
+import com.successfactors.cdp.bean.idp.ReadinessMeterInfoBean;
+import com.successfactors.cdp.service.GetRoleReadiness;
+import com.successfactors.cdp.util.CareerWorksheetUtils;
+import com.successfactors.competency.bean.CompetencyBean;
+import com.successfactors.competency.dao.CompetencyDAO;
+import com.successfactors.competency.util.type.CompetencyTypeEnum;
+import com.successfactors.db.dao.DAOException;
+import com.successfactors.gm.api.bean.IField;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.api.dao.ObjDAO;
+import com.successfactors.gm.service.objective.GetDefaultTemplate;
+import com.successfactors.gm.util.permission.DelegateObjectiveRulesEngine;
+import com.successfactors.gm.util.permission.GMRulesEngine;
+import com.successfactors.gm.util.permission.ObjectiveRulesEngineException;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.legacy.bean.FeedbackBean;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.dao.FeedbackDAO;
+import com.successfactors.legacy.service.GetSysConfig;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.pmcommon.bean.FormBean;
+import com.successfactors.pmcommon.dao.FormDAO;
+import com.successfactors.rbp.app.api.RBPFacade;
+import com.successfactors.rbp.app.api.TargetPopulationCriteria;
+import com.successfactors.rbp.app.collector.ContextualPermissionSpec;
+import com.successfactors.rbp.app.collector.PermissionSpec;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+
+@Service
+public class GetRoleReadinessImpl implements ServiceCommandImpl<GetRoleReadiness, GetRoleReadiness>{
+
+  @Inject
+  @In
+  ParamBean params;
+  @Inject
+  @In
+  Connection dbConnection;
+  
+  private LocalContextSCAHandler legacyHandler = LocalContextSCAHandler.create();
+  @Inject
+  @In
+  private transient ServiceCommandHandler scaHandler;
+  @Inject
+  @In(create=true)
+  protected EJBList ejbListAdapter;
+  
+  /** RBP instance. */
+  @Inject
+  @In(value = RBPFacade.RBP_FACADE_NAME, create = true)
+  protected RBPFacade rbp;
+  
+  private CompetencyDAO competencyDAO = DAOFactory.getDAOFactory().getCompetencyDAO();;
+  private ObjDAO objectiveDAO = (ObjDAO)DAOFactory.getDAOFactory().getObjDAO();
+  private FeedbackDAO feedbackDAO = DAOFactory.getDAOFactory().getFeedbackDAO();
+  private FormDAO formDAO = DAOFactory.getDAOFactory().getFormDAO();
+  
+  /**Cache form bean*/
+  private Map<Integer, FormBean> formBeanMap = new HashMap<Integer, FormBean>();
+  
+  /** log */
+  private static Logger logger = LogManager.getLogger();
+  
+  private static final Double DEFAULT_DOUBLE_VALUE=0.0;
+  
+  @Override
+  public GetRoleReadiness execute(GetRoleReadiness cmd)
+      throws ServiceApplicationException {
+    long roleId = cmd.getRoleId();
+    String targetUserId = cmd.getTargetUserId();
+    
+    // Get default CWS template
+    ObjTemplateBean planBean = legacyHandler.execute(params, new GetDefaultTemplate(ObjPlanTypeEnum.CAREER_WORKSHEET));
+    logger.debug("Load default career worksheet plan:" + planBean.getObjPlanId());
+    
+    if(planBean == null) {
+      logger.error("Error in GetRoleReadinessImpl: No career worksheet template found.");
+      throw new ServiceApplicationException("No career worksheet template found");
+    }
+      
+    // Check template target population
+    PermissionSpec permSpec = new ContextualPermissionSpec<Long>(null, PermissionBean.TGM, PermissionBean.TGM_TEMPLATE_VIEW, planBean.getObjPlanId(), Long.class);
+    TargetPopulationCriteria criteria = new TargetPopulationCriteria(false, false);
+    Set<String> targetPopulation = rbp.getTargetPopulation(params.getUserId(), permSpec, criteria);
+    if(targetPopulation != null && !targetPopulation.contains(targetUserId)) {
+      cmd.setReadiness(DEFAULT_DOUBLE_VALUE);
+      cmd.setDisplay(false);
+      return cmd;
+    }
+    
+    GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine.getRulesEngine(null, params, ejbListAdapter,
+        params.getUserId(), planBean, null, null);
+    
+    // check if need display readiness meter configured in template
+    boolean displayRedinessMeter = false;
+    try {
+        displayRedinessMeter = this.hasReadPermission(rulesEngine,planBean,
+          CareerWorkSheetTemplateBean.FIELD_READINESS_METER, targetUserId);
+    } catch (RemoteException e) {
+      logger.error("Error in GetRoleReadinessImpl: Get readiness meter display option failed.");
+    } catch (ObjectiveRulesEngineException e) {
+      logger.error("Error in GetRoleReadinessImpl: Get readiness meter display option failed.");
+    }
+    
+    cmd.setDisplay(displayRedinessMeter);
+    
+    CareerWorksheetBean.CareerBehaviorBean careerBehaviorBean = planBean.getCareerBehaviorBean();
+    IField lastRatingField = planBean.getField(CareerWorkSheetTemplateBean.FIELD_LAST_RATING);
+    
+    // Get competency id set by role id.
+    boolean includeSubcompetencies = true;
+    if(careerBehaviorBean != null){
+      includeSubcompetencies = careerBehaviorBean.isUseInReadiness();
+    }
+    Set<Long> roleIds = new HashSet<Long>();
+    roleIds.add(roleId);
+    List<CompetencyBean> comps = competencyDAO.getCompetencyListByRoleId(params.getCompanySchema(), dbConnection, roleId, false, includeSubcompetencies, 
+        params.getLocale(), CompetencyTypeEnum.TYPE_COMPETENCY.getName(), false);
+    
+    if(comps != null && comps.size() > 0) {
+      Set<Long> compIdSet = new HashSet<Long>();
+      for(CompetencyBean comp : comps) {
+        compIdSet.add(comp.getCompetencyId());
+      }
+      
+      //get ratings for all related competencies
+      Map<Long, CareerWorksheetBean.CareerEntryBean> lastRatings = 
+          new HashMap<Long, CareerWorksheetBean.CareerEntryBean>();
+      if(!compIdSet.isEmpty()){
+        lastRatings = getCompetencyRatings(targetUserId, compIdSet, planBean);
+        
+        List<CompetencyBean> comList = competencyDAO.getCompetencyListByRoleId(params.getCompanySchema(), dbConnection, roleId, false, includeSubcompetencies, 
+            params.getLocale(), CompetencyTypeEnum.TYPE_COMPETENCY.getName(), false);
+        
+        List<CareerWorksheetBean.CareerEntryBean> entryList = mergeCompetencyBean(lastRatings, comList);
+
+        if(entryList == null || entryList.isEmpty()) {
+          cmd.setReadiness(DEFAULT_DOUBLE_VALUE);
+        } else {
+          double roleReadiness = calculateRoleReadiness(lastRatingField,
+              includeSubcompetencies, entryList);
+          cmd.setReadiness(roleReadiness);
+        }
+      }
+    }
+    
+    return cmd;
+  }
+
+  /**
+   * Merge competency info into rating map
+   * @param lastRatings
+   * @param comList
+   * @return
+   */
+  private List<CareerWorksheetBean.CareerEntryBean> mergeCompetencyBean(
+      Map<Long, CareerWorksheetBean.CareerEntryBean> lastRatings,
+      List<CompetencyBean> comList) {
+    List<CareerWorksheetBean.CareerEntryBean> entryList = new ArrayList<CareerWorksheetBean.CareerEntryBean>();
+    if(comList != null) {
+      for (Iterator compItr = comList.iterator(); compItr.hasNext();) {
+        CompetencyBean competencyBean = (CompetencyBean) compItr.next();
+        CareerWorksheetBean.CareerEntryBean entryBean = new  CareerWorksheetBean.CareerEntryBean();
+        entryBean.setCompetencyId(competencyBean.getCompetencyId());
+        entryBean.setCompName(competencyBean.getCompetencyName());
+        entryBean.setCompetencyDescription(competencyBean.getCompetencyDesc());
+        entryBean.setExpectedRating(competencyBean.getExpectedRating());
+        entryBean.setCompetencyType(FeedbackBean.TYPE_COMPETENCY);
+        entryBean.setCompetencySource(competencyBean.getCompetencySource());
+        setLastRatingInfo(competencyBean.getCompetencyId(), entryBean, lastRatings);
+        List subCompetencyList = competencyBean.getSubcompetencyList();
+        if (subCompetencyList != null && !subCompetencyList.isEmpty()) {
+          List subEntryList = new ArrayList();
+          entryBean.setSubEntryList(subEntryList);
+          for (Iterator behaviorItr = subCompetencyList.iterator(); behaviorItr.hasNext();) {
+            CompetencyBean behavior = (CompetencyBean) behaviorItr.next();
+            CareerWorksheetBean.CareerEntryBean subEntryBean = new CareerWorksheetBean.CareerEntryBean();
+            subEntryBean.setCompetencyId(behavior.getCompetencyId());
+            subEntryBean.setCompName(behavior.getCompetencyName());
+            subEntryBean.setCompetencyDescription(behavior.getCompetencyDesc());
+            subEntryBean.setExpectedRating(behavior.getExpectedRating());
+            subEntryBean.setCompetencyType(FeedbackBean.TYPE_BEHAVIOR);
+            setLastRatingInfo(behavior.getCompetencyId(), subEntryBean, lastRatings);
+ 
+            subEntryList.add(subEntryBean);
+          }
+        }
+        entryList.add(entryBean);
+      }
+    }
+    
+    return entryList;
+  }
+
+  /**
+   * Calculate role readiness.
+   * @param lastRatingField
+   * @param includeSubcompetencies
+   * @param entryList
+   * @return
+   */
+  private double calculateRoleReadiness(IField lastRatingField,
+      boolean includeSubcompetencies,
+      List<CareerWorksheetBean.CareerEntryBean> entryList) {
+    int requiredCompetencies = 0;
+    boolean useCompanyScale = false;
+    try{
+      SystemBean systemBean = scaHandler.execute(new GetSysConfig(SystemBean.COMPANYWIDE_SCALE_KEY, SystemBean.COMPANYWIDE_SCALE_TYPE));
+      useCompanyScale = systemBean!=null;
+    } catch(ServiceApplicationException e){
+      useCompanyScale = false;
+    }
+    ReadinessMeterInfoBean meterInfoBean = new ReadinessMeterInfoBean();
+    for (CareerWorksheetBean.CareerEntryBean entryBean : entryList) {
+      double actualRating = lastRatingField!=null?CareerWorksheetUtils.adjustLastRating(lastRatingField, entryBean.getLastRating(),
+            entryBean.getMinScale(), entryBean.getMaxScale()):0;
+      double percent = entryBean.getExpectedRating();
+      double expectedRating = lastRatingField!=null?CareerWorksheetUtils.getExpectedRating(lastRatingField, percent):DEFAULT_DOUBLE_VALUE;
+      meterInfoBean.calculation(actualRating,expectedRating, useCompanyScale);// calculate filledCompetencies
+      if(entryBean.getCompetencyType() == FeedbackBean.TYPE_COMPETENCY){
+        requiredCompetencies++;
+      }
+      if(includeSubcompetencies){
+        // add behavior support
+        List subEntryList = entryBean.getSubEntryList();
+        if(null!=subEntryList && !subEntryList.isEmpty()){
+          for(Iterator it2 = subEntryList.iterator();it2.hasNext();){
+            CareerEntryBean subEntry = (CareerEntryBean)it2.next();
+            long behaviorId = subEntry.getCompetencyId();
+            double behaviorActualRating = lastRatingField!=null?
+              CareerWorksheetUtils.adjustLastRating(lastRatingField,
+                  subEntry.getLastRating(), subEntry.getMinScale(), subEntry.getMaxScale()):DEFAULT_DOUBLE_VALUE;
+            double behaviorExpectedRating = lastRatingField!=null?
+              CareerWorksheetUtils.getExpectedRating(lastRatingField,
+                    entryBean.getExpectedRating()):0;
+            // if behavior expected rating is not set, use competency's.
+            if(FeedbackBean.NOT_APPLICABLE == behaviorExpectedRating){
+              behaviorExpectedRating = expectedRating;
+            }
+            // calculation only support includeBehavior=true or competency
+            meterInfoBean.calculation(behaviorActualRating,behaviorExpectedRating, useCompanyScale);
+            requiredCompetencies++;
+          }
+        }
+      }
+    }
+    double roleReadiness = CareerWorksheetUtils.getReadinessMeter(meterInfoBean, requiredCompetencies, 0);
+    return roleReadiness/CareerWorksheetUtils.DOUBLE_100;
+  }
+  
+  /**
+   * Get rating for competency. Have special logic for 360 form.
+   * @param userId
+   * @param compIdSet
+   * @param planBean
+   * @return
+   * @throws ServiceApplicationException
+   */
+  private Map<Long, CareerWorksheetBean.CareerEntryBean> getCompetencyRatings(String userId, Set<Long> compIdSet, ObjTemplateBean planBean)
+      throws ServiceApplicationException{
+    try{
+      //form ids will be filtered which defined in plan
+      String formIds = planBean.getCWSRatingFilterFormIds(params.getLocale().toString());
+      
+      Map newEntryMap = objectiveDAO.getCareerWorksheetEntries(
+          params.getCompanySchema(), dbConnection, userId, compIdSet, formIds);
+      // Copy the data into the existing map
+      if (newEntryMap != null && !newEntryMap.isEmpty()) {
+        for (Iterator itr = newEntryMap.keySet().iterator(); itr.hasNext(); ) {
+          Long compId = (Long) itr.next();
+
+          CareerWorksheetBean.CareerEntryBean entryBeanNew 
+              = (CareerWorksheetBean.CareerEntryBean)newEntryMap.get(compId);
+          //Handle 360 form rating
+          if(FormBean.TYPE_PM360.equals(entryBeanNew.getFormType())){
+            //get last rating
+            // CDP-2468: get behavior latest rating
+            entryBeanNew.setLastRating(this.get360FormRating(
+                entryBeanNew.getFormDataId(), entryBeanNew.getFormTempId(), entryBeanNew.getCompetencyId(),
+                entryBeanNew.getCompetencyType()));
+          }
+        }
+      }
+      return newEntryMap;
+    }catch(DAOException oe){
+      logger.error("DAOException caught in GetRoleReadinessImpl.getCompetencyRatings: " + oe, oe);
+      throw new ServiceApplicationException("DAOException caught in GetRoleReadinessImpl.getCompetencyRatings: "
+        + oe.getMessage(), oe);
+    }
+  }
+
+  private double get360FormRating(long formDataId, int formtid, long competencyId, long competencyType)
+      throws ServiceApplicationException{
+    double rating = 0.0;
+    try{
+      List<FeedbackBean> feedbackList = feedbackDAO.getFeedbackRecordsForCompetenciesRatingWithFormStatus(params.
+          getCompanySchema(), dbConnection, formDataId, competencyId, FormBean.STATUS_COMPLETED, competencyType);
+      FormBean formbean = formBeanMap.get(formtid);
+      if(formbean == null){
+        formbean = formDAO.getFormTemplateById(params.getCompanySchema(), dbConnection, formtid);
+        formBeanMap.put(formtid, formbean);
+      }
+      
+      return CareerWorksheetUtils.get360FormRating(feedbackList, formbean);
+    } catch (DAOException oe) {
+      logger.error("DAOException caught in GetRoleReadinessImpl.get360FormRating: " + oe, oe);
+      throw new ServiceApplicationException("DAOException caught in GetRoleReadinessImpl.get360FormRating: "
+        + oe.getMessage(), oe);
+    }
+    
+  }
+  
+  private void setLastRatingInfo(long compId, CareerWorksheetBean.CareerEntryBean entryBean,
+      Map<Long, CareerWorksheetBean.CareerEntryBean> lastRatingMap){
+    CareerWorksheetBean.CareerEntryBean lastRatingBean = lastRatingMap.get(compId);
+    if(lastRatingBean != null){
+      entryBean.setGoalCount(lastRatingBean.getGoalCount());
+      entryBean.setLastFormName(lastRatingBean.getLastFormName());
+      entryBean.setLastRatedDate(lastRatingBean.getLastRatedDate());
+      entryBean.setLastRating(lastRatingBean.getLastRating());
+      entryBean.setMaxScale(lastRatingBean.getMaxScale());
+      entryBean.setMinScale(lastRatingBean.getMinScale());
+    }
+  }
+  
+  /***
+   * check if login user has field read permission for target user
+   * @param rulesEngine
+   * @param planBean
+   * @param fieldId
+   * @param userId
+   * @return
+   * @throws RemoteException
+   * @throws ObjectiveRulesEngineException
+   */
+  private boolean hasReadPermission(GMRulesEngine rulesEngine, ObjTemplateBean planBean,
+      String fieldId, String userId) throws RemoteException, ObjectiveRulesEngineException{
+    boolean hasPermission=false;
+    if(planBean!=null){
+      IField field = planBean.getField(fieldId);
+      if(field!=null){
+        hasPermission = rulesEngine.hasReadPermission(userId, field, null);
+      }
+    }
+    return hasPermission;
+  }
+}

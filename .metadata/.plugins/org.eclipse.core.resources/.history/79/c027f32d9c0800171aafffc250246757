@@ -1,0 +1,12 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import com.successfactors.jobscheduler.bean.JobScheduleRequestEO;
+import com.successfactors.jobscheduler.bean.SchedulingConfig;
+import com.successfactors.jobscheduler.bean.SchedulingTypeEnum;
+import com.successfactors.legacy.bean.eo.RequestDefinition;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+
+public interface IMentoringJobUtil {
+}

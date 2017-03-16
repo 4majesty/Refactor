@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.filters;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+
+public interface ILibraryFilter {
+	boolean select(Viewer viewer, Object parentElement, Object element);
+}

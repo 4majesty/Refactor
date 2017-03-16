@@ -1,0 +1,28 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+class RefreshAction extends Action implements IRefreshAction {
+	private CallHierarchyViewPart fPart;
+
+	public RefreshAction(CallHierarchyViewPart part) {
+		fPart= part;
+		setText(CallHierarchyMessages.RefreshAction_text);
+		setToolTipText(CallHierarchyMessages.RefreshAction_tooltip);
+		JavaPluginImages.setLocalImageDescriptors(this, "refresh_nav.gif");
+		setActionDefinitionId(IWorkbenchCommandConstants.FILE_REFRESH);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_REFRESH_ACTION);
+	}
+
+	/** 
+	* @see org.eclipse.jface.action.Action#run()
+	*/
+	@Override
+	public void run() {
+		fPart.refresh();
+	}
+}

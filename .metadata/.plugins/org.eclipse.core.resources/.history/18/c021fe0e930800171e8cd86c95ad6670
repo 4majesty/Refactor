@@ -1,0 +1,12 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.actions.ExportResourcesAction;
+import org.eclipse.ui.actions.ImportResourcesAction;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
+public interface IImportActionGroup {
+	void fillContextMenu(IMenuManager menu);
+
+	void dispose();
+}

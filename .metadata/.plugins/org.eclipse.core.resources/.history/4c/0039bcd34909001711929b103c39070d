@@ -1,0 +1,4 @@
+package com.successfactors.cdp.service.mentoring;
+
+public interface ICheckJAMPermission {
+}

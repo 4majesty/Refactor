@@ -1,0 +1,37 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+
+public interface ITypeHierarchyViewer {
+	void setQualifiedTypeName(boolean on);
+
+	void initContextMenu(IMenuListener menuListener, String popupId, IWorkbenchPartSite viewSite);
+
+	void contributeToContextMenu(IMenuManager menu);
+
+	void setMemberFilter(IMember[] memberFilter);
+
+	boolean isMethodFiltering();
+
+	void setWorkingSetFilter(ViewerFilter filter);
+
+	Object containsElements();
+
+	IType getTreeRootType();
+
+	boolean isElementShown(Object element);
+
+	void updateContent(boolean doExpand);
+
+	String getTitle();
+
+	void setContentProvider(IContentProvider cp);
+}

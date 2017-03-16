@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface IClearWorkingSetAction {
+	void run();
+}

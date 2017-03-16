@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.corext.refactoring;
+
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
+
+public interface ITypedSource {
+	String getSource();
+
+	int getType();
+
+	boolean equals(Object other);
+
+	int hashCode();
+}

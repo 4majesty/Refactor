@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
+
+public interface INewWizardsActionGroup {
+	void fillContextMenu(IMenuManager menu);
+}

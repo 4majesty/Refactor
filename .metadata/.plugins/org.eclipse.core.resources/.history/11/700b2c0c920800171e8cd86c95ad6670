@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
+
+public interface IToggleLinkingAction {
+	void run();
+}

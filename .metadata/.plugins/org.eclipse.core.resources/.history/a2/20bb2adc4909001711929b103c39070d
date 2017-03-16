@@ -1,0 +1,11 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.cdp.service.SetSuggestedRolesFilterFlags;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+public interface ISetSuggestedRolesFilterFlagsImpl {
+	Void execute(SetSuggestedRolesFilterFlags cmd) throws ServiceApplicationException;
+}

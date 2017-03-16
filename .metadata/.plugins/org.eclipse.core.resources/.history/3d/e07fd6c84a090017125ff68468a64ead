@@ -1,0 +1,31 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import static com.successfactors.unittest.TestUtils.setField;
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+import org.apache.http.HttpStatus;
+import org.apache.http.message.BasicNameValuePair;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.service.mentoring.jam.GetJamSingleUseToken;
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.unittest.TestUtils;
+
+public interface IGetJamSingleUseTokenImplTest {
+	ParamBean getDefaultParam();
+
+	void setUp();
+
+	void testSuccessResponse();
+
+	void testwithAccessToken();
+
+	void testServiceUnavailable();
+}

@@ -1,0 +1,55 @@
+package com.successfactors.cdp.service.impl;
+
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.successfactors.logging.api.Logger;
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.bean.AutoCompleteRoleSearchVO;
+import com.successfactors.cdp.service.AutoCompleteRoleSearch;
+import com.successfactors.competency.dao.CompetencyDAO;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.logging.api.LogManager;
+import javax.inject.Inject;
+
+@Service
+public class AutoCompleteRoleSearchImpl
+    implements ServiceQueryImpl<List<AutoCompleteRoleSearchVO>, AutoCompleteRoleSearch> {
+
+  /** params */
+  @Inject
+  @In
+  ParamBean params;
+
+  /***/
+  @Inject
+  @In
+  Connection dbConnection;
+
+  /**logger*/
+  private static Logger logger = LogManager.getLogger();
+
+  /**
+   * execute 
+   * @param cmd 
+   * @return list
+   * @throws ServiceApplicationException 
+   */
+  @Override
+  public List<AutoCompleteRoleSearchVO> execute(AutoCompleteRoleSearch cmd)
+      throws ServiceApplicationException {
+    String userId = cmd.getUserId();
+    long templateId = cmd.getTemplateId();
+    List<AutoCompleteRoleSearchVO> result = new ArrayList<AutoCompleteRoleSearchVO>();
+    CompetencyDAO roleSearchDAO = DAOFactory.getDAOFactory().getCompetencyDAO();
+    result = roleSearchDAO.searchRole(params.getCompanySchema(), dbConnection, userId, templateId, cmd.getKeyword());
+    return result;
+  }
+
+}

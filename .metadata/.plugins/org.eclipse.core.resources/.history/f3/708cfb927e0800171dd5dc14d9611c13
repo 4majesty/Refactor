@@ -1,0 +1,200 @@
+package com.successfactors.xi.ui.config.login;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+import org.jboss.seam.mock.SeamTest;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.mockobjects.servlet.MockHttpServletRequest;
+import com.successfactors.authentication.service.EmailNotificationParam;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.email.util.constants.EmailNotificationConstants;
+import com.successfactors.platform.ui.login.determinator.DeepLinkEndPointDeterminator;
+import com.successfactors.platform.ui.login.determinator.EndPointContext;
+import com.successfactors.platform.ui.servlet.BoilerPlateServlet;
+import com.successfactors.legacy.ui.servlet.UIEnum;
+import com.successfactors.legacy.ui.fb.AcmeMap;
+import com.successfactors.legacy.ui.fb.AcmeStateEnum;
+import com.successfactors.pmcommon.service.ejb.Form;
+import com.successfactors.xi.ui.controller.topnav.TopNavBarViewEnum;
+import com.successfactors.platform.util.UIVersionManager.UIVersion;
+
+
+public class DeepLinkEndpointDeterminatorTest extends SeamTest{
+    
+    ParamBean params = new ParamBean();
+    CompanyBean cbean;
+    EndPointContext context;
+    Form formService;
+    MockHttpServletRequest req = new MockHttpServletRequest();
+    IFeatureEnum selectedFeature = null;
+
+    @BeforeMethod(groups={"checkin"}) 
+    public void beforeTest(){
+        cbean = new CompanyBean(){
+            @Override
+            public boolean isFeatureExist(FeatureEnum feature) {
+                return getFeatureSet().contains(feature);
+            }
+        };   
+           
+        context = new EndPointContext();
+        context.setRequest(req);
+        
+        params.setCompanyBean(cbean);
+        
+        formService = (Form)Proxy.newProxyInstance(
+                Thread.currentThread().getContextClassLoader(),
+                new Class<?>[] { Form.class },
+                     new InvocationHandler() {  
+                       public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        // TODO Auto-generated method stub
+                        if( method.getName().equals("getFolderMapIdByDataId")) {
+                            return 5161;
+                        } 
+                        
+                        return null;
+                    }
+                });
+       
+    }
+    
+    
+    @Test(groups={"checkin", "broken", "scaconverter"})
+    public void testNoDeepLinks()
+    {
+
+        DeepLinkEndPointDeterminator pcd = new DeepLinkEndPointDeterminator();
+
+        setField(pcd, "params", params);
+        setField(pcd, "companybean", cbean);
+        
+        
+        String result = pcd.determine(UIVersion.V10, context);
+        assert result == null;
+       
+        result = pcd.determine(UIVersion.V11, context);
+        assert result == null;
+        
+    }
+    
+    
+    //@Test(groups={"checkin"})
+    public void testOldEmailLink()
+    {
+
+        DeepLinkEndPointDeterminator pcd = new DeepLinkEndPointDeterminator();
+
+        setField(pcd, "params", params);
+        setField(pcd, "companybean", cbean);
+        
+    
+        req.setupAddParameter(EmailNotificationConstants.EMAIL_NOTIFY, "notify");
+        req.setupAddParameter(EmailNotificationConstants.EMAIL_NOTIFY_FMAPID, "1");
+        //set boilerplateservlet attribute to indicate acme ui.
+        //req.setAttribute("a_uifw", UIEnum.ACME);
+        
+        req.setupGetAttribute(UIEnum.ACME);
+        req.addExpectedGetAttributeName("a_uifw");
+        
+        EmailNotificationParam emailParam = new EmailNotificationParam(context.getRequest());
+        //emailParam.setFolderMapId("1");
+        //emailParam.setEmNotify("notify");
+        context.addLoginParam("emailNotificationParam", emailParam);
+        
+        String result = pcd.determine(UIVersion.V10, context);
+        assert result != null;
+        assert result.equals(AcmeMap.getOpenFormURL(context.getRequest(), params, emailParam.getFolderMapId(), true));
+        
+        result = pcd.determine(UIVersion.V11, context);
+        assert result == null;
+        
+    }
+    
+    @Test(groups={"checkin", "broken", "scaconverter"})
+    public void testDeeplinkPmReviews()
+    {
+
+        DeepLinkEndPointDeterminator pcd = new DeepLinkEndPointDeterminator();
+
+        setField(pcd, "params", params);
+        setField(pcd, "companybean", cbean);
+        
+        //NOTE this should never change since customers will depend on this.
+        context.setReferer("/pmreviews");
+        
+        String result = pcd.determine(UIVersion.V10, context);
+        assert result != null;
+        //assert result.equals("/acme?" + BoilerPlateServlet.PARAM_COMPANYID +"=" 
+        //        + params.getCompanyId()+"&fbacme_n=" + AcmeStateEnum.MY_FORMS);
+        Assert.assertEquals(result, "/sf/pmreviews");
+        
+        // currently the same for both v11 and v10.
+        result = pcd.determine(UIVersion.V11, context);
+        //assert result != null;
+        //assert result.equals(TopNavBarViewEnum.PM_REVIEW.getUrlStr());
+        Assert.assertEquals(result, "/sf/pmreviews");
+    }
+    
+    
+    @Test(groups={"checkin", "broken", "scaconverter"})
+    public void testDeeplinkGoals()
+    {
+
+        DeepLinkEndPointDeterminator pcd = new DeepLinkEndPointDeterminator();
+
+        setField(pcd, "params", params);
+        setField(pcd, "companybean", cbean);
+        
+        //NOTE this should never change since customers will depend on this.
+        context.setReferer("/goals");
+        
+        String result = pcd.determine(UIVersion.V10, context);
+        assert result != null;
+        Assert.assertEquals(result, "/sf/goals");
+        
+        // currently the same for both v11 and v10.
+        result = pcd.determine(UIVersion.V11, context);
+        assert result != null;
+        Assert.assertEquals(result, "/sf/goals");
+    }
+    
+    @Test(groups={"checkin", "broken", "scaconverter"})
+    public void testDeepLinkNoDeeplinkPart()
+    {
+
+        DeepLinkEndPointDeterminator pcd = new DeepLinkEndPointDeterminator();
+
+        setField(pcd, "params", params);
+        setField(pcd, "companybean", cbean);
+        
+        //NOTE this should never change since customers will depend on this.
+        context.setReferer("/goals");
+        
+        String result = pcd.determine(UIVersion.V10, context);
+        
+        assert result.equals("/sf/goals");
+        /**
+        assert result != null;
+        assert result.equals("/acme?" + BoilerPlateServlet.PARAM_COMPANYID +"=" 
+                + params.getCompanyId()+"&fbacme_n=" + AcmeStateEnum.OBJECTIVES);
+        
+        // currently the same for both v11 and v10.
+        result = pcd.determine(UIVersion.V11, context);
+        assert result != null;
+        assert result.equals(TopNavBarViewEnum.GOAL_PLAN_ULTRA.getUrlStr());
+        */
+    }
+    //direct link servlet is not being used yet.
+   
+    
+  
+
+
+}

@@ -1,0 +1,25 @@
+package com.successfactors.cdp.dao.impl.oracle;
+
+import java.sql.Connection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import com.successfactors.cdp.bean.CareerWorkSheetSuggestedRolesFilterSettingBean;
+import com.successfactors.cdp.bean.SuggestedRolesFilterSettingBean;
+import com.successfactors.cdp.bean.SuggestedRolesSettingBean;
+import com.successfactors.platform.di.SFContextConstant;
+
+public interface IOracleSuggestedRolesSettingDAO {
+	int updateSuggestedRolesSetting(String companySchema, String locale, Connection dbConnection,
+			Set<SuggestedRolesSettingBean> settingBeans);
+
+	Map<String, SuggestedRolesSettingBean> getSuggestedRolesSetting(String companySchema, String locale,
+			Connection dbConnection);
+
+	int initData(String companySchema, Connection dbConnection);
+
+	List<CareerWorkSheetSuggestedRolesFilterSettingBean> getFilterFlags(String companySchema, Connection dbConnection);
+
+	void setFilterFlags(String companySchema, Connection dbConnection,
+			List<SuggestedRolesFilterSettingBean> filterSettingBeans);
+}

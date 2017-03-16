@@ -1,0 +1,179 @@
+/*
+ * $Id: SFCodeTemplate31.xml 67218 2009-03-18 19:07:17Z svn $
+ */
+package com.successfactors.cdp.service.impl;
+
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jboss.seam.mock.SeamTest;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.BackgroundElement;
+
+import com.successfactors.cdp.service.GetDevPlanList;
+import com.successfactors.cdp.service.impl.GetDevPlanListImpl;
+import com.successfactors.edu.api.bean.EmployeeBackgroundBean;
+import com.successfactors.empfile.util.scorecard.EmployeeDevelopmentObjectivesPortletHelper;
+import com.successfactors.gm.bean.ObjPlanBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.service.ejb.Objective;
+import com.successfactors.gm.service.objective.GetDefaultTemplateId;
+import com.successfactors.gm.service.objective.GetObjListByPlanV4;
+import com.successfactors.gm.service.objective.GetPermittedActiveTemplates;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.preference.PreferenceBean;
+import com.successfactors.user.service.ejb.UserEJB;
+import com.successfactors.user.service.ejb.preference.Preferences;
+import com.successfactors.user.service.preference.GetPreferenceBean;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+
+/**
+ * @author ytian
+ * Success Factors
+ */
+public class GetDevPlanListImplTest {
+  
+  private Mockery context;
+  private Objective goalService;
+  private Preferences preferencesService;
+  private EJBList ejbListAdapter;
+  private String selectedUserId;
+  private Long selectedPlanId;
+  private List<ObjPlanBean> objPlanList;
+  private ParamBean params;
+  private ServiceCommandHandler scaHandler;
+  private LocalContextSCAHandler legacyHandler;
+  
+  @BeforeMethod(groups = { "checkin" })
+  private void setup() throws RemoteException {
+    context = new Mockery();
+    //mock ejbListAdapter
+    context.setImposteriser(ClassImposteriser.INSTANCE);
+    ejbListAdapter = context.mock(EJBList.class);
+    context.checking(new Expectations() {
+      {
+        allowing(ejbListAdapter).getUserEJB();
+        will(returnValue(new UserEJB()));
+      }
+    });
+    
+    //mock parambean
+    params = context.mock(ParamBean.class);
+    context.checking(new Expectations() {
+      {
+        allowing(params).getUserId();
+        will(returnValue("1"));
+      }
+    });
+    
+    //mock goalService
+    final List<ObjTemplateBean> objTemplateList = new ArrayList<ObjTemplateBean>();
+    final ObjTemplateBean otb = new ObjTemplateBean();
+    otb.setObjPlanId(1l);
+    objTemplateList.add(otb);
+    
+    final ObjPlanBean objPlanBean = new ObjPlanBean();
+    goalService = context.mock(Objective.class);
+    context.checking(new Expectations() {
+      {
+        allowing(goalService).getPermittedActiveTemplates(with(any(ParamBean.class)), 
+            with(any(ObjPlanTypeEnum.class)), with(any(String.class)));
+        will(returnValue(objTemplateList));
+        
+        allowing(goalService).getObjListByPlan(with(any(ParamBean.class)), with(any(Long.class)), 
+            with(any(String.class)), with(any(Boolean.class)), with(any(Boolean.class)), 
+            with(any(Boolean.class)), with(any(Boolean.class)), with(any(Boolean.class)), 
+            with(any(Boolean.class)), with(any(Boolean.class)), with(any(Integer.class)), with(any(Integer.class)),
+            with(any(List.class)));
+        will(returnValue(objPlanBean));
+        
+        allowing(goalService).getDefaultTemplateId(with(any(ParamBean.class)), with(any(ObjPlanTypeEnum.class)));
+        will(returnValue(1l));
+      }
+    });
+    
+    //mock preferencesService
+    final PreferenceBean preferenceBean = new PreferenceBean();
+    preferencesService = context.mock(Preferences.class);
+    context.checking(new Expectations(){
+      {
+        allowing(preferencesService).getPreferenceBean(with(any(ParamBean.class)), with(any(PreferenceBean.class)));
+        will(returnValue(preferenceBean));
+        allowing(preferencesService).updatePreferenceBeans(with(any(ParamBean.class)), with(any(List.class)));
+      }
+    });
+    
+    //mock successionService
+    final SuccessionDataModelBean datamodel = new SuccessionDataModelBean();
+    List<BackgroundElement> bgElementList = new ArrayList<BackgroundElement>();
+    BackgroundElement bgElement = new BackgroundElement();
+    bgElement.setId(EmployeeDevelopmentObjectivesPortletHelper.SYS_DEVELOPMENT_OBJECTIVES);
+    bgElementList.add(bgElement);
+    datamodel.setBackgroundElements(bgElementList);
+
+    EmployeeBackgroundBean bgBean = new EmployeeBackgroundBean();
+    Map<String, Object> argFields = new HashMap<String, Object>();
+    argFields.put(EmployeeDevelopmentObjectivesPortletHelper.TITLE_DEVELOPMENT_OBJECTIVES, "1");
+    bgBean.setFields(argFields);
+    final List<EmployeeBackgroundBean> bgSection = new ArrayList<EmployeeBackgroundBean>();
+
+    scaHandler = context.mock(ServiceCommandHandler.class);
+    legacyHandler = context.mock(LocalContextSCAHandler.class);
+    
+    context.checking(new Expectations() {
+      {
+        try {
+          one(scaHandler).execute(with(any(GetPermittedActiveTemplates.class)));
+          will(returnValue(objTemplateList));
+          
+          one(scaHandler).execute(with(any(GetDefaultTemplateId.class)));
+          will(returnValue(1L));
+          
+          one(scaHandler).execute(with(any(GetObjListByPlanV4.class)));
+          will(returnValue(objPlanBean));
+          
+          one(legacyHandler).execute(with(any(ParamBean.class)), with(any(GetPreferenceBean.class)));
+          will(returnValue(preferenceBean));
+          
+          one(legacyHandler).execute(with(any(ParamBean.class)), with(any(UpdatePreferenceBeans.class)));
+          
+        } catch (ServiceApplicationException e) {
+          Assert.fail();
+        }
+      }
+    });
+  }
+
+  @Test(groups = { "checkin" })
+  public void testGetDevPlanList() throws ServiceApplicationException{
+    GetDevPlanList cmd = new GetDevPlanList();
+    cmd.setSelectedUserId("1");
+    cmd.setSelectedPlanId(1l);
+    
+    GetDevPlanListImpl impl = new GetDevPlanListImpl();
+    TestUtils.setField(impl, "params", params);
+    TestUtils.setField(impl, "ejbListAdapter", ejbListAdapter);
+    TestUtils.setField(impl, "scaHandler", scaHandler);
+    TestUtils.setField(impl, "legacyHandler", legacyHandler);
+    impl.execute(cmd);
+    assert(!cmd.getObjTemplateList().isEmpty());
+    
+  }
+
+}

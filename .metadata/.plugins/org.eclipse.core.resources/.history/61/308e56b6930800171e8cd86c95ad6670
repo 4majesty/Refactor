@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.internal.ui.viewsupport.TreeHierarchyLayoutProblemsDecorator;
+
+public interface IPackageExplorerProblemsDecorator {
+}

@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
+import org.eclipse.jdt.internal.ui.text.JavaIndenter;
+
+public interface IIndentAction {
+	void run();
+
+	void update();
+}

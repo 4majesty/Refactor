@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
+import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
+
+public interface IQuickAssistLightBulbUpdater {
+	int getLayer();
+
+	void paint(GC gc, Canvas canvas, Rectangle r);
+
+	boolean isSetInPreferences();
+
+	void install();
+
+	void uninstall();
+}

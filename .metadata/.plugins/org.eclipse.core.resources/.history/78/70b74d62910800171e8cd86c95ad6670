@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.dialogs.ControlEnableState;
+import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+
+public interface IJavadocProblemsConfigurationBlock {
+}

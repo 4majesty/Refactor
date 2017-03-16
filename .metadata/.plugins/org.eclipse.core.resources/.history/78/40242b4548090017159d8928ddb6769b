@@ -1,0 +1,11 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.cdp.service.GetRoleReadiness;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+
+public interface IGetRoleReadinessImpl {
+	GetRoleReadiness execute(GetRoleReadiness cmd) throws ServiceApplicationException;
+}

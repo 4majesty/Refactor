@@ -1,0 +1,120 @@
+package com.successfactors.cdp.service.impl;
+import static org.mockito.Mockito.*;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jboss.seam.security.Role;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.bean.CareerWorksheetSuggestedRoleVO;
+import com.successfactors.competency.dao.CompetencyDAO;
+import com.successfactors.db.dao.DAOException;
+import com.successfactors.gm.api.dao.ObjDAO;
+import com.successfactors.cdp.service.GetCareerWorksheetSuggestedRoles;
+import com.successfactors.cdp.service.transcript.impl.DeleteTranscriptByIdImpl;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerRoleBean;
+import com.successfactors.competency.bean.FamilyBean;
+
+public class GetCareerWorksheetSuggestedRolesImplTest {
+  private ParamBean params;
+  private Connection dbConnection;
+  private IGetCareerWorksheetSuggestedRolesImpl impl;
+  
+  private CompetencyDAO competencyDAO;
+  private ObjDAO objDAO;
+
+  private static long roleIdx = 1l;
+  private static Map<String, RoleBean> roleVertexMap=new HashMap<String, RoleBean>();
+  private static final List<RoleBean> roleVertexList = new ArrayList<RoleBean>();
+
+  
+  private final String userId = "cgrant";
+  private final long templateId = 5001l;
+
+  @BeforeMethod(groups={"checkin"})
+  public void setup(){
+    params = mock(ParamBean.class);
+    params.setCompanySchema("myACE");
+    dbConnection = mock(Connection.class);
+    competencyDAO = mock(CompetencyDAO.class);
+    objDAO = mock(ObjDAO.class);
+
+    impl = new GetCareerWorksheetSuggestedRolesImpl();
+    TestUtils.setField(impl, "params", params);
+    TestUtils.setField(impl, "dbConnection", dbConnection);
+    TestUtils.setField(impl, "competencyDAO", competencyDAO);
+    TestUtils.setField(impl, "objDAO", objDAO);
+
+  }
+
+  
+  @Test(groups = {"checkin"})
+  public void testGetLeadingFromRoles() throws IllegalAccessException, IllegalArgumentException,
+  InvocationTargetException, ClassNotFoundException, NoSuchMethodException{
+    final long currentRoleId = roleIdx;
+    final long currentFamilyId = 1l;
+    final Map<Long, Long> currentRoleFamilyMap = new HashMap<Long, Long>();
+    {
+      currentRoleFamilyMap.put(currentRoleId, currentFamilyId);
+    }
+    final FamilyBean familyBean = new FamilyBean();
+    familyBean.setFamilyId(currentFamilyId);
+
+    List<Long[]> allRolePathMapEntries = new ArrayList<Long[]>();
+    {
+      // A->B->C->D->B
+      allRolePathMapEntries.add(newRolePath("A","B"));
+      allRolePathMapEntries.add(newRolePath("B","C"));
+      allRolePathMapEntries.add(newRolePath("C","D"));
+      allRolePathMapEntries.add(newRolePath("D","B"));
+    }
+    final Collection<RoleBean> currentRoleSet = new ArrayList<RoleBean>();
+    {
+      currentRoleSet.add(roleVertexMap.get("C"));
+    }
+    final List<CareerRoleBean> targetRoles = new ArrayList<CareerRoleBean>();
+    when(competencyDAO.getAllRoles(params.getCompanySchema(), dbConnection)).thenReturn(roleVertexList);
+    when(competencyDAO.getRolesByUserId(params.getCompanySchema(), dbConnection, userId)).thenReturn(currentRoleSet);
+    when(objDAO.getCareerWorksheetRoles(params.getCompanySchema(), dbConnection, userId, templateId)).thenReturn(targetRoles);
+    when(competencyDAO.getFamilyById(params.getCompanySchema(), dbConnection, currentFamilyId)).thenReturn(familyBean);
+    Object[] arguments = new Object[]{userId, templateId, currentRoleFamilyMap, allRolePathMapEntries};
+    Method m = impl.getClass().getDeclaredMethod("initProcessingRoles", new Class[]{String.class, long.class, Map.class, List.class});
+    m.setAccessible(true);
+    List<CareerWorksheetSuggestedRoleVO> actual = (List<CareerWorksheetSuggestedRoleVO>)m.invoke(impl, arguments);
+    for(CareerWorksheetSuggestedRoleVO vo:actual){
+      System.out.println(vo);
+    }
+  }
+
+  private RoleBean getRoleVertex(String roleName){
+    RoleBean role = roleVertexMap.get(roleName);
+    if(role == null){
+      role = new RoleBean();
+      role.setRoleId(++roleIdx);
+      role.setRoleName(roleName);
+      role.setRoleDesc(roleName);
+      role.setFamilyId(1l);
+      roleVertexMap.put(roleName, role);
+      roleVertexList.add(role);
+    }
+    return role;
+  }
+  private Long[] newRolePath(String roleName, String nextRoleName){
+    Long[] rolePath = new Long[2];
+    rolePath[0]=this.getRoleVertex(roleName).getRoleId();
+    rolePath[1] = this.getRoleVertex(nextRoleName).getRoleId();
+    return rolePath;
+  }
+}

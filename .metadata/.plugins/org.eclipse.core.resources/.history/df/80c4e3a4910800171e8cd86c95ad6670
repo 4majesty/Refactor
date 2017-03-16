@@ -1,0 +1,9 @@
+package org.eclipse.jdt.ui;
+
+import org.eclipse.jdt.internal.ui.dialogs.MultiMainTypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+
+public interface IJavaUI {
+}

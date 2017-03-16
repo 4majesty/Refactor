@@ -1,0 +1,6 @@
+package com.successfactors.arb.bean;
+
+import com.successfactors.arb.exception.AnalyticsRuntimeException;
+
+public interface IReflectiveInvoker {
+}

@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+
+public interface ITypeChangeCorrectionProposal {
+}

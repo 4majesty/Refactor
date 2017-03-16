@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFilePartitionScanner;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
+
+public interface IPropertiesFileMergeViewer {
+	String getTitle();
+}

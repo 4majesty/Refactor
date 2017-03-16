@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.corext.refactoring.util;
+
+import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
+
+public interface IJavadocUtil {
+}

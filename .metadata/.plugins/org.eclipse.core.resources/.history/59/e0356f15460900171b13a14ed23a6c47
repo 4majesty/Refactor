@@ -1,0 +1,15 @@
+package com.successfactors.cdp.bean;
+
+public interface ICareerWorkSheetSuggestedRolesFilterSettingBean {
+	CareerWorkSheetSuggestedRolesFlagEnum getFlagEnum();
+
+	void setFlagEnum(CareerWorkSheetSuggestedRolesFlagEnum flagEnum);
+
+	boolean isEnabled();
+
+	void setEnabled(boolean enabled);
+
+	String getUiLabel();
+
+	void setUiLabel(String uiLabel);
+}

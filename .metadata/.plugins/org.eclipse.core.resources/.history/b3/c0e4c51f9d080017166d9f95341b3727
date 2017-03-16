@@ -1,0 +1,9 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.user.service.ejb.preference.Preferences;
+import com.successfactors.user.service.preference.GetPreferenceBean;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+
+public interface IGetDevPlanListImplTest {
+	void testGetDevPlanList();
+}

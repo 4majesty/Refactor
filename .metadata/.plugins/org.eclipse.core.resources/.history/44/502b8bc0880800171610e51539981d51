@@ -1,0 +1,4 @@
+package com.successfactors.arb.bean;
+
+public interface IStringPairVOFactory {
+}

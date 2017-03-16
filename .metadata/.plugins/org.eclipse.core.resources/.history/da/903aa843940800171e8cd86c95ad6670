@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IHelpAction {
+	void run();
+}

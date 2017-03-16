@@ -1,0 +1,41 @@
+package com.successfactors.cdp.app.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionValueVO;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.SignupFormSectionCategoryEnum;
+import com.successfactors.competency.bean.CompetencyBean;
+import com.successfactors.competency.service.GetCompetencyById;
+import com.successfactors.datamodel.api.DataModelFacade;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.xi.util.SeamEnvUtils;
+import com.successfactors.jdmng.JDAccessException;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.jdmng.app.core.DataService;
+import com.successfactors.jdmng.bean.SkillEntity;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.user.bean.UserBean;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import javax.inject.Inject;
+import java.util.Iterator;
+import java.util.List;
+
+public interface IRetrieveLabelService {
+	String getSectionLabelbyId(String sectionId) throws ServiceApplicationException;
+
+	void fillSectionValuesLabel(String sectionId, List<ProgramSignupFormSectionValueVO> valueVOs)
+			throws ServiceApplicationException;
+
+	void fillSectionAllLabels(ProgramSignupFormSectionVO sectionVO) throws ServiceApplicationException;
+
+	void fillSectionAllLabels(List<ProgramSignupFormSectionVO> sectionVOs) throws ServiceApplicationException;
+}

@@ -1,0 +1,51 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ProgramSignupFormSectionVO implements Serializable {
+  private String sectionId;
+  private String sectionLabel;
+  private String type; // not used now
+  private List<ProgramSignupFormSectionValueVO> sectionValues = new ArrayList<ProgramSignupFormSectionValueVO>();
+
+  public String getSectionId() {
+    return sectionId;
+  }
+
+  public void setSectionId(String sectionId) {
+    this.sectionId = sectionId;
+  }
+
+  public String getSectionLabel() {
+    return sectionLabel;
+  }
+
+  public void setSectionLabel(String sectionLabel) {
+    this.sectionLabel = sectionLabel;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  public List<ProgramSignupFormSectionValueVO> getSectionValues() {
+    return sectionValues;
+  }
+
+  public void setSectionValues(List<ProgramSignupFormSectionValueVO> sectionValues) {
+    this.sectionValues = sectionValues;
+  }
+
+  @Override
+  public String toString() {
+    return "ProgramSignupFormSectionVO [sectionId=" + sectionId + ", sectionLabel=" + sectionLabel + ", type=" + type + ", sectionValues=" + sectionValues
+        + "]";
+  }
+  
+}

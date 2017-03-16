@@ -1,0 +1,35 @@
+package org.eclipse.jdt.ui.wizards;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringDialogField;
+
+public interface INewPackageWizardPage {
+	void init(IStructuredSelection selection);
+
+	void createControl(Composite parent);
+
+	void setVisible(boolean visible);
+
+	void dialogFieldChanged(DialogField field);
+
+	String getPackageText();
+
+	void setPackageText(String str, boolean canBeModified);
+
+	IResource getModifiedResource();
+
+	IRunnableWithProgress getRunnable();
+
+	IPackageFragment getNewPackageFragment();
+
+	void createPackage(IProgressMonitor monitor) throws CoreException, InterruptedException;
+}

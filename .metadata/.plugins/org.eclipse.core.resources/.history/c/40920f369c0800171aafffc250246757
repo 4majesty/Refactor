@@ -1,0 +1,59 @@
+/*
+ * $Id$
+ */
+package com.successfactors.cdp.service.mentoring.impl;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.service.mentoring.CheckJAMPermission;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+/**
+ * Implementation to check if JAM is enabled in Provisioning and user has permission to access it.
+ * 
+ * @author ricardo.saito
+ * Success Factors
+ */
+@Service
+public class CheckJAMPermissionImpl implements ServiceQueryImpl<Boolean, CheckJAMPermission> {
+
+  @Inject
+  @In
+  private ParamBean params;
+
+  @Inject
+  @In(value = PermissionUtils.PERMISSION_LIST_BEAN)
+  private PermissionListBean permList;
+
+  public CheckJAMPermissionImpl() {
+    super();
+  }
+
+  @Override
+  public Boolean execute(CheckJAMPermission arg0)
+      throws ServiceApplicationException {
+    if (permList == null || params == null) {
+      return false;
+    }
+    CompanyBean companySettings = params.getCompanyBean();
+    boolean enable = companySettings.isFeatureExist(FeatureEnum.ENABLE_CUBETREE_INTEGRATION);
+
+    if (enable) {// cubetree integration must be enabled
+      if (companySettings.isFeatureExist(FeatureEnum.ENABLE_CUBETREE_USER_PERMISSION)) {
+      // if user permission is enabled
+        enable =  (permList.hasPermission(PermissionBean.CUBETREE, PermissionBean.CUBETREE_ACCESS, -1));
+      }
+    }
+    return enable;
+  }
+}

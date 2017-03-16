@@ -1,0 +1,29 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.edu.ui.controller.exception.AjaxInternalServerError;
+import com.successfactors.legacy.util.SerializationException;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.notification.utils.JSONSerilizationUtils;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.Set;
+
+public interface ICDPReadinessController {
+	String getUserReadiness(String userId, long roleId) throws AjaxInternalServerError;
+
+	String getRecommendedSuccessors(long positionId, long roleId, Set<String> excludedUserIds)
+			throws AjaxInternalServerError;
+
+	boolean isGetRecommendedSuccessorsPermitted();
+}

@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.text.Match;
+import org.eclipse.jdt.ui.search.IQuerySpecification;
+
+public interface IJavaSearchQuery {
+	void reportMatch(Match match);
+
+	IStatus run(IProgressMonitor monitor);
+
+	String getLabel();
+
+	String getResultLabel(int nMatches);
+
+	boolean canRerun();
+
+	boolean canRunInBackground();
+
+	ISearchResult getSearchResult();
+}

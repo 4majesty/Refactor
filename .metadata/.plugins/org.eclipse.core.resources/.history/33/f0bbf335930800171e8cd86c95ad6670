@@ -1,0 +1,11 @@
+package org.eclipse.jdt.ui;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.ui.preferences.IMembersOrderPreferenceCache;
+
+public interface IJavaElementComparator {
+	int category(Object element);
+
+	int compare(Viewer viewer, Object e1, Object e2);
+}

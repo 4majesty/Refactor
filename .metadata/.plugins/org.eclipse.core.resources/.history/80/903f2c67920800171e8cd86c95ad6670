@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+
+public interface ISpellingConfigurationBlock {
+	boolean performOk();
+
+	boolean performApply();
+
+	void performDefaults();
+}

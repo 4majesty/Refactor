@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.views.tasklist.TaskPropertiesDialog;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface IAddTaskAction {
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(IStructuredSelection selection);
+}

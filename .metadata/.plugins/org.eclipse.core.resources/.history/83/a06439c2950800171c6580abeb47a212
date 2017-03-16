@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.corext.refactoring.reorg;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaModelException;
+
+public interface ISourceReferenceUtil {
+}

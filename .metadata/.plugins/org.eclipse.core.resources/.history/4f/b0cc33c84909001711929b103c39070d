@@ -1,0 +1,7 @@
+package com.successfactors.cdp.service.mentoring.jam;
+
+public interface IGetJamGroup {
+	String getGroupId();
+
+	String getAccessToken();
+}

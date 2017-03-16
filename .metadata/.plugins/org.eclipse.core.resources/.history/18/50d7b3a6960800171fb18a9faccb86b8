@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IDelegateUIHelper {
+}

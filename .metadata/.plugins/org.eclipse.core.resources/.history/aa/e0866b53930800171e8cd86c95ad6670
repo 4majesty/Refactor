@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.text.spelling.engine;
+
+import java.net.URL;
+import java.util.Locale;
+
+public interface ILocaleSensitiveSpellDictionary {
+	Locale getLocale();
+}

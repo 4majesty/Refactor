@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.propertiesfileeditor;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.rules.EndOfLineRule;
+import org.eclipse.jface.text.rules.ICharacterScanner;
+import org.eclipse.jface.text.rules.IPredicateRule;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.IWordDetector;
+import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
+import org.eclipse.jface.text.rules.SingleLineRule;
+import org.eclipse.jface.text.rules.Token;
+import org.eclipse.jface.text.rules.WordRule;
+
+public interface IPropertiesFilePartitionScanner {
+	boolean isWordStart(char c);
+
+	boolean isWordPart(char c);
+
+	IToken evaluate(ICharacterScanner scanner, boolean resume);
+
+	IToken getSuccessToken();
+}

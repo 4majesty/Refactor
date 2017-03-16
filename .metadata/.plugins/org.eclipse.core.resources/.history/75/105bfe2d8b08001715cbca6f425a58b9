@@ -1,0 +1,3193 @@
+// ###Modified by SCAConverter on 2014-06-16 PST###
+// ###Modified by SCAConverter on 2014-06-09 PST###
+/* $Id: FBSectUI_Objective.java 1114453 2016-10-31 05:46:29Z jdwu $ */
+package com.successfactors.pmcommon.ui.fb.sect;
+
+import static com.successfactors.gm.util.TgmConstants.ACHIEVEMENT_ACHIEVEMENTDATE_PROPERTY_NAME;
+
+import java.io.IOException;
+import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.Vector;
+
+import javax.servlet.ServletException;
+import javax.servlet.jsp.PageContext;
+
+import com.sf.sfv4.util.StringUtils;
+
+import com.successfactors.cdp.service.transcript.DeleteLearningForGoal;
+import com.successfactors.cdp.ui.fb.URLBuilderFormIDP;
+import com.successfactors.ge.service.GetObjTemplate;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjBeanWrap;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.bean.ObjTemplateBean.Field;
+import com.successfactors.gm.bean.ObjTemplateBean.Permission;
+import com.successfactors.gm.bean.ObjWrap;
+import com.successfactors.gm.service.ejb.Objective;
+import com.successfactors.gm.service.objective.CreateObj;
+import com.successfactors.gm.service.objective.CreateObjV2;
+import com.successfactors.gm.service.objective.DeleteObj;
+import com.successfactors.gm.service.objective.GetChildLearning;
+import com.successfactors.gm.service.objective.GetObjById;
+import com.successfactors.gm.service.objective.GetObjByIdV2;
+import com.successfactors.gm.service.objective.GetObjByIdV3;
+import com.successfactors.gm.service.objective.GetRecommendedLearningURL;
+import com.successfactors.gm.service.objective.GetSelectableLearningActivityList;
+import com.successfactors.gm.service.objective.GetSuccesslineAchievementsByGoalId;
+import com.successfactors.gm.service.objective.RouteObj;
+import com.successfactors.gm.service.objective.UpdateObj;
+import com.successfactors.gm.ui.servlet.util.EditWizardUtils;
+import com.successfactors.gm.ui.servlet.util.ObjectiveFeatures;
+import com.successfactors.gm.ui.servlet.util.TGMUtils;
+import com.successfactors.gm.util.TGMCommonUtils;
+import com.successfactors.gm.util.permission.DelegateObjectiveRulesEngine;
+import com.successfactors.gm.util.permission.GMRulesEngine;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.gm.util.validator.TGMFieldValidator;
+import com.successfactors.goalcommon.util.exception.GoalPlanNotFoundException;
+import com.successfactors.learning.service.rest.LearningRestConstants;
+import com.successfactors.legacy.bean.ScaleBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.service.GetSysConfig;
+import com.successfactors.legacy.ui.servlet.FBLeftNav;
+import com.successfactors.legacy.ui.servlet.FolderMapLookupServlet;
+import com.successfactors.legacy.ui.servlet.FormRendererOptions;
+import com.successfactors.legacy.ui.servlet.RateGapImageGeneratorServlet;
+import com.successfactors.legacy.ui.servlet.TreeDestination;
+import com.successfactors.legacy.ui.servlet.util.ServletUtils;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.platform.bean.FullNameBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.ui.servlet.SessionConstants;
+import com.successfactors.platform.util.DateUtils;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.pm.util.PMFormUtils;
+import com.successfactors.pm360.util.ObjectiveAssigner;
+import com.successfactors.pmcommon.bean.FormBean;
+import com.successfactors.pmcommon.bean.FormSectionBean;
+import com.successfactors.pmcommon.bean.v4form.FMComment;
+import com.successfactors.pmcommon.bean.v4form.FMComponent;
+import com.successfactors.pmcommon.bean.v4form.FMElement;
+import com.successfactors.pmcommon.bean.v4form.FMObjective;
+import com.successfactors.pmcommon.bean.v4form.FMObjectiveWrap;
+import com.successfactors.pmcommon.bean.v4form.ObjectiveSection;
+import com.successfactors.pmcommon.bean.v4form.PerformanceItem;
+import com.successfactors.pmcommon.fb.sect.IFBSectUI_Objective;
+import com.successfactors.pmcommon.ui.fb.FBObj4;
+import com.successfactors.pmcommon.ui.fb.FBObj4.Command;
+import com.successfactors.pmcommon.ui.fb.FBpmFormUI;
+import com.successfactors.pmcommon.ui.util.SectionProgressMeterCallBack;
+import com.successfactors.pmcommon.ui.util.SectionProgressMeterImpl;
+import com.successfactors.pmcommon.ui.util.TreeLinkBuilder;
+import com.successfactors.pmcommon.util.ClientDateFormat;
+import com.successfactors.pmcommon.util.Log;
+import com.successfactors.pmcommon.util.rules.OthersRatingTabPermissionList;
+import com.successfactors.pmcommon.util.rules.TabPermissionList;
+import com.successfactors.pmcommon.util.type.ActionPermissionEnum;
+import com.successfactors.pmcommon.util.type.FieldPermissionEnum;
+import com.successfactors.pmcommon.util.type.ObjMgtEnum;
+import com.successfactors.proxy.bean.ProxyPermissionEnum;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.sfutil.util.math.MathUtil;
+import com.successfactors.sm.util.ScaleUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.workflow.ui.servlet.workflow.FBSaveOnTimeout;
+import com.successfactors.workflow.util.WorkflowOptionEnum;
+import com.successfactors.user.service.FindUserFullNameByIds;
+import com.successfactors.user.bean.util.UserFormatUtils;
+
+
+public class FBSectUI_Objective extends FBSectUI_ObjCompPerformance
+  implements SectionProgressMeterCallBack, IFBSectUI_Objective
+{ 
+  /**
+   * Don't use it by yourself! Only for Legacy!
+   */
+  private transient LocalContextSCAHandler legacyHandler = LocalContextSCAHandler.create();
+  private static Logger log = LogManager.getLogger();
+  private ObjMgtEnum _objType;
+  private Boolean useTGMv10Framework;
+
+  /**
+   * This is a lazy-initialized list of ObjUIs.
+   * ALWAYS call getObjUIs() instead of using _objUIs directly.
+   * The only exception is within getObjUIs() itself.
+   */
+  private ArrayList _objUIs;
+
+  private ObjectiveSection _objSect;
+
+  /** BOM New Obj button */
+  private boolean _newButton;
+  /** BOM Copy Obj button*/
+  private boolean _copyButton;
+  /** BOM Link Obj button */
+  private boolean _linkButton;
+  /** TGM Add Objs button/ new tgm insert existing objective button*/
+  private boolean _addObj4Button;
+
+  /** new TGM add new Objective button, adds to both goal plan and form */
+  private boolean _addNewObjButton = false;
+
+  /** objectives' Remove buttons */
+  private boolean _removeButton = false;
+
+  /** Publish Section button */
+  private boolean _publishSectionButton;
+  
+  /** Goal wizard button */
+  private boolean _smartWizardButton = false;
+  
+  private FMElementListUI _sectionElementListUI;
+  //rating uis used only by speed rater mode for drawing, they are the first rating ui's found in the list of objs.
+  private RatingUI _officialRating;
+  private RatingUI _subjectRating;
+
+  private URLBuilderFormIDP objSecURLBuilder;
+
+  // Whether to show section details, only applicable in read-only mode.
+  private boolean _showSectionDetails;
+  private SystemBean lmsVersionIdSystemBean = null;
+  
+  //Whether to expand the section if in EZ-Rater mode.
+  private boolean ezRaterExpandAll;
+
+  public boolean isPrintPreview() {
+    return _printPreview;
+  }
+
+  public void setPrintPreview(boolean printPreview) {
+    _printPreview = printPreview;
+  }
+  
+  // Set to true if the enclosing form is displayed in print preview mode
+  private boolean _printPreview;
+  
+  //TGM-2909
+  public static final String ATTR_FBSECTUI_OBJECTIVE_ERR_FIELD_PARSE="ATTR_FBSECTUI_OBJECTIVE_ERR_FIELD_PARSE";
+  
+  
+  public boolean isConfigurable() {
+    return _objSect.getConfigurable();
+  }
+
+  //speed rater mode only works for tgmv10
+  public boolean isSpeedRaterMode(){
+    return (getObjType() == ObjMgtEnum.PLAN &&
+            isUseTGMv10Framework()&&
+            _objSect.getSectMode().equals(FMComponent.SECTION_MODE_SPEED));
+  }
+  
+  public boolean isShowSectionDetails(){
+    return _showSectionDetails;
+  }
+
+  public void setShowSectionDetails(boolean showSectionDetails) {
+    _showSectionDetails = showSectionDetails;
+  }
+
+
+  public List getSectionElementList()
+  {
+    return _objSect.sectionElementList;
+  }
+
+  /**
+   * BOM objective status legal-move matrix.
+   * Each key is an Integer representing the old status (ObjBean.STATUS_*)
+   * and each value is a HashSet of legal destination status Integers.
+   */
+  private static final HashMap _statusMoves;
+
+  /**
+   * Each key is an Integer representing a status (ObjBean.STATUS_*).
+   * Each value is an Integer representing the action (ObjBean.ACTION_*).
+   */
+  private static final HashMap _statusRoutingActions;
+
+  /**
+   * Each key is an Integer representing a status (ObjBean.STATUS_*).
+   * Each value is a String.
+   */
+  private static final HashMap _statusMessageKeys;
+  
+  private boolean useMltRatingIfPresent = false;
+
+  /**
+   * The status Integers, in the order that they should appear in a list.
+   */
+  private static final Integer[] _statusDisplayOrder = {
+    new Integer(ObjBean.STATUS_DRAFT),
+    new Integer(ObjBean.STATUS_NEW),
+    new Integer(ObjBean.STATUS_APPROVED),
+    new Integer(ObjBean.STATUS_COMPLETED),
+    new Integer(ObjBean.STATUS_OBSOLETE)
+  };
+
+  private Messages messages;
+  /**
+   * Simple Constructor, called by FBSectUI's factory method
+   */
+  public FBSectUI_Objective(
+    FB2Context fb2Context,
+    String instanceName,
+    String urlPrefix,
+    FormSectionBean sectBean)
+  throws GoalPlanNotFoundException
+  {
+    super(fb2Context, instanceName, urlPrefix, sectBean);
+    _objSect = (ObjectiveSection)getSectBean().getSectComponent();
+    messages = getMessages();
+    // We will load the template now so if the template is invalid, we can catch it early.
+    getObjTemplateThrowsException();
+    _showSectionDetails = _objSect.isShowSectionDetails();
+    
+    useMltRatingIfPresent = getObjSect().getUseMltRatingIfPresent()!= null && getObjSect().getUseMltRatingIfPresent().equals("true") ? true : false;
+    setOthersRatingTabItemPermissionList(new OthersRatingTabPermissionList(_objSect.getOthersRatingTabItemPermissions()));
+    if (isPMUnityForm()) {
+      setTabPermissionList(new TabPermissionList(_objSect.getTabPermissions()));
+    }
+    ezRaterExpandAll = _objSect.getEzRaterExpandAll();
+
+  }
+  
+  public FBSectUI_Objective(Map parameters, Map attributes,
+      ParamBean paramBean, CompanyBean companyBean, Messages messages, String instanceName,
+      String urlPrefix, FormSectionBean sectBean)
+          throws GoalPlanNotFoundException {
+    super(parameters, attributes, paramBean, companyBean, messages, instanceName, urlPrefix, sectBean);
+    _objSect = (ObjectiveSection)getSectBean().getSectComponent();
+    messages = getMessages();
+    // We will load the template now so if the template is invalid, we can catch it early.
+    getObjTemplateThrowsException();
+    _showSectionDetails = _objSect.isShowSectionDetails();
+    
+    useMltRatingIfPresent = getObjSect().getUseMltRatingIfPresent()!= null && getObjSect().getUseMltRatingIfPresent().equals("true") ? true : false;
+    setOthersRatingTabItemPermissionList(new OthersRatingTabPermissionList(_objSect.getOthersRatingTabItemPermissions()));
+    if (isPMUnityForm()) {
+      setTabPermissionList(new TabPermissionList(_objSect.getTabPermissions()));
+    }
+    ezRaterExpandAll = _objSect.getEzRaterExpandAll();
+
+  }   
+
+  public long getFormId(){
+    return getSectBean().getFormBean().getFolderMapId();
+  }
+  public long getDraftId(){
+    return getSectBean().getFormBean().getDraftId();
+  }
+  
+  private boolean isUseTGMv10Framework() {
+    if (useTGMv10Framework == null) {
+      ObjTemplateBean objTemplateBean = getObjTemplate();
+      if (objTemplateBean == null) {
+        useTGMv10Framework = Boolean.FALSE;
+      } else {
+        useTGMv10Framework = new Boolean(TGMUtils.useTGMv10Framework(getCompanyBean(), objTemplateBean.getObjPlanType()));
+      }
+    }
+    return useTGMv10Framework.booleanValue();
+  }
+
+  @Override
+  /**
+   * This method determines the corresponding proxy permission required of a 
+   * particular FBSectUI 
+   * @return ProxyPermissionEnum
+   */
+  public ProxyPermissionEnum getProxyPermission(){
+    return ProxyPermissionEnum.TGM;
+  }
+
+  protected void publishDraftGoals() {
+    for (int i = 0; i < _objSect.getObjectiveList().size(); i++) {
+      FMObjective obj = (FMObjective)_objSect.getObjectiveList().get(i);
+      if (obj.getObjectiveId() <= 0) {
+        // These are draft goals.
+        ObjBean objBean = obj.convertToObjBean();
+        try {
+          objBean.setObjPlanId(_objSect.getSectionPlanId());
+          objBean.setObjId(legacyHandler.execute(paramBean, new CreateObjV2(objBean, "", Long.MAX_VALUE)));
+          objBean = legacyHandler.execute(paramBean, new GetObjByIdV2(objBean.getObjId(), false, true, false, true));
+        } catch (Exception e) {
+          getLog().log(Log.ERROR, "Exception caught when publishing draft goals to the goal library.", e, paramBean);
+        }
+        // Update the FMObjective object's content.
+        obj.updateObjContent(objBean, true, _objSect.autoPopWeights, _objSect.sectScale);
+      }
+    }
+  }
+
+  /**
+   * Activates the objective add and remove buttons, based on 
+   * the objective section type (BOM/TGM),
+   * ObjectiveFeatures,
+   * CompanyBean settings,
+   * and ActionPermissions.
+   * <p>
+   * Only call this from a form renderer,
+   * once the above things are configured, 
+   * and only after you've established that you're in an editable form mode.
+   * <p>
+   * Assumes that everything is false to start with, 
+   * and sets some things to true.
+   */
+  public void activateButtons() {
+
+    // Properly set up if we need to display the Publish Section Content
+    // button or not.
+    setPublishSectionButton(canPublishSection());
+
+    if (getPerfSect().getConfigurable()) {
+      //Set Reomve Button permission
+      if(getRemoveItemPermission() == ActionPermissionEnum.ENABLED) {
+        if(getObjType() == ObjMgtEnum.PLAN && isTGMv10Button()){
+          boolean hasRemovePerm = false;
+          try {
+            GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine.getRulesEngine(request, paramBean, ejbList, paramBean.getUserId(), getObjTemplate(),
+                getSubjectID(), getSubjectID());
+            hasRemovePerm = rulesEngine.hasPermission(getSubjectID(), Permission.DELETE, null);
+          } catch (Exception e) {
+            logWarning("Unable to get DELETE permission from TGM template, exception: "+e);
+          }
+          setRemoveButton(hasRemovePerm);
+        } else{
+         setRemoveButton(true);
+        }
+      }
+      
+      if (getAddItemPermission() == ActionPermissionEnum.ENABLED) {
+        if (getObjType() == ObjMgtEnum.BASIC) {
+          setNewButton(ObjectiveFeatures.isNewObjEnabled(request));
+          setCopyButton(!ObjectiveFeatures.isNewObjEnabled(request)
+                        || ObjectiveFeatures.isAddCopyEnabled(request));
+          setLinkButton(getCompanyBean().isFeatureExist(CompanyBean.FEATURE_ADVOBJ)
+                        ? ObjectiveFeatures.isLinkInFormEnabled(request)
+                        : ObjectiveFeatures.isLinkInFormBOMEnabled(request));
+        } else if (getObjType() == ObjMgtEnum.PLAN) {
+          setAddObj4Button(true);
+          //If we are on TGMv10 then we have a button on the form that will let
+          //you add the objective to both the plan and the form
+          if(isTGMv10Button()){
+            boolean hasAddPerm = false;
+            try{
+              //find out if the plan template allows this user to add objectives to the plan
+              GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine.getRulesEngine(request, paramBean, ejbList, paramBean.getUserId(), getObjTemplate(),
+              getSubjectID(), getSubjectID());
+              hasAddPerm = rulesEngine.hasPermission(getSubjectID(), Permission.CREATE, null);
+            } catch (Exception e) {
+              //Error should not prevent the form from loading, default for the button is
+              //false, so just log the error
+              logWarning("Unable to get CREATE permision from TGM template, exception: "+e);
+            }
+                
+            if (_objSect.getObjTypeFilters() != null
+                && !_objSect.getObjTypeFilters().isEmpty() 
+                && _objSect.getObjTypeFilters().contains(ObjBean.TYPE_GROUP)) { 
+              hasAddPerm = false; // do not show button for obj-type filters which specify group goal
+            } 
+            
+            setAddNewObjButton(hasAddPerm);
+            
+            //set smart goal button
+            FormBean formBean = getSectBean().getFormBean();
+            if (formBean != null && formBean.checkStatus(FormBean.ENABLE_SMART_GOAL_WIZARD)) {
+              if(getObjTemplate() != null) {
+                setSmartWizardButton(getObjTemplate().smartGoalEnabled());
+              }
+            }
+          }
+
+        }
+      }
+    }
+  }
+
+  public void setNewButton(boolean newButton) {
+    _newButton = newButton;
+  }
+
+  public boolean isNewButton() {
+    return _newButton;
+  }
+
+  public void setCopyButton(boolean copyButton) {
+    _copyButton = copyButton;
+  }
+
+  public boolean isCopyButton() {
+    return _copyButton;
+  }
+
+  public void setLinkButton(boolean linkButton) {
+    _linkButton = linkButton;
+  }
+
+  public boolean isLinkButton() {
+    return _linkButton;
+  }
+
+  public void setAddObj4Button(boolean addObj4Button) {
+    _addObj4Button = addObj4Button;
+  }
+  public boolean isEzRaterExpandAll(){
+    return ezRaterExpandAll;
+  }
+
+  public void setEzRaterExpandAll(boolean ezRaterExpandAll) {
+    ezRaterExpandAll = ezRaterExpandAll;
+  }
+  public boolean isAddObj4Button() {
+    return _addObj4Button;
+  }
+
+  public void setPublishSectionButton(boolean inValue) {
+    _publishSectionButton = inValue;
+  }
+
+  public boolean isPublishSectionButton() {
+    // Must check canPublishSection() because it can be dynamically changed
+    // during the POST due to the "Publish" action.
+    // _publishSectionButton is set during activateButtons() but
+    // canPublishSection() can change after activateButtons() is called.
+    return (canPublishSection() && _publishSectionButton);
+  }
+  
+  public void setSmartWizardButton(boolean inValue) {
+  	_smartWizardButton = inValue;
+  }
+  
+  public boolean isSmartWizardButton() {
+  	return _smartWizardButton;
+  }
+  
+  public String getSmartWizardButtonLabel() {
+  	return getMessages().Smart_Goal_Wizard();
+  }
+  
+  public String getButtonCode() {
+  	if(getObjTemplate() == null) return "";
+  	
+  	Long planID = new Long(getObjTemplate().getObjPlanId());
+  	String userID = getSubjectID();
+  	Long formID = new Long(getFormId());
+  	Integer sectIndex = new Integer(getSectBean().getIndex());
+  	
+  	return EditWizardUtils.addSmartGoalUrl(userID, planID, null, formID, sectIndex);
+  }
+
+  /**
+   * Set whether to show the Add New Objective button in tgmV10
+   * @param addNewObjButton whether to show the Add New Objective button in tgmV10
+   */
+  public void setAddNewObjButton(boolean addNewObjButton){
+    _addNewObjButton = addNewObjButton;
+  }
+
+  /**
+   * Check weather or not to show the Add New Objective button in tgmV10
+   * @return boolean, true if show else false
+   */
+  public boolean isAddNewObjButton(){
+    return _addNewObjButton;
+  }
+
+  public boolean isTGMv10Button(){
+    return isUseTGMv10Framework();
+  }
+
+  /**
+   * Check if on-form Draft TGM goals allowed in the section.  If allowed,
+   * a new button for adding an on-form draft TGM goal will be displayed to
+   * allow users to insert a draft goal to the form.  The draft goal will
+   * not show up in the TGM library until it is published or due to routing
+   * stage changes (e.g., when document is routed from Modify Stage to Signoff
+   * or Completed stage.).
+   * This method also checks if the "publish" button is available or not.
+   * If not available, then do not show the Create Draft Goal any more
+   * because they no longer can publish them.
+   */
+  public boolean isDraftTGMAllowed() {
+    return (canPublishSection() && (_objSect.getSectionPlanId() > 0 || ObjBean.TYPE_PLAN.equals(_objSect.getSectionType())) && _objSect.isDraftTGMAllowed());
+  }
+
+  /**
+   * Check whether to display "Add Existing goals" button.
+   * It's configurated in form template by attribute hide-addexistinggoals-btn
+   * @return _objSect.hideAddExistingBtn
+   */
+  public boolean isHideAddExisting() {
+      return _objSect.isHideAddExisting();
+  }
+
+  public void setRemoveButton(boolean removeButton) {
+    this._removeButton = removeButton;
+  }
+  public boolean isRemoveButton() {
+    return _removeButton;
+  }
+
+  public boolean isShowTGMDetailLinks() {
+    return showTGMDetailLinks;
+  }
+
+  public void setShowTGMDetailLinks(boolean showTGMDetailLinks) {
+    this.showTGMDetailLinks = showTGMDetailLinks;
+  }
+
+  public void addItemsToLeftNav(FBLeftNav leftNav,
+                                TreeLinkBuilder treeLinkBuilder) {
+    ArrayList list = new ArrayList();
+
+    if (!ServletUtils.isAcmeUI(request)) {
+      if (isNewButton()) {
+        list.add(new Integer(FBpmFormUI.OBJ_NEW));
+      }
+      if (isCopyButton()) {
+        list.add(new Integer(FBpmFormUI.OBJ_COPY));
+      }
+      if (isLinkButton()) {
+        list.add(new Integer(FBpmFormUI.OBJ_LINK));
+      }
+    }
+    
+    if (isAddObj4Button() && !isHideAddExisting()) {
+      list.add(new Integer(FBpmFormUI.OBJ4_ADD));  
+    }
+
+    for(int i = 0, size = list.size(); i < size; i++) {
+      int current = ((Integer)list.get(i)).intValue();
+      TreeDestination dest =
+        new TreeDestination(getIndex(), TreeDestination.UNSELECTED,
+                            current);
+      String linkHTML = treeLinkBuilder.getLinkHtml(dest, this);
+
+      // explicitly replace UI text for TGM components using getTextReplacement() 
+      if (!StringUtils.isEmpty(linkHTML) && isUseTGMv10Framework()) {
+        String label = getAddExistingGoalToFormLabel();
+        linkHTML = linkHTML.replaceAll(getMessages().BTN_Add_Objectives_With_Dots(), label);
+      }
+      if (hasProxyPermission()){
+        leftNav.addActionItem(linkHTML, null);
+      }
+      if (treeLinkBuilder.isSelected(dest)) {
+        leftNav.select();
+      }
+    }
+
+    // TGM left navigation has to correspond to actions available in the form for the TGM objective section  
+    if (isAddObj4Button() && isAddNewObjButton() && !isDraftTGMAllowed() 
+        && isUseTGMv10Framework() && hasProxyPermission()) {
+      leftNav.addActionItem(getObjSecURLBuilder().getAddNewHREF(null), null);
+    }    
+    
+    super.addItemsToLeftNav(leftNav, treeLinkBuilder);
+  }
+
+  public URLBuilderFormIDP getObjSecURLBuilder() {
+    if (objSecURLBuilder == null) {
+      boolean isDevelopment = (_getGoalType() == ObjPlanTypeEnum.DEVELOPMENT_ORDINAL);
+      objSecURLBuilder = new URLBuilderFormIDP("fb_pm_form_focus", getAnchorBuilder().getAnchor(getIndex()),
+                                              getObjTemplate().getObjPlanId(),
+                                              getFormId(), getDraftId(),
+                                              getIndex(),
+                                              getCategoryFilters(),
+                                              getSubjectID(), getAddNewGoalToFormLabel(), false, isDevelopment);
+    }
+    return objSecURLBuilder;
+  }
+
+  private boolean showTGMDetailLinks = true;
+  /** TGM delegate for evaluating "private-access" permission */
+  private ObjectiveAssigner objAssigner;
+
+  static {
+    _statusMoves = new HashMap();
+    _statusRoutingActions = new HashMap();
+    _statusMessageKeys = new HashMap();
+    Integer status;
+    HashSet moveTo;
+
+    // draft
+    status = new Integer(ObjBean.STATUS_DRAFT);
+    moveTo = new HashSet();
+    moveTo.add(new Integer(ObjBean.STATUS_NEW));
+    moveTo.add(new Integer(ObjBean.STATUS_APPROVED));
+    moveTo.add(new Integer(ObjBean.STATUS_COMPLETED));
+    moveTo.add(new Integer(ObjBean.STATUS_OBSOLETE));
+    _statusMoves.put(status, moveTo);
+    // no routing actions
+    _statusMessageKeys.put(status, "FUNCBLOCK_USEROBJ_STATUS_DRAFT");
+
+    // new
+    status = new Integer(ObjBean.STATUS_NEW);
+    moveTo = new HashSet();
+    moveTo.add(new Integer(ObjBean.STATUS_APPROVED));
+    moveTo.add(new Integer(ObjBean.STATUS_COMPLETED));
+    moveTo.add(new Integer(ObjBean.STATUS_OBSOLETE));
+    _statusMoves.put(status, moveTo);
+    // no routing actions.  ObjectiveEJB.createObj() is all you need.
+    _statusMessageKeys.put(status, "FUNCBLOCK_USEROBJ_STATUS_1");
+
+    // approved
+    status = new Integer(ObjBean.STATUS_APPROVED);
+    moveTo = new HashSet();
+    moveTo.add(new Integer(ObjBean.STATUS_COMPLETED));
+    moveTo.add(new Integer(ObjBean.STATUS_OBSOLETE));
+    _statusMoves.put(status, moveTo);
+    _statusRoutingActions.put(status, new Integer(ObjBean.ACTION_APPROVE));
+    _statusMessageKeys.put(status, "FUNCBLOCK_USEROBJ_STATUS_3");
+
+    // completed
+    status = new Integer(ObjBean.STATUS_COMPLETED);
+    moveTo = new HashSet();
+    // no moving
+    _statusMoves.put(status, moveTo);
+    _statusRoutingActions.put(status, new Integer(ObjBean.ACTION_COMPLETE));
+    _statusMessageKeys.put(status, "FUNCBLOCK_USEROBJ_STATUS_0");
+
+    // obsolete
+    status = new Integer(ObjBean.STATUS_OBSOLETE);
+    moveTo = new HashSet();
+    // no moving
+    _statusMoves.put(status, moveTo);
+    _statusRoutingActions.put(status, new Integer(ObjBean.ACTION_DELETE));
+    _statusMessageKeys.put(status, "FUNCBLOCK_USEROBJ_STATUS_2");
+
+    // deleted
+    status = new Integer(ObjBean.STATUS_DELETED);
+    moveTo = new HashSet();
+    // no moving
+    _statusMoves.put(status, moveTo);
+    // no routing actions
+    _statusMessageKeys.put(status, "FUNCBLOCK_USEROBJ_STATUS_8");
+  }
+
+  /**
+   * @return true if "From" and "To" constitute a legal status change.
+   * Returns false for non-changes and illegal changes.
+   */
+  public static boolean isStatusMoveLegal(int from, int to) {
+    HashSet legalMoves = (HashSet)_statusMoves.get(new Integer(from));
+    if (legalMoves == null) return false;
+    return legalMoves.contains(new Integer(to));
+  }
+
+  /**
+   * @return a list of PerformanceItem objects.
+   */
+  public List getPerformanceItems() {
+
+    List retval = _sortObjUIs(getObjUIs());
+    if (retval == null) return new ArrayList();
+    return retval;
+  }
+
+  public int getSectionSummaryThreshold() {
+    return _objSect.getSectionSummaryThreshold();
+  }
+
+  public ObjectiveSection getObjSect() {
+    return _objSect;
+  }
+  public void setObjSect(ObjectiveSection objSect) {
+    _objSect = objSect;
+  }
+
+  public void setObjType(ObjMgtEnum type) {
+    _objType = type;
+    if (_objType == ObjMgtEnum.BASIC) { // BOM
+      setHelpURL(getMessages().PH_GOALSECTBOM());
+      setAltText(getMessages().PAGE_HELP_GOALSECT_BOM());
+    }
+    else if (_objType == ObjMgtEnum.PLAN && !TGMUtils.isIDP(getObjTemplate()) ) { // Disable help url if IDP  
+      if (isUseTGMv10Framework()) { //TGM V10
+        setHelpURL(getMessages().PH_GOALSECTV10());
+        setAltText(getMessages().PAGE_HELP_GOALSECT_V10());
+      }
+      else {
+        setHelpURL(getMessages().PH_GOALSECTTGM());
+        setAltText(getMessages().PAGE_HELP_GOALSECT_TGM());
+      }
+    }
+  }
+
+  public ObjMgtEnum getObjType() {
+    return _objType;
+  }
+
+  /**
+   @return a HashSet of Longs, one for each unique obj ID on the form
+   */
+  public HashSet getObjIds() {
+    HashSet set = new HashSet();
+    Iterator i = _objSect.objectiveList.iterator();
+    while (i.hasNext()) {
+      set.add(new Long(((FMObjective)i.next()).objectiveId));
+    }
+    return set;
+  }
+
+  /**
+   * Removes checked objectives..
+   * Used when removing objs while viewing section summary in left nav item mode.
+   */
+  public void removeCheckedObjectives()
+  {
+    List objUIs = getObjUIs();
+    for (int i=objUIs.size()-1; i>=0; i--) {
+      ObjUI objUI = (ObjUI)objUIs.get(i);
+      if (null != getParameter(objUI.key_objCheckbox())) {
+        removeObj(i);
+      }
+    }
+  }
+
+  /**
+   * Remove Objective from both ObjectiveUI List and objective List
+   * @param objUIListIndex - List Index of the objective UIs
+   */
+  public boolean removeObj(int objUIListIndex)
+  {
+    try {
+      ObjUI objUI = (ObjUI)getObjUIs().get(objUIListIndex);
+      _objSect.objectiveList.remove(objUI.getFMObj());
+      getObjUIs().remove(objUIListIndex);
+      
+      return true;
+    } catch (Exception e) {
+      log.error("Error removing objective from objective plan from form.", e); 
+      return false;
+    }
+  }
+
+
+  /**
+   * Convenience method which calls addObjs() (plural)
+   * after wrapping the ObjBean in an ArrayList.
+   * @param objBean - the objBean to be converted to an FMObjective
+   * and added to this section.
+   * @param participantIDs - 360 participants to add to each new FMObjective.
+   * May be null.
+   *
+   * @return the FMObjective.index of the objective added.
+   */
+  public int addObj(ObjBean objBean, Set participantIDs) {
+    ArrayList a = new ArrayList();
+    a.add(objBean);
+    return addObjs(a, participantIDs);
+  }
+
+  private List getLearningActivities4Obj(long objId) {
+    Vector objList = new Vector();
+    try{
+      Vector childrenList = legacyHandler.execute(paramBean, new GetChildLearning(objId, false, false, false));
+      for (int i = 0; i< childrenList.size(); i++) {
+        ObjBean obj = (ObjBean)childrenList.elementAt(i);
+        if (!obj.isDeleted())
+          objList.addElement(obj);
+      }
+// catch (RemoteException e) {
+// logError(\"Caught exception when retreiving learning activities of
+// objective\");
+// }
+    }
+    catch (ServiceApplicationException e) {
+      logError("Caught exception when retreiving learning activities of objective");
+    }
+    return objList;
+  }
+  /**
+   * Adds the set of objBeans to this section, updating objUIs contents and sort order.
+   * Never uses DB to look up or create objs.
+   * @param objBeans - the objBeans to be converted to FMObjectives
+   * and added to this section
+   * @param participantIDs - 360 participants to add to each new FMObjective.
+   * May be null.
+   *
+   * @return the FMObjective.index of the earliest-in-sort-order objective added.
+   */
+  public int addObjs(Collection objBeans, Set participantIDs)
+  {
+    if (objBeans == null || objBeans.isEmpty())
+      return -1;
+    List objectiveList = _objSect.getObjectiveList();
+    List newObjs = new ArrayList();
+    Iterator i = objBeans.iterator();
+    while (i.hasNext()) {
+      ObjBean obj = (ObjBean)i.next();
+      //System.out.print("ObjBean status = " + obj.getObjStatus());
+      FMObjective fmObj = new FMObjective();
+      //System.out.println(", FMObjective status = " + obj.getObjStatus());
+
+
+      fmObj.updateObjContent(obj, true, _objSect.autoPopWeights, _objSect.getSectScale());
+      fmObj.addComment(getReviewerBean());
+      fmObj.copyTemplateElements(_objSect);
+      boolean isCalculatedRating = fmObj.getObjMetricMin() != fmObj.getObjMetricMax();
+      // If it is a PMU form and use-mlt-rating-if-present set to false and if it is a calculated rating then reset the rating.
+      // Considere calculated rating to not override group goal rating
+      if(isPMUnityForm() && !isUseMltRatingIfPresent() && isCalculatedRating){
+        fmObj.setRating(null);
+      }else if(isPMUnityForm() && isUseMltRatingIfPresent() && isCalculatedRating){
+        fmObj.setRating(ScaleUtils.normalizedObjRating(fmObj, getSectBean().getFormBean(), _objSect));
+      }
+      if (participantIDs != null) {
+        if (fmObj.getUserList() == null) fmObj.setUserList(new HashSet());
+        if (fmObj.getObjectiveFlag() == ObjBean.PRIVATE_OBJ) {
+          Set<String> privateAccessUsers = getObjectiveAssigner()
+              .createPrivateAccessList(participantIDs, _objSect);
+          fmObj.getUserList().addAll(privateAccessUsers);
+        } else {
+          fmObj.getUserList().addAll(participantIDs);
+        }
+      }
+      // Set the index to the size of the list.
+      // Maybe we should obsolete the index in FMObjective and use the order
+      // in which they appear in objectiveList as the display order instead.
+      fmObj.index = FMObjective.getNewIndex(_objSect.objectiveList);
+      newObjs.add(_addObjUI(fmObj));
+      objectiveList.add(fmObj);
+    }
+    // re-sort the section
+    _sortObjUIs(getObjUIs());
+
+    // sort the new objs and return the index of the first one
+    _sortObjUIs(newObjs);
+    if (newObjs.size() > 0) {
+      return ((ObjUI)newObjs.get(0)).getIndex();
+    } else if (getObjUIs().size() > 0) {
+      return ((ObjUI)getObjUIs().get(getObjUIs().size()-1)).getIndex();
+    } else {
+      return -1;
+    }
+  }
+
+
+
+  /** Is Item Weights locked down? */
+  public boolean isLockItemWeights() {
+    return _objSect.getLockItemWeights();
+  }
+  
+  public boolean showSubjectColumn(){
+    return isSpeedRaterMode() && _subjectRating != null;
+  }
+  
+  public boolean showManagerColumn(){
+    return isSpeedRaterMode() && _officialRating != null;
+  }
+  
+  public boolean showActionColumn(){
+    return true;
+  }
+  
+  public boolean showGapGraphColumn() {
+  	return (getSectConfig().getShowGap() && showManagerColumn() && showSubjectColumn());
+  }
+
+  //  public boolean isUseMilestones() {
+  //    return _objSect.getUseMilestone();
+  //  }
+
+  public Set getCategoryFilters() {
+    return _objSect.getCategoryFilters();
+  }
+
+  public Set getObjTypeFilters() {
+    return _objSect.getObjTypeFilters();
+  }
+
+  public String key_newObjButton() {
+    return sectionPrefix() + "newobtn";
+  }
+  public String key_copyObjsButton() {
+    return sectionPrefix() + "copyobtn";
+  }
+  public String key_linkObjsButton() {
+    return sectionPrefix() + "linkobtn";
+  }
+  public String key_addObj4sButton() {
+    return sectionPrefix() + "addo4btn";
+  }
+  public String key_addDraftTGMsButton() {
+    return sectionPrefix() + "adddrfto4btn";
+  }
+
+  public String key_removeObjsButton() {
+    return sectionPrefix() + "rmobtn";
+  }
+
+  public String key_objective() {
+    return sectionPrefix() +"obj";
+  }
+
+  public String getRefreshButtonKey() {
+    return sectionPrefix() + "refreshBtn";
+  }
+
+  /**
+   * This method returns true if it's a LMS integration environment and
+   * if the section with develop-goal=true
+   *
+   * NOTE: This is a confusing method. I do not know why it is only handling SystemBean.LMS_VERSION_SUMTOTAL_65 but
+   * it is inefficient because it was retrieving the systembean many times during the same request. I am optimizing it
+   * to only retrieve the systembean once but not changing the underlying logic.
+   *
+   * @return true if the section is develope-goal section  and a SUMTOTAL_65
+   */
+  public boolean isDevSection() {
+    if (_objSect.getDevelopeGoal()) {
+      if (lmsVersionIdSystemBean == null) {
+        try {
+          lmsVersionIdSystemBean = legacyHandler.execute(paramBean, new GetSysConfig(SystemBean.LMS_VERSION_ID_KEY, SystemBean.LMS_TYPE));
+          if (lmsVersionIdSystemBean == null) {
+            lmsVersionIdSystemBean = new SystemBean();
+          }
+// catch (SysConfigEJBException e) {
+// _log.error(\"Error retrieving sysConfigBean\",e);
+// }
+// catch (RemoteException e) {
+// _log.error(\"Error retrieving sysConfigBean\",e);
+// }
+        } catch (ServiceApplicationException e) {
+          _log.error("Error retrieving sysConfigBean", e);
+        }
+      }
+      return SystemBean.LMS_VERSION_SUMTOTAL_65.equals(lmsVersionIdSystemBean.sysString) && _objSect.getDevelopeGoal();
+    }
+    return _objSect.getDevelopeGoal();
+  }
+
+  public boolean showCompetency4Learning() {
+    return _objSect.getShowLearningComp();
+  }
+
+  public String getLearningSectionTitle() {
+    return _objSect.getLearningActivitySectionTitle();
+  }
+
+  public String formatDate(Date date) {
+    return ClientDateFormat.format(date, paramBean.getLocale());
+  }
+
+  public boolean isNewObjButtonHit() {
+    return isNewButton() && getParameter(key_newObjButton()) != null;
+  }
+  public boolean isCopyObjButtonHit() {
+    return isCopyButton() && getParameter(key_copyObjsButton()) != null;
+  }
+  public boolean isLinkObjButtonHit() {
+    return isLinkButton() && getParameter(key_linkObjsButton()) != null;
+  }
+  public boolean isAddObj4ButtonHit() {
+    return isAddObj4Button() && getParameter(key_addObj4sButton()) != null;
+  } 
+  public boolean isAddDraftTGMButtonHit() {
+    return isDraftTGMAllowed() && getParameter(key_addDraftTGMsButton()) != null;
+  }
+
+  public boolean isRemoveButtonHit() {
+    return isRemoveButton() && getParameter(key_removeObjsButton()) != null;
+  }
+
+  /**
+   * This method returns the first found objective category filter in the
+   * filter list if any.  It returns null if no filters are defined.
+   */
+  public String getDefaultCategory()
+  {
+    for (Iterator i = _objSect.categoryFilters.iterator(); i.hasNext();) {
+      return (String)i.next();
+    }
+    return null;
+  }
+
+
+  /**
+   * @return ObjTemplateBean without throws GoalPlanNotFoundException
+   */
+  public ObjTemplateBean getObjTemplate() {
+    ObjTemplateBean objTemplateBean = null;
+    try {
+      objTemplateBean = getObjTemplateThrowsException();
+    } catch (GoalPlanNotFoundException gpe) {
+      logError(gpe.getMessage(), gpe);
+    }
+    return objTemplateBean;
+  }
+
+  /**
+   Lazy-initializes and returns the ObjTemplateBean for the plan.
+   Caches obj templates in request so they can be used by multiple sections.
+   */
+  public ObjTemplateBean getObjTemplateThrowsException() throws GoalPlanNotFoundException
+  {
+    long planID = _objSect.sectionPlanId;
+    ObjTemplateBean objTemplateBean = null;
+    if (planID >= 0) {
+      try {
+        objTemplateBean = TGMUtils.getObjTemplateBean(request, null, paramBean, planID);
+      } catch (GoalPlanNotFoundException e) {
+        String msg = "Error loading Template (id="+planID+") for section: " + _objSect.getSectionName()
+                     + ".  Make sure the section is setup with a valid goal template.";
+        throw new GoalPlanNotFoundException(msg, e);
+      }
+    }
+    return objTemplateBean;
+  }
+  
+  public boolean showObjNumbering() {
+    boolean showFlag = false;
+    if(_objType == ObjMgtEnum.PLAN && null != getObjTemplate()){
+      showFlag = getObjTemplate().isShowObjNumbering();
+    }
+    return showFlag;
+  }
+
+
+  /**
+   * lazy-initializes _objUIs.
+   * @return a List of ObjUIs, unsorted. never returns null 
+   */
+  public ArrayList getObjUIs()
+  {
+    try{
+      if (_objUIs == null) {
+        _objUIs = new ArrayList();
+        List fmObjs = _objSect.getObjectiveList();
+        if ((fmObjs != null)) {
+          ObjTemplateBean objTemplate = getGoalTemplate(_objSect.getSectionPlanId());
+          List<Field> objPlanFields = new ArrayList<Field>();
+          if(objTemplate != null) {
+            objPlanFields = objTemplate.getFields();
+          }
+          
+          List updatedActivities = null;
+          for (int i=0, n=fmObjs.size(); i<n; i++) {
+            FMObjective fmObj = (FMObjective)fmObjs.get(i);
+            PMFormUtils.initializeItemComments(getSectBean().getFormBean(), _objSect, fmObj, getManagerBean());
+            if (isGoalAccessible(fmObj)){
+              ObjUI objUI = _addObjUI(fmObj);
+              if (((fmObj.lmsList==null) || (fmObj.lmsList.size()==0)) && isDevSection() && (objUI!=null)) {
+                
+                objUI.addLearningActivities(getLearningActivities4Obj(fmObj.getObjectiveId()));
+                if (null == updatedActivities) {
+                  updatedActivities = objUI.getUpdatedActivities();
+                }
+                objUI.refreshLearningActivities(updatedActivities);
+                objUI.setLearningActivitiesRefreshed(true);
+              }
+              
+              if(objTemplate != null) {
+                clearDeletedGoalFields(objUI, objPlanFields);
+              }
+            }
+          }
+        }
+      }
+    }
+    catch (Exception e) {
+      getLog().log(Log.ERROR, "Error while refreshing learning activities",
+                   e, paramBean);
+    }
+    return _objUIs;
+  }
+  
+  private ObjTemplateBean getGoalTemplate(long goalPlanId) {
+    try {
+      GetObjTemplate cmd = new GetObjTemplate();
+      cmd.setObjPlanId(goalPlanId);
+      legacyHandler.execute(cmd);
+      if(cmd.getObjTemplateBean() == null) {
+        log.warn("The goalPlanId of this section is invalid!!!");
+      } else {
+        return cmd.getObjTemplateBean();
+      }
+    } catch(Exception e) {
+      log.warn(e.toString());
+    }
+    return null;
+  }
+  /*
+   * Fix PMU-2048
+   * Currently we only clear metric field when it was delete from objective tempalte
+   */
+  private void clearDeletedGoalFields(ObjUI objUI, List<Field> objPlanFields) {
+    boolean metricFieldFlag = false;
+    for(Field objPlanField: objPlanFields) {
+      if(objPlanField.getId().equals(Field.ID_METRIC)) {
+        metricFieldFlag = true;
+        break;
+      }
+    }
+    if(!metricFieldFlag) {
+      objUI.getFMObj().setObjectiveMetric("");
+    }
+  }
+  
+  private boolean isGoalAccessible(FMObjective fmObj) {
+    // limit the support of private goals in 360 forms
+    if (getSectBean().getFormBean().getV4Form().getPM360() == null)
+      return true;
+    
+    if (fmObj.getObjectiveFlag() != ObjBean.PRIVATE_OBJ)
+      return true;
+
+    ObjectiveAssigner assigner = getObjectiveAssigner();
+
+    return assigner.hasPrivateAccessPermission(getParamBean().getUserId(),
+        _objSect.getSectionPlanId());
+  }
+
+  private ObjectiveAssigner getObjectiveAssigner() {
+    if (objAssigner == null) {
+      // lazy-init the objective assigner
+      Set<ObjTemplateBean> objTemplates = ObjectiveAssigner.findObjTemplates(
+          getParamBean(), getObjEJB(), getSectBean().getFormBean().getV4Form()
+              .getPM360());
+      objAssigner = ObjectiveAssigner.getAssigner(objTemplates, getParamBean(),
+          ejbList, getSectBean().getFormBean().getSubjectBean().getUserId());
+    }
+    return objAssigner;
+  }
+
+  /**
+   * @return Returns the _sectionElementListUI.
+   */
+  public FMElementListUI getSectionElementListUI() {
+    return _sectionElementListUI;
+  }
+
+  public void findRatingUIs(){
+    List objUIs = getObjUIs();
+    if(null != objUIs && objUIs.size() > 0){
+      ObjUI objsUI = (ObjUI)objUIs.get(0);
+      _officialRating  = objsUI.getRatingUI();
+      _subjectRating = objsUI.getSubjectRatingUI();
+    }
+    
+  }
+  
+  public void process()
+  {
+    super.process();
+    if(isSpeedRaterMode()){
+      findRatingUIs();
+    }
+    processBody();
+    List elist = _objSect.getSectionElementList();
+    if (elist!=null && elist.size()>0) {
+      _sectionElementListUI = new FMElementListUI(elist, isEditableData(), sectionPrefix(), _objSect.getSectLevelElementsTitle(), this);
+    }
+    //  custom elements
+    if (_sectionElementListUI != null) {
+
+      _sectionElementListUI.process();
+    }
+    // TGM-1799 fix, flag for clearing Rules engine from cache.
+    setAttribute("createRulesEngine",true);
+  }
+
+  /**
+   Only processes the objective list.
+   Don't handle end-of-sect comments or summary-section section weight.
+   The "Add" button can be queried with isAddButtonHit()
+   */
+  public void processBody()
+  {
+    // remove or process
+    for (int i=0, n=getObjUIs().size(); i<n; i++) {
+      ObjUI objUI = (ObjUI)getObjUIs().get(i);
+      // Check if the Remove Goal button is hit.
+      if (objUI.isRemoveButtonHit()) {
+        removeObj(i);
+        i--;
+        n--;
+        setFocus();
+      }
+      else {
+        processButtonEvent(objUI);
+      }
+    }
+  }
+
+  private void setFocus() {
+    setAttribute("focus", getAnchorBuilder().getAnchor(getIndex()));
+  }
+
+  private void processButtonEvent(ObjUI objUI) {
+    // check if the remove button is hit
+    if ((getParameter(objUI.getRemoveButtonKey())!= null) &&
+        (!StringUtils.isBlank(getParameterValues(objUI.getRemoveButtonKey())[0]))) {
+      String[] values = getParameterValues(objUI.getRemoveButtonKey());
+      log.debug("Remove button is hit "+values.length+ "Value is "+values[0]);
+      for (int j = 0; j < values.length; j++) {
+        if (values[j] != null && values[j].trim().length() > 0) {
+          try {
+            long objId = Long.valueOf(values[j]).longValue();
+            objUI.removeLearningActivity(objId);
+          } catch (Exception exc) {
+            exc.printStackTrace();
+          }
+        }
+      }
+      setFocus();
+    }
+    else if (getParameter(getRefreshButtonKey())!= null) {
+      log.debug("Refresh button is hit ");
+      try {
+        // EE-8556 Refresh LearningActivities if not already refreshed in getObjUIs call
+        if(!objUI.isLearningActivitiesRefreshed()) {
+          objUI.refreshLearningActivities(objUI.getUpdatedActivities()); 
+          objUI.setLearningActivitiesRefreshed(true);
+        }
+      }catch(Exception e){
+        getLog().log(Log.ERROR, "Error while refreshing learning activities",
+            e, paramBean);
+      }
+    }
+    else {
+      objUI.process();
+    }
+  }
+
+  public void renderSectionBody(PageContext pageContext)
+    throws ServletException, IOException
+  {
+    _sortObjUIs(getObjUIs());
+    pageContext.setAttribute("fb", this, PageContext.REQUEST_SCOPE);
+    if(isSpeedRaterMode() && !this.isPMUnityForm()){
+      pageContext.include("/ui/pmcommon/pages/fb_sect_ui_objective_speed_rater.jsp");
+    } else {
+      if(this.getShowDemoUI()){
+          pageContext.include("/ui/pmcommon/pages/fb_sect_ui_objective_demo.jsp");
+      }else {
+        if(!isAddObj4ButtonHit() && this.isPMUnityForm()){
+          pageContext.include("/ui/pmcommon/pages/fb_sect_ui_objective_rev.jsp");
+        }else if(!isAddObj4ButtonHit() && this.isPMRForm()){
+          pageContext.include("/ui/pmcommon/pages/fb_sect_ui_objective_pmr.jsp");
+        }else {
+          pageContext.include("/ui/pmcommon/pages/fb_sect_ui_objective.jsp");
+        }
+      }
+
+    }
+  }
+
+  public boolean isBomExtraAttibs() {
+    return getCompanyBean().isFeatureExist(CompanyBean.FEATURE_ADVOBJ) ||
+           ObjectiveFeatures.isStatusOnFormBOMEnabled(request);
+  }
+
+  ////////////////////
+  // private methods
+  ////////////////////
+  private String _getObjPrefix(long objIndex) {
+    return new StringBuffer(sectionPrefix())
+      .append("o_").append(objIndex).append("_")
+      .toString();
+  }
+
+  private String _getObjCommentPrefix(long objIndex) {
+    return _getObjPrefix(objIndex) + "cmt_";
+  }
+
+  private ObjUI _addObjUI(FMObjective fmObj) {
+    getObjUIs();  
+    CommentListUI comments = null;
+
+    if (_objSect.getItemComment()) {
+      Vector commentList = new Vector();
+      commentList.addAll(fmObj.getCommentList());
+
+      // Rearrange the comments so it will work with CommentListUI for group goals.
+      if (showGroupGoalRatingComment(fmObj)) {
+        processGroupCommentList(fmObj, commentList);
+      }
+
+      String titleFormat = getDefaultItemCommentsLabel();
+      String managerCommentsLabel = showGroupGoalRatingComment(fmObj) ? getMessages().comment_title_group_rating() : getManagerCommentsLabel();
+      comments = new CommentListUI(
+        commentList,
+        titleFormat,
+        null,
+        paramBean.getUserId(),
+        isEditableComments(),
+        _objSect.getRatingOption(),
+        _objSect.getSectScale(),
+        _getObjCommentPrefix(fmObj.getIndex()),
+        managerCommentsLabel,
+        getSubjectCommentsLabel(),
+        getCommentsBlankIndicator(),
+        getItemCmtRatingFieldPermission(null),
+        _objSect.noRate,
+        fmObj.getObjectiveId(),
+        false, getAnonymousUsers(),
+        FieldPermissionEnum.ITEM_COMMENT,
+        isPrintPreview());
+      comments
+          .setSuppressItemComments(_objSect.getSuppressItemComments() == ObjectiveSection.SUPPRESS_ALL_COMMENTS);
+      comments.setSuppressItemCommentsLabel(_objSect.getSuppressItemCommentsLabel());
+    }
+    ObjUI objUI = new ObjUI(fmObj, _getObjPrefix(fmObj.getIndex()), comments, getIndex(), this);
+    getObjUIs().add(objUI);
+    return objUI;
+  }
+
+
+  /**
+   * Prepare the commentList
+   * @param fmObj
+   * @param commentList
+   */
+  private void processGroupCommentList(FMObjective fmObj, Vector commentList) {
+
+    // Find subject comments and group comments
+    FMComment subjComment = null;
+    FMComment groupComment = null;
+    FMComment mgrComment = null;
+    Iterator itr = fmObj.getCommentList().iterator();
+    while (itr.hasNext()) {
+      FMComment fmComment = (FMComment) itr.next();
+      if (getSubjectID().equals(fmComment.userId)){
+        subjComment = fmComment;
+      } else if (getManagerID().equals(fmComment.userId)) {
+        mgrComment = fmComment;
+      } else if (ObjBean.GROUP_GOAL_INDICATOR.equals(fmComment.userId)) {
+        groupComment = fmComment;
+      }
+    }
+
+    if (hasSplitComments()) {
+      if (mgrComment != null) commentList.remove(mgrComment);
+
+      if (groupComment == null) {
+        groupComment = new FMComment();
+        groupComment.setComment("");
+        groupComment.setUserId(ObjBean.GROUP_GOAL_INDICATOR);
+        commentList.add(groupComment);
+      }
+
+      if (false && subjComment == null) {
+        subjComment = new  FMComment();
+        subjComment.setComment("");
+        subjComment.setUserId(getSubjectID());
+        commentList.add(subjComment);
+      }
+
+    }
+  }
+
+  private boolean showGroupGoalRatingComment(FMObjective fmObj) {
+    return fmObj != null && fmObj.isGroupRating() &&
+           ScaleBean.RESERVE_TGM_RATE_AT_FORM != fmObj.getGroupRating(); //(!(""+ScaleBean.RESERVE_TGM_RATE_AT_FORM).equals(""+fmObj.getGroupRating()));
+  }
+
+  public void sortObjUIs() {
+    _sortObjUIs(getObjUIs());
+  }
+
+  /**
+   * True if "auto-pop-weights" is set to true in the form template and if we're in TGM
+   * This is used to determine whether to show the item weight. If it's true, we show the TGM weight instead. 
+   * @return True if "auto-pop-weights" is set to true in the form template and if we're in TGM
+   */
+  public boolean isAutoPopWeightOn() {
+    return _objSect.autoPopWeights && _objType == ObjMgtEnum.PLAN;
+  }
+
+  /**
+   * Combines all knowledge to come up with the final answer.
+   */
+  public FieldPermissionEnum getItemPointPermission() {
+    if (getSectConfig().isShowPoints()) {
+      return FieldPermissionEnum.READ;
+    } else {
+      return FieldPermissionEnum.NONE;
+    }
+  }
+
+
+  /**
+   * @return the list that was passed in, after sorting it.
+   */
+  private List _sortObjUIs(List objUIs) {
+    if (_objType == ObjMgtEnum.PLAN) {
+      ObjTemplateBean objTemplateBean = getObjTemplate();
+
+      TGMCommonUtils.sortObjectives(objUIs, objTemplateBean, true, 
+          new TGMCommonUtils.SortableObjAdapter() {
+            public String getCategory(Object obj) {
+              ObjUI objUI = (ObjUI) obj;
+              return objUI.getBomCategory();
+            }
+
+            public int getStatus(Object obj) {
+              ObjUI objUI = (ObjUI) obj;
+              return objUI.getStatus();
+            }
+            
+            public Comparator getComparator() {
+              Comparator comparator = new Comparator() {
+                public int compare(Object a, Object b) {
+                  // When a goal does not have a category, the order number 
+                  // on all the goals is 1.
+                  // In this case, we need to order them by their name.
+                  if(((ObjUI)a).getOrder()==((ObjUI)b).getOrder()) {
+                    String tmpA = StringUtils.isBlank(((ObjUI)a).getName()) ? "" : ((ObjUI)a).getName();
+                    // Fix for PMT-3163: An objective does not need to have a name.
+                    String tmpB = StringUtils.isBlank(((ObjUI)b).getName()) ? "" : ((ObjUI)b).getName();
+                    return (tmpA).compareTo(tmpB);
+                  } else {
+                    return ((ObjUI)a).getOrder() - ((ObjUI)b).getOrder();
+                  }
+                }
+               };
+              return comparator;
+            }
+          });
+
+    } else {
+      // We're not using TGM, so sort by form index.
+      Collections.sort(
+        objUIs,
+        new Comparator() {
+          public int compare(Object o1, Object o2) {
+            return ((ObjUI)o1).getIndex() - ((ObjUI)o2).getIndex();
+          }
+        }
+      );
+    }
+    return objUIs;
+  }
+
+  private String getObjItemAnchorName() {
+    return (getSectBean().getFormBean().getFormType().equals(FormBean.TYPE_PM360))? "pm360_tdnew" : "pmreview_tdnew";
+  }
+
+  /** UI element backed by an FMObjective. */
+  public class ObjUI implements FBSectUI_Summary.PerformanceItemSummary
+  {
+    /**
+     * Don't use it by yourself! Only for Legacy!
+     */
+    private transient LocalContextSCAHandler legacyHandler = LocalContextSCAHandler.create();
+    /**
+     * sca handler
+     */
+    private transient ServiceCommandHandler scaHandler = ServiceCommandHandlerFactory
+        .getSCAHandler();
+    //////////////////////////
+    // stuff for constructor
+    //////////////////////////
+    private FMObjective _fmObj;
+    private FBSectUI_Objective _fbSectUI_Objective;
+    private String _prefix;
+    /** comemntListUI has it's own data, editability */
+    private CommentListUI _commentListUI;
+
+    ///////////////////
+    // internal stuff
+    ///////////////////
+    private FMElementListUI _elementListUI;
+
+    /**
+     * This does double duty as the rating of record for most rating-opts,
+     * and as the manager rating iff rating-opt=3
+     */
+    private RatingUI _ratingUI;
+
+    /**
+     * subject's rating iff rating-opt=3
+     */
+    private RatingUI _subjectRatingUI;
+
+    private ObjWrap _fmow;
+
+    // TGM data
+    private FBObj4 _obj4;
+    private List hiddenDivIDs = new ArrayList();
+
+    /** all objUIs rendered will have consecutive position numbers starting at 0 */
+    private int _position;
+
+    /** cache for lazy-initialized point text */
+    private String _pointText = null;
+
+    /** Flag to maintain Learning Activities refreshed status */
+    private boolean _learningActivitiesRefreshed = false;
+
+
+    public ObjUI(FMObjective fmObj, String prefix, CommentListUI commentListUI, int secIndex, FBSectUI_Objective fb)
+    {
+      this._fmObj = fmObj;
+      this._fbSectUI_Objective = fb;
+      this._prefix = prefix;
+      this._commentListUI = commentListUI;
+      this.learningActivities = new Vector();
+
+      _fmow = new FMObjectiveWrap(fmObj, getLocale(),
+                                  getMessages().getString("FUNCBLOCK_USEROBJ_DATEFORMAT"));
+      try {
+        ObjTemplateBean template = null;
+        if (_objType == ObjMgtEnum.BASIC) {
+          _obj4 = null;
+        } else {
+          if(isAPI) {
+            _obj4 = new FBObj4(parameters, attributes, paramBean, paramBean.getCompanyBean() , getMessages(),
+                instanceName, getUrlPrefix(), getSubjectBean().getUserId(),
+                _fmow, isEditableObjData(), false);
+            
+          } else {
+            _obj4 = new FBObj4(getFB2Context(), prefix, getUrlPrefix(),
+                             getSubjectBean().getUserId(), _fmow, isEditableObjData(), false);
+          }
+          _obj4.setExpando(FormRendererOptions.isEnabled(request, FormRendererOptions.KEY_EXPANDO));
+          _obj4.setValidation(FormRendererOptions.isEnabled(request, FormRendererOptions.KEY_VALIDATION));
+          _obj4.setUsePopUp(TGMUtils.isEditViaPopup(getObjSect()));
+          
+          //EE-4695: Objective Section should ignore TGM permissions when viewing thru Detailed Doc Search
+          _obj4.setIgnorePermCheck(ignorePermCheck);
+          _obj4.setAutoPopWeightOn(fb.isAutoPopWeightOn());
+          template = getObjTemplate();
+          if (null == template)
+          {
+            _obj4CustomCommands(_obj4);
+          }
+          else
+          {
+        	_obj4.init(template, getSubjectBean().getUserId());
+            HashSet cmdSet = new HashSet();
+            cmdSet.add("type");//TGM-2942
+            cmdSet.add("category");//TGM-2942
+            
+            // no additional commands.
+            _obj4.setHiddenDivIdPrefix(_prefix+"hid_");
+                        
+            // If the form is in edit mode, get the original form layout; otherwise, get a read-only form layout                                     
+            _obj4.useTemplateCommands(template, _printPreview? template.getReadOnlyFormLayout(_showSectionDetails) : template.getFormLayout(),
+                    cmdSet, getSubjectBean().getUserId());
+            hiddenDivIDs = _obj4.getHiddenDivIds();
+
+
+            String anchor = secIndex + "i" + getIndex();
+            // Add Learning Activities for IDP goals
+            if (template.hasLearningActivities()) {
+                String addLearningTitle = getMessages().FORM_LABEL_ADD_NEW_LA();
+                
+                boolean isDevelopment = (_getGoalType() == ObjPlanTypeEnum.DEVELOPMENT_ORDINAL);
+
+                URLBuilderFormIDP learningURLBuilderFormIDP = new URLBuilderFormIDP(getObjItemAnchorName(), anchor,
+                                                          template.getLearningTemplateBean().getObjPlanId(),
+                                                          getFormId(), getDraftId(),
+                                                          secIndex,
+                                                          null,
+                                                          getSubjectID(), addLearningTitle,
+                                                          true, isDevelopment);
+              learningURLBuilderFormIDP.setIdpAnchor(getAnchorBuilder().getAnchor(secIndex, getIndex()));
+              _obj4.setLearningFormURLBuilder(learningURLBuilderFormIDP);
+            }
+
+            if (TGMUtils.isEditViaPopup(getObjSect())) {
+              URLBuilderFormIDP goalURLBuilder = (URLBuilderFormIDP) getObjSecURLBuilder().clone();
+              goalURLBuilder.setAnchorName(getObjItemAnchorName());
+              goalURLBuilder.setAnchor(anchor);
+              _obj4.setGoalFormURLBuilder(goalURLBuilder);
+            }
+
+          }
+        }
+
+          for (int i = 0; i< fmObj.lmsList.size(); i++) {
+              FMElement element = (FMElement)fmObj.lmsList.elementAt(i);
+              ObjBean objBean = legacyHandler.execute(paramBean, new GetObjById(Long.parseLong(element.elementKey), false, false));
+              objBean.setCompetencyName(element.elementName);
+              learningActivities.addElement(objBean);
+          }
+
+        List elist = _fmObj.getElementList();
+        if (elist!=null && elist.size()>0) {
+          _elementListUI = new FMElementListUI(elist, isEditableData(), prefix, fb);
+          if(showObjNumbering()){
+            _elementListUI.setSubSectionLabel(_fmObj.getObjectiveNumber());
+          }else{
+            _elementListUI.setSubSectionLabel(_fmObj.getObjectiveName());
+          }
+        }
+
+        FieldPermissionEnum expectedItemRatingPerm = getExpectedRatingPermission(_objSect.isShowObjExpectedRating(), FieldPermissionEnum.EXPECTED_ITEM_RATING);
+        FieldPermissionEnum itemRatingPerm = getItemRatingPermission();
+        boolean isCalculatedRating = fmObj.isCalculatedRating();
+        if (itemRatingPerm != FieldPermissionEnum.NONE) {
+          boolean editable = itemRatingPerm == FieldPermissionEnum.WRITE && !_fmObj.isGroupRating();
+
+          // EE-18599
+          String objRating = null;
+          if((isPMUnityForm())){
+            // for PMU form we always store the normalized rating not the mlt rating so set the value directly
+            objRating = fmObj.getRating();
+          }else{
+            objRating = fmObj.getRatingValue(_fmow, getSectConfig(), template, getLocale());
+          }
+          
+          // Need to flag whether to rating is calculated.
+          _ratingUI = new RatingUI(getScale(), objRating, -1,
+                                   editable,
+                                   key_rating(), false, expectedItemRatingPerm);
+          
+          if ((!isPMUnityForm() && isCalculatedRating)) {
+            String objRatingDisplayValue = fmObj.getRatingDisplayValue(_fmow, getSectConfig(), template, getLocale());
+            _ratingUI.setDisplayValue(objRatingDisplayValue);
+          }
+          else if((isPMUnityForm() && isUseMltRatingIfPresent() && isCalculatedRating)){
+            // for PMU form we always store the normalized rating not the mlt rating so don't set the display rating and 
+            // when show-value="true" the full value will be computed later
+            _ratingUI.setDisplayValue(null);
+          }
+          else {
+            _ratingUI.setOverridingUseMetricLookupTable(true);
+          }
+        }
+
+        FieldPermissionEnum subjectItemRatingPerm = getSubjectItemRatingPermission();
+        if (subjectItemRatingPerm != FieldPermissionEnum.NONE) {
+           boolean editable = subjectItemRatingPerm == FieldPermissionEnum.WRITE && !_fmObj.isGroupRating();           
+          _subjectRatingUI = new RatingUI(getScale(), getSubjectRatingValue(), -1,
+                                          editable,
+                                          key_rating(), false, expectedItemRatingPerm);
+          if (!isCalculatedRating) {
+            _subjectRatingUI.setOverridingUseMetricLookupTable(true);
+          }          
+        }
+
+        // XXX/ADW If it's supposed to be grouped but is not,
+        // set the group to be the first one in the list.
+        FieldPermissionEnum itemGroupPerm = getItemGroupPermission();
+        if (itemGroupPerm != FieldPermissionEnum.NONE && getGroup()==null) {
+          setGroup((String)getGroups().get(0));
+        }
+      }
+      catch(Exception e) {
+        logError("Exception in constructor ", e);
+      }
+    }
+
+    /**
+     * @return lazy-inititlized item point text<p>
+     * item points = item rating * item weight / expected section weight<br>
+     * Defaults to 0 if any of the terms is undefined.<br>
+     * Rounds to the standard 2 decimals.
+     */
+    public String getPointText() {
+      if (_pointText == null) {
+        double result;
+        try {
+          double rating = Double.parseDouble(getRatingValue());
+          double weight = Double.parseDouble(getWeight());
+          double expectedWeightTotal = getSectConfig().getWeightTotal();
+          // weightTotal defaults to -1, meaning 'undefined'.  Check for that.
+          if (expectedWeightTotal > 0) {
+            result = rating * weight / expectedWeightTotal;
+          } else {
+            result = 0;
+          }
+        } catch (NumberFormatException fne) {
+          result = 0;
+        }
+        _pointText = Double.toString(MathUtil.round(result, getSectConfig().getNumDecimalPlaces()));
+      }
+      return _pointText;
+    }
+
+    public FMObjective getFMObj()
+    {
+      return _fmObj;
+    }
+
+    /** never returns null */
+    public String getBomDesc() {
+      String desc = _fmObj.getObjectiveDesc();
+      if (desc == null) return "";
+      return desc;
+    }
+
+    public String getName() {
+      if (_objType == ObjMgtEnum.BASIC) {
+        return _fmow.getName();
+      } else if (_objType == ObjMgtEnum.PLAN) {
+        return getObj4().getObj().getName();
+      }
+      throw new Error("Assertion failure");
+    }
+
+    public String getNumber() {
+      return _fmObj.getObjectiveNumber();
+    }
+
+    public String getKey() {
+      if (_objType == ObjMgtEnum.BASIC) {
+        return key_bomName();
+      } else if (_objType == ObjMgtEnum.PLAN) {
+        return getObj4().key_field("name");
+      }
+      throw new Error("Assertion failure");
+    }
+
+    public String getPrefix() {
+      return _prefix;
+    }
+
+    public void setPosition(int i) {
+      _position = i;
+    }
+    public int getPosition() {
+      return _position;
+    }
+
+    public String key_showDetails() {
+      return _prefix + "sd";
+    }
+    public String key_removeButton() {
+      return _prefix + "rm";
+    }
+    public String key_rating() {
+      return _prefix + "r";
+    }
+    public String key_weight() {
+      return _prefix + "w";
+    }
+    public String key_group() {
+      return _prefix + "g";
+    }
+
+    // BOM keys
+    public String key_bomName() {
+      return _prefix + "name";
+    }
+    public String key_bomStart() {
+      return _prefix + "start";
+    }
+    public String key_bomDue() {
+      return _prefix + "due";
+    }
+    public String key_bomCategory() {
+      return _prefix + "cat";
+    }
+    public String key_bomStatus() {
+      return _prefix + "stat";
+    }
+    public String key_bomDesc() {
+      return _prefix + "desc";
+    }
+
+    public String key_objCheckbox() {
+      return _prefix + "objChk";
+    }
+
+    /** BYIP: For 360 forms, you can lock down certain objectives so that
+     they can't be removed.
+     */
+    public boolean isRemovable() {
+      return isRemoveButton()
+             && _fmObj.isRemovable
+             
+             // If it is "Group Goal" and "AutoSync"
+             // then, only the owner can delete the goal content.
+      		 && hasModifyAccessOnGroupGoalWithAutoSync();
+    }
+
+    public boolean isShowButtons() {
+      return true;
+    }
+
+    public void setRemovable(boolean removable) {
+      _fmObj.setIsRemovable(removable);
+    }
+
+    public PerformanceItem getPerformanceItem() {
+      return _fmObj;
+    }
+
+// add learning activity, for develope goal section
+    public String getInsertButtonKey() {
+      return sectionPrefix() + "insertLABtn"+getId();
+    }
+
+    public String getRemoveButtonKey() {
+      return sectionPrefix() + "removeLABtn";
+    }
+
+    public String getSearchButtonKey() {
+      return sectionPrefix() + "searchLearningBtn";
+    }
+
+    public boolean isAddButtonHit() {
+      return getParameter(getInsertButtonKey()) != null;
+    }
+
+    /** @return true iff
+     the section is set to editable
+     and the obj is not corporate
+     and (the section is TGM or the BOM obj is in Draft or New*/
+    public boolean isEditableObjData() {
+      return isEditableData()
+             && (getTgmFieldPermission() == FieldPermissionEnum.WRITE)
+             && !ObjBean.TYPE_CORPORATE.equals(_fmObj.getObjectiveType())
+             && !ObjBean.TYPE_GROUP.equals(_fmObj.getObjectiveType())
+             && (_objType==ObjMgtEnum.PLAN || _statusAllowsEditingObjData(_fmObj.getObjectiveStatus()));
+    }
+    /**
+     * Check if we have read/write permssion for TGM field on PM form.
+     * @return
+     */
+    public boolean isCanRWObjData() {
+      return (getTgmFieldPermission() != FieldPermissionEnum.NONE);
+    }
+    /**
+     * If the goal is a "Group Goal" & the form has "AutoSync" enabled,
+     * then only the group goal owner can EDIT the goal content or REMOVE the goal.
+     *
+     * if the goal is new group goal, then only creator can edit his own master goal;
+     *          only assigner can edit assigned group goal;
+     * @return <code>true</code> if the condition is met and the user has the right to edit/remove the goal.
+     */
+    public boolean hasModifyAccessOnGroupGoalWithAutoSync() {
+      // group goal
+      if (ObjBean.TYPE_GROUP.equals(_fmObj.getObjectiveType()) && _fbSectUI_Objective._objSect.isAutoSyncEnabled()) {
+        return paramBean.getUserId().equals(_fmObj.getObjectiveGroupGoalOwner()) ? true : false;
+      }
+      // new group goal
+      // TGM-3060 Autosync should not control whether group goals 2.0 can be deleted.
+      // Original expected behavior that only owner & assigner can delete group goals should apply in PM as well.
+      if (ObjBean.TYPE_GROUP_V2.equals(_fmObj.getObjectiveType())) {
+        // creator can edit his own master goal
+        if (paramBean.getUserId().equals(_fmObj.getObjectiveOwner()) && _fmObj.getObjMasterId() == -1) {
+          return true;
+        }
+        // assigner can edit assigned goal
+        if (TGMUtils.hasAssignPermission(getHttpServletRequest()) && _fmObj.getObjMasterId() > 0) {
+          return true;
+        }
+        
+        // TGM-3614: define by "remove-group-goal"
+    	return ( getRemoveGroupGoalPermission() == ActionPermissionEnum.ENABLED );
+        
+      }
+      return true;
+    }
+    
+    public FMElementListUI getElementListUI() { return _elementListUI; }
+    public CommentListUI getCommentListUI() { return _commentListUI; }
+    public RatingUI getRatingUI() { return _ratingUI; }
+    public String getWeight() { return _fmObj.getWeight(); }
+
+    public Vector getLearningActivities() {
+      return learningActivities;
+    }
+
+    public void setLearningActivities(Vector learningActivities) {
+      this.learningActivities = learningActivities;
+    }
+
+    public void addLearningActivities(List list) {
+      Iterator iterator = list.iterator();
+      while (iterator.hasNext()) {
+        ObjBean objBean = (ObjBean) iterator.next();
+        learningActivities.addElement(objBean);
+      }
+      // write learning activities
+      _fmObj.lmsList = new Vector();
+      if ((learningActivities!= null) && (learningActivities.size() > 0)) {
+        for (int i =0; i< learningActivities.size(); i++) {
+          ObjBean objBean = (ObjBean) learningActivities.elementAt(i);
+          FMElement element = new FMElement();
+          element.elementKey = Long.toString(objBean.getObjId());
+          element.elementName = objBean.getCompetencyName();
+          element.elementValue = objBean.getObjDept();
+          _fmObj.lmsList.addElement(element);
+        }
+      }
+    }
+
+    public void refreshLearningActivities(List newList) throws Exception{
+
+      _fmObj.lmsList = new Vector();
+      if ((learningActivities!= null) && (learningActivities.size() > 0)) {
+        
+        for (int i =0; i< learningActivities.size(); i++) {
+          ObjBean objBean = (ObjBean) learningActivities.elementAt(i);
+          boolean found = false;
+          Iterator itr = newList.iterator();
+          while(itr.hasNext()) {
+            ObjBean newObj = (ObjBean) itr.next();
+            if (objBean.getObjDept().equals(newObj.getObjDept())) {
+              found = true;
+              objBean.setCompetencyName(newObj.getCompetencyName()==null?"":newObj.getCompetencyName());
+              objBean.setObjStart(newObj.getObjStart());
+              objBean.setObjEnd(newObj.getObjEnd());
+              objBean.setObjDue(newObj.getObjDue());
+              // replace the old learning activity with new one.
+              learningActivities.set(i, objBean);
+              
+              legacyHandler.execute(paramBean, new UpdateObj(paramBean.getUserId(), objBean, true, false, true));
+              break;
+            }
+          }
+          if (found) {
+            FMElement element = new FMElement();
+            element.elementKey = Long.toString(objBean.getObjId());
+            element.elementName = objBean.getCompetencyName();
+            element.elementValue = objBean.getObjDept();
+            _fmObj.lmsList.addElement(element);
+          }
+          else { // if learning activity has been removed from LMS system, remove it from form
+              learningActivities.removeElementAt(i);
+          }
+        }
+      }
+    }
+
+    private URL recLearningURL = null;
+
+      public List getUpdatedActivities() throws Exception {
+        // Get updated activities from LMS
+        return legacyHandler.execute(
+          paramBean, new GetSelectableLearningActivityList(String.valueOf(
+              getSectBean().getFormBean().getFormDataId()), paramBean.getLocale(), getSectBean().getFormBean().getSubjectBean().getUserId()));
+      }
+
+
+    /**
+     * Call Sumtotal API to give the URL to search page
+     * @return URL
+     */
+    public URL getRecommendedLearningURL() {
+
+      if (recLearningURL == null ) {
+        String url = "foldermaplookup?" +
+                     FolderMapLookupServlet.PARAM_FORMDATAID + "=" + getSectBean().getFormBean().getFormDataId();
+        try {
+          recLearningURL = legacyHandler.execute(paramBean, new GetRecommendedLearningURL(
+                                                                      getSectBean().getFormBean(),
+                                                                      url));
+        } catch (Exception exc) {
+          getLog().log(Log.ERROR, "Error retrieving recommended learning url", exc);
+        }
+      }
+      return recLearningURL;
+    }
+
+    // a Vector of ObjBean
+    private Vector learningActivities = new Vector();
+
+    public String getRatingValue() {
+      if (_ratingUI != null) {
+        return _ratingUI.getValue();
+      } else return ""; // user isn't allowed to see rating
+    }
+
+    public String getRatingText() {
+      if (_ratingUI != null) {
+        return _ratingUI.getRatingText();
+      } else return ""; // user isn't allowed to see rating
+    }
+
+    /** actual selected group.  May be null. */
+    public String getGroup() { 
+      return _fmObj.getItemGroupId(); 
+    }
+    public void setGroup(String group) {
+      _fmObj.setItemGroupId(group); 
+    }
+
+    public FBObj4 getObj4() { return _obj4; }
+    public int getIndex() { return _fmObj.getIndex(); }
+    public int getOrder() { return _fmObj.getObjectiveOrder(); }
+    public int getStatus() { return _fmObj.getObjectiveStatus(); }
+    public String getObjectiveNumber(){ return _fmObj.getObjectiveNumber(); }
+
+    // BOM/AOM attributes
+    public String getBomStart() { return _fmObj.getObjectiveStart(); }
+    public String getBomDue() { return _fmObj.getObjectiveDue(); }
+    public String getBomCategory() { return _fmObj.getObjectiveCategory(); }
+
+    public long getId() { return _fmObj.getObjectiveId(); }
+
+    public boolean isRemoveButtonHit()
+    {
+      if (isRemovable() && null != getParameter(key_removeButton())) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    public boolean isSearchButtonHit() {
+      if (null != getParameter(getSearchButtonKey()))
+        return true;
+      else
+        return false;
+    }
+
+    public RatingUI getSubjectRatingUI() { return _subjectRatingUI; }
+
+    /** processes objective data, plus ratingUI, weight, group, & commentListUI */
+    public void process()
+    {
+      String errors = "";
+      
+      // objective data
+      if (_objType == ObjMgtEnum.PLAN) {
+       
+        boolean changesMade = _obj4.process();
+        //TGM-2909
+        String errMsgInObj4=_obj4.getFieldParseErrorMsg();
+        if(errMsgInObj4.length()>0){
+          addSectUIErrorMsg(errMsgInObj4);
+          return;
+        }
+        if (isEditableObjData() && changesMade && _fmObj.getObjectiveId() >= 0) {
+          String value = getParameter(FBSaveOnTimeout.PARAM_AUTO_LOGOUT);
+          // if autosave is set don't trigger the validation on session timeout
+          // just save the form to prevent loss of data entered by the user
+          if (!FBSaveOnTimeout.TRUE.equals(value)) {
+            // perform the tgm fields validation only if the tgm-fields tag exists on the pm form
+            // since we don't want to save the objective if there are errors, we are doing validation here
+            // and validation is again performed later in the FBWorkflowForm, which results in double validation
+            boolean tgmFieldsRequired = isFieldRequired("tgm-fields", getCurrentRouteStepID(), (WorkflowOptionEnum.SAVE).getName(), getRequiredFieldsList());
+            if(tgmFieldsRequired) {
+              errors = validateRequiredFields();
+            }
+          }
+          // update the objective fields only if there are no errors
+          if(StringUtils.isBlank(errors)&&StringUtils.isBlank(errMsgInObj4)){
+            // fetch the objBean from the DB, over-write parts of it, and save it back.
+            try {
+              ObjBean objBean = _fmObj.convertToObjBean();
+              if (objBean != null) {                
+                //TGM-381: setting the routing comments to be stored in the audit trail.
+                objBean.setRoutingComments(getMessages().GOALS_UPDATED_PM_FORM());
+                objBean.setObjectiveActionType(ObjBean.ACTION_EDIT);
+                
+                // TGM-4696 no need to send status updated messages due to performance issue
+                objBean.setFromPerfForm(true);
+                
+                int status = legacyHandler.execute(paramBean, new UpdateObj(paramBean.getUserId(), objBean, true, false, true));
+                if (status != Objective.OBJECTIVEEJB_OK) {
+                  _log.log(Log.ERROR, "When calling Objective.updateStatus() in FBSectUI_Objective(), " +
+                                        "return value was " + status);
+                }
+              }
+            } catch (Exception e) {
+              _log.log(Log.ERROR, "Error trying to synch FMObjective and ObjBean.", e);
+            }
+          }          
+        }        
+      } else {
+        // BOM
+        if (!ObjBean.TYPE_CORPORATE.equals(_fmObj.getObjectiveType())) {
+          _processBomObjData();
+        } else {
+          //System.out.println(".... not processing corporate obj status or data ....");
+        }
+      }
+
+      // custom elements
+      if (_elementListUI != null) {
+        _elementListUI.process();
+      }
+      // rating
+      if (_ratingUI != null)
+      {
+        boolean isCalculatedRating = _fmObj.getObjMetricMin() != _fmObj.getObjMetricMax();
+        // if it  MLT then anyhow user can't edit the rating so no need to update the ratingUI
+        boolean isPMUMLT = (isPMUnityForm() && isUseMltRatingIfPresent() && isCalculatedRating);
+        if(getItemRatingPermission() == FieldPermissionEnum.WRITE && !isPMUMLT){
+          _ratingUI.process();
+          _fmObj.rating = _ratingUI.getValue();
+      }
+        
+        if(isSpeedRaterMode()){
+          _ratingUI.setGapImgId(sectionPrefix()+_fmObj.getObjectiveId()+"Gap");
+          _ratingUI.setRatingType(RateGapImageGeneratorServlet.OFFICIAL_RATING_PARAM);
+        }
+        _ratingUI.setRatingPrefix("_official_rating");            
+
+      }
+      if (_subjectRatingUI != null)
+      {
+        if(getSubjectItemRatingPermission() == FieldPermissionEnum.WRITE){
+          _subjectRatingUI.process();
+          setSubjectRatingValue(_subjectRatingUI.getValue());
+        }
+        if(isSpeedRaterMode()){
+          _subjectRatingUI.setGapImgId(sectionPrefix()+_fmObj.getObjectiveId()+"Gap");
+          _subjectRatingUI.setRatingType(RateGapImageGeneratorServlet.SUBJECT_RATING_PARAM);
+        }
+        _subjectRatingUI.setRatingPrefix("_subject_rating");
+
+      }
+      // weight
+      if (getItemWeightPermission() != FieldPermissionEnum.NONE) {
+        if (!isAutoPopWeightOn()) {
+          if (getItemWeightPermission() == FieldPermissionEnum.WRITE) {
+            String p = getParameter(key_weight());
+            if (p != null) {
+              _fmObj.setWeight(p.trim());
+            }
+          }
+        } else {
+          /* As requested by Kimberly-Clark, we've added TGM-PM weight integration. If a weight property was specified in the objective
+          template, its value will be used here as the FMObjective weight. -PK */
+
+          ObjTemplateBean.Field weightField = _obj4.getObjTemplate().getField(ObjBean.WEIGHT);
+          if (weightField != null) {
+            Object objWeight = weightField.getValue(_obj4.getObj());
+            if (objWeight != null) {
+              if (objWeight instanceof Number) {
+                //if auto-pop-weights ='true', then get the weight format and display the weight accordingly.
+                _fmObj.setWeight(TGMUtils.formatPercentValue((Number) objWeight, weightField.getFieldFormat(), null));
+              } else {
+                _fmObj.setWeight(objWeight.toString());
+              }
+            }
+          }
+        }
+      }
+      // group
+      if (getItemGroupPermission() == FieldPermissionEnum.WRITE) {
+        String p = getParameter(key_group());
+        if (p != null) {
+          setGroup(p);
+        }
+      }
+      // comment
+      if (_commentListUI != null) {
+        if(showObjNumbering()){
+          _commentListUI.setSubSectionLabel(_fmObj.getObjectiveNumber());
+        }else {
+          _commentListUI.setSubSectionLabel(_fmObj.getObjectiveName());
+        }
+        _commentListUI.process();
+      }
+      // if it is revoluition form, we need to copy item rating back to user rating
+      if (this._fbSectUI_Objective.isPMUnityForm()) {
+        if ((_ratingUI != null) && (getItemRatingPermission() == FieldPermissionEnum.WRITE)) {
+          syncItemRatingToUserRating(_objSect.getRatingOption(), _fmObj.getCommentList(), _fmObj.getRating());
+        }
+      }
+    }
+
+    private void removeLearningActivity(long objId) {
+      for (int i=0; i < learningActivities.size();  i++) {
+        if (((ObjBean)learningActivities.elementAt(i)).getObjId()==objId) {
+          learningActivities.remove(i);
+          break;
+        }
+      }
+      
+
+
+      // delete the learning activity in form
+      for (int j =0; j < _fmObj.lmsList.size(); j++) {
+        FMElement element = (FMElement)_fmObj.lmsList.elementAt(j);
+        if ((Long.parseLong(element.elementKey))== objId) {
+          _fmObj.lmsList.remove(j);
+          break;
+        }
+      }
+
+      try {
+        if(!getCompanyBean().isFeatureExist(FeatureEnum.ENABLE_PLATEAU_INTEGRATION)){
+            legacyHandler.execute(paramBean, new DeleteObj(paramBean.getUserId(), objId, "", false, true));
+        }else{
+          DeleteLearningForGoal cmd = new DeleteLearningForGoal(paramBean, paramBean.getUserId(), objId, "",
+              false, true);
+          if(getObjTemplate().getObjPlanType() == ObjPlanTypeEnum.DEVELOPMENT){
+            cmd.setOrigin(LearningRestConstants.REST_ORIGIN_CDP);
+          } else if(getObjTemplate().getObjPlanType() == ObjPlanTypeEnum.BUSINESS){
+            cmd.setOrigin(LearningRestConstants.REST_ORIGIN_TGM);
+          }
+          cmd.setWrapEJB(true);
+          ServiceCommandHandlerFactory.getSCAHandler().execute(cmd);
+        }
+      } catch (Exception exc) {
+        getLog().log(Log.ERROR, "Error while removing learning activity", exc,
+                     paramBean);
+      }
+    }
+
+    public void renderHTML(PageContext pageContext)
+      throws ServletException, IOException
+    {
+      pageContext.setAttribute("fb", FBSectUI_Objective.this, PageContext.REQUEST_SCOPE);
+      pageContext.setAttribute("obj", this, PageContext.REQUEST_SCOPE);
+      if (FBSectUI_Objective.this.getShowDemoUI()) {
+        pageContext.include("/ui/pmcommon/pages/fb_sect_ui_objui_demo.jsp");
+      }
+      else {
+        if(isSpeedRaterMode()){
+          pageContext.include("/ui/pmcommon/pages/fb_sect_ui_objui_speed_rater.jsp");
+        }else{
+          pageContext.include("/ui/pmcommon/pages/fb_sect_ui_objui.jsp");
+        }
+      }
+    }
+
+    public List getHiddenDivIDs() {
+      return hiddenDivIDs;
+    }
+
+    public String getHiddenDivIDsJSName() {
+      return _prefix + "hidjs";
+    }
+
+
+    /////////////////////////////////
+    // status-related public methods
+    /////////////////////////////////
+
+    public String getBomStatusMessageKey(int status) {
+      return (String)_statusMessageKeys.get(new Integer(status));
+    }
+
+    public int getBomStatusesSize() {
+      return _statusDisplayOrder.length;
+    }
+
+    public Integer getBomStatus(int i) {
+      return _statusDisplayOrder[i];
+    }
+
+
+
+    ////////////////////
+    // private methods
+    ////////////////////
+
+    private boolean _statusAllowsEditingObjData(int status) {
+      return (null != getSessionAttribute(SessionConstants.BOM_ALLOBJS_EDITABLE) || status==ObjBean.STATUS_DRAFT || status==ObjBean.STATUS_NEW);
+    }
+
+    /**
+     * Doesn't fetch audit or milestone info.
+     * Logs errors.
+     * @return the objBean, or null if there's a problem.
+     */
+    public ObjBean _getObjBeanFromDB(long objID) {
+      ObjBean objBean = null;
+      try {
+        objBean = legacyHandler.execute(paramBean, new GetObjByIdV3(objID, false, false, false, true,
+                                                    true));  // includeComments
+      } catch (Exception e) {
+        logError("error getting objBean - id='"+objID+"'", e);
+      }
+      if (objBean == null) {
+        logError("getObjById() returned unexpected null - id='"+objID+"'");
+      }
+      return objBean;
+    }
+
+    /**
+     * Overwrites some ObjBean fields with some FMObj fields.
+     * Doesn't talk to the DB.
+     * @return true if successful, false otherwise.
+     * Only fails if either param is null.
+     */
+    private boolean _updateObjBeanWithFMObj(ObjBean objBean, FMObjective fmObj) {
+      if (objBean==null || fmObj==null) return false;
+      ObjBeanWrap obw = new ObjBeanWrap(objBean);
+      FMObjectiveWrap fmow = new FMObjectiveWrap(fmObj, getLocale(),
+                                                 getMessages().getString("DATEFORMAT"));
+      obw.setName(fmow.getName());
+      obw.setDesc(fmow.getDesc());
+      obw.setStart(fmow.getStart());
+      obw.setDue(fmow.getDue());
+      obw.setCategory(fmow.getCategory());
+      return true;
+    }
+
+    /**
+     * Updates the objBean in the DB (duh).
+     * Logs errors.
+     * @return true if successful, false otherwise.
+     */
+    private boolean _updateObjInDB(ObjBean objBean) {
+      int ejbStatus = -1;
+      try {
+        ejbStatus = legacyHandler.execute(
+            paramBean, new UpdateObj(paramBean.getUserId(), objBean, false, false, true));
+        if (ejbStatus != Objective.OBJECTIVEEJB_OK) {
+          getLog().log(Log.ERROR, "updateObj() returned '"+ejbStatus+"'",
+                       new RuntimeException(), paramBean);
+          return false;
+        }
+      } catch (Exception e) {
+        getLog().log(Log.ERROR, "error updating obj on-form", e, paramBean);
+        return false;
+      }
+      return true;
+    }
+
+    /**
+     * Creates a new DB record
+     * using an FMObjective that is assumed to be in DRAFT mode.
+     * If succesful, overwrites the ObjBean and FMObjective's id and status fields.
+     * with the new ID.
+     * @return the ObjBean if successful, or null otherwise.
+     */
+    private ObjBean _createObjFromDraft(FMObjective fmObj) {
+      ObjBean objBean = new ObjBean(
+        fmObj.getObjectiveId(),
+        fmObj.getObjectiveParentId(),
+        ObjBean.TYPE_USER,
+        fmObj.getObjectiveName(),
+        fmObj.getObjectiveOwner(),
+        StringUtils.toBytes(fmObj.getObjectiveDesc()),
+        ClientDateFormat.parseDate(fmObj.getObjectiveStart(), getLocale()),
+        ClientDateFormat.parseDate(fmObj.getObjectiveDue(), getLocale()),
+        ClientDateFormat.parseDate(fmObj.getObjectiveDue(), getLocale()),
+        new Date(), ObjBean.STATUS_NEW,
+        paramBean.getUserId(), fmObj.getObjectiveOwner(), -1,
+        null, null, null, null, fmObj.getObjectiveCategory());
+      try {
+        // try to create record in DB
+        
+        long objID = legacyHandler.execute(paramBean, new CreateObj(objBean, "", true, true));
+        if (objID <= 0) {
+          getLog().log(Log.ERROR, "createObj() returned invalid objID '"+objID+"'",
+                       new RuntimeException(), paramBean);
+          return null;
+        } else {
+          // success
+          fmObj.setObjectiveId(objID);
+          fmObj.setObjectiveStatus(ObjBean.STATUS_NEW);
+          objBean.setObjId(objID);
+          objBean.setObjStatus(ObjBean.STATUS_NEW);
+        }
+      } catch (Exception e) {
+        getLog().log(Log.ERROR, "error creating obj record in DB from draft fmObj", e, paramBean);
+        return null;
+      }
+      return objBean;
+    }
+
+    /**
+     * @return an ObjBean.ACTION_* value,
+     * or -1 if there's no action to get to the new status.
+     */
+    private int _getRoutingAction(int newStatus) {
+      Integer i = (Integer)_statusRoutingActions.get(new Integer(newStatus));
+      if (i == null) return -1;
+      return i.intValue();
+    }
+
+    private boolean _routeObj(int newStatus, ObjBean objBean, FMObjective _fmObj) {
+      int routingAction = _getRoutingAction(newStatus);
+      if (routingAction == -1) {
+        // defense...
+        getLog().log(Log.WARNING, "Unexpected routing action value '-1'"
+                                  +" where _fmObj.getObjectiveStatus() is '"+_fmObj.getObjectiveStatus()
+                                  +" and 'newStatus is '"+newStatus+"'.",
+                     new RuntimeException(), paramBean);
+        return false;
+      }
+      try {
+        // XXX/ADW Why do we send an objBean to routeObj()?
+        // Is it updating the obj data?
+        // If so, sometimes we shouldn't call _updateObjInDB(), above.
+        long ejbStatus = legacyHandler.execute(
+          paramBean, new RouteObj(routingAction, paramBean.getUserId(), null, _fmObj.getObjectiveId(),
+              getMessages().getString("Route_Objective_from_Form"), objBean, false));
+        //System.out.println("--==++ routeObj returned '"+ejbStatus+"'");
+        if (ejbStatus >= 0) {
+          // success
+          _fmObj.setObjectiveStatus(newStatus);
+          objBean.setObjStatus(newStatus);
+        } else {
+          getLog().log(Log.ERROR, "routeObj() returned '"+ejbStatus+"'",
+                       new RuntimeException(), paramBean);
+          return false;
+        }
+      } catch (Exception e) {
+        getLog().log(Log.ERROR, "error in routing objective (id='"
+                                +_fmObj.getObjectiveId()+"') on-form",
+                     e, paramBean);
+        return false;
+      }
+      return true;
+    }
+
+
+    /**
+     * Updates the _fmObj's fields based on what is permitted:<ul>
+     * <li>name</li>
+     * <li>description</li>
+     * <li>start</li>
+     * <li>due</li>
+     * <li>status</li>
+     * <li>category (AOM-only, not supported yet)</li>
+     * </ul>
+     * Executes in this order:<ol>
+     * <li>Read editable POSTed data into fmObj</li>
+     * <li>Synch fmObj data to DB for non-drafts,
+     * or create new DB row if changing status from draft to non-draft.</li>
+     * <li>Objective Workflow triggered by certain status changes</li>
+     * </ol>
+     * @return true if successful or false if there were any errors.
+     */
+    private boolean _processBomObjData()
+    {
+      boolean dirty = false;
+      // objBean has to be kept around because routing takes an objbean.
+      ObjBean objBean = null;
+
+      // If the ID says it's a draft, but the status isn't DRAFT,
+      // then log it, change the status, and continue.
+      if (_fmObj.getObjectiveId() <= 0
+          && _fmObj.getObjectiveStatus() != ObjBean.STATUS_DRAFT)
+      {
+        getLog().log(Log.WARNING,
+                     "On-form BOM obj id = '" +_fmObj.getObjectiveId()
+                     + "' (draft) but obj status = '"
+                     + _fmObj.getObjectiveStatus()  + "' (non-draft).  "
+                     + "Changing the status to '" + ObjBean.STATUS_DRAFT
+                     + "' (draft), dumping stacktrace, and continuing...",
+                     new RuntimeException("stacktrace"), paramBean);
+        _fmObj.setObjectiveStatus(ObjBean.STATUS_DRAFT);
+      }
+
+      // Error out if the id is non-draft, but the status is draft.
+      if (_fmObj.getObjectiveId() > 0
+          && _fmObj.getObjectiveStatus() == ObjBean.STATUS_DRAFT)
+      {
+        getLog().log(Log.ERROR,
+                     "On-form BOM obj id = '" +_fmObj.getObjectiveId()
+                     + "' (non-draft) but obj status = '"
+                     + _fmObj.getObjectiveStatus()  + "' (draft).",
+                     new RuntimeException(), paramBean);
+        return false;
+      }
+
+      ////////////////////////
+      // 1. Read POSTed data
+      ////////////////////////
+
+      // status
+      int newStatus = _fmObj.getObjectiveStatus();
+      // clean up invalid status values (pending, finalized...)
+      switch (_fmObj.getObjectiveStatus()) {
+        case ObjBean.STATUS_DRAFT:
+        case ObjBean.STATUS_NEW:
+        case ObjBean.STATUS_APPROVED:
+        case ObjBean.STATUS_COMPLETED:
+        case ObjBean.STATUS_DELETED:
+        case ObjBean.STATUS_OBSOLETE:
+          // these are valid statuses, so do nothing
+          break;
+        default:
+          // we caught an invalid status,
+          // so change it to NEW
+          getLog().log(Log.WARNING, "Converting invalid obj status '"
+                                    +_fmObj.getObjectiveStatus()+"' to STATUS_NEW.",
+                       new RuntimeException(), paramBean);
+          _fmObj.setObjectiveStatus(ObjBean.STATUS_NEW);
+          dirty = true;
+          break;
+      }
+      if (!isBomStatusEditable()) {
+        //System.out.println("status not editable");
+      } else {
+        //System.out.println("status editable");
+
+        // Read new status, and save it in "newStatus" if it is valid.
+        // Do not update the fmObj until obj workflow is handled, below.
+        String statusParam = getParameter(key_bomStatus());
+        if (statusParam != null) {
+          Integer newInt = null;
+          try {
+            newInt = new Integer(statusParam);
+          } catch (NumberFormatException nfe) {
+            getLog().log(Log.WARNING, "Invalid obj status posted; ignoring.", nfe, paramBean);
+          }
+          if (newInt != null && isStatusMoveLegal(_fmObj.getObjectiveStatus(), newInt.intValue())) {
+            newStatus = newInt.intValue();
+            dirty = true;
+          }
+        }
+      }// end if status is editable
+
+      if (isEditableObjData()) {
+        { // name
+          String nameParam = getParameter(key_bomName());
+          if (nameParam != null) {
+            nameParam = nameParam.trim();
+            if (_fmObj.getObjectiveName() == null || !_fmObj.getObjectiveName().equals(nameParam)) {
+              _fmObj.setObjectiveName(nameParam);
+              dirty = true;
+            }
+            // Old rule: Name cannot be empty
+            if ("".equals(_fmObj.getObjectiveName())) {
+              _fmObj.setObjectiveName("(" + ClientDateFormat.formatLong(new Date(),
+                                                                        paramBean.getTimeZone(), getLocale()) + ")");
+              dirty = true;
+            }
+          }
+        }
+
+        { // description
+          String descParam = getParameter(key_bomDesc());
+          if (descParam != null) {
+            descParam = descParam.trim();
+            if (_fmObj.getObjectiveDesc() == null || !_fmObj.getObjectiveDesc().equals(descParam)) {
+              _fmObj.setObjectiveDesc(descParam);
+              dirty = true;
+            }
+          }
+        }
+
+        // extra attribs: start, due (and AOM category, not supported yet)
+        if (isBomExtraAttibs())
+        {
+          { // start date
+            String startParam = getParameter(key_bomStart());
+            if (startParam != null) {
+              startParam = startParam.trim();
+              if (_fmObj.getObjectiveStart() == null ||
+                  !_fmObj.getObjectiveStart().equals(startParam))
+              {
+                dirty = true;
+                Date startDate = ClientDateFormat.parseDate(startParam, paramBean.getLocale());
+                _fmObj.setObjectiveStart(ClientDateFormat.simpleformat(startDate, "MM/dd/yyyy", SystemBean.DEFAULT_LOCALE));
+              }
+            }
+          }
+
+          { // due date
+            String dueParam = getParameter(key_bomDue());
+            if (dueParam != null) {
+              dueParam = dueParam.trim();
+              if (_fmObj.getObjectiveDue() == null ||
+                  !_fmObj.getObjectiveDue().equals(dueParam))
+              {
+                dirty = true;
+                Date dueDate = ClientDateFormat.parseDate(dueParam, paramBean.getLocale());
+                _fmObj.setObjectiveDue(ClientDateFormat.simpleformat(dueDate, "MM/dd/yyyy", SystemBean.DEFAULT_LOCALE));
+              }
+            }
+          }
+
+//    // category is an AOM-only feature, so I'm not finishing the code for it yet - ADW
+//    { // category
+//      String catParam = getParameter(key_category());
+//      if (catParam != null && !catParam.equals(_fmObj.getObjectiveCategory())) {
+//        // is the new category valid?
+//
+//      }
+//    }
+        } // end extra attribs
+      }
+
+      //////////////////
+      // 2. Synch to DB
+      //////////////////
+
+      // If an obj did not start off as a draft, and it was updated,
+      // then fetch the objBean from the DB, overwrite fields,
+      // and write it back to the DB.
+      if (_fmObj.getObjectiveId() > 0 && dirty) {
+        objBean = _getObjBeanFromDB(_fmObj.getObjectiveId());
+        if (objBean == null) return false;
+        
+        // TGM-4696 no need to send status updated messages due to performance issue
+        objBean.setFromPerfForm(true);
+        if (!_updateObjBeanWithFMObj(objBean, _fmObj)) return false;
+        if (!_updateObjInDB(objBean)) return false;
+      } // done synching non-draft
+
+
+      //////////////////////////////
+      // 3. Obj Creation & Workflow
+      //////////////////////////////
+      if (_fmObj.getObjectiveStatus() != newStatus) {
+        // definitely changing status...
+
+        if (_fmObj.getObjectiveStatus() == ObjBean.STATUS_DRAFT) {
+          // leaving Draft status is special because a new record must be created first
+          objBean = _createObjFromDraft(_fmObj);
+          if (objBean == null) {
+            return false;
+          }
+
+        }
+        if (objBean == null) {
+          getLog().log(Log.ERROR, "Assertion failure: objBean==null just before on-form routing",
+                       new RuntimeException(), paramBean);
+          return false;
+        }
+        if (_getRoutingAction(newStatus) != -1) {
+          boolean success = _routeObj(newStatus, objBean, _fmObj);
+          return success;
+        }
+      }
+      return true;
+    }
+
+    /**
+     @return true if all these conditions are met:
+     <ul>
+     <li>The section has been set to have editable objective data/</li>
+     <li>The obj is not corporate.</li>
+     <li>Either AOM is on, or BOM is on and status-on-form is enabled.</li>
+     <li>The obj's status is not Completed, Obsolete, or Deleted.</li>
+     </ul>
+     */
+    public boolean isBomStatusEditable() {
+      return isEditableData()
+             && !ObjBean.TYPE_CORPORATE.equals(_fmObj.getObjectiveType())
+             && (getCompanyBean().isFeatureExist(CompanyBean.FEATURE_ADVOBJ)
+                 || ObjectiveFeatures.isStatusOnFormBOMEnabled(request))
+             && !(_fmObj.getObjectiveStatus() == ObjBean.STATUS_COMPLETED
+                  || _fmObj.getObjectiveStatus() == ObjBean.STATUS_OBSOLETE
+                  || _fmObj.getObjectiveStatus() == ObjBean.STATUS_DELETED);
+    }
+
+    private String _newHiddenDivID()
+    {
+      String id = _prefix + "hid_"+hiddenDivIDs.size();
+      hiddenDivIDs.add(id);
+      return id;
+    }
+
+    private void _obj4CustomCommands(FBObj4 o4) {
+      getLog().log(Log.WARNING,
+                   "throwback code: _obj4CustomCommands() is being called. Stack Trace:",
+                   new RuntimeException(), paramBean);
+      StringBuffer b = new StringBuffer();
+      // outer HTML, objective label, and NAME
+      b.append("<table width='100%' cellspacing='0' cellpadding='0'><tr>");
+      b.append("<td valign='top' width='50%'><b>");
+      b.append(getMessages().getString("Objective"));
+      b.append(":</b><br>");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+      o4.addCommand(new Command(FBObj4.CMD_NAME, "expand-o-group")); // hack!
+      // hidden TASKS and end cell
+      b.append("<div style='display:none' id='");
+      b.append(_newHiddenDivID());
+      b.append("'><b>");
+      b.append("Tasks");//XXX/ADW hardcoded string
+      b.append(":</b><br>");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+      o4.addCommand(new Command(FBObj4.CMD_TASKS));
+      b.append("</div></td>");
+
+      // spacer cell
+      b.append("<td>&nbsp;&nbsp;&nbsp;</td>");
+
+      // new cell, METRIC, TARGETS, end cell, end row, end table
+      b.append("<td valign='top' width='50%'><b>");
+      b.append("Metric");//XXX/ADW hardcoded string
+      b.append(":</b><br>");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+      o4.addCommand(new Command(FBObj4.CMD_METRIC, "expand-o-group")); // hack!
+      // hidden TARGETS and next cell
+      b.append("<div style='display:none' id='");
+      b.append(_newHiddenDivID());
+      b.append("'><b>");
+      b.append("Targets");//XXX/ADW hardcoded string
+      b.append(":</b><br>");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+      o4.addCommand(new Command(FBObj4.CMD_TARGETS));
+      o4.addCommand(new Command(FBObj4.CMD_HTML, "</div></td></tr></table>"));
+
+
+      // new vert margin, new objPair div, STATUS, close div
+      b.append("<div style='margin:0.5em 0'><div class='objPair'><b>");
+      b.append("Status"); //XXX/ADW hardcoded string
+      b.append(":</b> ");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+      o4.addCommand(new Command(FBObj4.CMD_STATE));
+      b.append("</div>");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+
+      // new objPair div, START, close div
+      b.append("<div class='objPair' style='display:none' id='");
+      b.append(_newHiddenDivID());
+      b.append("'><b>");
+      b.append("Start"); // XXX/ADW hardcoded string
+      b.append(":</b> ");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+      o4.addCommand(new Command(FBObj4.CMD_START));
+      b.append("</div>");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+
+      // new objPair div, DUE, close div
+      b.append("<div class='objPair' style='display:none' id='");
+      b.append(_newHiddenDivID());
+      b.append("'><b>");
+      b.append("Due"); // XXX/ADW hardcoded string
+      b.append(":</b> ");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+      o4.addCommand(new Command(FBObj4.CMD_DUE));
+      b.append("</div>");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+
+      // new objPair div, PERCENT, close div
+      b.append("<div class='objPair' style='display:none' id='");
+      b.append(_newHiddenDivID());
+      b.append("'><b>");
+      b.append("% Complete"); // XXX/ADW hardcoded string
+      b.append(":</b> ");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+      o4.addCommand(new Command(FBObj4.CMD_PERCENT));
+      b.append("</div>");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+
+      // close vert margin, clear floats
+      b.append("</div><div class='clear'>&nbsp;</div>");
+      o4.addCommand(new Command(FBObj4.CMD_HTML, b.toString()));
+      b.setLength(0);
+    }
+
+    /**
+     * Gets the value out of the section bean's objective list.
+     * Does not rely on the CommentListUI.
+     * @return the String rating value; may be null or empty-string.
+     */
+    private String getSubjectRatingValue() {
+      List comments = _fmObj.getCommentList();
+      if (comments != null) {
+        // traverse the list to find the subject's comment rating.
+        for (Iterator it = comments.iterator(); it.hasNext();) {
+          FMComment comment = (FMComment)it.next();
+          if (comment.getUserId().equals(getSubjectID())) {
+            return comment.getRating();
+          }
+        }
+      }
+      return null;
+    }
+
+    /**
+     * Sets the value of the user's comment rating.
+     * Does not rely on the CommentListUI.
+     * If there's no comment list, one is created.
+     * If there's no subject comment, one is created.
+     */
+    private void setSubjectRatingValue(String value) {
+      // Traverse like getter,
+      // but if no slot is found, must make one, 
+      // even if it means making a new commentList.
+      // That will screw up anything that just looks at the comment list 
+      // to determine whether to display comments or not, so hunt and test.
+      FMComment subjComment = null;
+      int highestIndex = -1;
+      List comments = _fmObj.getCommentList();
+
+      // Make sure there's a comment list,
+      // and try to find the subject's comment.
+      if (comments == null) {
+        _fmObj.setCommentList(new Vector());
+      } else {
+        // Traverse the list to find the subject's comment,
+        // and to establish highest comment index.
+   	    /*PMT-2290 - Unable to save the rating 
+   	    * Instead of comparing the highest index with the index of the comment(as was done in the previous version),
+   	    * this iterator iterates over all the elements and saves the rating, if there is a matching userId. 
+   	    */	  
+
+        for (Iterator it = comments.iterator(); it.hasNext();) {
+            FMComment comment = (FMComment)it.next();
+              highestIndex++;
+              if (comment.getUserId().equals(getSubjectID())) {
+                subjComment = comment;
+                //PMT-2290 - saving at every case, instead of at the end(as in the previous version)
+                subjComment.setRating(value);
+              }
+          }
+      }
+      // now we know there's a comment list
+
+      if (subjComment == null) {
+        subjComment = new FMComment();
+        UserBean subjBean = getSubjectBean();
+        subjComment.setUserId(subjBean.getUserId());
+        subjComment.setFullName(subjBean.getFullNameBean());
+        subjComment.setIndex(highestIndex + 1);
+        comments.add(subjComment);
+        //PMT-2290 - saving at every case, instead of at the end(as in the previous version)
+        subjComment.setRating(value);
+      }
+
+    }
+    public String validateRequiredFields() {
+      StringBuffer errRFMsg = new StringBuffer();
+      //if we're in BOM we cannot validate TGM fields, so do nothing
+      if(null != getObj4()){
+        ObjTemplateBean template = getObj4().getObjTemplate();
+      
+        Date startDate = null;
+        Date dueDate = null;
+        
+        for(Iterator fieldIter = template.getFields().iterator(); fieldIter.hasNext();){
+          ObjTemplateBean.Field field = (ObjTemplateBean.Field)fieldIter.next();
+          String err = TGMFieldValidator.validateField(field, getObj4().getObj(), getLocale(), getMessages());
+          if(!StringUtils.isBlank(err)){
+            errRFMsg.append(err);
+          }
+          if(field.getId().equals(ObjTemplateBean.Field.ID_START)){
+            startDate = (Date)field.getValue(getObj4().getObj());
+           
+          }
+          if(field.getId().equals(ObjTemplateBean.Field.ID_DUE)){
+            dueDate = (Date)field.getValue(getObj4().getObj());
+            if(null != dueDate){
+              dueDate = DateUtils.endOfTheDay(dueDate);
+            }
+            
+          }
+        }
+        if(null != startDate && null != dueDate && startDate.after(dueDate)){
+          errRFMsg.append("\t").append(getObj4().getObj().getDisplayNumber()).append(" ").append(getObj4().getObj().getName()).append(" : ")
+            .append(getMessages().ERR_TGM_Start_before_Due()).append("\n");
+        }
+      }
+      return errRFMsg.toString();
+    }
+
+    public boolean isLearningActivitiesRefreshed() {
+      return _learningActivitiesRefreshed;
+    }
+
+    public void setLearningActivitiesRefreshed(boolean activitiesRefreshed) {
+      _learningActivitiesRefreshed = activitiesRefreshed;
+    }
+    
+    public void updateItemProgress(SectionProgressMeterImpl sectionProgressMeter) {    
+      if (isEditableElements()) {
+        List<FMElement> fmElementList = _fmObj.getElementList();
+        sectionProgressMeter.countCustomFields(FBSectUI_Objective.this, fmElementList);
+      }
+      
+      sectionProgressMeter.countRating(_ratingUI);
+      sectionProgressMeter.countRating(_subjectRatingUI);
+
+      // weight
+      if (getItemWeightPermission() == FieldPermissionEnum.WRITE) {
+        if (!isAutoPopWeightOn()) {
+          sectionProgressMeter.increaseEditableFieldsCount();
+          if (StringUtils.isBlank(_fmObj.getWeight())) {
+            sectionProgressMeter.increaseEmptyEditableFieldCount();
+          }
+        } 
+      }
+      
+      //commentListUI
+      // item comments
+      if (isEditableSectionComments()){
+        sectionProgressMeter.countComments(_commentListUI);
+       }
+
+    }
+
+  }// end subclass ObjUI
+
+
+  /**
+   * @return Returns the _officialRating.
+   */
+  public RatingUI getOfficialRating() {
+    return _officialRating;
+  }
+
+  /**
+   * @param rating The _officialRating to set.
+   */
+  public void setOfficialRating(RatingUI rating) {
+    _officialRating = rating;
+  }
+
+  /**
+   * @return Returns the _subjectRating.
+   */
+  public RatingUI getSubjectRating() {
+    return _subjectRating;
+  }
+
+  /**
+   * @param rating The _subjectRating to set.
+   */
+  public void setSubjectRating(RatingUI rating) {
+    _subjectRating = rating;
+  }
+
+  // *******************************  LABELS ***************************************
+  // The following are label used through out the UI.  They are left undefined intentionally so they can be
+  // initialized by the getter method once as needed..
+
+  private String addExistingGoalToFromLabel;
+  private String addNewGoalToFormLabel;
+  private String delSelectedGoalLabel;
+  private String removeGoalLabel;
+  private String objTypeMsg;
+
+  /**
+    * @return The localize objective type, such as objective, goal, development goal.
+   */
+  private String _getObjTypeMsg() {
+    if (objTypeMsg == null) {
+      objTypeMsg = getMessages().Objective();
+
+      ObjTemplateBean objTemplate = getObjTemplate();
+      if (null != objTemplate) {
+          objTypeMsg = objTemplate.getObjPlanType().getName(getMessages());
+      }
+    }
+    return objTypeMsg;
+  }
+  private int _getGoalType(){
+	  int goalType = ObjPlanTypeEnum.BUSINESS_ORDINAL;
+	  
+	  ObjTemplateBean objTemplate = getObjTemplate();
+      if (null != objTemplate) {
+          goalType = objTemplate.getObjPlanType().getId();
+      }
+	  return goalType;
+ }
+
+  /**
+    * @return true in case the objective section of development type
+   */
+  public boolean isDevelopmentObjective() {
+    return (_getGoalType() == ObjPlanTypeEnum.DEVELOPMENT_ORDINAL);
+  }
+
+  /**
+    * @return The localize remove label with appropriate type
+   */
+  public String getRemoveGoalLabel() {
+    if (removeGoalLabel == null) {
+      removeGoalLabel = getMessages().BTN_Remove_One(_getObjTypeMsg());
+      //CDP-666
+      ObjTemplateBean objTemplate = getObjTemplate();
+      if (null != objTemplate) {
+        removeGoalLabel = objTemplate.getTextReplacement(ObjTemplateBean.TextReplacement.DELETE_GOAL_FROM_PLAN,
+                                                               getLocale(), removeGoalLabel);
+        if(removeGoalLabel != null )
+          removeGoalLabel = removeGoalLabel.trim();
+      }
+    }
+    return removeGoalLabel;
+  }
+
+  /**
+    * @return The localized delete selected label with appropriate type
+   */
+  public String getDelSelectedGoalLabel() {
+    if (delSelectedGoalLabel == null) {
+      delSelectedGoalLabel = getMessages().FORM_LABEL_DEL_SEL(_getObjTypeMsg());
+    }
+    return delSelectedGoalLabel;
+  }
+
+  /**
+    * @return The localize add existing label with appropriate type
+   */
+  public String getAddExistingGoalToFormLabel() {
+    if (addExistingGoalToFromLabel == null) {
+      if (_getGoalType() == ObjPlanTypeEnum.DEVELOPMENT_ORDINAL){
+    	  addExistingGoalToFromLabel = getMessages().BTN_INSERT_EXISTING_DEV_OBJ(_getObjTypeMsg());
+      }
+      else{
+          addExistingGoalToFromLabel = getMessages().BTN_INSERT_EXISTING(_getObjTypeMsg());
+      }
+      ObjTemplateBean objTemplate = getObjTemplate();
+      if (null != objTemplate) {
+        addExistingGoalToFromLabel = objTemplate.getTextReplacement(ObjTemplateBean.TextReplacement.ADD_EXISTING_GOAL_TO_FORM,
+                                                                    getLocale(), addExistingGoalToFromLabel);
+      }
+    }
+    return addExistingGoalToFromLabel;
+  }
+
+  private Boolean useMetricLookupTable;
+  private Boolean useMetricLookuptableStepCalcType;
+
+  /**
+   * This method determine whether the form template uses the metric lookup table to calculate the goal rating based on
+   * whether the template has the a field with ID equals to ID_METRIC_LOOKUP_TABLE
+   * @return true if a field with ID ID_METRIC_LOOKUP_TABLE is found in the goal template, false otherwise 
+   */                                                       
+  public boolean isUseMetricLookuptable() {      
+    if (useMetricLookupTable == null) {
+      useMetricLookupTable = TGMCommonUtils.isUseMetricLookuptable(getObjTemplate());  
+    } 
+    return useMetricLookupTable;           
+  }
+    
+  /**
+   * This method determines whether the form template uses the metric lookup table to calculate the goal rating based on
+   * whether the template has the a field with ID equals to ID_METRIC_LOOKUP_TABLE and the calculation type is "step"
+   * @return true if isUseMetricLookupTable() and the calculation type is "step"
+   * 
+   * @deprecated Since PMT-2727.
+   */
+  public boolean isMetricLookuptableStepCalcType() {     
+    if(useMetricLookuptableStepCalcType == null) {
+      useMetricLookuptableStepCalcType = TGMCommonUtils.isMetricLookuptableStepCalcType(getObjTemplate());  
+    } 
+    return useMetricLookuptableStepCalcType;           
+  }    
+  
+  /**
+    * @return The localize add new to form label with appropriate type   
+   */
+  private String getAddNewGoalToFormLabel() {
+    if (addNewGoalToFormLabel == null) {
+      ObjTemplateBean objTemplate = getObjTemplate();
+      if (_getGoalType() == ObjPlanTypeEnum.DEVELOPMENT_ORDINAL){
+    	   addNewGoalToFormLabel = getMessages().FORM_LABEL_ADD_NEW_DEV_GOAL(_getObjTypeMsg());
+      }
+      else{
+    	  addNewGoalToFormLabel = getMessages().FORM_LABEL_ADD_NEW_GOAL(_getObjTypeMsg());
+      }
+      
+      if (null != objTemplate) {
+        addNewGoalToFormLabel = objTemplate.getTextReplacement(ObjTemplateBean.TextReplacement.ADD_GOAL_TO_FORM,
+                                                               getLocale(), addNewGoalToFormLabel);
+      }
+    }
+    return addNewGoalToFormLabel;
+  }
+  // *******************************  END OF LABELS ***************************************  
+
+  /* (non-Javadoc)
+   * @see com.sf.sfv4.servlet.util.progressMeter.SectionProgressMeterCallBack#isEditableElements()
+   */
+  public boolean isEditableElements() {
+    return isEditableData();
+  }
+
+  /* (non-Javadoc)
+   * @see com.sf.sfv4.servlet.util.progressMeter.SectionProgressMeterCallBack#updateSectionProgress(com.sf.sfv4.servlet.util.progressMeter.SectionProgressMeterImpl)
+   */
+  public void updateSectionProgress(
+      SectionProgressMeterImpl sectionProgressMeter)
+  {
+    // ObjUIs
+    for (ObjUI objUI: (List<ObjUI>) getObjUIs()) {
+      objUI.updateItemProgress(sectionProgressMeter);
+    }
+  }
+  
+  public boolean isLineBreakInComments() {
+    return _objSect.getLineBreakInSectionComments();
+  }
+
+  public boolean isUseMltRatingIfPresent() {
+    return useMltRatingIfPresent;
+  }
+  
+  /**
+   * Fetch Achievements by goal id - CPM integration
+   * @param goalId
+   * @param params
+   * @param isDevelopmentObjective 
+   * @return achievements
+   */
+  public Iterable<Map<String, Object>> getAchievementsByGoalId(Long goalId,
+      ParamBean params, boolean isDevelopmentObjective) {
+    Iterable<Map<String, Object>> achievements = null;
+    Locale locale = params.getLocale();
+    //Commenting out the timezone as its displaying the 
+    //one day prior to the form review start date - PMU-3252
+    //TimeZone timeZone = TimeZone.getTimeZone(params.getTimeZone());
+    DateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy", locale);
+    //dateFormat.setTimeZone(timeZone);
+    if (goalId != null) {
+      GetSuccesslineAchievementsByGoalId cmd = new GetSuccesslineAchievementsByGoalId(
+          true, goalId);
+      cmd.setDevelopmentGoal(isDevelopmentObjective);
+      cmd.setIncludeSupporterFeedback(true);
+      try {
+        Map<Long, List<Map<String, Object>>> goalAchievements = ServiceCommandHandlerFactory
+            .getSCAHandler().execute(cmd);
+        if (null != goalAchievements) {
+          achievements = goalAchievements.get(goalId);
+          //Formatting the date
+          for (Map<String, Object> achievement : achievements) {
+            if (achievement.get(ACHIEVEMENT_ACHIEVEMENTDATE_PROPERTY_NAME) instanceof Date) {
+              achievement.put(ACHIEVEMENT_ACHIEVEMENTDATE_PROPERTY_NAME,
+                  dateFormat.format((Date) achievement
+                      .get(ACHIEVEMENT_ACHIEVEMENTDATE_PROPERTY_NAME)));
+            }
+          }
+        }
+      } catch (ServiceApplicationException e) {
+        log.error("Error occurred while retrieving achievements for objective id: " + goalId, e);
+      }
+    }
+    return achievements;
+  }
+  /**
+   * get the full names for given user ids
+   * @param userIds
+   * @return
+   */
+  public Map<String, String> getFullNamesForUserIds (List<String> userIds) {
+    Map<String, String> userFullNames = new HashMap<String, String>();
+    try {
+     if (!userIds.isEmpty()) {
+       FindUserFullNameByIds cmd = new FindUserFullNameByIds (userIds);
+       Map<String, FullNameBean> fullNames = ServiceCommandHandlerFactory
+          .getSCAHandler().execute(cmd);
+      
+       if (!fullNames.isEmpty()) {
+        for (String userId : fullNames.keySet()) {
+          String fullName = UserFormatUtils.formatFullName(getMessages(), fullNames.get(userId));
+          userFullNames.put(userId, fullName);
+        }       
+      }      
+    }
+   } catch (ServiceApplicationException e) {
+      log.error("Error occurred while retrieving full name for given userIds ", e);
+   }
+    
+    return userFullNames;
+  }
+}

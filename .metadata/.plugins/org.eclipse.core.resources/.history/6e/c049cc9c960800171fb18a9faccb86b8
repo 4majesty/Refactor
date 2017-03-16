@@ -1,0 +1,26 @@
+package org.eclipse.jdt.internal.ui.refactoring.contentassist;
+
+import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jdt.ui.IJavaElementLabelProvider;
+
+public interface IJavaSourcePackageFragmentRootCompletionProcessor {
+	ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset);
+
+	IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset);
+
+	char[] getCompletionProposalAutoActivationCharacters();
+
+	char[] getContextInformationAutoActivationCharacters();
+
+	String getErrorMessage();
+
+	IContextInformationValidator getContextInformationValidator();
+
+	ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubject, int documentOffset);
+
+	IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubject, int documentOffset);
+}

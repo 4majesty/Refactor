@@ -1,0 +1,10 @@
+package com.successfactors.cdp.service.impl;
+
+import java.util.Map;
+import com.successfactors.cdp.bean.SuggestedRolesSettingBean;
+import com.successfactors.cdp.service.GetSuggestedRolesWeight;
+import com.successfactors.sca.ServiceApplicationException;
+
+public interface IGetSuggestedRolesWeightImpl {
+	Map<String, SuggestedRolesSettingBean> execute(GetSuggestedRolesWeight cmd) throws ServiceApplicationException;
+}

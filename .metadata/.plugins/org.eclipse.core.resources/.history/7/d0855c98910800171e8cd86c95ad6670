@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
+import org.eclipse.jface.text.source.DefaultAnnotationHover;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+
+public interface IHTMLAnnotationHover {
+}

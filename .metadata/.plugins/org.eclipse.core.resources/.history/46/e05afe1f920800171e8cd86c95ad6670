@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IGenerateBuildPathActionGroup {
+	void update();
+
+	void fillActionBars(IActionBars actionBar);
+
+	void fillContextMenu(IMenuManager menu);
+
+	void dispose();
+}

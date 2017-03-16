@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.actions.OpenInNewWindowAction;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
+
+public interface IPatchedOpenInNewWindowAction {
+	void run();
+}

@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.resource.CompositeImageDescriptor;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface ICallHierarchyImageDescriptor {
+	void setAdornments(int adornments);
+
+	int getAdronments();
+
+	void setImageSize(Point size);
+
+	Point getImageSize();
+
+	boolean equals(Object object);
+
+	int hashCode();
+}

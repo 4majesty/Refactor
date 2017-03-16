@@ -1,0 +1,9 @@
+package com.successfactors.cdp.ui.util.mentoring;
+
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.sca.ServiceApplicationException;
+
+public interface IMentoringViewHelper {
+}

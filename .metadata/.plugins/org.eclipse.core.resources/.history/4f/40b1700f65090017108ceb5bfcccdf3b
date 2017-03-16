@@ -1,0 +1,13 @@
+package test2;
+
+import test1.a;
+
+public class test2 {
+	a test = new a();
+	a test2;
+
+	void aaaa(){
+	if(a t instanceof a){
+	}
+	}
+}

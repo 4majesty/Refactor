@@ -1,0 +1,7 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
+import org.eclipse.jdt.internal.ui.search.SearchMessages;
+
+public interface IFindImplementorsInProjectAction {
+}

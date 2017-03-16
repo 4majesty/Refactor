@@ -1,0 +1,189 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSection;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplateSection;
+import com.successfactors.cdp.bean.mentoring.vo.MatchedParticipantVO;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+public class MentoringUtilsTest {
+  
+  private Map<MatchingScoreTypeEnum, Double> categoryConfigData;
+  
+  @BeforeMethod(groups = { "checkin" })
+  public void setup() {
+    categoryConfigData = new LinkedHashMap<MatchingScoreTypeEnum, Double>();
+    categoryConfigData.put(MatchingScoreTypeEnum.EXCELLENT, new Double(0.25));
+    categoryConfigData.put(MatchingScoreTypeEnum.GOOD, new Double(0.25));
+    categoryConfigData.put(MatchingScoreTypeEnum.AVERAGE, new Double(0.5));
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testSupervisedMatchNormalization1() {    
+    List<MatchedParticipantVO> matchList = new ArrayList<MatchedParticipantVO>();
+    MatchedParticipantVO user1 = new MatchedParticipantVO();
+    user1.setMachingFinalScore(40);
+    matchList.add(user1);
+    Map<MatchingScoreTypeEnum, List>  map = MentoringUtils.supervisedMatchNormalization(matchList, categoryConfigData);
+    Assert.assertEquals(map.size(), 1);
+    Map<MatchingScoreTypeEnum, List>  expected = new LinkedHashMap<MatchingScoreTypeEnum, List>();
+    List userList1 = new ArrayList();
+    userList1.add(user1);
+    expected.put(MatchingScoreTypeEnum.EXCELLENT, userList1);    
+    Assert.assertEquals(map, expected);    
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testSupervisedMatchNormalization2() {
+    List<MatchedParticipantVO> matchList = new ArrayList<MatchedParticipantVO>();
+    MatchedParticipantVO user1 = new MatchedParticipantVO();
+    user1.setMachingFinalScore(40);
+    matchList.add(user1);
+    MatchedParticipantVO user2 = new MatchedParticipantVO();
+    user2.setMachingFinalScore(40);
+    matchList.add(user2);
+    Map<MatchingScoreTypeEnum, List>  map = MentoringUtils.supervisedMatchNormalization(matchList, categoryConfigData);
+    Assert.assertEquals(map.size(), 2);
+    Map<MatchingScoreTypeEnum, List>  expected = new LinkedHashMap<MatchingScoreTypeEnum, List>();
+    List userList1 = new ArrayList();
+    userList1.add(user1);
+    List userList2 = new ArrayList();
+    userList2.add(user2);
+    expected.put(MatchingScoreTypeEnum.EXCELLENT, userList1);   
+    expected.put(MatchingScoreTypeEnum.GOOD, userList2); 
+    Assert.assertEquals(map, expected);
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testSupervisedMatchNormalization3() {
+    List<MatchedParticipantVO> matchList = new ArrayList<MatchedParticipantVO>();
+    MatchedParticipantVO user1 = new MatchedParticipantVO();
+    user1.setMachingFinalScore(40);
+    matchList.add(user1);
+    MatchedParticipantVO user2 = new MatchedParticipantVO();
+    user2.setMachingFinalScore(80);
+    matchList.add(user2);    
+    MatchedParticipantVO user3 = new MatchedParticipantVO();
+    user3.setMachingFinalScore(60);
+    matchList.add(user3);
+    Map<MatchingScoreTypeEnum, List>  map = MentoringUtils.supervisedMatchNormalization(matchList, categoryConfigData);
+    Assert.assertEquals(map.size(), 3);
+    Map<MatchingScoreTypeEnum, List>  expected = new LinkedHashMap<MatchingScoreTypeEnum, List>();
+    List userList1 = new ArrayList();
+    userList1.add(user2);
+    List userList2 = new ArrayList();
+    userList2.add(user3);
+    List userList3 = new ArrayList();
+    userList3.add(user1);
+    expected.put(MatchingScoreTypeEnum.EXCELLENT, userList1);   
+    expected.put(MatchingScoreTypeEnum.GOOD, userList2); 
+    expected.put(MatchingScoreTypeEnum.AVERAGE, userList3); 
+    Assert.assertEquals(map, expected);
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testSupervisedMatchNormalization4() {
+    List<MatchedParticipantVO> matchList = new ArrayList<MatchedParticipantVO>();
+    MatchedParticipantVO user1 = new MatchedParticipantVO();
+    user1.setMachingFinalScore(40);
+    matchList.add(user1);
+    MatchedParticipantVO user2 = new MatchedParticipantVO();
+    user2.setMachingFinalScore(80);
+    matchList.add(user2);    
+    MatchedParticipantVO user3 = new MatchedParticipantVO();
+    user3.setMachingFinalScore(60);
+    matchList.add(user3);    
+    MatchedParticipantVO user4 = new MatchedParticipantVO();
+    user4.setMachingFinalScore(50);
+    matchList.add(user4);
+    Map<MatchingScoreTypeEnum, List>  map = MentoringUtils.supervisedMatchNormalization(matchList, categoryConfigData);
+    Assert.assertEquals(map.size(), 3);
+    Map<MatchingScoreTypeEnum, List>  expected = new LinkedHashMap<MatchingScoreTypeEnum, List>();
+    List userList1 = new ArrayList();
+    userList1.add(user2);
+    List userList2 = new ArrayList();
+    userList2.add(user3);
+    List userList3 = new ArrayList();
+    userList3.add(user4);
+    userList3.add(user1);
+    expected.put(MatchingScoreTypeEnum.EXCELLENT, userList1);   
+    expected.put(MatchingScoreTypeEnum.GOOD, userList2); 
+    expected.put(MatchingScoreTypeEnum.AVERAGE, userList3); 
+    Assert.assertEquals(map, expected);
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testSortSignupSectionsSameWithWizard(){
+    List<MentoringProgramSignupTemplateSection> templateSections = new ArrayList<MentoringProgramSignupTemplateSection>();
+    MentoringProgramSignupTemplateSection s1 = new MentoringProgramSignupTemplateSection();
+    s1.setSectionId("location");
+    s1.setOrder(3);
+    
+    MentoringProgramSignupTemplateSection s2 = new MentoringProgramSignupTemplateSection();
+    s2.setSectionId("competency");
+    s2.setOrder(1);
+    
+    MentoringProgramSignupTemplateSection s3 = new MentoringProgramSignupTemplateSection();
+    s3.setSectionId("division");
+    s3.setOrder(2);    
+    
+    MentoringProgramSignupTemplateSection s4 = new MentoringProgramSignupTemplateSection();
+    s4.setSectionId("department");
+    s4.setOrder(4);
+    
+    templateSections.add(s1);
+    templateSections.add(s2);
+    templateSections.add(s3);
+    templateSections.add(s4);
+    
+    
+    List<MentoringProgramSignupFormSection> signupSections = new ArrayList<MentoringProgramSignupFormSection>();
+    MentoringProgramSignupFormSection ss1 = new MentoringProgramSignupFormSection();
+    ss1.setSectionId("division");
+    
+    MentoringProgramSignupFormSection ss2 = new MentoringProgramSignupFormSection();
+    ss2.setSectionId("location");
+    
+    MentoringProgramSignupFormSection ss3 = new MentoringProgramSignupFormSection();
+    ss3.setSectionId("department");
+    
+    MentoringProgramSignupFormSection ss4 = new MentoringProgramSignupFormSection();
+    ss4.setSectionId("competency");
+    
+    signupSections.add(ss1);
+    signupSections.add(ss2);
+    signupSections.add(ss3);
+    signupSections.add(ss4);
+    
+    signupSections = MentoringUtils.sortSignupSectionsSameWithWizard(templateSections, signupSections);
+    
+    Assert.assertEquals(signupSections.get(3).getSectionId(), "department");
+  }
+  @Test(groups = {"checkin"})
+  public void testIsProgramInMatchingType(){
+    MentoringProgram program = new MentoringProgram();
+    program.setMatchingType(ProgramMatchingTypeEnum.SUPERVISED);
+    try {
+      Class clazz = Class.forName("MentoringUtils.class");
+      MentoringUtils util;
+      util = (MentoringUtils)clazz.newInstance();
+      boolean isMatching = util.isProgramInMatchingType(program,ProgramMatchingTypeEnum.values());
+      if(isMatching){
+        Assert.assertEquals(true,isMatching);
+      }else{
+        Assert.assertEquals(false,isMatching);
+      }
+    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+      e.printStackTrace();
+    }
+  }
+
+}

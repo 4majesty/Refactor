@@ -1,0 +1,14 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.cdp.service.impl.IGetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl;
+
+public interface IGetMentoringProgramsForMentorUnavailabilityExpirationCheckImplTest {
+	void setup();
+
+	void testGatherAllUsers();
+
+	void testCalculateDaysDifferenceWithToday();
+
+	void testCalculateDaysDifferenceWithYesterday();
+}

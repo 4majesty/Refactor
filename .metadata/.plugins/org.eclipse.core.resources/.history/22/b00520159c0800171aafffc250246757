@@ -1,0 +1,58 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Service command to start program
+ * @author Keqin Liu
+ */
+public class StartProgram implements ServiceCommand<StartProgram> {
+  private String programId;
+  
+  private IMentoringProgram program;
+  
+  private int declineCount;
+
+  private String autoForwardJobToken;
+
+  /**
+   * Constructor
+   * @param programId Program ID
+   */
+  public StartProgram(String programId) {
+    this.programId = programId;
+  }
+
+  /**
+   * Get program ID
+   * @return Program ID
+   */
+  public String getProgramId() {
+    return programId;
+  }
+
+  public MentoringProgram getProgram() {
+    return program;
+  }
+
+  public void setProgram(MentoringProgram program) {
+    this.program = program;
+  }
+
+  public int getDeclineCount() {
+    return declineCount;
+  }
+
+  public void setDeclineCount(int declineCount) {
+    this.declineCount = declineCount;
+  }
+
+  public String getAutoForwardJobToken() {
+    return autoForwardJobToken;
+  }
+
+  public void setAutoForwardJobToken(String autoForwardJobToken) {
+    this.autoForwardJobToken = autoForwardJobToken;
+  }
+}

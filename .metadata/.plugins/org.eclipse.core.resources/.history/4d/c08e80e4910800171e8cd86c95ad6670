@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+
+public interface IJavaWorkingSetPage {
+	void setInitialSelection(IStructuredSelection selection);
+
+	void createControl(Composite parent);
+}

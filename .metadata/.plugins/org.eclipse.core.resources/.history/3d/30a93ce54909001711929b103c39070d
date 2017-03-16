@@ -1,0 +1,57 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMenteeSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorSignupForm;
+import com.successfactors.cdp.service.mentoring.CompleteProgram;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import org.jboss.seam.annotations.In;
+
+import javax.inject.Inject;
+import java.util.Date;
+
+/**
+ * Created by frank on 12/13/16.
+ */
+@Service
+public class CompleteProgramImpl implements ServiceCommandImpl<CompleteProgram, CompleteProgram> {
+  @Inject
+  @In(create = true)
+  private MentoringServiceBase mentoringServiceBase;
+
+  private ServiceCommandHandler scaHandler = ServiceCommandHandlerFactory.getSCAHandler();
+
+  private static Logger logger = LogManager.getLogger();
+
+  @Override
+  public CompleteProgram execute(CompleteProgram cmd) throws ServiceApplicationException {
+    MentoringProgram program = cmd.getMentoringProgram();
+    if((!StringUtils.isBlank(cmd.getAutoForwardJobToken()) && !MentoringUtils.verifyMentoringProgramMD5Token(program, cmd.getAutoForwardJobToken()))
+            || (StringUtils.isBlank(cmd.getAutoForwardJobToken()) && program.getStatus().getNextStatus(program) != ProgramStatusEnum.COMPLETED)) {
+      logger.error("The next status of the program(current status:" + program.getStatus() + ") is not " + ProgramStatusEnum.COMPLETED);
+      return cmd;
+    }
+    program.setStatus(ProgramStatusEnum.COMPLETED);
+    program.setCompletedDate(new Date());
+
+    ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgram.class, program));
+    mentoringServiceBase.validateContext(context);
+    mentoringServiceBase.declineUnprocessedRequests(program);
+//    mentoringServiceBase.declineUnmatchedParticipants(program);
+    mentoringServiceBase.autoDeclineParticipants(MentoringProgramMentorSignupForm.class, program.getMentors(), true);
+    mentoringServiceBase.autoDeclineParticipants(MentoringProgramMenteeSignupForm.class, program.getMentees(), true);
+    return cmd;
+  }
+}

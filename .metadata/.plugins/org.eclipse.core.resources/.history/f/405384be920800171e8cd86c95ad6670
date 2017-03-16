@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface ILibraryContainer {
+	boolean equals(Object obj);
+
+	int hashCode();
+
+	IAdaptable[] getChildren();
+
+	ImageDescriptor getImageDescriptor();
+
+	String getLabel();
+
+	IPackageFragmentRoot[] getPackageFragmentRoots();
+}

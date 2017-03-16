@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.propertiesfileeditor;
+
+import org.eclipse.osgi.util.NLS;
+
+public interface IPropertiesFileEditorMessages {
+}

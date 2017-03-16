@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.compare.ZipFileStructureCreator;
+
+public interface IJarStructureCreator {
+}

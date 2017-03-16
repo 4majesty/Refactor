@@ -1,0 +1,60 @@
+/*
+ * $Id$
+ */
+package com.successfactors.cdp.service.util.mentoring;
+
+import com.successfactors.sca.ServiceApplicationException;
+
+/**
+ * Exception when failing to create JAM group
+ * Success Factors
+ */
+@com.successfactors.sca.ServiceRollback
+public class CreateJAMGroupException extends ServiceApplicationException {
+  public enum REASON {
+    INVALID_NAME,
+    DUPLICATE_NAME,
+//    OAUTH_FAIL,
+    SYSTEM_FAIL
+  }
+  private REASON failReason = REASON.SYSTEM_FAIL;
+
+  
+  public CreateJAMGroupException() {
+    super();
+  }
+
+  /**
+   * Creates a new jam group with specific reason 
+   * @param reason
+   * @param cause
+   */
+  public CreateJAMGroupException(REASON reason, String message, Throwable cause) {
+    super(message, cause);
+    this.failReason = reason;
+  }
+  
+  /**
+   * The failure reason becomes system failure
+   * @param cause
+   */
+  public CreateJAMGroupException(Throwable cause) {
+    super(cause);
+  }
+  
+  /**
+   * The failure reason becomes system failure
+   * @param cause
+   */
+  public CreateJAMGroupException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public REASON getFailReason() {
+    return failReason;
+  }
+
+  public void setFailReason(REASON failReason) {
+    this.failReason = failReason;
+  }
+}

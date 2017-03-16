@@ -1,0 +1,94 @@
+/*
+ * $Id: FeatureGroupEnum.java 1180783 2017-02-20 06:46:38Z wwang $
+ *
+ * Copyright (C) 2005 SuccessFactors, Inc.
+ * All Rights Reserved
+ */
+package com.successfactors.legacy.bean.provisioning;
+
+import com.successfactors.gm.util.type.EnumType;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * FeatureGroupEnum
+ *
+ * @author George Lui
+ * @version $Revision: 1180783 $
+ */
+public class FeatureGroupEnum extends EnumType {
+  /**
+   * Used as a lookup repository of sorts (thru static methods)
+   * to add singleton FeatureGroupEnum instances and retrieve the singleton
+   * instances.
+   */
+  private static Map featureGroupEnumMap = new HashMap();
+
+  /**
+   * Contains the FeatureEnum's of this feature group.
+   */
+  private List<FeatureEnum> _featureList = new ArrayList<FeatureEnum>();
+
+/*******************************************************
+ * IMPORTANT!!!!
+ *
+ * Feature groups MUST be listed IN THE ORDER THEY APPEAR IN
+ * funcblock_provisioning_companies_company_edit.jsp
+ *
+ * If you add a new feature group. PLEASE continue to follow this rule.
+ *
+ * This is needed for ProvisioningReportFeatureEmitter to output
+ * the features in the correct order.
+********************************************************/
+  public static final FeatureGroupEnum GENERAL = new FeatureGroupEnum("general");
+  public static final FeatureGroupEnum ONBOARDING = new FeatureGroupEnum("onboarding");
+  public static final FeatureGroupEnum OFFBOARDING = new FeatureGroupEnum("offboarding");
+  public static final FeatureGroupEnum COLLABORATION = new FeatureGroupEnum("collaboration");
+  public static final FeatureGroupEnum OBJECTIVE = new FeatureGroupEnum("objective");
+  public static final FeatureGroupEnum DASHBOARDANALYTICS = new FeatureGroupEnum("dashboard/analytics");
+  public static final FeatureGroupEnum WEBSERVICES = new FeatureGroupEnum("webservices");
+  public static final FeatureGroupEnum ENABLE_BOOMI_ADMIN_LINK = new FeatureGroupEnum("enable_boomi_admin_link");
+  public static final FeatureGroupEnum GOOGLEAPPS = new FeatureGroupEnum("googleapps");
+  public static final FeatureGroupEnum LMS = new FeatureGroupEnum("lms");
+  public static final FeatureGroupEnum PE_SELFSERVICE = new FeatureGroupEnum("pe_selfservice");
+  public static final FeatureGroupEnum RCM = new FeatureGroupEnum("recruiting_2");
+  public static final FeatureGroupEnum GM_EXECUTION = new FeatureGroupEnum("gm_execution");
+  public static final FeatureGroupEnum ENABLE_AUDITING = new FeatureGroupEnum("enable_auditing");
+  public static final FeatureGroupEnum XML_CONFIGURATOR = new FeatureGroupEnum("xml_configurator");
+  public static final FeatureGroupEnum DTCE_COMMON_UI = new FeatureGroupEnum("dtce_common_ui");
+
+  private FeatureGroupEnum(String name) {
+    super(name);
+    put(this);
+  }
+
+  public void add(final FeatureEnum feature) {
+    _featureList.add(feature);
+  }
+
+  public List<FeatureEnum> getFeatureList() {
+    return Collections.unmodifiableList(_featureList);
+  }
+
+  private static void put(final FeatureGroupEnum e) {
+    if (!featureGroupEnumMap.containsKey(e.name()))
+      featureGroupEnumMap.put(e.name(), e);
+  }
+
+  public String toString() {
+    StringBuffer sb = new StringBuffer();
+
+    List l = getFeatureList();
+
+    for (Iterator i = l.iterator(); i.hasNext(); ) {
+      sb.append( ((FeatureEnum)i.next()).toString() + "\n");
+    }
+
+    return sb.toString();
+  }
+}

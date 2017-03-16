@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.corext.refactoring;
+
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
+
+public interface ITypedSource {
+	String getSource();
+
+	int getType();
+
+	boolean equals(Object other);
+
+	int hashCode();
+}

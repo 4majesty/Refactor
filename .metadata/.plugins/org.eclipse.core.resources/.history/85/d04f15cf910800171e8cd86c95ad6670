@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.ui.JavaElementComparator;
+
+public interface IWorkingSetAwareJavaElementSorter {
+	int compare(Viewer viewer, Object e1, Object e2);
+}

@@ -1,0 +1,18 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IChangeTypeAction {
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(IStructuredSelection selection);
+
+	void selectionChanged(ITextSelection selection);
+
+	void selectionChanged(JavaTextSelection selection);
+
+	void run(ITextSelection selection);
+}

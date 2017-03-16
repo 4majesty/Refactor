@@ -1,0 +1,10 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.cdp.service.mentoring.jam.ScheduleProgramJamGroupInviteJob;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+public interface IScheduleProgramJamGroupInviteJobImpl {
+	Void execute(ScheduleProgramJamGroupInviteJob cmd) throws ServiceApplicationException;
+}

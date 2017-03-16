@@ -1,0 +1,21 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.actions.InlineConstantAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.InlineMethodAction;
+
+public interface IInlineAction {
+	void selectionChanged(ISelection selection);
+
+	void run(ITextSelection selection);
+
+	void run(IStructuredSelection selection);
+}

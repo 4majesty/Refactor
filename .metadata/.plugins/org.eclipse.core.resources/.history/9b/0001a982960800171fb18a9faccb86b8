@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import java.lang.reflect.InvocationTargetException;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractSupertypeProcessor;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IExtractSupertypeMethodPage {
+	void createControl(Composite parent);
+
+	void setVisible(final boolean visible);
+}

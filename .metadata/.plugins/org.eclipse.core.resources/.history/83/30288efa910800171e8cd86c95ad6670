@@ -1,0 +1,75 @@
+package org.eclipse.jdt.internal.ui.fix;
+
+import java.util.Map;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+
+public abstract class AbstractCleanUp implements ICleanUp, IAbstractCleanUp {
+	private CleanUpOptions fOptions;
+
+	protected AbstractCleanUp() {
+	}
+
+	protected AbstractCleanUp(Map settings) {
+		setOptions(new MapCleanUpOptions(settings));
+	}
+
+	@Override
+	public void setOptions(CleanUpOptions options) {
+		Assert.isLegal(options != null);
+		Assert.isTrue(fOptions == null);
+		fOptions= options;
+	}
+
+	@Override
+	public String[] getStepDescriptions() {
+		return new String[0];
+	}
+
+	/** 
+	* @return code snippet complying to current options
+	*/
+	@Override
+	public String getPreview() {
+		return "";
+	}
+
+	@Override
+	public CleanUpRequirements getRequirements() {
+		return new CleanUpRequirements(false, false, false, null);
+	}
+
+	@Override
+	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+		return new RefactoringStatus();
+	}
+
+	@Override
+	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
+		return null;
+	}
+
+	@Override
+	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
+		return new RefactoringStatus();
+	}
+
+	/** 
+	* @param key the name of the option
+	* @return <code>true</code> if option with <code>key</code> is enabled
+	*/
+	protected boolean isEnabled(String key) {
+		Assert.isNotNull(fOptions);
+		Assert.isLegal(key != null);
+		return fOptions.isEnabled(key);
+	}
+}

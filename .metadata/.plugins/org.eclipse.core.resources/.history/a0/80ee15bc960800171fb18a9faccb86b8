@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls.search;
+
+import org.eclipse.jdt.core.search.SearchEngine;
+
+public interface ISearchBrokenNLSKeysUtil {
+}

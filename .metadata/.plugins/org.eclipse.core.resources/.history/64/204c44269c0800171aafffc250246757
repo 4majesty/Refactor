@@ -1,0 +1,144 @@
+/*
+ * $Id$
+ */
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.cdp.service.mentoring.AddMentoringJamAdmins;
+import com.successfactors.cdp.service.mentoring.jam.GetJamAuthToken;
+import com.successfactors.cdp.service.mentoring.jam.JamGroupInviteBySyncIds;
+import com.successfactors.cdp.service.mentoring.jam.MakeJamGroupAdminByUserId;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.service.FindUsersByIds;
+
+/**
+ * Implementation to add the mentoring program admins
+ * It will add program owners as jam group admins
+ * Returns failed users if any
+ * 
+ * @author ricardo.saito
+ * Success Factors
+ */
+@Service
+public class AddMentoringJamAdminsImpl implements ServiceCommandImpl<List<String>, AddMentoringJamAdmins> {
+  private static Logger logger = LogManager.getLogger();
+
+  @Inject
+  @In
+  private ParamBean params;
+
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+
+  @Override
+  public List<String> execute(AddMentoringJamAdmins cmd)
+      throws ServiceApplicationException {
+    MentoringProgram program = cmd.getProgram();
+    List<String> owners = getValidProgramOwners(program);
+    List<String> failedUsers = new ArrayList<String>();
+
+    if(owners != null && !owners.isEmpty()) {
+      String token = scaHandler.execute(new GetJamAuthToken(params.getUserId())); // param user will contain program launcher
+  
+      inviteMembers(program.getJamGroupId(), owners, token);
+      failedUsers = addUsersAsAdmin(program.getJamGroupId(), owners, token);
+    } else {
+      logger.error("No valid program owners found for program."+cmd.getProgram().getName());
+    }
+
+    return failedUsers;
+  }
+
+  /**
+   * Invite the members to be part of JAM group.
+   * 
+   * @param program
+   * @param users
+   * @throws ServiceApplicationException 
+   */
+  private void inviteMembers(String jamGroupId, List<String> users, String authToken) throws ServiceApplicationException {
+    scaHandler.execute(new JamGroupInviteBySyncIds(users, jamGroupId, authToken));
+  }
+
+  /**
+   * Adds users as admins to the jam group.
+   * The users must be part of the JAM group or else it would fail
+   * 
+   * @param program
+   * @param users
+   * @return
+   */
+  private List<String> addUsersAsAdmin(String jamGroupId, List<String> users, String authToken) {
+    List<String> failedUsers = new ArrayList<String>();
+
+    for (String user : users) {
+      try {
+        scaHandler.execute(new MakeJamGroupAdminByUserId(user, jamGroupId, authToken));
+      } catch (ServiceApplicationException sae) {
+        logger.error("User "+user+" was not added to the Mentoring JAM Group:"+jamGroupId, sae);
+        failedUsers.add(user);
+      }
+    }
+
+    return failedUsers;
+  }
+
+  /**
+   * Fetches valid (active users) program owners
+   * 
+   * @param program
+   * 
+   * @return
+   * 
+   * @throws ServiceApplicationException 
+   */
+  private List<String> getValidProgramOwners(MentoringProgram program) throws ServiceApplicationException {
+    List<String> users = new ArrayList<String>();
+
+    if (program.getOwners() != null && !program.getOwners().isEmpty()) {
+      for (MentoringProgramOwner owner : program.getOwners()) {
+        users.add(owner.getUser());
+      }
+
+      users = filterInvalidUsers(users);
+    }
+
+    return users;
+  }
+
+  private List<String> filterInvalidUsers(List<String> users) throws ServiceApplicationException {
+    List<String> validUsers = new ArrayList<String>();
+    Collection<UserBean> userBeans = getUserBeanByIds(users);
+
+    if (userBeans != null) {
+      for (UserBean user : userBeans) {
+        if  (user != null && user.isValidUser()) {
+          validUsers.add(user.getUserId());
+        }
+      }
+    }
+
+    return validUsers;
+  }
+
+  private Collection<UserBean> getUserBeanByIds(List<String> userIdList) throws ServiceApplicationException {
+    return scaHandler.execute(new FindUsersByIds(userIdList));
+  }
+}

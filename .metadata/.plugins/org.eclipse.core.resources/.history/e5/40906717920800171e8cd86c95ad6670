@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.jface.viewers.ILabelProvider;
+
+public interface ILabelProviderDisposer {
+	void widgetDisposed(DisposeEvent e);
+}

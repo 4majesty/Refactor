@@ -1,0 +1,29 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import java.util.List;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IWorkingSetConfigurationDialog {
+	void dispose();
+
+	Image getImage(Object object);
+
+	String getText(Object object);
+
+	boolean select(Viewer viewer, Object parentElement, Object element);
+
+	IWorkingSet[] getSelection();
+
+	void setSelection(IWorkingSet[] workingSets);
+
+	int open();
+
+	List getNewlyAddedWorkingSets();
+
+	boolean isSortingEnabled();
+}

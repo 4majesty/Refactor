@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.preferences.cleanup;
+
+import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
+
+public interface IMissingCodeTabPage {
+}

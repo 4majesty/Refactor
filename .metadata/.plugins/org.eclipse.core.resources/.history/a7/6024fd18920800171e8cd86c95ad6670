@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.jarimport;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
+import org.eclipse.jdt.internal.ui.refactoring.binary.BinaryRefactoringHistoryWizard;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
+
+public interface IJarImportWizardPage {
+	void createControl(final Composite parent);
+
+	void performFinish();
+
+	void setErrorMessage(final String message);
+
+	void setVisible(final boolean visible);
+}

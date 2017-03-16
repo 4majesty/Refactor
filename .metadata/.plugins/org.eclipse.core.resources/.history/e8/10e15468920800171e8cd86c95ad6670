@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetComparator;
+
+public interface ISearchUtil {
+}

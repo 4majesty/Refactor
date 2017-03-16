@@ -1,0 +1,118 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
+
+public class TypeSetEnvironment implements ITypeSetEnvironment {
+	private final TypeEnvironment fTypeEnvironment;
+
+	private final ITypeUniverseSet fUniverse;
+
+	private final IEmptyTypeSet fEmptyTypeSet;
+
+	private final Map fSubtypesOfSingletons= new LinkedHashMap();
+
+	private final Map fSubTypesSets= new LinkedHashMap();
+
+	private final Map fSuperTypesOfSingletons= new LinkedHashMap();
+
+	private final Map fSuperTypesSets= new LinkedHashMap();
+
+	private int fgCommonExprHits= 0;
+
+	private int fgCommonExprMisses= 0;
+
+	public TypeSetEnvironment(TypeEnvironment typeEnvironment) {
+		fTypeEnvironment= typeEnvironment;
+		fUniverse= new TypeUniverseSet(this);
+		fEmptyTypeSet= new EmptyTypeSet(this);
+	}
+
+	@Override
+	public TType getJavaLangObject() {
+		return fTypeEnvironment.getJavaLangObject();
+	}
+
+	@Override
+	public TypeUniverseSet getUniverseTypeSet() {
+		return fUniverse;
+	}
+
+	@Override
+	public EmptyTypeSet getEmptyTypeSet() {
+		return fEmptyTypeSet;
+	}
+
+	@Override
+	public SubTypesOfSingleton createSubTypesOfSingleton(TType superType) {
+		if (superType.isJavaLangObject())
+			return this.getUniverseTypeSet();
+		if (fSubtypesOfSingletons.containsKey(superType)) {
+			fgCommonExprHits++;
+			return (SubTypesOfSingleton)fSubtypesOfSingletons.get(superType);
+		} else {
+			SubTypesOfSingleton s= new SubTypesOfSingleton(superType, this);
+			fgCommonExprMisses++;
+			fSubtypesOfSingletons.put(superType, s);
+			return s;
+		}
+	}
+
+	@Override
+	public SubTypesSet createSubTypesSet(TypeSet superTypes) {
+		if (fSubTypesSets.containsKey(superTypes)) {
+			fgCommonExprHits++;
+			return (SubTypesSet)fSubTypesSets.get(superTypes);
+		} else {
+			SubTypesSet s= new SubTypesSet(superTypes);
+			fgCommonExprMisses++;
+			fSubTypesSets.put(superTypes, s);
+			return s;
+		}
+	}
+
+	@Override
+	public SuperTypesOfSingleton createSuperTypesOfSingleton(TType subType) {
+		if (fSuperTypesOfSingletons.containsKey(subType)) {
+			fgCommonExprHits++;
+			return (SuperTypesOfSingleton)fSuperTypesOfSingletons.get(subType);
+		} else {
+			SuperTypesOfSingleton s= new SuperTypesOfSingleton(subType, this);
+			fgCommonExprMisses++;
+			fSuperTypesOfSingletons.put(subType, s);
+			return s;
+		}
+	}
+
+	@Override
+	public SuperTypesSet createSuperTypesSet(TType subType) {
+		if (fSuperTypesSets.containsKey(subType)) {
+			fgCommonExprHits++;
+			return (SuperTypesSet)fSuperTypesSets.get(subType);
+		} else {
+			SuperTypesSet s= new SuperTypesSet(subType, this);
+			fgCommonExprMisses++;
+			fSuperTypesSets.put(subType, s);
+			return s;
+		}
+	}
+
+	@Override
+	public SuperTypesSet createSuperTypesSet(TypeSet subTypes) {
+		if (fSuperTypesSets.containsKey(subTypes))
+			return (SuperTypesSet)fSuperTypesSets.get(subTypes);
+		else {
+			SuperTypesSet s= new SuperTypesSet(subTypes, this);
+			fSuperTypesSets.put(subTypes, s);
+			return s;
+		}
+	}
+
+	@Override
+	public void dumpStats() {
+		System.out.println("Common expression hits:   " + fgCommonExprHits);
+		System.out.println("Common expression misses: " + fgCommonExprMisses);
+	}
+}

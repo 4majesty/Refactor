@@ -1,0 +1,51 @@
+package com.successfactors.cdp.service.impl;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.jboss.seam.annotations.In;
+import com.successfactors.cdp.bean.UserReadinessVO;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean;
+import com.successfactors.cdp.service.GetRecommendedSuccessors;
+import com.successfactors.cdp.service.GetRoleReadiness;
+import com.successfactors.competency.bean.CompetencyBean;
+import com.successfactors.competency.dao.CompetencyDAO;
+import com.successfactors.competency.util.type.CompetencyTypeEnum;
+import com.successfactors.gm.api.dao.ObjDAO;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.service.objective.GetDefaultTemplate;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.dao.FeedbackDAO;
+import com.successfactors.legacy.service.GetSysConfig;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.pmcommon.dao.FormDAO;
+import com.successfactors.rbp.app.api.RBPFacade;
+import com.successfactors.rbp.app.api.TargetPopulationCriteria;
+import com.successfactors.rbp.app.collector.ContextualPermissionSpec;
+import com.successfactors.rbp.app.collector.PermissionSpec;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.UserInfoBean;
+import com.successfactors.user.bean.util.UserFormatUtils;
+import com.successfactors.user.dao.UserDAO;
+import javax.inject.Inject;
+
+public interface IGetRecommendedSuccessorsImpl {
+	GetRecommendedSuccessors execute(GetRecommendedSuccessors cmd) throws ServiceApplicationException;
+}

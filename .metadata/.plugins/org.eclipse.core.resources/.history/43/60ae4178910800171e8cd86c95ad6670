@@ -1,0 +1,31 @@
+package org.eclipse.jdt.internal.ui.text.java.hover;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+
+public interface IJavaEditorTextHoverDescriptor {
+	IJavaEditorTextHover createTextHover();
+
+	String getId();
+
+	String getHoverClassName();
+
+	String getLabel();
+
+	String getDescription();
+
+	boolean canActivatePlugIn();
+
+	boolean equals(Object obj);
+
+	int hashCode();
+
+	int getStateMask();
+
+	String getModifierString();
+
+	boolean isEnabled();
+
+	IConfigurationElement getConfigurationElement();
+}

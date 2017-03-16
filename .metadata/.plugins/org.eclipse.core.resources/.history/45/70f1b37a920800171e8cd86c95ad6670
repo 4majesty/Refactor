@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
+import org.eclipse.jdt.internal.ui.actions.ISelectAllAction;
+
+public interface ITypesView {
+	Object getAdapter(Class key);
+
+	void selectionChanged(IWorkbenchPart part, ISelection selection);
+}

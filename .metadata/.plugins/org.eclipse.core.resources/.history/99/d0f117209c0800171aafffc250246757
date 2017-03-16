@@ -1,0 +1,310 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.OneToMany;
+
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.cdp.service.util.mentoring.MatchingScoreTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.genericobject.api.model.APISubVersion;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.api.model.Type;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+
+/**
+ * Mentor/Mentee request Entity
+ * @author I309618
+ *
+ */
+/**
+ * Mentor/Mentee request Entity
+ * @author I309618
+ *
+ */
+@MDFEntity(effectiveDating = EffectiveDating.NONE, apiVisibility = APIVisibility.EDITABLE, apiSubVersion = APISubVersion.V1_0)
+public class MentoringProgramMentorRequest extends AuditFields{
+  //System Fields
+  /** Row Id. */
+  @Column(name = GENERIC_OBJECT_T.ROW_ID, nullable = false)
+  @Field(visibility = Visibility.NOT_VISIBLE)
+  private Long rowId;
+  
+  /** External Code. */
+  @Column(name = GENERIC_OBJECT_T.EXTERNAL_CODE, nullable = false)
+  @Field(visibility = Visibility.READ_ONLY, dataType = DataType.AUTO_NUMBER)
+  protected String externalId;
+ 
+  /** Internal Id. */
+  @Column(name = GENERIC_OBJECT_T.INTERNAL_ID)
+  @Field(visibility = Visibility.NOT_VISIBLE)
+  protected Long internalId;
+  
+  // Business Fields
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD1, nullable = false)
+  @Field(visibility = Visibility.EDITABLE, dataType=DataType.USER)
+  private String mentor;
+  
+  /** menteeUserId. */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD2, nullable = false)
+  @Field(visibility = Visibility.EDITABLE, dataType=DataType.USER)
+  private String mentee;
+  
+  /** programId. */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD3, nullable = false)
+  @Field(visibility = Visibility.EDITABLE, dataType=DataType.STRING)
+  private String programId;
+  
+  /** Monitoring Request Status:. DRAFT, CONFIRMED,REJECTED,ACCEPTED,DELETED */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD4, nullable = false)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.ENUM)
+  private MentorRequestStatusEnum mentoringRequestStatus;
+  /** programId. */
+  
+  /** Monitoring Request Status:. RejectComment */
+  @Column(name=GENERIC_OBJECT_T.SF_FIELD6, nullable=true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.STRING, maxLength = GENERIC_OBJECT_T.CUSTOM_FIELD100_LEN)
+  private String rejectComment;
+  
+  /** acceptDates. */
+  @Column(name=GENERIC_OBJECT_T.SF_FIELD7, nullable=true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date acceptDate;
+  
+  /** rejectDate. */
+  @Column(name=GENERIC_OBJECT_T.SF_FIELD8, nullable=true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date rejectDate;
+  
+  /** matchingScore. */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD9, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.NUMBER)
+  private Float matchingScore;
+  
+  /** matchingCategory. */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD10, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType =DataType.ENUM)
+  private MatchingScoreTypeEnum matchingCategory;
+
+  /**mentoringProgramMatchedArea */
+  @OneToMany()
+  @AssociationType(type = Type.COMPOSITE)
+  @Field(visibility = Visibility.EDITABLE)
+  private List<MentoringProgramSignupFormSection> mentoringProgramMatchedArea=new ArrayList<MentoringProgramSignupFormSection>();
+  
+  
+  
+  
+/**
+ * getRejectComment
+ * @return rejectComment
+ */
+public String getRejectComment() {
+    return rejectComment;
+}
+
+/**
+ * setRejectComment
+ * @param rejectComment rejectComment
+ */
+public void setRejectComment(String rejectComment) {
+    this.rejectComment = rejectComment;
+}
+
+/**
+ * getRowId
+ * @return rowId
+ */
+public Long getRowId() {
+    return rowId;
+}
+/**
+ * setRowId
+ * @param rowId rowId
+ */
+public void setRowId(Long rowId) {
+    this.rowId = rowId;
+}
+
+/**
+ * getExternalId
+ * @return externalId
+ */
+public String getExternalId() {
+    return externalId;
+}
+
+/**
+ * setExternalId
+ * @param externalCode externalCode
+ */
+public void setExternalId(String externalCode) {
+    this.externalId = externalCode;
+}
+
+/**
+ * getInternalId
+ * @return internalId
+ */
+public Long getInternalId() {
+    return internalId;
+}
+
+/**
+ * setInternalId
+ * @param internalId internalId
+ */
+public void setInternalId(Long internalId) {
+    this.internalId = internalId;
+}
+
+/**
+ * getMentor
+ * @return mentor
+ */
+public String getMentor() {
+    return mentor;
+}
+
+/**
+ * setMentor
+ * @param mentorUserId
+ */
+public void setMentor(String mentorUserId) {
+    this.mentor = mentorUserId;
+}
+/**
+ * getMentee
+ * @return mentee
+ */
+public String getMentee() {
+    return mentee;
+}
+/**
+ * setMentee
+ * @param menteeUserId
+ */
+public void setMentee(String menteeUserId) {
+    this.mentee = menteeUserId;
+}
+/**
+ * getProgramId
+ * @return programId
+ */
+public String getProgramId() {
+    return programId;
+}
+/**
+ * setProgramId
+ * @param programId programId
+ */
+public void setProgramId(String programId) {
+    this.programId = programId;
+}
+/**
+ * getMentoringRequestStatus
+ * @return mentoringRequestStatus
+ */
+public MentorRequestStatusEnum getMentoringRequestStatus() {
+    return mentoringRequestStatus;
+}
+
+/**
+ * setMentoringRequestStatus
+ * @param mentoringRequestStatus mentoringRequestStatus
+ */
+public void setMentoringRequestStatus(
+        MentorRequestStatusEnum mentoringRequestStatus) {
+    this.mentoringRequestStatus = mentoringRequestStatus;
+}
+
+/**
+ * getAcceptDate
+ * @return acceptDate
+ */
+public Date getAcceptDate() {
+    return acceptDate;
+}
+
+/**
+ * setAcceptDate
+ * @param acceptDate acceptDate
+ */
+public void setAcceptDate(Date acceptDate) {
+    this.acceptDate = acceptDate;
+}
+
+/**
+ * getRejectDate
+ * @return rejectDate
+ */
+public Date getRejectDate() {
+    return rejectDate;
+}
+/**
+ * setRejectDate
+ * @param rejectDate rejectDate
+ */
+public void setRejectDate(Date rejectDate) {
+    this.rejectDate = rejectDate;
+}
+/**
+ * getMatchingScore
+ * @return matchingScore
+ */
+public Float getMatchingScore() {
+  return matchingScore;
+}
+
+/**
+ * setMatchingScore
+ * @param matchingScore matchingScore
+ */
+public void setMatchingScore(Float matchingScore) {
+  this.matchingScore = matchingScore;
+}
+
+/**
+ * getMatchingCategory
+ * @return matchingCategory
+ */
+public MatchingScoreTypeEnum getMatchingCategory() {
+  return matchingCategory;
+}
+/**
+ * setMatchingCategory
+ * @param matchingCategory matchingCategory
+ */
+public void setMatchingCategory(MatchingScoreTypeEnum matchingCategory) {
+  this.matchingCategory = matchingCategory;
+}
+
+/**
+ * getMentoringProgramMatchedArea
+ * @return mentoringProgramMatchedArea
+ */
+public List<MentoringProgramSignupFormSection> getMentoringProgramMatchedArea() {
+  return mentoringProgramMatchedArea;
+}
+
+/**
+ * setMentoringProgramMatchedArea
+ * @param mentoringProgramMatchedArea mentoringProgramMatchedArea
+ */
+public void setMentoringProgramMatchedArea(
+    List<MentoringProgramSignupFormSection> mentoringProgramMatchedArea) {
+  this.mentoringProgramMatchedArea = mentoringProgramMatchedArea;
+}
+
+
+  
+}

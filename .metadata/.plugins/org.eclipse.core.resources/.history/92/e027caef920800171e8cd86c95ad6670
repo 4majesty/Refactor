@@ -1,0 +1,7 @@
+package org.eclipse.jdt.ui.wizards;
+
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+
+public interface INewElementWizardPage {
+	void setVisible(boolean visible);
+}

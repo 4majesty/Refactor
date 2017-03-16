@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.ui.views.properties.IPropertyDescriptor;
+import org.eclipse.jdt.core.IJavaElement;
+
+public interface IJavaElementProperties {
+	IPropertyDescriptor[] getPropertyDescriptors();
+
+	Object getPropertyValue(Object name);
+
+	void setPropertyValue(Object name, Object value);
+
+	Object getEditableValue();
+
+	boolean isPropertySet(Object property);
+
+	void resetPropertyValue(Object property);
+}

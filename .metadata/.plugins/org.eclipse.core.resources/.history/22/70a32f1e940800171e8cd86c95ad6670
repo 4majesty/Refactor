@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+public interface ISortingLabelProvider {
+	Image getImage(Object element);
+
+	String getText(Object element);
+
+	StyledString getStyledText(Object element);
+
+	void setOrder(int orderFlag);
+}

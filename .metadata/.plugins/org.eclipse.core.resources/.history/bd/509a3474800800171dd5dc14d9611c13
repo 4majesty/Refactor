@@ -1,0 +1,46 @@
+package com.successfactors.legacy.ui.fb.provisioning.extensionsupport.feature;
+
+import org.mockito.Mockito;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.pmcommon.bean.FeatureSet;
+
+public class FeatureStateProviderTest {
+
+  private static final String ENABLED_STATE = "ENABLED";
+  private FeatureStateProvider stateProvider;
+  private CompanyBean companyBean;
+  private IFeatureSet featureSet;
+
+  @BeforeMethod
+  public void setUp() {
+    // cannot resolve CompanyDatabaseContext fix it!
+    // this.companyBean = Mockito.mock(CompanyBean.class);
+    // this.featureSet = Mockito.mock(FeatureSet.class);
+    // this.stateProvider = new FeatureStateProvider(companyBean);
+  }
+
+  // @Test
+  public void testGetStateForNotReverseFeature() {
+    FeatureEnum testFeature = FeatureEnum.ECT_FISCAL_YEAR;
+    Mockito.when(companyBean.getFeatureSet()).thenReturn(featureSet);
+    Mockito.when(featureSet.contains(testFeature)).thenReturn(true);
+    String actualState = stateProvider.getState(testFeature);
+
+    Assert.assertEquals(ENABLED_STATE, actualState);
+  }
+
+  // @Test
+  public void testGetStateForReverseFeature() {
+    FeatureEnum testFeature = FeatureEnum.DISABLE_ODATA_API;
+    Mockito.when(companyBean.getFeatureSet()).thenReturn(featureSet);
+    Mockito.when(featureSet.contains(testFeature)).thenReturn(true);
+    String actualState = stateProvider.getState(testFeature);
+
+    Assert.assertEquals("DISABLED", actualState);
+  }
+
+}

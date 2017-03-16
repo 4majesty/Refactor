@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.corext.refactoring.code;
+
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyzer;
+
+public interface IExceptionAnalyzer {
+	boolean visit(ThrowStatement node);
+
+	boolean visit(MethodInvocation node);
+
+	boolean visit(SuperMethodInvocation node);
+
+	boolean visit(ClassInstanceCreation node);
+}

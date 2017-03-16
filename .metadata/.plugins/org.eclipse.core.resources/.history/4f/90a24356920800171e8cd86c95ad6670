@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.jarpackagerfat;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IFatJarPackageWizard {
+	void addPages();
+
+	IWizardPage getNextPage(IWizardPage page);
+
+	IWizardPage getPreviousPage(IWizardPage page);
+
+	void init(IWorkbench workbench, IStructuredSelection selection);
+
+	void init(IWorkbench workbench, JarPackageData jarPackage);
+
+	boolean performFinish();
+}

@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
+
+public interface IMemberProposalInfo {
+	IJavaElement getJavaElement();
+}

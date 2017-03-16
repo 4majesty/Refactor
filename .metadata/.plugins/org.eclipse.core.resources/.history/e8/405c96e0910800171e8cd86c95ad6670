@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.wizards;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+import org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetPage;
+
+public interface INewJavaWorkingSetWizard {
+	void addPages();
+
+	boolean performFinish();
+
+	void init(IWorkbench workbench, IStructuredSelection selection);
+}

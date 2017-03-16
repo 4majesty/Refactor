@@ -1,0 +1,954 @@
+package com.successfactors.cdp.app.mentoring;
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramEmailTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentee;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMenteeSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSection;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplateSection;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramMenteeVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramMentorVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramParticipantVO;
+import com.successfactors.cdp.bean.mentoring.vo.overview.ProgramDetailsTabVO;
+import com.successfactors.cdp.bean.mentoring.vo.overview.ProgramMenteesTabVO;
+import com.successfactors.cdp.bean.mentoring.vo.overview.ProgramMentorsTabVO;
+import com.successfactors.cdp.service.UpdateMentorUnavailableEndDate;
+import com.successfactors.cdp.service.mentoring.GetMatchedParticipants;
+import com.successfactors.cdp.service.mentoring.GetMentoringRequest;
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.MentoringConstants;
+import com.successfactors.cdp.service.util.mentoring.MentoringDateUtils;
+import com.successfactors.cdp.service.util.mentoring.MentoringPermissionChecker;
+import com.successfactors.cdp.service.util.mentoring.MentoringProgramMDFException;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.ProgramEmailTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramParticipantTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailContent;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailTokenEnum;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailUtils;
+import com.successfactors.genericobject.api.bean.GenericObject;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.app.PrefetchFlags;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.proxy.GenericObjectToLazyBean;
+import com.successfactors.genericobject.service.LoadByObjectTypeExternalCode;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.legacy.service.GetSysConfig;
+import com.successfactors.legacy.service.ejb.SysConfig;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.MailInvalidAddressException;
+import com.successfactors.platform.bean.MailSendException;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.util.UserFormatUtils;
+import com.successfactors.user.service.FindUsersByIds;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+
+import javax.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Service base of all mentoring service commands, contains methods could be reused by those service commands
+ * @author Keqin Liu
+ */
+@Name("mentoringServiceBase")
+@javax.inject.Named("mentoringServiceBase")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope()
+public class MentoringServiceBase {
+  /**
+   * Logger
+   */
+  private static Logger logger = LogManager.getLogger();
+
+  /**
+   * MDF configuration provider
+   */
+  @Inject
+  @In(create = true)
+  private ConfigurationProvider configurationProvider;
+
+  /**
+   * Parameter bean
+   */
+  @Inject
+  @In
+  private ParamBean params;
+
+  /**
+   * Message resource
+   */
+  @Inject
+  @In(create = true, value = "v10msgs")
+  private IMessageBundle msgs;
+
+  /**
+   * Email utility
+   */
+  @Inject
+  @In(create = true)
+  private IMentoringEmailUtils mentoringEmailUtils;
+
+  /** SysConfig EJB. */
+  @Inject
+  @In
+  private SysConfig sysConfigService;
+
+  private Map<String, Messages> localeMessageBundleMap = new HashMap<String, Messages>();
+  /**
+   * Service command handler
+   */
+  private ServiceCommandHandler scaHandler = ServiceCommandHandlerFactory.getSCAHandler();
+
+  private SimpleDateFormat sdf = new SimpleDateFormat(MentoringConstants.DEFAULT_DATE_FORMAT);
+
+  /**
+   * Get a mentoring program according to program ID specified
+   *
+   * @param programId Program ID
+   * @return Mentoring program
+   * @throws ServiceApplicationException If program with specified ID doesn't exist
+   */
+  public MentoringProgram getProgramById(String programId) throws ServiceApplicationException {
+    MentoringProgram program = null;
+
+    ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgram.class);
+    LoadByObjectTypeExternalCode loadByExtCode = new LoadByObjectTypeExternalCode(def, new PrefetchFlags(), programId);
+    List<GenericObject> gos = scaHandler.execute(loadByExtCode);
+
+    if (gos.size() > 0) {
+      program = new GenericObjectToLazyBean<MentoringProgram>(def).transform(gos.get(0));
+    }
+
+    if (program == null) {
+      throw new ServiceApplicationException("Program (" + programId + ") doesn't exist!");
+    }
+
+    return program;
+  }
+
+  /**
+   * Get a mentoring request according to request ID
+   *
+   * @param requestId Request ID
+   * @return Mentoring request
+   * @throws ServiceApplicationException If request with specified ID doesn't exist
+   */
+  public MentoringProgramMentorRequest getMentoringRequestById(String requestId) throws ServiceApplicationException {
+    MentoringProgramMentorRequest request = null;
+
+    ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgramMentorRequest.class);
+    LoadByObjectTypeExternalCode loadByExtCode = new LoadByObjectTypeExternalCode(def, new PrefetchFlags(), requestId);
+    List<GenericObject> gos = scaHandler.execute(loadByExtCode);
+
+    if (gos.size() > 0) {
+      request = new GenericObjectToLazyBean<MentoringProgramMentorRequest>(def).transform(gos.get(0));
+    }
+
+    if (request == null) {
+      throw new ServiceApplicationException("Request (" + requestId + ") doesn't exist!");
+    }
+
+    return request;
+  }
+
+  /**
+   * Validate whether save operation succeeds or not
+   *
+   * @param context MDF validation context
+   * @throws MentoringProgramMDFException Throw MentoringProgramMDFException if save failed
+   */
+  public void validateContext(ValidationContext context) throws MentoringProgramMDFException {
+    if (context.getFailedOperationContexts() != null && context.getFailedOperationContexts().size() > 0) {
+      throw new MentoringProgramMDFException(context.getFailedOperationContexts().get(0).toString());
+    }
+  }
+
+  /**
+   * Get email template according to email template type
+   *
+   * @param program Mentoring program
+   * @param type    Email template type
+   * @return Email template
+   */
+  public MentoringProgramEmailTemplate getEmailTemplateByType(MentoringProgram program, ProgramEmailTypeEnum type) {
+    for (MentoringProgramEmailTemplate template : program.getEmailTemplates()) {
+      if (type.equals(template.getEmailType())) {
+        return template;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Create sign-up form for all mentors or mentees and save them
+   *
+   * @param program      Mentoring program
+   * @param clasz        Mentor or mentee sign-up form class
+   * @param participants All mentors or mentees in a program
+   * @throws ServiceApplicationException If sign-up form template doesn't exist
+   */
+  public <T extends MentoringProgramSignupForm, U extends MentoringProgramParticipant> void saveSignupForm(MentoringProgram program,
+                                                                                                           Class<T> clasz, List<U> participants) throws ServiceApplicationException {
+    try {
+      for (U participant : participants) {
+        T signupForm = clasz.newInstance();
+        signupForm.setProgramId(program.getExternalId());
+        signupForm.setUser(participant.getUser());
+        signupForm.setStatus(SignupFormStatusEnum.DRAFT);
+
+        if (program.getSignupFormTemplate() == null) {
+          throw new ServiceApplicationException("Program (" + program.getExternalId() + ") doesn't have sign-up form template!");
+        }
+
+        List<MentoringProgramSignupTemplateSection> templateSections = program.getSignupFormTemplate().getSections();
+        List<MentoringProgramSignupFormSection> formSections = new ArrayList<MentoringProgramSignupFormSection>();
+
+        //sort sections by order
+        MentoringUtils.sortSignupSections(templateSections);
+
+        // Create sign-up form section and add to form if it is visible to this mentor or mentee
+        for (MentoringProgramSignupTemplateSection templateSection : templateSections) {
+          if ((signupForm instanceof MentoringProgramMentorSignupForm
+                  && templateSection.getMentorQuestion() != null
+                  && !StringUtils.isEmpty(templateSection.getMentorQuestion().getString(params.getLocale()))
+          ) || (signupForm instanceof MentoringProgramMenteeSignupForm
+                  && templateSection.getMenteeQuestion() != null)
+                  && !StringUtils.isEmpty(templateSection.getMenteeQuestion().getString(params.getLocale()))
+                  ) {
+            MentoringProgramSignupFormSection formSection = new MentoringProgramSignupFormSection();
+            formSection.setSectionId(templateSection.getSectionId());
+            formSections.add(formSection);
+          }
+        }
+
+        signupForm.setSections(formSections);
+        // Create association between mentor or mentee and sign-up form
+        participant.setSignupForm(signupForm);
+
+        ValidationContext context = scaHandler.execute(new SaveBean(participant.getClass(), participant));
+        validateContext(context);
+      }
+    } catch (InstantiationException ie) {
+      throw new ServiceApplicationException("Failed to save sign-up form: " + ie.getMessage(), ie);
+    } catch (IllegalAccessException iae) {
+      throw new ServiceApplicationException("Failed to save sign-up form: " + iae.getMessage(), iae);
+    }
+  }
+
+  /**
+   * Compose sign-up emails to all mentors or mentees
+   *
+   * @param program       Mentoring program
+   * @param emailTemplate Sign-up email template
+   * @param participants  All mentors or mentees
+   * @throws ServiceApplicationException If failed to send email
+   */
+  public <T extends MentoringProgramParticipant> void sendSignupEmail(MentoringProgram program, MentoringProgramEmailTemplate emailTemplate,
+                                                                      List<T> participants) throws ServiceApplicationException {
+    if (emailTemplate == null) {
+      return;
+    }
+
+    // Load user bean map for login user and all mentors or mentees recieving sign-up email
+    List<String> userIdList = new ArrayList<String>();
+    userIdList.add(params.getUserId());
+
+    for (MentoringProgramParticipant participant : participants) {
+      userIdList.add(participant.getUser());
+    }
+
+    Map<String, UserBean> userBeanMap = getUsernameMapByIds(userIdList);
+
+    for (MentoringProgramParticipant participant : participants) {
+      UserBean recipient = userBeanMap.get(participant.getUser());
+
+      try {
+        MentoringEmailContent emailContent = new MentoringEmailContent();
+        emailContent.setSubject(emailTemplate.getEmailSubject());
+        emailContent.setBody(emailTemplate.getEmailContent());
+
+        Map<MentoringEmailTokenEnum, String> tokenMap = new HashMap<MentoringEmailTokenEnum, String>();
+        tokenMap.put(MentoringEmailTokenEnum.USER_NAME, mentoringEmailUtils.escapleHtmlTag(getLocalizedUserFullName(recipient)));
+        tokenMap.put(MentoringEmailTokenEnum.PROGRAM_NAME, mentoringEmailUtils.generateUrlToken(program, recipient, mentoringEmailUtils.escapleHtmlTag(program.getName())));
+        tokenMap.put(MentoringEmailTokenEnum.PLAIN_PROGRAM_NAME, program.getName());
+        tokenMap.put(MentoringEmailTokenEnum.START_DATE,
+                MentoringDateUtils.formatDate(program.getStartDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+        if (params.getUserId() != null) {
+          mentoringEmailUtils.sendEmail(emailContent, tokenMap, userBeanMap.get(params.getUserId()), recipient);
+        } else {
+          UserBean sender = mentoringEmailUtils.getDummyEmailSender();
+          mentoringEmailUtils.sendEmail(emailContent, tokenMap, sender, recipient);
+        }
+      } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        throw new ServiceApplicationException("Failed to generate sign-up URL token: " + e.getMessage(), e);
+      } catch (MailInvalidAddressException | MailSendException me) {
+        throw new ServiceApplicationException("Failed to send sign-up email to " + recipient.getUserId() + " : " + me.getMessage(), me);
+      }
+    }
+  }
+
+  /**
+   * Generate a user ID/user bean map according to specified user ID list and format user full name
+   *
+   * @param userIdList User ID list
+   * @return User ID/user bean map
+   * @throws ServiceApplicationException If failed to load user beans
+   */
+  public Map<String, UserBean> getUsernameMapByIds(List<String> userIdList) throws ServiceApplicationException {
+    Map<String, UserBean> userBeanMap = new HashMap<String, UserBean>();
+    List<UserBean> userBeanList = scaHandler.execute(new FindUsersByIds(userIdList));
+
+    for (UserBean user : userBeanList) {
+      // Format user full name so that caller can use it directly
+      user.setFullName(UserFormatUtils.formatFullName(params.getFullNameFormat(), user.getFullNameBean()));
+      userBeanMap.put(user.getUserId(), user);
+    }
+
+    return userBeanMap;
+  }
+
+  /**
+   * Decline participants haven't signed up or don't have match
+   *
+   * @param clasz        Class of mentor or mentee sign-up form
+   * @param participants Participants list
+   * @param draftOnly    Only decline mentor/mentee whose sign-up form is in draft status or not
+   * @throws ServiceApplicationException If failed to reject participant
+   */
+  public <T extends MentoringProgramSignupForm, U extends MentoringProgramParticipant>
+  void autoDeclineParticipants(Class<T> clasz, List<U> participants, boolean draftOnly) throws ServiceApplicationException {
+    List<MentoringProgramSignupForm> signupForms = new ArrayList<MentoringProgramSignupForm>();
+    for (U participant : participants) {
+      MentoringProgramSignupForm signupForm = participant.getSignupForm();
+      if (signupForm != null) {//this is for Forward Job which may change program status from confirmed directly to completed, and skip signup form creation phase.
+        if (!draftOnly || SignupFormStatusEnum.DRAFT.equals(signupForm.getStatus())) {
+          signupForm.setStatus(SignupFormStatusEnum.SYSTEM_REJECTED);
+          signupForms.add(signupForm);
+        }
+      }
+    }
+    ValidationContext context = scaHandler.execute(new SaveBean(clasz, signupForms));
+    validateContext(context);
+  }
+
+  /**
+   * Send matched email to mentor
+   *
+   * @param program  Mentoring program
+   * @param mentorId Mentor ID
+   * @param mentees  Matched mentees
+   * @throws ServiceApplicationException If error occurs
+   */
+  public void sendMatchedEmailToMentor(MentoringProgram program, String mentorId, List<String> mentees) throws ServiceApplicationException {
+    // Load user bean map for login user and mentee recieving approval email
+    List<String> userIdList = new ArrayList<String>();
+    userIdList.add(params.getUserId());
+    userIdList.add(mentorId);
+
+    for (String mentee : mentees) {
+      userIdList.add(mentee);
+    }
+
+    Map<String, UserBean> userBeanMap = getUsernameMapByIds(userIdList);
+    UserBean recipient = userBeanMap.get(mentorId);
+    List<UserBean> menteeList = new ArrayList<UserBean>();
+
+    for (String mentee : mentees) {
+      menteeList.add(userBeanMap.get(mentee));
+    }
+
+    try {
+      MentoringEmailContent emailContent = new MentoringEmailContent();
+      emailContent.setSubject(getMessageByLocale("DEVELOPMENT_MENTORING_MATCHING_MENTOR_SUBJECT", recipient.getUserLocale()));
+      emailContent.setBody(getMessageByLocale("DEVELOPMENT_MENTORING_MATCHING_MENTOR_BODY", recipient.getUserLocale()));
+
+      Map<MentoringEmailTokenEnum, String> tokenMap = new HashMap<MentoringEmailTokenEnum, String>();
+      tokenMap.put(MentoringEmailTokenEnum.MENTEE_LIST, mentoringEmailUtils.generateMenteeListToken(menteeList));
+      tokenMap.put(MentoringEmailTokenEnum.MENTOR_NAME, mentoringEmailUtils.escapleHtmlTag(getLocalizedUserFullName(userBeanMap.get(mentorId))));
+      tokenMap.put(MentoringEmailTokenEnum.PROGRAM_NAME, mentoringEmailUtils.generateUrlToken(program, recipient, mentoringEmailUtils.escapleHtmlTag(program.getName())));
+      tokenMap.put(MentoringEmailTokenEnum.PLAIN_PROGRAM_NAME, mentoringEmailUtils.escapleHtmlTag(program.getName()));
+      tokenMap.put(MentoringEmailTokenEnum.START_DATE, MentoringDateUtils.formatDate(program.getStartDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+      tokenMap.put(MentoringEmailTokenEnum.HOME_PAGE, mentoringEmailUtils.generateUrlToken(program, recipient,
+              getMessageByLocale("DEVELOPMENT_MENTORING_HOMEPAGE", recipient.getUserLocale())));
+
+      mentoringEmailUtils.sendEmail(emailContent, tokenMap, userBeanMap.get(params.getUserId()), recipient);
+    } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+      throw new ServiceApplicationException("Failed to generate sign-up URL token: " + e.getMessage(), e);
+    } catch (MailInvalidAddressException | MailSendException me) {
+      throw new ServiceApplicationException("Failed to send matched email to " + recipient.getUserId() + " : " + me.getMessage(), me);
+    }
+  }
+
+  /**
+   * Send matched email to mentee
+   *
+   * @param program  Mentoring program
+   * @param mentorId Mentor ID
+   * @param menteeId Mentee ID
+   * @throws ServiceApplicationException If error occurs
+   */
+  public void sendMatchedEmailToMentee(MentoringProgram program, String mentorId, String menteeId) throws ServiceApplicationException {
+    List<String> userIdList = new ArrayList<String>();
+    userIdList.add(params.getUserId());
+    userIdList.add(mentorId);
+    userIdList.add(menteeId);
+
+    Map<String, UserBean> userBeanMap = getUsernameMapByIds(userIdList);
+    UserBean recipient = userBeanMap.get(menteeId);
+
+    try {
+      MentoringEmailContent emailContent = new MentoringEmailContent();
+      emailContent.setSubject(getMessageByLocale("DEVELOPMENT_MENTORING_MATCHING_MENTEE_SUBJECT", recipient.getUserLocale()));
+      emailContent.setBody(getMessageByLocale("DEVELOPMENT_MENTORING_MATCHING_MENTEE_BODY", recipient.getUserLocale()));
+
+      Map<MentoringEmailTokenEnum, String> tokenMap = new HashMap<MentoringEmailTokenEnum, String>();
+      tokenMap.put(MentoringEmailTokenEnum.MENTEE_NAME, mentoringEmailUtils.escapleHtmlTag(getLocalizedUserFullName(recipient)));
+      tokenMap.put(MentoringEmailTokenEnum.MENTOR_NAME, mentoringEmailUtils.escapleHtmlTag(getLocalizedUserFullName(userBeanMap.get(mentorId))));
+      tokenMap.put(MentoringEmailTokenEnum.PROGRAM_NAME, mentoringEmailUtils.generateUrlToken(program, recipient, mentoringEmailUtils.escapleHtmlTag(program.getName())));
+      tokenMap.put(MentoringEmailTokenEnum.PLAIN_PROGRAM_NAME, mentoringEmailUtils.escapleHtmlTag(program.getName()));
+      tokenMap.put(MentoringEmailTokenEnum.START_DATE, MentoringDateUtils.formatDate(program.getStartDate(),
+              MentoringConstants.DEFAULT_DATE_FORMAT));
+      tokenMap.put(MentoringEmailTokenEnum.HOME_PAGE, mentoringEmailUtils.generateUrlToken(program, recipient,
+              getMessageByLocale("DEVELOPMENT_MENTORING_HOMEPAGE", recipient.getUserLocale())));
+
+      mentoringEmailUtils.sendEmail(emailContent, tokenMap, userBeanMap.get(params.getUserId()), recipient);
+    } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+      throw new ServiceApplicationException("Failed to generate sign-up URL token: " + e.getMessage(), e);
+    } catch (MailInvalidAddressException | MailSendException me) {
+      throw new ServiceApplicationException("Failed to send matched email to " + recipient.getUserId() + " : " + me.getMessage(), me);
+    }
+  }
+
+  /**
+   * Send decline email to mentee
+   *
+   * @param program  Mentoring program
+   * @param menteeId Mentee ID
+   * @param comment  Decline comment
+   * @throws ServiceApplicationException If error occurs
+   */
+  public void sendDeclineEmail(MentoringProgram program, String menteeId, String comment) throws ServiceApplicationException {
+    // Load user bean map for login user and mentee recieving approval email
+    List<String> userIdList = new ArrayList<String>();
+    userIdList.add(params.getUserId());
+    userIdList.add(menteeId);
+
+    Map<String, UserBean> userBeanMap = getUsernameMapByIds(userIdList);
+    UserBean sender = userBeanMap.get(params.getUserId());
+    UserBean recipient = userBeanMap.get(menteeId);
+
+    try {
+      MentoringEmailContent emailContent = new MentoringEmailContent();
+      emailContent.setSubject(getMessageByLocale("DEVELOPMENT_MENTORING_DECLINE_REQUEST_SUBJECT", recipient.getUserLocale()));
+      emailContent.setBody(getMessageByLocale("DEVELOPMENT_MENTORING_DECLINE_REQUEST_BODY", recipient.getUserLocale()));
+
+      Map<MentoringEmailTokenEnum, String> tokenMap = new HashMap<MentoringEmailTokenEnum, String>();
+
+      if (!StringUtils.isEmpty(comment)) {
+        tokenMap.put(MentoringEmailTokenEnum.DECLINE_MESSAGE, getMessageByLocale("DEVELOPMENT_MENTORING_DECLINE_REQUEST_DECLINE_MESSAGE", recipient.getUserLocale()));
+        tokenMap.put(MentoringEmailTokenEnum.DECLINE_COMMENT, comment);
+      }
+      tokenMap.put(MentoringEmailTokenEnum.MENTEE_NAME, mentoringEmailUtils.escapleHtmlTag(getLocalizedUserFullName(recipient)));
+      tokenMap.put(MentoringEmailTokenEnum.MENTOR_NAME, mentoringEmailUtils.escapleHtmlTag(getLocalizedUserFullName(sender)));
+      tokenMap.put(MentoringEmailTokenEnum.PROGRAM_NAME, mentoringEmailUtils.generateUrlToken(program, recipient, mentoringEmailUtils.escapleHtmlTag(program.getName())));
+      tokenMap.put(MentoringEmailTokenEnum.PLAIN_PROGRAM_NAME, mentoringEmailUtils.escapleHtmlTag(program.getName()));
+      tokenMap.put(MentoringEmailTokenEnum.HOME_PAGE, mentoringEmailUtils.generateUrlToken(program, recipient,
+              getMessageByLocale("DEVELOPMENT_MENTORING_HOMEPAGE", recipient.getUserLocale())));
+
+      mentoringEmailUtils.sendEmail(emailContent, tokenMap, sender, recipient);
+    } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+      throw new ServiceApplicationException("Failed to generate sign-up URL token: " + e.getMessage(), e);
+    } catch (MailInvalidAddressException | MailSendException me) {
+      throw new ServiceApplicationException("Failed to send approved email to " + recipient.getUserId() + " : " + me.getMessage(), me);
+    }
+  }
+
+  /**
+   * Send matching reuqest email to mentor
+   *
+   * @param program         Mentoring program
+   * @param mentorMenteeMap Mentor and matched mentee map
+   * @throws ServiceApplicationException If error occurs
+   */
+  public void sendMatchingRequestEmail(MentoringProgram program, Map<String, Set<String>> mentorMenteeMap) throws ServiceApplicationException {
+    // Load user bean map for login user, all mentors recieving matching email and all mentees matched to them
+    List<String> userIdList = new ArrayList<String>();
+    userIdList.add(params.getUserId());
+
+    for (String mentor : mentorMenteeMap.keySet()) {
+      userIdList.add(mentor);
+      userIdList.addAll(mentorMenteeMap.get(mentor));
+    }
+
+    Map<String, UserBean> userBeanMap = getUsernameMapByIds(userIdList);
+
+    // Send matching email to each mentor
+    for (String mentor : mentorMenteeMap.keySet()) {
+      UserBean recipient = userBeanMap.get(mentor);
+      List<UserBean> menteeList = new ArrayList<UserBean>();
+
+      for (String mentee : mentorMenteeMap.get(mentor)) {
+        menteeList.add(userBeanMap.get(mentee));
+      }
+
+      try {
+        MentoringEmailContent emailContent = new MentoringEmailContent();
+        emailContent.setSubject(getMessageByLocale("DEVELOPMENT_MENTORING_MATCHING_MENTOR_APPROVAL_SUBJECT", recipient.getUserLocale()));
+        emailContent.setBody(getMessageByLocale("DEVELOPMENT_MENTORING_MATCHING_MENTOR_APPROVAL_BODY", recipient.getUserLocale()));
+
+        Map<MentoringEmailTokenEnum, String> tokenMap = new HashMap<MentoringEmailTokenEnum, String>();
+        tokenMap.put(MentoringEmailTokenEnum.MENTEE_LIST, mentoringEmailUtils.generateMenteeListToken(menteeList));
+        tokenMap.put(MentoringEmailTokenEnum.MENTOR_NAME, mentoringEmailUtils.escapleHtmlTag(getLocalizedUserFullName(userBeanMap.get(mentor))));
+        tokenMap.put(MentoringEmailTokenEnum.PROGRAM_NAME, mentoringEmailUtils.generateUrlToken(program, recipient, mentoringEmailUtils.escapleHtmlTag(program.getName())));
+        tokenMap.put(MentoringEmailTokenEnum.PLAIN_PROGRAM_NAME, mentoringEmailUtils.escapleHtmlTag(program.getName()));
+
+        tokenMap.put(MentoringEmailTokenEnum.HOME_PAGE, mentoringEmailUtils.generateUrlToken(program, recipient,
+                getMessageByLocale("DEVELOPMENT_MENTORING_HOMEPAGE", recipient.getUserLocale())));
+
+        mentoringEmailUtils.sendEmail(emailContent, tokenMap, userBeanMap.get(params.getUserId()), recipient);
+      } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        throw new ServiceApplicationException("Failed to generate sign-up URL token: " + e.getMessage(), e);
+      } catch (MailInvalidAddressException | MailSendException me) {
+        throw new ServiceApplicationException("Failed to send matching request email to " + recipient.getUserId() + " : " + me.getMessage(), me);
+      }
+    }
+  }
+
+  /**
+   * isMentorAvailable
+   * @param programId
+   * @param mentorId
+   * @return boolean
+   * @throws ServiceApplicationException
+   */
+  public boolean isMentorAvailable(String programId, String mentorId) throws ServiceApplicationException {
+    MentoringProgram program = getProgramById(programId);
+    for (MentoringProgramMentor mentor : program.getMentors()) {
+      if (mentor.getUser().equals(mentorId)) {
+        return mentor.getUnavailableEndDate() == null;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * assignPropertyValueFromVO
+   * @param program
+   * @param vo
+   * @throws ServiceApplicationException
+   */
+
+  public void assignPropertyValueFromVO(MentoringProgram program, ProgramDetailsTabVO vo) throws ServiceApplicationException {
+    if (MentoringPermissionChecker.hasFieldEditPermission("name", program.getStatus(), program.getMatchingType())) {
+      program.setName(vo.getName());
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("description", program.getStatus(), program.getMatchingType())) {
+      program.setDescription(vo.getDescription());
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("mentor_signup_date", program.getStatus(), program.getMatchingType())) {
+      program.setMentorSignupDate(MentoringDateUtils.convertStringToDate(vo.getMentorSignupDate()));
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("mentee_signup_date", program.getStatus(), program.getMatchingType())) {
+      program.setMenteeSignupDate(MentoringDateUtils.convertStringToDate(vo.getMenteeSignupDate()));
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("matching_date", program.getStatus(), program.getMatchingType())) {
+      program.setMatchingDate(MentoringDateUtils.convertStringToDate(vo.getMatchingDate()));
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("start_date", program.getStatus(), program.getMatchingType())) {
+      program.setStartDate(MentoringDateUtils.convertStringToDate(vo.getStartDate()));
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("end_date", program.getStatus(), program.getMatchingType())) {
+      program.setEndDate(MentoringDateUtils.convertStringToDate(vo.getEndDate()));
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("matching_type", program.getStatus(), program.getMatchingType())) {
+      program.setMatchingType(vo.getMatchingType());
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("max_mentees", program.getStatus(), program.getMatchingType())) {
+      program.setMaximumOfMentee(vo.getMaximumOfMentee());
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("max_mentors", program.getStatus(), program.getMatchingType())) {
+      program.setMaximumOfMentor(vo.getMaximumOfMentor());
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("photo_upload", program.getStatus(), program.getMatchingType())) {
+      program.setPhotoId(vo.getPhotoId());
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("matching_approval", program.getStatus(), program.getMatchingType())) {
+      program.setNeedMentorApproval(vo.isNeedMentorApproval());
+    }
+    program.setMentorshipClosureEnabled(vo.isMentorshipClosureEnabled());
+    if (MentoringPermissionChecker.hasFieldEditPermission("owners", program.getStatus(), program.getMatchingType())) {
+      mergeProgramOwnerList(program, vo);
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("jam_Group_Switch", program.getStatus(), program.getMatchingType())) {
+      program.setJamEnabled(vo.isJamEnabled());
+    }
+  }
+
+  private void mergeProgramOwnerList(MentoringProgram program, ProgramDetailsTabVO vo) {
+    for (String ownerId : vo.getDeletedOwners()) {
+      for (MentoringProgramOwner owner : program.getOwners()) {
+        if (owner.getUser().equals(ownerId)) {
+          program.getOwners().remove(owner);
+          break;
+        }
+      }
+    }
+    for (String ownerId : vo.getAddedOwners()) {
+      program.getOwners().add(new MentoringProgramOwner(ownerId));
+    }
+  }
+
+  /**
+   *saveOverviewMenteesTabChange
+   * @param program
+   * @param addedVOList
+   * @param updateVOList leave updateVOList empty incause any futher use
+   * @param deletedVOList
+   * @throws ServiceApplicationException
+   */
+
+  public void saveOverviewMenteesTabChange(MentoringProgram program,
+                                           ProgramMenteesTabVO addedVOList,
+                                           ProgramMenteesTabVO updateVOList,
+                                           ProgramMenteesTabVO deletedVOList) throws ServiceApplicationException {
+    boolean canDeleteMentee = MentoringPermissionChecker.hasFieldEditPermission("remove_mentees", program.getStatus(), program.getMatchingType());
+    boolean canAddMentee = MentoringPermissionChecker.hasFieldEditPermission("add_mentees", program.getStatus(), program.getMatchingType());
+    if (canDeleteMentee) {
+      deleteParticipantsFromProgram(program, deletedVOList.getMentees(),false);
+    } else {
+      logger.error("no removementees permission for program[" + program.getName() + "]");
+    }
+    if (canAddMentee) {
+      addMenteeToProgram(program, addedVOList);
+    } else {
+      logger.error("no addmentees permission for program[" + program.getName() + "]");
+    }
+    if (canAddMentee || canDeleteMentee) {
+      scaHandler.execute(new SaveBean(MentoringProgram.class, program));
+    } else {
+      logger.error("no addmentees and removementees permissions for program[" + program.getName() + "]");
+    }
+  }
+
+
+
+
+
+
+  /**
+   * saveOverviewMentorsTabChange
+   * @param program
+   * @param addedVOList
+   * @param updatedVOList
+   * @param deletedVOList
+   * @throws ServiceApplicationException
+   */
+  public void saveOverviewMentorsTabChange(MentoringProgram program,
+                                           ProgramMentorsTabVO addedVOList,
+                                           ProgramMentorsTabVO updatedVOList,
+                                           ProgramMentorsTabVO deletedVOList) throws ServiceApplicationException {
+    Map<String, String> userExternalIdOriginalEndDateMap = new HashMap<String, String>();
+    Map<String, String> userIdOriginalEndDateMap = new HashMap<String, String>();
+    if (MentoringPermissionChecker.hasFieldEditPermission("remove_mentors", program.getStatus(), program.getMatchingType())) {
+      deleteParticipantsFromProgram(program, deletedVOList.getMentors(), true);
+    } else {
+      logger.error("no removementors permission for program[" + program.getName() + "]");
+    }
+    if (MentoringPermissionChecker.hasFieldEditPermission("add_mentors", program.getStatus(), program.getMatchingType())) {
+      userIdOriginalEndDateMap.putAll(addMentorToProgram(program, addedVOList));
+    } else {
+      logger.error("no addmentors permission for program[" + program.getName() + "]");
+    }
+    userExternalIdOriginalEndDateMap.putAll(updateMentorInProgram(program, updatedVOList));
+    scaHandler.execute(new SaveBean(MentoringProgram.class, program));
+    mergeUserIdEndDateMapWithUserExternalIdEndDateMap(program.getExternalId(), userIdOriginalEndDateMap, userExternalIdOriginalEndDateMap);
+    UpdateMentorUnavailableEndDate cmd = new UpdateMentorUnavailableEndDate();
+    if (!userExternalIdOriginalEndDateMap.isEmpty()) {
+      for (Map.Entry<String, String> entry : userExternalIdOriginalEndDateMap.entrySet()) {
+        try {
+          cmd.setMentorId(entry.getKey());
+          cmd.setProgramId(addedVOList.getExternalCode());
+          Date unavailableEndDate = null;
+          if (!StringUtils.isBlank(entry.getValue())) {
+            unavailableEndDate = sdf.parse(entry.getValue());
+          }
+          cmd.setUnavailableEndDate(unavailableEndDate);
+          scaHandler.execute(cmd);
+        } catch (ParseException e) {
+          logger.error("Date parse error occurred.");
+        }
+      }
+    }
+  }
+
+  private void mergeUserIdEndDateMapWithUserExternalIdEndDateMap(String programExternalId, Map<String, String> userIdEndDateMap, Map<String, String> externalIdEndDateMap) throws ServiceApplicationException {
+    if (!userIdEndDateMap.isEmpty()) {
+      MentoringProgram program = getProgramById(programExternalId);
+      Map<String, String> userIdExternalIdMap = new HashMap<String, String>();
+      for (MentoringProgramMentor programMentor : program.getMentors()) {
+        userIdExternalIdMap.put(programMentor.getUser(), programMentor.getExternalId());
+      }
+      for (Map.Entry<String, String> entry : userIdEndDateMap.entrySet()) {
+        if (userIdExternalIdMap.get(entry.getKey()) != null) {
+          externalIdEndDateMap.put(userIdExternalIdMap.get(entry.getKey()), entry.getValue());
+        }
+      }
+    }
+  }
+
+  /**
+   * The returned map is [userId <==> end date]
+   *
+   * @param program
+   * @param addedVOList
+   * @return
+   * @throws ServiceApplicationException
+   */
+  private Map<String, String> addMentorToProgram(MentoringProgram program, ProgramMentorsTabVO addedVOList) throws ServiceApplicationException {
+    Map<String, String> userExternalIdOriginalEndDateMap = new HashMap<String, String>();
+    for (ProgramMentorVO addedVo : addedVOList.getMentors()) {
+      MentoringProgramMentor programMentor = new MentoringProgramMentor();
+      userExternalIdOriginalEndDateMap.putAll(copyProgramMentorValuesFromAddedMentorVO(programMentor, addedVo));
+      program.getMentors().add(programMentor);
+    }
+    return userExternalIdOriginalEndDateMap;
+  }
+
+  private void addMenteeToProgram(MentoringProgram program, ProgramMenteesTabVO addedVOList)  {
+    for (ProgramMenteeVO addedVo : addedVOList.getMentees()){
+      MentoringProgramMentee programMentee = new MentoringProgramMentee();
+      copyProgramMenteeValuesFromAddedMenteeVO(programMentee, addedVo);
+      program.getMentees().add(programMentee);
+      }
+  }
+
+
+  /**
+   * The returned map is [externalId <==> end date]
+   *
+   * @param program
+   * @param updatedVOList
+   * @return
+   * @throws ServiceApplicationException
+   */
+  private Map<String, String> updateMentorInProgram(MentoringProgram program, ProgramMentorsTabVO updatedVOList) throws ServiceApplicationException {
+    Map<String, String> userExternalIdEndDateMap = new HashMap<String, String>();
+    for (ProgramMentorVO updatedVo : updatedVOList.getMentors()) {
+      for (MentoringProgramMentor programMentor : program.getMentors()) {
+        if (programMentor.getUser().equals(updatedVo.getUserId())) {
+          userExternalIdEndDateMap.putAll(copyProgramMentorValuesFromUpdatedMentorVO(programMentor, updatedVo));
+          break;
+        }
+      }
+    }
+    return userExternalIdEndDateMap;
+  }
+
+  /**
+   * The returned map is [externalId <==> end date]
+   */
+  private Map<String, String> copyProgramMentorValuesFromUpdatedMentorVO(MentoringProgramMentor programMentor, ProgramMentorVO mentorVo) throws ServiceApplicationException {
+    Map<String, String> userExternalIdEndDateMap = new HashMap<String, String>();
+    programMentor.setType(ProgramParticipantTypeEnum.MENTOR);
+    programMentor.setThreshold(mentorVo.getThreshold());
+    userExternalIdEndDateMap.put(mentorVo.getExternalId(), mentorVo.getUnavailableEndDate());
+    programMentor.setUser(mentorVo.getUserId());
+    return userExternalIdEndDateMap;
+  }
+
+  /**
+   * The returned map is [userId <==> end date]
+   */
+  private Map<String, String> copyProgramMentorValuesFromAddedMentorVO(MentoringProgramMentor programMentor, ProgramMentorVO mentorVo) throws ServiceApplicationException {
+    Map<String, String> userIdEndDateMap = new HashMap<String, String>();
+    programMentor.setThreshold(mentorVo.getThreshold());
+    if (!StringUtils.isBlank(mentorVo.getUnavailableEndDate())) {
+      userIdEndDateMap.put(mentorVo.getUserId(), mentorVo.getUnavailableEndDate());
+    }
+    programMentor.setUser(mentorVo.getUserId());
+    return userIdEndDateMap;
+  }
+
+  private  void copyProgramMenteeValuesFromAddedMenteeVO(MentoringProgramMentee programMentee, ProgramMenteeVO menteeVO)  {
+    programMentee.setThreshold(menteeVO.getThreshold());
+    programMentee.setUser(menteeVO.getUserId());
+
+  }
+
+  private void deleteParticipantsFromProgram(MentoringProgram program, List<?extends ProgramParticipantVO> deletedMembersList, boolean isMentor) {
+    if (isMentor) {
+      for (ProgramParticipantVO deletedVo : deletedMembersList) {
+        for (MentoringProgramMentor programMentor : program.getMentors()) {
+          if (programMentor.getUser().equals(deletedVo.getUserId())) {
+            program.getMentors().remove(programMentor);
+            break;
+          }
+        }
+      }
+    } else {
+      for (ProgramParticipantVO deletedVo : deletedMembersList) {
+        for (MentoringProgramMentee programMentee : program.getMentees()) {
+          if (programMentee.getUser().equals(deletedVo.getUserId())) {
+            program.getMentees().remove(programMentee);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  public void declineUnprocessedRequests(MentoringProgram program) throws ServiceApplicationException {
+    // Get all mentoring requests not processed yet
+    GetMentoringRequest cmd = new GetMentoringRequest();
+    cmd.setProgramId(program.getExternalId());
+    cmd.setStatus(MentorRequestStatusEnum.CONFIRMED);
+    List<MentoringProgramMentorRequest> requests = scaHandler.execute(cmd);
+    if (requests.isEmpty()) {
+      return;
+    }
+    // Reject those mentoring requests
+    for (MentoringProgramMentorRequest request : requests) {
+      request.setMentoringRequestStatus(MentorRequestStatusEnum.SYSTEM_REJECTED);
+      request.setRejectDate(new Date());
+      request.setRejectComment("Declined by system automatically");
+    }
+
+    ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgramMentorRequest.class, requests));
+    validateContext(context);
+  }
+
+  public int declineUnmatchedParticipants(MentoringProgram program) throws ServiceApplicationException {
+    Set<String> matchedSet = new HashSet<String>();
+
+    // Get all matched participants in this program
+    GetMatchedParticipants cmd = new GetMatchedParticipants();
+    cmd.setProgramId(program.getExternalId());
+    List<MentoringProgramMatchedParticipant> matchList = scaHandler.execute(cmd);
+
+    // Get all matched mentors and mentees from matched participants
+    for (MentoringProgramMatchedParticipant match : matchList) {
+      matchedSet.add(match.getMentor());
+      matchedSet.add(match.getMentee());
+    }
+
+    // Get all unmatched mentors and decline them automatically
+    List<MentoringProgramMentor> unmatchedMentors = new ArrayList<MentoringProgramMentor>();
+
+    for (MentoringProgramMentor mentor : program.getMentors()) {
+      if (!matchedSet.contains(mentor.getUser())) {
+        unmatchedMentors.add(mentor);
+      }
+    }
+
+    if (!unmatchedMentors.isEmpty()) {
+      autoDeclineParticipants(MentoringProgramMentorSignupForm.class, unmatchedMentors, false);
+    }
+
+    // Get all unmatched mentees and decline them automatically
+    List<MentoringProgramMentee> unmatchedMentees = new ArrayList<MentoringProgramMentee>();
+
+    for (MentoringProgramMentee mentee : program.getMentees()) {
+      if (!matchedSet.contains(mentee.getUser())) {
+        unmatchedMentees.add(mentee);
+      }
+    }
+
+    if (!unmatchedMentees.isEmpty()) {
+      autoDeclineParticipants(MentoringProgramMenteeSignupForm.class, unmatchedMentees, false);
+    }
+
+    return unmatchedMentors.size() + unmatchedMentees.size();
+  }
+
+  public boolean isTroubleShootingModeEnabled(){
+    boolean enableLogForTroubleShooting = false;
+    try{
+      GetSysConfig cmd = new GetSysConfig(SystemBean.ENABLE_LOG_FOR_TROUBLE_SHOOTING_KEY,
+              SystemBean.ENABLE_LOG_FOR_TROUBLE_SHOOTING_TYPE);
+      enableLogForTroubleShooting = scaHandler.execute(cmd) != null;
+    }catch(ServiceApplicationException e){
+      logger.error("check enable log for trouble shooting failed");
+      enableLogForTroubleShooting=false;
+    }
+    return enableLogForTroubleShooting;
+  }
+
+  /**
+   * Result Map: key -> MENTOR|MENTEE, value -> a set of user id.
+   * @param program
+   * @return
+   */
+  public Map<ProgramParticipantTypeEnum, Set<String>> getProgramMatchedParticipantCount(MentoringProgram program) {
+    Map<ProgramParticipantTypeEnum, Set<String>> resultMap = new HashMap<ProgramParticipantTypeEnum, Set<String>>();
+    GetMatchedParticipants cmd = new GetMatchedParticipants();
+    try {
+      cmd.setProgramId(program.getExternalId());
+      List<MentoringProgramMatchedParticipant> matchList = scaHandler.execute(cmd);
+      Set<String> mentorSet = new HashSet<String>(), menteeSet = new HashSet<String>();
+      // Get all matched mentors and mentees from matched participants
+      for (MentoringProgramMatchedParticipant match : matchList) {
+        mentorSet.add(match.getMentor());
+        menteeSet.add(match.getMentee());
+      }
+      resultMap.put(ProgramParticipantTypeEnum.MENTOR, mentorSet);
+      resultMap.put(ProgramParticipantTypeEnum.MENTEE, menteeSet);
+    } catch(ServiceApplicationException ex) {
+      logger.error(ex);
+    }
+    return resultMap;
+  }
+
+  public String getMessageByLocale(String messageKey, Locale locale) {
+    Messages messageBundle = getMessageBundleByLocale(locale);
+    return messageBundle.getString(messageKey);
+  }
+
+  public Messages getMessageBundleByLocale(Locale locale) {
+    Messages messageBundle = localeMessageBundleMap.get(locale.getDisplayName());
+    if (messageBundle == null) {
+      messageBundle = new Messages(params, locale, sysConfigService);
+      localeMessageBundleMap.put(locale.getDisplayName(), messageBundle);
+    }
+    return messageBundle;
+  }
+
+  public String getLocalizedUserFullName(UserBean userBean) {
+    String localizedNameFormat = getMessageByLocale("User_Display_Name", userBean.getUserLocale());
+    return UserFormatUtils.formatFullName(localizedNameFormat, userBean.getFullNameBean());
+  }
+
+
+}

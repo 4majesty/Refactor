@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+
+public interface IParameterTypeVariable {
+	String toString();
+
+	IMethodBinding getMethodBinding();
+
+	int getParameterIndex();
+}

@@ -1,0 +1,22 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.dialogs.SortMembersMessageDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitEditor;
+
+public interface ISortMembersAction {
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(IStructuredSelection selection);
+
+	void selectionChanged(ITextSelection selection);
+
+	void run(ITextSelection selection);
+}

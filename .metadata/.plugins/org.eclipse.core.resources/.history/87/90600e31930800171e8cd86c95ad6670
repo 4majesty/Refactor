@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.dialogs;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+
+public interface ISortMembersMessageDialog {
+	int open();
+
+	boolean close();
+
+	boolean isNotSortingFieldsEnabled();
+}

@@ -1,0 +1,28 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure;
+
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MemberRef;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodRef;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+
+public interface IMovedMemberAnalyzer {
+	boolean targetNeedsSourceImport();
+
+	boolean visit(SimpleName node);
+
+	boolean visit(QualifiedName node);
+
+	boolean visit(FieldAccess node);
+
+	boolean visit(MethodInvocation node);
+
+	boolean visit(MemberRef node);
+
+	boolean visit(MethodRef node);
+}

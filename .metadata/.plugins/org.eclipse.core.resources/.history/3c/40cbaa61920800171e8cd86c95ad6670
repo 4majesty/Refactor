@@ -1,0 +1,37 @@
+package org.eclipse.jdt.internal.ui.wizards.dialogfields;
+
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+public interface IComboDialogField {
+	Control[] doFillIntoGrid(Composite parent, int nColumns);
+
+	int getNumberOfControls();
+
+	boolean setFocus();
+
+	Combo getComboControl(Composite parent);
+
+	String[] getItems();
+
+	void setItems(String[] items);
+
+	String getText();
+
+	void setText(String text);
+
+	boolean selectItem(int index);
+
+	boolean selectItem(String name);
+
+	int getSelectionIndex();
+
+	void setTextWithoutUpdate(String text);
+
+	void refresh();
+}

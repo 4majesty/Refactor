@@ -1,0 +1,71 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.actions.ActionGroup;
+
+public class WorkingSetShowActionGroup extends ActionGroup implements IWorkingSetActionGroup, IWorkingSetShowActionGroup {
+	private List fContributions= new ArrayList();
+
+	private IConfigureWorkingSetAction fConfigureWorkingSetAction;
+
+	private WorkingSetModel fWorkingSetModel;
+
+	private final IWorkbenchPartSite fSite;
+
+	public WorkingSetShowActionGroup(IWorkbenchPartSite site) {
+		Assert.isNotNull(site);
+		fSite= site;
+	}
+
+	@Override
+	public void setWorkingSetMode(WorkingSetModel model) {
+		Assert.isNotNull(model);
+		fWorkingSetModel= model;
+		if (fConfigureWorkingSetAction != null)
+			fConfigureWorkingSetAction.setWorkingSetModel(fWorkingSetModel);
+	}
+
+	/** 
+	* {@inheritDoc}
+	*/
+	@Override
+	public void fillActionBars(IActionBars actionBars) {
+		super.fillActionBars(actionBars);
+		IMenuManager menuManager= actionBars.getMenuManager();
+		fillViewMenu(menuManager);
+	}
+
+	@Override
+	public void fillViewMenu(IMenuManager menuManager) {
+		fConfigureWorkingSetAction= new ConfigureWorkingSetAction(fSite);
+		if (fWorkingSetModel != null)
+			fConfigureWorkingSetAction.setWorkingSetModel(fWorkingSetModel);
+		addAction(menuManager, fConfigureWorkingSetAction);
+	}
+
+	@Override
+	public void cleanViewMenu(IMenuManager menuManager) {
+		for (Iterator iter= fContributions.iterator(); iter.hasNext();) {
+			IContributionItem removed= menuManager.remove((IContributionItem)iter.next());
+			if (removed != null) {
+				removed.dispose();
+			}
+		}
+		fContributions.clear();
+	}
+
+	private void addAction(IMenuManager menuManager, Action action) {
+		IContributionItem item= new ActionContributionItem(action);
+		menuManager.appendToGroup(ACTION_GROUP, item);
+		fContributions.add(item);
+	}
+}

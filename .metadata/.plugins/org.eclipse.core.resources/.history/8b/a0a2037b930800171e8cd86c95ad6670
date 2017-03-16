@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+
+public interface ILRUWorkingSetsList {
+	void add(IWorkingSet[] workingSets);
+
+	Iterator iterator();
+
+	Iterator sortedIterator();
+}

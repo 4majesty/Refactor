@@ -1,0 +1,6 @@
+package com.successfactors.pmcommon.util.type;
+
+import com.successfactors.legacy.util.EnumeratedType;
+
+public interface IObjMgtEnum {
+}

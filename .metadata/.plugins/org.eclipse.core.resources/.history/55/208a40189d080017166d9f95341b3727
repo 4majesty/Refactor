@@ -1,0 +1,14 @@
+package com.successfactors.cdp.service.util.mentoring.email;
+
+import java.util.List;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.cdp.service.util.mentoring.email.IMentoringEmailUtils;
+
+public interface IMentoringEmailUtilsTest {
+	void setup();
+
+	void excludeInvalidRecipient();
+}

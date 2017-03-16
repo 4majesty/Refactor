@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.RetargetTextEditorAction;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
+
+public interface ICompilationUnitEditorActionContributor {
+	void contributeToMenu(IMenuManager menu);
+
+	void setActiveEditor(IEditorPart part);
+}

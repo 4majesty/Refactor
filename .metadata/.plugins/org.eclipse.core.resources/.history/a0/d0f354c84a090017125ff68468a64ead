@@ -1,0 +1,23 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.sca.ServiceCommandHandler;
+
+public interface IGetJamFeedWidgetInfoImplTest {
+	void setup();
+
+	void tearDown();
+
+	void testOuputNotNull();
+
+	void testGroupId();
+
+	void testSingleUseToken();
+
+	void testGroupURL();
+
+	void testNoGroupPermission();
+
+	void testNoJamPermission();
+
+	void testMentoringJamSwitchDisabled();
+}

@@ -1,0 +1,24 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.datamodel.service.DataModelFacadeImpl;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.xi.ui.messages.SFMessages;
+
+public interface IProcessMentoringRequestImplTest {
+	void setup();
+
+	void testInvalidUser();
+
+	void testValidUser();
+
+	void testGetMatchingAreasByDeepCopy();
+}

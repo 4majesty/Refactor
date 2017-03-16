@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.navigator;
+
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.ui.navigator.CommonDropAdapter;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
+import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgCopyStarter;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveStarter;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IJavaDropAdapterAssistant {
+	IStatus handleDrop(CommonDropAdapter dropAdapter, DropTargetEvent dropTargetEvent, Object target);
+
+	IStatus validateDrop(Object target, int operation, TransferData transferType);
+
+	boolean isSupportedType(TransferData transferType);
+}

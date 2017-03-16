@@ -1,0 +1,110 @@
+package com.successfactors.cdp.bean;
+
+import java.io.Serializable;
+
+public class UserReadinessVO  implements Comparable<UserReadinessVO>, Serializable {
+  private String userId;
+  private String userName = null;
+  private String userTitle;
+  
+  private long roleId;
+  private double readiness;
+  private boolean displayReadiness;
+  public String getUserId() {
+    return userId;
+  }
+  public void setUserId(String userId) {
+    this.userId = userId;
+  }
+  public String getUserName() {
+    return userName;
+  }
+  public void setUserName(String userName) {
+    this.userName = userName;
+  }
+  public long getRoleId() {
+    return roleId;
+  }
+  public void setRoleId(long roleId) {
+    this.roleId = roleId;
+  }
+  public double getReadiness() {
+    return readiness;
+  }
+  public void setReadiness(double readiness) {
+    this.readiness = readiness;
+  }
+  public boolean isDisplayReadiness() {
+    return displayReadiness;
+  }
+  public void setDisplayReadiness(boolean displayReadiness) {
+    this.displayReadiness = displayReadiness;
+  }
+  
+  public String getUserTitle() {
+    return userTitle;
+  }
+  public void setUserTitle(String userTitle) {
+    this.userTitle = userTitle;
+  }
+  /**
+   * readiness first, then user name.
+   * Readiness small to big
+   * User Name big to small
+   * @param o
+   * @return
+   */
+  @Override
+  public int compareTo(UserReadinessVO o) {
+    Double d1 = this.readiness;
+    Double d2 = o.readiness;
+    int result = d1.compareTo(d2);
+    if(result == 0 && o.userName != null) {
+      return o.userName.compareTo(this.userName);
+    } else {
+      return result;
+    }
+  }
+  
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    long temp;
+    temp = Double.doubleToLongBits(readiness);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    result = prime * result + (int) (roleId ^ (roleId >>> 32));
+    result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+    return result;
+  }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    UserReadinessVO other = (UserReadinessVO) obj;
+    if (Double.doubleToLongBits(readiness) != Double
+        .doubleToLongBits(other.readiness)) {
+      return false;
+    }
+    if (roleId != other.roleId) {
+      return false;
+    }
+    if (userId == null) {
+      if (other.userId != null) {
+        return false;
+      }
+    } else if (!userId.equals(other.userId)) {
+      return false;
+    }
+    return true;
+  }
+  
+}

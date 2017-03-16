@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.NewFolderDialog;
+import org.eclipse.ui.views.navigator.ResourceComparator;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IFolderSelectionDialog {
+	void selectionChanged(SelectionChangedEvent event);
+}

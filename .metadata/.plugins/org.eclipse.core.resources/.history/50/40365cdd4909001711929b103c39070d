@@ -1,0 +1,28 @@
+package com.successfactors.cdp.service.scheduledjob;
+
+import static com.successfactors.jobscheduler.ScheduledJobAttr.AttrType.CUSTOMER_VISIBLE;
+import static com.successfactors.jobscheduler.ScheduledJobAttr.AttrType.PROVISIONING_SUPPORT;
+
+import com.successfactors.jobscheduler.IScheduledJob;
+import com.successfactors.jobscheduler.ScheduledJobAttr;
+import com.successfactors.jobscheduler.ScheduledJobTypeSupport;
+
+@ScheduledJobAttr({PROVISIONING_SUPPORT, CUSTOMER_VISIBLE})
+public class MentorUnavailabilityNotificationJobType extends ScheduledJobTypeSupport {
+
+    @Override
+    public String getJobTypeName() {
+        return "mentorUnavailabilityNotification";
+    }
+
+    @Override
+    public String getJobTypeLabelKey() {
+        return "PROVISIONING_MENTORING_JOB_TYPE_MENTOR_UNAVAILABILITY_NOTIFICATION";
+    }
+
+    @Override
+    public Class<? extends IScheduledJob> getJobClass() {
+        return MentorUnavailabilityNotificationJob.class;
+    }
+
+}

@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.navigator;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.navigator.ILinkHelper;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+
+public interface IJavaFileLinkHelper {
+	void activateEditor(IWorkbenchPage page, IStructuredSelection selection);
+
+	IStructuredSelection findSelection(IEditorInput input);
+}

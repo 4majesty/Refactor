@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFilePartitionScanner;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
+
+public interface IPropertiesFileMergeViewer {
+	String getTitle();
+}

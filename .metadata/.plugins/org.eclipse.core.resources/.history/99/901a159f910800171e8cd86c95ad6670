@@ -1,0 +1,36 @@
+package org.eclipse.jdt.internal.ui.jarpackager;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.SaveAsDialog;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+public interface IJarOptionsPage {
+	void handleEvent(Event e);
+
+	void createControl(Composite parent);
+
+	void saveWidgetValues();
+
+	boolean isPageComplete();
+
+	boolean canFlipToNextPage();
+
+	void setPreviousPage(IWizardPage page);
+
+	void finish();
+}

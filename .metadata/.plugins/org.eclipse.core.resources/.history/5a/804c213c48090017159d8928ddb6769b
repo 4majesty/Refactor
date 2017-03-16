@@ -1,0 +1,17 @@
+package com.successfactors.cdp.service.util.deeplink;
+
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.deeplink.annotation.DeepLink;
+import com.successfactors.deeplink.core.DeepLinkKeyMeta;
+import com.successfactors.deeplink.util.deeplink.DeepLinkCreator;
+import com.successfactors.deeplink.util.deeplink.DeepLinkParser;
+import com.successfactors.deeplink.util.deeplink.DeepLinkResolver;
+import com.successfactors.deeplink.util.deeplink.DeepLinkUtil;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.UIVersionManager.UIVersion;
+import com.successfactors.sfutil.util.URICreator;
+import com.successfactors.user.bean.UserBean;
+
+public interface IMentoringResolver {
+	URICreator resolveAlias(UIVersion curVersion, ParamBean params, DeepLinkParser deepLink);
+}

@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jdt.internal.ui.javaeditor.ISpecificContentAssistExecutor;
+
+public interface IJavaContentAssistHandler {
+	Object execute(ExecutionEvent event) throws ExecutionException;
+}

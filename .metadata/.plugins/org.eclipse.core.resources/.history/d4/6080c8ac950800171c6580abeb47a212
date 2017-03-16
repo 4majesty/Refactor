@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.corext.refactoring;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+public interface ISearchResultGroup {
+	void add(SearchMatch match);
+
+	IResource getResource();
+
+	SearchMatch[] getSearchResults();
+
+	ICompilationUnit getCompilationUnit();
+
+	String toString();
+}

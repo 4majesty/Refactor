@@ -1,0 +1,76 @@
+package com.successfactors.cdp.service;
+
+import java.util.List;
+
+import com.successfactors.cdp.bean.AutoCompleteRoleSearchVO;
+import com.successfactors.sca.ServiceQuery;
+
+/**
+ * SCA to get auto complete role search result
+ * 
+ * @author Blake HAN
+ * 
+ */
+public class AutoCompleteRoleSearch implements
+    ServiceQuery<List<AutoCompleteRoleSearchVO>> {
+  /**templateId*/
+  private long templateId;
+  /**userId*/
+  private String userId;
+  /**keyword*/
+  private String keyword;
+
+  /**
+   * constructor
+   */
+  public AutoCompleteRoleSearch() {
+    super();
+  }
+/**
+ * getter 
+ * @return .
+ */
+  public long getTemplateId() {
+    return templateId;
+  }
+  /**
+   * setter
+   * @param templateId 
+   */
+  public void setTemplateId(long templateId) {
+    this.templateId = templateId;
+  }
+
+  /**
+   * getter 
+   * @return 
+   */
+  public String getUserId() {
+    return userId;
+  }
+
+  /**
+   * setter  
+   * @param userId 
+   */
+  public void setUserId(String userId) {
+    this.userId = userId;
+  }
+
+  /**
+   * getter 
+   * @return 
+   */
+  public String getKeyword() {
+    return keyword;
+  }
+
+  /**
+   * setter 
+   * @param keyword 
+   */
+  public void setKeyword(String roleName) {
+    this.keyword = roleName;
+  }
+
+}

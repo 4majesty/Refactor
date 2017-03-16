@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.TrayDialog;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+public interface IMatchLocations {
+	int getCurrentSelection();
+}

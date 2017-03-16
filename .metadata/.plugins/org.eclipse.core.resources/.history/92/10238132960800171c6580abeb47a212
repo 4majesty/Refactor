@@ -1,0 +1,70 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
+
+import org.eclipse.core.runtime.Assert;
+
+public final class SimpleTypeConstraint implements ITypeConstraint, ISimpleTypeConstraint {
+	private final ConstraintVariable fLeft;
+
+	private final ConstraintVariable fRight;
+
+	private final IConstraintOperator fOperator;
+
+	SimpleTypeConstraint(ConstraintVariable left, ConstraintVariable right, ConstraintOperator operator) {
+		Assert.isNotNull(left);
+		Assert.isNotNull(right);
+		Assert.isNotNull(operator);
+		fLeft= left;
+		fRight= right;
+		fOperator= operator;
+	}
+
+	@Override
+	public ConstraintVariable getLeft() {
+		return fLeft;
+	}
+
+	@Override
+	public ConstraintVariable getRight() {
+		return fRight;
+	}
+
+	@Override
+	public ConstraintOperator getOperator() {
+		return fOperator;
+	}
+
+	@Override
+	public String toString() {
+		return getLeft().toString() + " " + fOperator.toString() + " " + getRight().toString();
+	}
+
+	@Override
+	public String toResolvedString() {
+		return getLeft().toResolvedString() + " " + fOperator.toString() + " " + getRight().toResolvedString();
+	}
+
+	@Override
+	public boolean isSimpleTypeConstraint() {
+		return true;
+	}
+
+	@Override
+	public boolean isSubtypeConstraint() {
+		return fOperator.isSubtypeOperator();
+	}
+
+	@Override
+	public boolean isStrictSubtypeConstraint() {
+		return fOperator.isStrictSubtypeOperator();
+	}
+
+	@Override
+	public boolean isEqualsConstraint() {
+		return fOperator.isEqualsOperator();
+	}
+
+	@Override
+	public boolean isDefinesConstraint() {
+		return fOperator.isDefinesOperator();
+	}
+}

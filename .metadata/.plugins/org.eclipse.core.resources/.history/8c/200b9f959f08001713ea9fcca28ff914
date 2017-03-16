@@ -1,0 +1,451 @@
+/*
+ * $Id: DevPlanPortletController.java 1138291 2016-12-22 07:01:38Z I330531 $
+ */
+package com.successfactors.cdp.ui.controller;
+
+import com.sf.sfv4.util.LocalString;
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.ajaxservice.annotation.AjaxMethod;
+import com.successfactors.ajaxservice.annotation.AjaxService;
+import com.successfactors.cdp.service.GetDevPlanList;
+import com.successfactors.competency.bean.CompetencyBean;
+import com.successfactors.edu.ui.controller.exception.AjaxInternalServerError;
+import com.successfactors.edu.ui.controller.exception.ProfileAjaxException;
+import com.successfactors.empfile.util.scorecard.EmployeeDevelopmentObjectivesPortletHelper;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjBeanWrap;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.bean.ObjTemplateBean.Column;
+import com.successfactors.gm.bean.ObjTemplateBean.EnumValue;
+import com.successfactors.gm.bean.ObjTemplateBean.Field;
+import com.successfactors.gm.util.TGMCalcUtil;
+import com.successfactors.gm.util.TGMCommonUtils;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.legacy.util.JSONUtils;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.legacy.util.type.ProfileInfoCategoryEnum;
+import com.successfactors.legacy.util.type.ProfileInfoSourceEnum;
+import com.successfactors.legacy.util.type.ProfileInfoTypeEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.pmcommon.util.ClientDateFormat;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.serialization.SerializationException;
+import com.successfactors.serialization.json.JSONSerializationUtils;
+import com.successfactors.sfutil.util.FormatUtils;
+import com.successfactors.sfutil.util.XMLUtils;
+import com.successfactors.user.bean.preference.PreferenceBean;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * controller for dev plan portlet 
+ * @author ytian
+ * Success Factors
+ */
+@Name("devPlanPortletController")
+@javax.inject.Named("devPlanPortletController")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+@AjaxService
+public class DevPlanPortletController {
+  
+  /** logger. */
+  private static Logger logger = LogManager.getLogger();
+  /** id. */
+  private static String  JSON_OBJ_ID= "id";
+  /** show label. */
+  private static String  JSON_OBJ_SHOW_LABEL= "showLabel";
+  /** value. */
+  private static String  JSON_OBJ_VALUE= "value";
+
+  /**
+   * ParamBean in session.
+   */
+  @Inject
+  @In(value = "params")
+  private ParamBean params;
+  
+  /** ServiceCommandHandler. */
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+  /**
+   * Localization message file.
+   */
+  @Inject
+  @In(create = true, value = "v10msgs")
+  private IMessageBundle msgs;
+  /**
+   * get all dev plans and learning activities for one user
+   * @param selectedUserId the userid passed in
+   * @param selectedPlanId the plan Id passed in
+   * @param pageNum .
+   * @return json
+   * @throws ProfileAjaxException .
+   */
+  @AjaxMethod
+  public String get(String selectedUserId, String selectedPlanId, int pageNum) throws ProfileAjaxException {
+    JSONObjectOutput data = new JSONObjectOutput();
+    try {
+      //Handle business logic
+      GetDevPlanList cmd = new GetDevPlanList();
+      if(selectedPlanId!=null){
+        cmd.setSelectedPlanId(Long.parseLong(selectedPlanId));
+      }
+      cmd.setSelectedUserId(selectedUserId);
+      if(pageNum <= 0){
+        cmd.setPageNum(1);
+      }else{
+        cmd.setPageNum(pageNum);
+      }
+      
+      cmd.setPrint(false);
+      cmd = scaHandler.execute(cmd);
+      data.put("objPlanList", this.getObjPlanListJson(cmd.getObjTemplateList()));
+
+      data.put("selectedPlan", this.getSelectedPlanJson(cmd.getSelectedTemplateBean(), cmd.getObjTotalCount(),
+          cmd.getCatIdList(), cmd.getCatIdNameMap()));
+      List<Column> columnList = cmd.getColumnList();
+      data.put("columnList", this.getColumnJson(columnList));
+      data.put("objBeanList", this.getSelectedObjPlanJson(columnList, cmd.getObjBeanList()));
+    }catch (ServiceApplicationException e) {
+      logger.error("GetDevPlanList:ServiceApplicationException", e);
+      throw new AjaxInternalServerError(e.getMessage());
+    }
+
+    return JSONUtils.toCompactJSON(data);
+  }
+  
+  /**
+   * get all dev plans and learning activities for one user without pagination
+   * @param selectedUserId
+   * @param selectedPlanId
+   * @return
+   * @throws ProfileAjaxException
+   * @throws SerializationException 
+   */
+  @AjaxMethod
+  public String getGoalListWithoutPagination(String selectedUserId, String selectedPlanId) throws ProfileAjaxException, SerializationException {
+    JSONObjectOutput data = new JSONObjectOutput();
+    try {
+      //Handle business logic
+      GetDevPlanList cmd = new GetDevPlanList();
+      if(selectedPlanId!=null){
+        cmd.setSelectedPlanId(Long.parseLong(selectedPlanId));
+      }
+      cmd.setSelectedUserId(selectedUserId);
+      cmd.setNeedPagination(false);
+      
+      cmd.setPrint(false);
+      cmd = scaHandler.execute(cmd);
+      data.put("objPlanList", this.getObjPlanListJson(cmd.getObjTemplateList()));
+
+      data.put("selectedPlan", this.getSelectedPlanJson(cmd.getSelectedTemplateBean(), cmd.getObjTotalCount(),
+          cmd.getCatIdList(), cmd.getCatIdNameMap()));
+      List<Column> columnList = cmd.getColumnList();
+      data.put("columnList", this.getColumnJson(columnList));
+      data.put("objBeanList", this.getSelectedObjPlanJson(columnList, cmd.getObjBeanList()));
+    }catch (ServiceApplicationException e) {
+      logger.error("GetDevPlanList:ServiceApplicationException", e);
+      throw new AjaxInternalServerError(e.getMessage());
+    }
+
+    return JSONSerializationUtils.toJSON(data);
+  }
+  
+  /***
+   * get category list with localized name string
+   * @param catIdList .
+   * @param catIdNameMap .
+   * @return .
+   */
+  private JSONArrayOutput getObjCatList(List<String> catIdList, Map<String, String> catIdNameMap) {
+    JSONArrayOutput output = new JSONArrayOutput();
+    if(catIdList!=null && !catIdList.isEmpty() && catIdNameMap!=null && !catIdNameMap.isEmpty()){
+      for(String catId: catIdList){
+        JSONObjectOutput categoryOutput = new JSONObjectOutput();
+        categoryOutput.put("id", catId);
+        categoryOutput.put("name", catIdNameMap.get(catId));
+        output.add(categoryOutput);
+      }
+    }
+    return output;
+  }
+
+  /**
+   * format object plan list to json
+   * {
+   *    selectedPlanId : planId,
+   *    planMeta : [column]
+   *    
+   *    
+   * }
+   * @param objPlanList
+   * @param selectedPlanId
+   * @return
+   */
+  
+  private JSONArrayOutput getObjPlanListJson(List<ObjTemplateBean> templateList){
+    JSONArrayOutput objListOutput = new JSONArrayOutput();
+    JSONObjectOutput objPlanJson;
+    if(templateList !=null && templateList.size() > 0) {
+      for(ObjTemplateBean objTemplate : templateList){
+        objPlanJson =  new JSONObjectOutput();
+        objPlanJson.put(JSON_OBJ_ID, objTemplate.getObjPlanId());
+        objPlanJson.put(JSON_OBJ_VALUE, objTemplate.getObjPlanName(params.getLocale()));
+        objListOutput.add(objPlanJson);
+      }
+    }
+    return objListOutput;
+  }
+  
+  private JSONObjectOutput getSelectedPlanJson(ObjTemplateBean objTemplateBean, int count,
+      List<String> catIdList, Map<String, String> catIdNameMap){
+    JSONObjectOutput output = new JSONObjectOutput();
+    if(objTemplateBean != null) {
+      output.put(JSON_OBJ_ID, objTemplateBean.getObjPlanId());
+      if(!objTemplateBean.isDevelopmentScorecardShowAllGoalsEnabled()){
+        return output;
+      }
+      output.put("objCatList", this.getObjCatList(catIdList, catIdNameMap));
+      int pageSize = objTemplateBean.getPagerMaxObjsPerPage();
+      if(pageSize>0){
+        JSONObjectOutput paginationOutput = new JSONObjectOutput();
+        int page = count/pageSize;
+        if(count%pageSize!=0){
+          page++;
+        }
+        paginationOutput.put("pageSize", pageSize);
+        paginationOutput.put("recordCount", count);
+        paginationOutput.put("page", page);
+        output.put("pagination", paginationOutput);
+      }
+    }
+    return output;
+  }
+
+  private JSONArrayOutput getSelectedObjPlanJson(List<Column> columnList, List<ObjBean> objList){
+    JSONArrayOutput output = new JSONArrayOutput();
+    if(null != objList && !objList.isEmpty()){
+      for(ObjBean obj : objList){
+        output.add(this.getObjBeanJson(obj, columnList));
+      }
+    }
+    return output;
+  }
+  
+  private JSONArrayOutput getColumnJson(List<ObjTemplateBean.Column> columnList){
+    JSONArrayOutput output = new JSONArrayOutput();
+    if(columnList != null && columnList.size() > 0) {
+      for(ObjTemplateBean.Column col : columnList){
+        JSONArrayOutput column = new JSONArrayOutput();
+        for(Object field : col.getFields()){
+          JSONObjectOutput fieldJson = new JSONObjectOutput();
+          fieldJson.put(JSON_OBJ_ID,((ObjTemplateBean.Field)field).getId());
+          fieldJson.put(JSON_OBJ_SHOW_LABEL,((ObjTemplateBean.Field)field).isShowLabel());
+          fieldJson.put(JSON_OBJ_VALUE,
+              ((ObjTemplateBean.Field)field).getLabel().getString(params.getLocale()));
+          column.add(fieldJson);
+        }
+        output.add(column);
+      }
+    }
+    return output;
+  }
+  
+  private JSONObjectOutput getObjBeanJson(ObjBean obj, List<ObjTemplateBean.Column> columnList){
+    JSONObjectOutput output = new JSONObjectOutput();
+    if(columnList != null && columnList.size() > 0) {
+      for(ObjTemplateBean.Column col : columnList){
+        for(Object field : col.getFields()){
+          output.put(((ObjTemplateBean.Field)field).getId(), 
+              this.getObjFieldHtml((ObjTemplateBean.Field)field, new ObjBeanWrap(obj)));
+        }
+      }
+    }
+    output.put("category",obj.getObjCategory());
+    return output;
+  }
+  
+  private JSONObjectOutput getObjFieldHtml(ObjTemplateBean.Field field, ObjBeanWrap objWrap) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    String html = "";
+    if (field != null && Field.ID_RATING.equals(field.getId())) {
+      html = XMLUtils.escapeContent(TGMCalcUtil.getDisplayRatingString(objWrap, field, params.getLocale()));
+    }else{
+      Object value = field.getValue(objWrap);
+      html = this.formatValueObject(field, value);
+    }
+    output.put("value", html);
+    if(ObjTemplateBean.Field.TYPE_ENUM.equals(field.getType()) ||
+        ObjTemplateBean.Field.TYPE_CHECKBOX.equals(field.getType())){
+      ObjTemplateBean.EnumValue enumField = field.getEnumValue(objWrap);
+      if(enumField!=null && !StringUtils.isBlank(enumField.getStyle())){
+        output.put("style", enumField.getStyle());
+      }
+    }
+    return output;
+  }
+  
+  private String getTableFieldHtml(ObjTemplateBean.Field field, List<Object> records){
+    StringBuffer html = new StringBuffer();
+    List tableColumns = field.getTableColumns();
+    Object value = "";
+    html.append("<table><tr>");
+    for (int colNo=0 ; colNo < tableColumns.size() ; colNo++) {
+      ObjTemplateBean.TableColumn col = (ObjTemplateBean.TableColumn)tableColumns.get(colNo);
+      if (!col.isDisplayColumn()) {
+        continue;
+      }
+      html.append("<td>"+col.getLabel().getString(params.getLocale())+"</td>");
+    }
+    html.append("</tr>");
+    for(Object record : records){
+      html.append("<tr>");
+      for (int colNo=0 ; colNo < tableColumns.size() ; colNo++) {
+        ObjTemplateBean.TableColumn col = (ObjTemplateBean.TableColumn)tableColumns.get(colNo);
+        if (!col.isDisplayColumn()) {
+          continue;
+        }
+        if(col.getId().equals("member_id")){
+          value = col.getMemberFullName(record);
+        }else{
+          value = col.getValue(record);
+        }
+        html.append("<td>"+this.formatValueObject(field, value)+"</td>");
+      }
+      html.append("</tr>");
+    }
+    html.append("</table>");
+    return html.toString();
+  }
+  
+  private String formatValueObject(ObjTemplateBean.Field field, Object value){
+    Locale locale = params.getLocale();
+    String html = "";
+    if (value == null) {
+      html = "";
+    } else if (ObjTemplateBean.Field.TYPE_PERCENT.equals(field.getType())
+               || (field != null && ObjTemplateBean.Field.TYPE_PERCENT.equals(field.getType()))) {
+      Number num = (Number)value;
+      if (num != null) {
+        //EE-16239 need to display percent value consistently between save and display
+        html = FormatUtils.formatPercentValue(num, field.getFieldFormat(), locale, false)+ msgs.getString("%");
+        // TGM-2616 The fix of TGM-2200 didn't check null pointer, which caused the problem. by 
+        // Stanford @ Dec 15, 2009
+        if(field != null && ObjBean.WEIGHT.equals(field.getId()) && num.doubleValue() == ObjBean.NIL ){
+          // No need to display anything if the weight value is -999999.
+          html = StringUtils.EMPTY_STRING;
+        }
+      }
+    }else if (value instanceof LocalString) {
+      html = XMLUtils.escapeContent(((LocalString) value).getString(locale));
+    } else if (value instanceof String) {
+      if(Field.TYPE_ENUM.equals(field.getType())){
+        html=XMLUtils.escapeContent(getCorrectCustomField(field, value.toString()));
+      } else
+      {
+        html = XMLUtils.escapeContent(value.toString());
+      }
+    } else if(value instanceof Boolean){
+        html = XMLUtils.escapeContent(String.valueOf(value));
+    } else if (value instanceof Date) {
+      html = ClientDateFormat.simpleformat((Date)value, msgs.getString("FLD_DATEFORMAT"), locale);
+    } else if (value instanceof Number) {
+      Number number = (Number)value;
+      html = (number == null)? " " : TGMCommonUtils.formatNumber(field.getFieldFormat(), number, locale);
+    } else if (ObjTemplateBean.Field.TYPE_COMPETENCIES.equals(field.getType()) ) {
+      html = this.getSortedCompetencyNames((Set) (value));
+    } else if(ObjTemplateBean.Field.TYPE_TABLE.equals(field.getType())){
+      html = this.getTableFieldHtml(field, (List)value);
+    } else
+    {
+       XMLUtils.escapeContent(value.toString());
+    }
+    return html;
+  }
+  
+  /**
+   * Return the correct custom field if the value of import goal is invalid.
+   * @param html
+   * @param locale
+   * @return the correct custom field
+   */
+  private String getCorrectCustomField(ObjTemplateBean.Field field, String html){
+    String res = ((EnumValue)field.getEnumValues().get(0)).getLabel().getString(params.getLocale());
+    for (Iterator options = field.getEnumValues().iterator() ; options.hasNext() ; ) {
+          EnumValue enumValue = (EnumValue)options.next();
+          if(enumValue.getValue().equals(html)){
+            String localizedString = enumValue.getLabel().getString(params.getLocale());
+            if(null!=localizedString){
+              res = localizedString;
+            }else{
+              res = enumValue.getLabel().getDefaultString();
+            }
+            break;
+          }
+    }
+    return res;
+  }
+  
+
+  private String getSortedCompetencyNames(Set<CompetencyBean> competencies) {
+     StringBuilder html = new StringBuilder();
+     List<String> compNameList = null;
+     if (competencies != null) {
+       compNameList = new ArrayList<String>();
+       Iterator itr = competencies.iterator();
+       while (itr.hasNext()) {
+         CompetencyBean competencyBean = (CompetencyBean) itr.next();
+         compNameList.add(competencyBean.getCompetencyName());
+       }
+       Collections.sort(compNameList);
+       boolean isFirst = true;
+       for(String competencyName : compNameList){
+         html.append(((isFirst)? "" : ", <br> ") + XMLUtils.escapeContent(competencyName));
+         isFirst = false;
+       }
+     }
+     return html.toString();
+   }
+
+  /***
+   * save selected plan id, current is a workaround for V11.
+   * @param planId .
+   * @return .
+   */
+  @AjaxMethod
+  public void saveSelectedPlanId(long planId){
+    try{
+      PreferenceBean preferenceBean = new PreferenceBean();
+      preferenceBean.setCategory(ProfileInfoCategoryEnum.CDP_DEV_OBJECTIVES_SCORECARD_DISPLAY_OPTIONS_FILTER);
+      preferenceBean.setSource(ProfileInfoSourceEnum.CDP_DEV_OBJECTIVES_SCORECARD_DISPLAY_OPTIONS_PREF);
+      preferenceBean.setType(ProfileInfoTypeEnum.STRING);
+      preferenceBean.setKey(EmployeeDevelopmentObjectivesPortletHelper.selectPlanPrefKey);
+      preferenceBean.setValue(String.valueOf(planId));
+      List<PreferenceBean> prefList = new ArrayList<PreferenceBean>(1);
+      prefList.add(preferenceBean);
+      scaHandler.execute(new UpdatePreferenceBeans(prefList));
+    } catch(ServiceApplicationException e){
+      logger.error("Can't store preference value planId=" + planId+", userId="+params.getUserId(), e);
+    }
+  }
+}

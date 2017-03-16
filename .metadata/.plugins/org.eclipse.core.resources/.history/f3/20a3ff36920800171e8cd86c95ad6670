@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.jarpackager;
+
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.dialogs.WizardExportResourcesPage;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
+
+public interface IAbstractJarDestinationWizardPage {
+	void finish();
+
+	void handleEvent(Event e);
+}

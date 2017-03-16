@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.filters;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.core.IClassFile;
+
+public interface IInnerClassFilesFilter {
+	boolean select(Viewer viewer, Object parentElement, Object element);
+}

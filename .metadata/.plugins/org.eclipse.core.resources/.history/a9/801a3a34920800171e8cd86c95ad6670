@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+
+public interface IJavaElementHistoryPageSource {
+	IFile getFile(Object input);
+}

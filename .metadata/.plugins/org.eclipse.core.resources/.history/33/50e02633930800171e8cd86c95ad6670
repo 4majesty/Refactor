@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.filters;
+
+import java.util.Stack;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+public interface ICustomFiltersDialog {
+	String[] getUserDefinedPatterns();
+
+	String[] getEnabledFilterIds();
+
+	boolean areUserDefinedPatternsEnabled();
+
+	Stack getFilterDescriptorChangeHistory();
+}

@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import org.eclipse.jdt.internal.ui.actions.ISelectAllAction;
+import org.eclipse.jdt.internal.ui.actions.IMultiActionGroup;
+
+public interface IPackagesView {
+	void init(IViewSite site, IMemento memento) throws PartInitException;
+
+	void saveState(IMemento memento);
+
+	Object getAdapter(Class key);
+
+	void fillActionBars(IActionBars actionBars);
+
+	void run();
+}

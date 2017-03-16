@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.ui.IPageLayout;
+import org.eclipse.jdt.ui.JavaUI;
+
+public interface IJavaPerspectiveFactory {
+	void createInitialLayout(IPageLayout layout);
+}

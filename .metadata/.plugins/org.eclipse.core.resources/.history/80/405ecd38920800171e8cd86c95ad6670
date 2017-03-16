@@ -1,0 +1,24 @@
+package org.eclipse.jdt.ui;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.IDecoration;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
+
+public interface IOverrideIndicatorLabelDecorator {
+	String decorateText(String text, Object element);
+
+	Image decorateImage(Image image, Object element);
+
+	int computeAdornmentFlags(Object element);
+
+	void addListener(ILabelProviderListener listener);
+
+	void dispose();
+
+	boolean isLabelProperty(Object element, String property);
+
+	void removeListener(ILabelProviderListener listener);
+
+	void decorate(Object element, IDecoration decoration);
+}

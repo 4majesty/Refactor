@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IImagesOnFileSystemRegistry {
+	URL getImageURL(IJavaElement element);
+
+	URL getImageURL(ImageDescriptor descriptor);
+
+	void dispose();
+}

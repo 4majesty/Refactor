@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
+import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
+import org.eclipse.jdt.internal.ui.text.template.preferences.ITemplateVariableProcessor;
+
+public interface IJavaTemplatePreferencePage {
+	void createControl(Composite parent);
+
+	boolean performOk();
+}

@@ -1,0 +1,28 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionValueVO;
+
+public class MentoringBeanUtils {
+  
+ private MentoringBeanUtils(){   
+ }
+    
+ public static ProgramSignupFormSectionValueVO convertSignupFormSectionValue2VO(MentoringProgramSignupFormSectionValue eo){
+   return new ProgramSignupFormSectionValueVO(eo.getItemId(), eo.getItemLabel());
+ }
+
+ public static String getSectionValuesString(List<ProgramSignupFormSectionValueVO> valueVOs) {
+   if (valueVOs == null || valueVOs.isEmpty()) {
+     return "";
+   }
+   List<String> valueLabels = new ArrayList<>();
+   for (ProgramSignupFormSectionValueVO valueVO : valueVOs) {
+     valueLabels.add(valueVO.getItemLabel());
+   }
+   return MentoringUtils.formatSetToString(valueLabels, ",");
+ }
+}

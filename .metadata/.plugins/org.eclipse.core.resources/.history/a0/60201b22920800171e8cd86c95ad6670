@@ -1,0 +1,46 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+public interface ILinkedProposalModelPresenter {
+	void enterLinkedMode(ITextViewer viewer, IEditorPart editor, LinkedProposalModel linkedProposalModel) throws BadLocationException;
+
+	void apply(ITextViewer viewer, char trigger, int stateMask, int offset);
+
+	String getDisplayString();
+
+	Image getImage();
+
+	int getRelevance();
+
+	void apply(IDocument document);
+
+	String getAdditionalProposalInfo();
+
+	Point getSelection(IDocument document);
+
+	IContextInformation getContextInformation();
+
+	void selected(ITextViewer viewer, boolean smartToggle);
+
+	void unselected(ITextViewer viewer);
+
+	boolean validate(IDocument document, int offset, DocumentEvent event);
+
+	ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length);
+}

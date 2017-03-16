@@ -1,0 +1,15 @@
+package org.eclipse.jdt.ui.refactoring;
+
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSavePreferences;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IRefactoringSaveHelper {
+	boolean saveEditors(Shell shell);
+
+	void triggerIncrementalBuild();
+
+	boolean didSaveFiles();
+}

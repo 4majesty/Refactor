@@ -1,0 +1,47 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import java.net.URL;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+
+public interface IJavadocConfigurationBlock {
+	Control createContents(Composite parent);
+
+	void setFocus();
+
+	void performDefaults();
+
+	URL getJavadocLocation();
+
+	void run();
+
+	void spawnInBrowser(URL url);
+
+	void dialogFieldChanged(DialogField field);
+
+	Object findElement(IPath path);
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+
+	Object getParent(Object element);
+
+	boolean hasChildren(Object element);
+
+	Object[] getChildren(Object element);
+
+	Object[] getElements(Object element);
+
+	void dispose();
+
+	Image getImage(Object element);
+
+	String getText(Object element);
+
+	IStatus validate(Object[] selection);
+}

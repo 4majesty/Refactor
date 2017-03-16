@@ -1,0 +1,30 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+import com.successfactors.cdp.service.util.mentoring.ProgramParticipantTypeEnum;
+import java.io.Serializable;
+
+public interface IProgramParticipantVO {
+	Long getRowId();
+
+	void setRowId(Long rowId);
+
+	ProgramParticipantTypeEnum getType();
+
+	void setType(ProgramParticipantTypeEnum type);
+
+	String getUserId();
+
+	void setUserId(String userId);
+
+	String getUserName();
+
+	void setUserName(String userName);
+
+	int getThreshold();
+
+	void setThreshold(int threshold);
+
+	String getExternalId();
+
+	void setExternalId(String externalId);
+}

@@ -1,0 +1,20 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.cdp.service.GetRoleReadiness;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.pmcommon.bean.FormBean;
+import com.successfactors.pmcommon.dao.FormDAO;
+import com.successfactors.rbp.app.api.RBPFacade;
+import com.successfactors.rbp.app.api.TargetPopulationCriteria;
+import com.successfactors.rbp.app.collector.ContextualPermissionSpec;
+import com.successfactors.rbp.app.collector.PermissionSpec;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+
+public interface IGetRoleReadinessImpl {
+	GetRoleReadiness execute(GetRoleReadiness cmd) throws ServiceApplicationException;
+}

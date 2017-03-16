@@ -1,0 +1,33 @@
+package org.eclipse.jdt.internal.ui.text.template.preferences;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.TemplateVariableResolver;
+
+public interface ITemplateVariableProcessor {
+	int compare(Object arg0, Object arg1);
+
+	void setContextType(TemplateContextType contextType);
+
+	TemplateContextType getContextType();
+
+	ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset);
+
+	IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset);
+
+	char[] getCompletionProposalAutoActivationCharacters();
+
+	char[] getContextInformationAutoActivationCharacters();
+
+	String getErrorMessage();
+
+	IContextInformationValidator getContextInformationValidator();
+}

@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaEditor;
+
+public interface ICleanUpAction {
+	void run(ITextSelection selection);
+
+	void run(IStructuredSelection selection);
+
+	void selectionChanged(ITextSelection selection);
+
+	void selectionChanged(IStructuredSelection selection);
+
+	ICompilationUnit[] getCompilationUnits(IStructuredSelection selection);
+}

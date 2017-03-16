@@ -1,0 +1,42 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.jface.util.TransferDropTargetListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
+
+public interface IWorkingSetDropAdapter {
+	Transfer getTransfer();
+
+	boolean isEnabled(DropTargetEvent event);
+
+	boolean validateDrop(Object target, int operation, TransferData transferType);
+
+	boolean performDrop(Object data);
+
+	int internalTestValidateTarget(Object target, int operation);
+
+	void internalTestDrop(Object target, int eventDetail);
+
+	void internalTestSetLocation(int location);
+}

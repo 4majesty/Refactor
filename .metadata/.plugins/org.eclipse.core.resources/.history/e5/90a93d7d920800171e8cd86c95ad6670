@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.jarpackagerfat;
+
+import java.util.Set;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
+public interface IFatJarRsrcUrlManifestProvider {
+	String getManifestRsrcClasspath(Set jarNames);
+}

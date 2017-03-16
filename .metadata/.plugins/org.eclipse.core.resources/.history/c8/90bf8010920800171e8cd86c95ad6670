@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.wizards;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface INewClassCreationWizard {
+	void addPages();
+
+	boolean performFinish();
+
+	IJavaElement getCreatedElement();
+}

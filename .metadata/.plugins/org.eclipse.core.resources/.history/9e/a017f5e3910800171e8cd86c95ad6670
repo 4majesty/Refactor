@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.model;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.ViewerLabel;
+import org.eclipse.ltk.ui.refactoring.model.AbstractSynchronizationLabelProvider;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface IJavaSynchronizationLabelProvider {
+	void dispose();
+
+	Image getDelegateImage(final Object element);
+
+	void updateLabel(ViewerLabel label, TreePath elementPath);
+}

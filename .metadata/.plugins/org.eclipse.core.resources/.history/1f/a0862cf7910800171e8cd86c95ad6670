@@ -1,0 +1,27 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavaTextViewer {
+	Control getControl();
+
+	void setInput(Object input);
+
+	Object getInput();
+
+	ISelection getSelection();
+
+	void setSelection(ISelection s, boolean reveal);
+
+	void refresh();
+}

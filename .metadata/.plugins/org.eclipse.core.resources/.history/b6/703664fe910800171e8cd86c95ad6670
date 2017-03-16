@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jface.text.DocumentCommand;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.texteditor.ITextEditorExtension3;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavaStringAutoIndentStrategy {
+	void customizeDocumentCommand(IDocument document, DocumentCommand command);
+}

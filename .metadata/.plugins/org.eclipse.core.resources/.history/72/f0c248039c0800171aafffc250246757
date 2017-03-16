@@ -1,0 +1,32 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class MentoringConstants {
+
+  private MentoringConstants() {
+  }
+
+  public static final String DEFAULT_DATE_FORMAT = "MM/dd/yyyy";
+  
+  public static final String ROLE_NAME = "roleName";
+  
+  public static final String FAMILY_NAME = "familyName";
+
+  public static final int MAX_LENGTH_OF_PROGRAM_NAME = 100;
+
+  public static final String EXCLUDED_MATCHING_VALUE_NA = "N/A";
+  
+  public static final String EXCLUDED_MATCHING_VALUE_BLANK = "";
+  
+  public static final Set<String> EXCLUDED_MATCHING_VALUES = new HashSet<String>();
+
+  public static final boolean IS_OPEN_ENDED_PROGRAM_ENABLED = true;
+  
+  static{
+    EXCLUDED_MATCHING_VALUES.add(EXCLUDED_MATCHING_VALUE_NA);
+    EXCLUDED_MATCHING_VALUES.add(EXCLUDED_MATCHING_VALUE_BLANK);
+  }
+
+}

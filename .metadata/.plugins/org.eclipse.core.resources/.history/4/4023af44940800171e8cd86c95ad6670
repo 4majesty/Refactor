@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchRequestor;
+
+public interface INewSearchResultCollector {
+	void acceptSearchMatch(SearchMatch match) throws CoreException;
+
+	void beginReporting();
+
+	void endReporting();
+
+	void enterParticipant(SearchParticipant participant);
+
+	void exitParticipant(SearchParticipant participant);
+}

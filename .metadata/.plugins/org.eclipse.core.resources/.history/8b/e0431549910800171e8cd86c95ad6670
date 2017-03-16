@@ -1,0 +1,28 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.internal.ui.actions.MultiFormatAction;
+import org.eclipse.jdt.internal.ui.actions.IMultiFormatAction;
+
+public interface IFormatAllAction {
+	void setActivePart(IAction action, IWorkbenchPart targetPart);
+
+	void run(IAction action);
+
+	void selectionChanged(IAction action, ISelection selection);
+
+	void selectionChanged(ITextSelection selection);
+
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(ITextSelection selection);
+
+	void run(IStructuredSelection selection);
+
+	void runOnMultiple(final ICompilationUnit[] cus);
+}

@@ -1,0 +1,17 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.edu.ui.controller.exception.AjaxInternalServerError;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.util.Set;
+
+public interface ICDPReadinessController {
+	String getUserReadiness(String userId, long roleId) throws AjaxInternalServerError;
+
+	String getRecommendedSuccessors(long positionId, long roleId, Set<String> excludedUserIds)
+			throws AjaxInternalServerError;
+
+	boolean isGetRecommendedSuccessorsPermitted();
+}

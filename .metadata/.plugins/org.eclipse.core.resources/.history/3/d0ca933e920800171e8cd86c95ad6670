@@ -1,0 +1,11 @@
+package org.eclipse.jdt.ui.search;
+
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+
+public interface IPatternQuerySpecification {
+	boolean isCaseSensitive();
+
+	String getPattern();
+
+	int getSearchFor();
+}

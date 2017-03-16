@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import java.util.Arrays;
+
+public interface ISimilarElement {
+	int getKind();
+
+	String[] getTypesParameter();
+
+	String getName();
+
+	int getRelevance();
+
+	boolean equals(Object obj);
+
+	int hashCode();
+}

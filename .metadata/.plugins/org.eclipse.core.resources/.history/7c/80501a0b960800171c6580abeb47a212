@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.corext.refactoring.changes;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+public interface IMovePackageChange {
+	String getName();
+}

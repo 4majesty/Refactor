@@ -1,0 +1,25 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
+
+import org.eclipse.core.runtime.Assert;
+
+public interface ISimpleTypeConstraint {
+	ConstraintVariable getLeft();
+
+	ConstraintVariable getRight();
+
+	ConstraintOperator getOperator();
+
+	String toString();
+
+	String toResolvedString();
+
+	boolean isSimpleTypeConstraint();
+
+	boolean isSubtypeConstraint();
+
+	boolean isStrictSubtypeConstraint();
+
+	boolean isEqualsConstraint();
+
+	boolean isDefinesConstraint();
+}

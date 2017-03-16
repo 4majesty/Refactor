@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
+
+public interface ISourceAttachmentPropertyPage {
+	void createControl(Composite parent);
+
+	boolean performOk();
+
+	void statusChanged(IStatus status);
+}

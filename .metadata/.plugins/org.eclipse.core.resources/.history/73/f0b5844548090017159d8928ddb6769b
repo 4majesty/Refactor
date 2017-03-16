@@ -1,0 +1,197 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import javax.persistence.Column;
+
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.cdp.service.util.mentoring.SectionDisplayTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormSectionCategoryEnum;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.GOLocalizedData;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+
+@MDFEntity(effectiveDating = EffectiveDating.FROM_PARENT, apiVisibility = APIVisibility.EDITABLE)
+public class MentoringProgramSignupTemplateSection extends AuditFields {
+    // System Fields
+    /** Row Id. */
+    @Column(name = GENERIC_OBJECT_T.ROW_ID, nullable = false)
+    @Field(visibility = Visibility.READ_ONLY)
+    private Long rowId;
+
+    /** External Code. */
+    @Column(name = GENERIC_OBJECT_T.EXTERNAL_CODE, nullable = false)
+    @Field(visibility = Visibility.READ_ONLY, dataType = DataType.STRING)
+    protected String sectionId;
+
+    /** Internal Id. */
+    @Column(name = GENERIC_OBJECT_T.INTERNAL_ID)
+    @Field(visibility = Visibility.READ_ONLY)
+    protected Long internalId;
+
+    // Business Fields
+    /** mentorVisible */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD2)
+    @Field(visibility = Visibility.EDITABLE, dataType = DataType.BOOLEAN)
+    private boolean mentorVisible;
+    /** menteeVisible */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD3)
+    @Field(visibility = Visibility.EDITABLE, dataType = DataType.BOOLEAN)
+    private boolean menteeVisible;
+    /** category */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD4)
+    @Field(visibility = Visibility.EDITABLE, dataType = DataType.ENUM)
+    private SignupFormSectionCategoryEnum category;
+   
+    /** question */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD6)
+    @Field(visibility = Visibility.EDITABLE, dataType = DataType.LOCALIZED, maxLength = GENERIC_OBJECT_T.CUSTOM_FIELD100_LEN)
+    private GOLocalizedData mentorQuestion;
+
+    /** question */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD9)
+    @Field(visibility = Visibility.EDITABLE, dataType = DataType.LOCALIZED, maxLength = GENERIC_OBJECT_T.CUSTOM_FIELD100_LEN)
+    private GOLocalizedData menteeQuestion;
+
+    /**order */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD7)
+    @Field(visibility = Visibility.EDITABLE, dataType = DataType.NUMBER)
+    private int order;
+    
+    /**display type */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD8)
+    @Field(visibility = Visibility.EDITABLE, dataType = DataType.ENUM)
+    private SectionDisplayTypeEnum displayType;
+    
+
+    // Access Methods
+    /**
+     * getRowId
+     * @return rowId
+     */
+    public Long getRowId() {
+        return rowId;
+    }
+    /**
+     * setRowId
+     * @param rowId rowId
+     */
+    public void setRowId(Long rowId) {
+        this.rowId = rowId;
+    }
+    /**
+     * getInternalId
+     * @return internalId
+     */
+    public Long getInternalId() {
+        return internalId;
+    }
+    /**
+     * setInternalId
+     * @param internalId internalId
+     */
+    public void setInternalId(Long internalId) {
+        this.internalId = internalId;
+    }
+    /**
+     * getSectionId
+     * @return sectionId
+     */
+    public String getSectionId() {
+        return sectionId;
+    }
+   /**
+    * setSectionId
+    * @param sectionId sectionId
+    */
+    public void setSectionId(String sectionId) {
+        this.sectionId = sectionId;
+    }
+    /**
+     * isMentorVisible
+     * @return mentorVisible
+     */
+    public boolean isMentorVisible() {
+        return mentorVisible;
+    }
+    /**
+     * setMentorVisible
+     * @param mentorVisible mentorVisible
+     */
+    public void setMentorVisible(boolean mentorVisible) {
+        this.mentorVisible = mentorVisible;
+    }
+    /**
+     * isMenteeVisible
+     * @return menteeVisible
+     */
+    public boolean isMenteeVisible() {
+        return menteeVisible;
+    }
+    /**
+     * setMenteeVisible
+     * @param menteeVisible menteeVisible
+     */
+    public void setMenteeVisible(boolean menteeVisible) {
+        this.menteeVisible = menteeVisible;
+    }
+    /**
+     * getCategory
+     * @return category
+     */
+    public SignupFormSectionCategoryEnum getCategory() {
+        return category;
+    }
+   /**
+    * setCategory
+    * @param category category
+    */
+    public void setCategory(SignupFormSectionCategoryEnum category) {
+        this.category = category;
+    }
+
+    /**
+     * getOrder
+     * @return order
+     */
+    public int getOrder() {
+      return order;
+    }
+    /**
+     * setOrder
+     * @param order order
+     */
+    public void setOrder(int order) {
+      this.order = order;
+    }
+    
+    public SectionDisplayTypeEnum getDisplayType() {
+      if (this.displayType == null) {
+        return SectionDisplayTypeEnum.MULTIPLE_SELECT;
+      }
+      return displayType;
+    }
+    
+    public void setDisplayType(SectionDisplayTypeEnum displayType) {
+      this.displayType = displayType;
+    }
+
+    public GOLocalizedData getMentorQuestion() {
+        return mentorQuestion;
+    }
+
+    public void setMentorQuestion(GOLocalizedData mentorQuestion) {
+        this.mentorQuestion = mentorQuestion;
+    }
+
+    public GOLocalizedData getMenteeQuestion() {
+        return menteeQuestion;
+    }
+
+    public void setMenteeQuestion(GOLocalizedData menteeQuestion) {
+        this.menteeQuestion = menteeQuestion;
+    }
+}

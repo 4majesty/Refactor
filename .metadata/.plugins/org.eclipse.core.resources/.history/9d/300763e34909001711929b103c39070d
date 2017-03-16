@@ -1,0 +1,39 @@
+package com.successfactors.cdp.service.mentoring.jam.exception;
+
+import com.successfactors.sca.ServiceApplicationException;
+
+/**
+ * DuplicateJamGroupException.
+ *
+ *
+ */
+public class DuplicateJamGroupException extends ServiceApplicationException {
+
+  /**
+   * Creates a new <code>DuplicateJamGroupException</code> with the specified detail message.
+   *
+   * @param message the detail message
+   */
+  public DuplicateJamGroupException(String message) {
+    super(message);
+  }
+
+  /**
+   * Creates a new <code>DuplicateJamGroupException</code> with the specified detail message and cause.
+   *
+   * @param message the detail mesage
+   * @param cause the cause
+   */
+  public DuplicateJamGroupException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  /**
+   * Creates a new <code>DuplicateJamGroupException</code> with the specified cause.
+   *
+   * @param cause the cause
+   */
+  public DuplicateJamGroupException(Throwable cause) {
+    super(cause);
+  }
+}

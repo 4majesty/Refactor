@@ -1,0 +1,33 @@
+package com.successfactors.cdp.ui.controller;
+
+import org.testng.annotations.Test;
+import com.successfactors.cdp.bean.CareerWorksheetSuggestedRoleVO;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean;
+import com.successfactors.cdp.service.GetCareerWorksheetRoles;
+import com.successfactors.cdp.ui.util.CWSV12ViewHelper;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.util.JSONUtils;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.xi.ui.messages.SFMessages;
+
+public interface ICWSV12ControllerTest {
+	void setUp();
+
+	void testAddBehaviors();
+
+	void testGetSuggestedRoleListWithNoPermission();
+
+	void testGetSuggestedRoleListWithNoSameUser();
+
+	void testGetSuggestedRoleList();
+
+	void testGetSuggestedRoleListWithNoRoles();
+}

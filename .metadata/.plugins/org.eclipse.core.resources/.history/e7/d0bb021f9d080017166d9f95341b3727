@@ -1,0 +1,107 @@
+package com.successfactors.cdp.service.util.deeplink;
+
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+
+public class MentoringProgramManageOtherCheckTest {
+
+  @Mock
+  ParamBean params;
+  @Mock
+  PermissionListBean permList;
+  @Mock
+  ConfigurationProvider configurationProvider;
+  @Mock
+  Logger log;
+  @InjectMocks
+  private MentoringProgramManageOtherCheck check;
+
+  @BeforeMethod(groups = { "checkin" })
+  public void setup() {
+    check = new MentoringProgramManageOtherCheck();
+    MockitoAnnotations.initMocks(this);
+  }
+
+  @AfterMethod
+  public void tearDown() {
+    check = null;
+  }
+
+  @Test
+  public void testFeatureDisabled() throws ServiceApplicationException {
+    CompanyBean c = mock(CompanyBean.class);
+    when(params.getCompanyBean()).thenReturn(c);
+    when(c.isFeatureExist(FeatureEnum.CDP_MENTORING)).thenReturn(true);
+    when(c.isFeatureExist(FeatureEnum.ROLE_BASED_PERMISSION)).thenReturn(true);
+    when(c.isFeatureExist(FeatureEnum.GENERIC_OBJECTS)).thenReturn(true);
+    when(c.isFeatureExist(FeatureEnum.ATTACHMENT_MANAGE)).thenReturn(false);
+    Assert.assertEquals(check.isEnabled(), false);
+  }
+
+  @Test
+  public void testIsAdmin() throws ServiceApplicationException {
+    CompanyBean c = mock(CompanyBean.class);
+    when(params.getCompanyBean()).thenReturn(c);
+    when(c.isFeatureExist(FeatureEnum.CDP_MENTORING)).thenReturn(true);
+    when(c.isFeatureExist(FeatureEnum.ROLE_BASED_PERMISSION)).thenReturn(true);
+    when(c.isFeatureExist(FeatureEnum.GENERIC_OBJECTS)).thenReturn(true);
+    when(c.isFeatureExist(FeatureEnum.ATTACHMENT_MANAGE)).thenReturn(true);
+    when(permList.hasPermission(PermissionBean.DEVELOPMENT_ADMIN, PermissionBean.MANAGE_CDP_MENTORING_PROGRAM, 0)).thenReturn(true);
+    Assert.assertEquals(check.isEnabled(), true);
+    verify(configurationProvider, never()).getObjectDefinition(MentoringProgramOwner.class);
+  }
+
+  @Test
+  public void testIsOwner() throws ServiceApplicationException {
+    CompanyBean c = mock(CompanyBean.class);
+    when(params.getCompanyBean()).thenReturn(c);
+    when(c.isFeatureExist(FeatureEnum.CDP_MENTORING)).thenReturn(true);
+    when(c.isFeatureExist(FeatureEnum.ROLE_BASED_PERMISSION)).thenReturn(true);
+    when(c.isFeatureExist(FeatureEnum.GENERIC_OBJECTS)).thenReturn(true);
+    when(c.isFeatureExist(FeatureEnum.ATTACHMENT_MANAGE)).thenReturn(true);
+    when(permList.hasPermission(PermissionBean.DEVELOPMENT_ADMIN, PermissionBean.MANAGE_CDP_MENTORING_PROGRAM, 0)).thenReturn(false);
+    when(params.getUserId()).thenReturn("cgrant");
+    try {
+      check.isEnabled();
+    } catch (Exception e) {
+      // Do nothing.
+    }
+    verify(configurationProvider, atLeastOnce()).getObjectDefinition(MentoringProgramOwner.class);
+  }
+
+  @Test
+  public void testFeatureDisabledForNullObjDefinition() {
+    CompanyBean c = mock(CompanyBean.class);
+    when(params.getCompanyBean()).thenReturn(c);
+    when(c.isFeatureExist(FeatureEnum.CDP_MENTORING)).thenReturn(true);
+    when(c.isFeatureExist(FeatureEnum.ROLE_BASED_PERMISSION)).thenReturn(true);
+    when(c.isFeatureExist(FeatureEnum.GENERIC_OBJECTS)).thenReturn(true);
+    when(c.isFeatureExist(FeatureEnum.ATTACHMENT_MANAGE)).thenReturn(true);
+    when(permList.hasPermission(PermissionBean.DEVELOPMENT_ADMIN, PermissionBean.MANAGE_CDP_MENTORING_PROGRAM, 0)).thenReturn(false);
+    when(params.getUserId()).thenReturn("cgrant");
+    when(configurationProvider.getObjectDefinition(MentoringProgramOwner.class)).thenReturn(null);
+
+    Assert.assertEquals(check.isEnabled(), false);
+  }
+}

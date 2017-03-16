@@ -1,0 +1,13 @@
+package org.eclipse.jdt.ui.wizards;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface INewInterfaceWizardPage {
+	void init(IStructuredSelection selection);
+
+	void createControl(Composite parent);
+
+	void setVisible(boolean visible);
+}

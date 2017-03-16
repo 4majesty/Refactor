@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.IDecorationContext;
+import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.ViewerColumn;
+import org.eclipse.jface.viewers.StyledString.Styler;
+
+public interface IColoringLabelProvider {
+	void initialize(ColumnViewer viewer, ViewerColumn column);
+
+	void dispose();
+
+	void update();
+
+	String getText(Object element);
+}

@@ -1,0 +1,9 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.cdp.service.GetRecommendedSuccessors;
+import com.successfactors.sca.ServiceApplicationException;
+import javax.inject.Inject;
+
+public interface IGetRecommendedSuccessorsImpl {
+	GetRecommendedSuccessors execute(GetRecommendedSuccessors cmd) throws ServiceApplicationException;
+}

@@ -1,0 +1,21 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaEditor;
+
+public interface IMoveAction {
+	void selectionChanged(SelectionChangedEvent event);
+
+	void setSpecialSelectionProvider(ISelectionProvider provider);
+
+	void run(IStructuredSelection selection);
+
+	void run(ITextSelection selection);
+
+	void update(ISelection selection);
+}

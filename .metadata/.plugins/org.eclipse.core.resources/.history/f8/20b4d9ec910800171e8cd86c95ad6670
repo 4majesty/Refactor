@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IWorkInProgressPreferencePage {
+	void createControl(Composite parent);
+
+	void init(IWorkbench workbench);
+
+	boolean performOk();
+}

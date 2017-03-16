@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.dialogs;
+
+import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
+
+public interface IMultiMainTypeSelectionDialog {
+	int open();
+}

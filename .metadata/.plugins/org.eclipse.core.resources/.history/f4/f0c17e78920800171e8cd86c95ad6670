@@ -1,0 +1,116 @@
+package org.eclipse.jdt.internal.ui.wizards.dialogfields;
+
+import java.util.Iterator;
+import java.util.List;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+public interface ITreeListDialogField {
+	void setRemoveButtonIndex(int removeButtonIndex);
+
+	void setUpButtonIndex(int upButtonIndex);
+
+	void setDownButtonIndex(int downButtonIndex);
+
+	void setViewerComparator(ViewerComparator viewerComparator);
+
+	void setTreeExpansionLevel(int level);
+
+	Control[] doFillIntoGrid(Composite parent, int nColumns);
+
+	int getNumberOfControls();
+
+	void setButtonsMinWidth(int minWidth);
+
+	Control getTreeControl(Composite parent);
+
+	TreeViewer getTreeViewer();
+
+	Composite getButtonBox(Composite parent);
+
+	void dialogFieldChanged();
+
+	void enableButton(int index, boolean enable);
+
+	void setElements(List elements);
+
+	List getElements();
+
+	Object getElement(int index);
+
+	int getIndexOfElement(Object elem);
+
+	void replaceElement(Object oldElement, Object newElement) throws IllegalArgumentException;
+
+	boolean addElement(Object element);
+
+	boolean addElements(List elements);
+
+	void insertElementAt(Object element, int index);
+
+	void removeAllElements();
+
+	void removeElement(Object element) throws IllegalArgumentException;
+
+	void removeElements(List elements);
+
+	int getSize();
+
+	void selectElements(ISelection selection);
+
+	void selectFirstElement();
+
+	void postSetSelection(final ISelection selection);
+
+	void refresh();
+
+	void refresh(Object element);
+
+	void update(Object element);
+
+	List getSelectedElements();
+
+	void expandElement(Object element, int level);
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+
+	void dispose();
+
+	Object[] getElements(Object obj);
+
+	Object[] getChildren(Object element);
+
+	Object getParent(Object element);
+
+	boolean hasChildren(Object element);
+
+	void selectionChanged(SelectionChangedEvent event);
+
+	void doubleClick(DoubleClickEvent event);
+}

@@ -1,0 +1,38 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Accept or reject a mentoring request
+ * @author Jojo Wang
+ */
+public class ProcessMentoringRequest implements ServiceCommand<Void> {
+  private String programId;
+  private String requestId;
+  private MentorRequestStatusEnum status;
+  private String comment;
+  
+  public ProcessMentoringRequest(String programId, String requestId, MentorRequestStatusEnum status, String comment) {
+    this.programId = programId;
+    this.requestId = requestId;
+    this.status = status;
+    this.comment = comment;
+  }
+
+  public String getProgramId() {
+    return programId;
+  }
+
+  public String getRequestId() {
+    return requestId;
+  }
+
+  public MentorRequestStatusEnum getStatus() {
+    return status;
+  }
+
+  public String getComment() {
+    return comment;
+  }
+}

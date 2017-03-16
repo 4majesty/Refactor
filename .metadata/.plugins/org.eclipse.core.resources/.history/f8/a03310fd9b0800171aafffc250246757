@@ -1,0 +1,81 @@
+package com.successfactors.cdp.service.scheduledjob;
+
+import com.successfactors.cdp.bean.mentoring.jam.JamGroupInviteJobPayload;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupInviteFailureEmail;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupInviteToParticipants;
+import com.successfactors.jobscheduler.JobSchedulerException;
+import com.successfactors.jobscheduler.ScheduledJobExecutionException;
+import com.successfactors.jobscheduler.jobimpl.StandardJob;
+import com.successfactors.jobscheduler.service.JobScheduleFacade;
+import com.successfactors.legacy.util.Serializer;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceSystemException;
+
+/**
+ * Job to invoke Jam group invite api call for program participants
+ * Note that the program creator will be making call on participants behalf
+ * Any failure to the API call will send an email to program creator + all owners
+ * 
+ * @author rsrigiri
+ * 
+ * SAP SuccessFactors
+ */
+public class MentoringProgramJamGroupInviteJob extends StandardJob {
+
+    private static Logger logger = LogManager.getLogger();
+
+    private ServiceCommandHandler scaHandler;
+
+    @Override
+    public void executeJob() throws ScheduledJobExecutionException {
+      init();
+
+      JamGroupInviteJobPayload payload = getPayload();
+
+      try {
+        scaHandler.execute(new SendJamGroupInviteToParticipants(payload.getProgramId(), payload.getParticipants()));
+      } catch (ServiceApplicationException e) {
+        logger.error("Exception occured sending jam group invite.",e);
+        sendFailureEmail(payload);
+      } catch (ServiceSystemException e) {
+        logger.error("Exception occured sending jam group invite.",e);
+        sendFailureEmail(payload);
+      }
+    }
+
+    protected void init() {
+      scaHandler = jobContextBean.getScaHandler();
+    }
+
+    private JamGroupInviteJobPayload getPayload() throws ScheduledJobExecutionException {
+      byte[] data = null;
+
+      try {
+        data = getXMLPayload();
+      } catch (JobSchedulerException e) {
+        throw new ScheduledJobExecutionException(e);
+      }
+
+      return deserialize(data);
+    }
+
+    protected byte[] getXMLPayload() throws JobSchedulerException {
+      return JobScheduleFacade.getJobPayload(requestId);
+    }
+
+    private JamGroupInviteJobPayload deserialize(byte[] payload) {
+      Serializer ser = Serializer.getInstanceFor(JamGroupInviteJobPayload.class);
+      return (JamGroupInviteJobPayload) ser.deserialize(payload);
+    }
+
+    private void sendFailureEmail(JamGroupInviteJobPayload payload) {
+      try {
+        scaHandler.execute(new SendJamGroupInviteFailureEmail(payload.getProgramId(), payload.getParticipants()));
+      } catch (ServiceApplicationException e) {
+        logger.error("Exception occured while sending jam group invite failure email.",e);
+      }
+    }
+}

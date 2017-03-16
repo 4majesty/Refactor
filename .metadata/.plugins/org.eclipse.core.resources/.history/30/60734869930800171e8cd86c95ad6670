@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+
+public interface IJavaEditorPropertyPage {
+}

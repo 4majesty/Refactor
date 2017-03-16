@@ -1,0 +1,39 @@
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IJavadocWizard {
+	boolean performFinish();
+
+	boolean performCancel();
+
+	void addPages();
+
+	void init(IWorkbench workbench, IStructuredSelection structuredSelection);
+
+	void launchesTerminated(ILaunch[] launches);
+
+	void onTerminated();
+
+	void launchesAdded(ILaunch[] launches);
+
+	void launchesChanged(ILaunch[] launches);
+
+	void launchesRemoved(ILaunch[] launches);
+
+	IWizardPage getNextPage(IWizardPage page);
+
+	IWizardPage getPreviousPage(IWizardPage page);
+}

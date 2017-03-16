@@ -1,0 +1,21 @@
+package com.successfactors.cdp.app.mentoring.upgradecenter;
+
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.upgradecenter.core.UndoableUpgradeAction;
+import com.successfactors.upgradecenter.core.UpgradeCenterActionException;
+import com.successfactors.upgradecenter.core.UpgradeDependencyResult;
+import com.successfactors.upgradecenter.service.UCUpdateFeatureSet;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import com.successfactors.logging.api.LogManager;
+
+public interface IMentoringProgramUndoUpgradeActionProcessor {
+	boolean undo();
+
+	UpgradeDependencyResult checkUndoDependencies();
+}

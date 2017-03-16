@@ -1,0 +1,84 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.service.mentoring.GetMatchingCounts;
+import com.successfactors.cdp.service.util.mentoring.MatchingScoreTypeEnum;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.sql.MDFCriteria;
+import com.successfactors.genericobject.api.sql.MDFResultSet;
+import com.successfactors.genericobject.api.sql.Projections;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+/**
+ * Service query to get matching counts by matching category
+ * @author Keqin Liu
+ */
+@Service
+public class GetMatchingCountsImpl implements ServiceQueryImpl<GetMatchingCounts, GetMatchingCounts> {
+  @Inject
+  @In(create = true)
+  private ConfigurationProvider configurationProvider;
+  
+  @Inject
+  @In
+  private ParamBean params;
+  
+  @Override
+  public GetMatchingCounts execute(GetMatchingCounts cmd) throws ServiceApplicationException {
+    Map<MatchingScoreTypeEnum, Integer> matchingCounts = new HashMap<MatchingScoreTypeEnum, Integer>(){
+      {
+        
+        put(MatchingScoreTypeEnum.PREFERRED,0);
+        put(MatchingScoreTypeEnum.MANUAL,0);
+        put(MatchingScoreTypeEnum.GOOD,0);
+        put(MatchingScoreTypeEnum.EXCELLENT,0);
+        put(MatchingScoreTypeEnum.AVERAGE,0);      
+        }
+    };
+    
+    Set<String> matchedMentees = new HashSet<String>();
+    
+    // Get all matched participants
+    ObjectDefinition definition = configurationProvider.getObjectDefinition(MentoringProgramMatchedParticipant.class);
+    MDFCriteria criteria = new GOSQLGeneratorContext(definition, params);
+    criteria.setProjection(Projections.all());
+    criteria.add(Restrictions.eq("programId", cmd.getProgramId()));
+    MDFResultSet resultSet = criteria.execute();
+    
+    if (resultSet.getResultRows() != null && resultSet.getResultRows().size() > 0) {
+      // Get matching counts by different matching categories and matched mentees
+      for (Object bean : resultSet.getBeans()) {
+        MentoringProgramMatchedParticipant matchedParticipant = (MentoringProgramMatchedParticipant) bean;
+        Integer count = matchingCounts.get(matchedParticipant.getMatchingCategory());
+        
+        if (count == null) {
+          matchingCounts.put(matchedParticipant.getMatchingCategory(), 1);
+        } else {
+          matchingCounts.put(matchedParticipant.getMatchingCategory(), count + 1);
+        }
+        
+        matchedMentees.add(matchedParticipant.getMentee());
+      }
+    }
+    
+    cmd.setMatchingCounts(matchingCounts);
+    cmd.setMatchedMentees(matchedMentees.size());
+    
+    return cmd;
+  }
+}

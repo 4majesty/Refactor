@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.refactoring.contentassist;
+
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+
+public interface IControlContentAssistHelper {
+}

@@ -1,0 +1,15 @@
+package com.successfactors.legacy.bean.provisioning;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+public interface IFeatureGroupEnum {
+	void add(final FeatureEnum feature);
+
+	List<FeatureEnum> getFeatureList();
+
+	String toString();
+}

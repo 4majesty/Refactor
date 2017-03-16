@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
+
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+
+public interface IASTCreator {
+}

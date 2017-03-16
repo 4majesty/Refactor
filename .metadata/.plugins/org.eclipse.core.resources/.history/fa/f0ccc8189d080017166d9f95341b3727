@@ -1,0 +1,156 @@
+package com.successfactors.cdp.bean.mentoring.processor;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.cdp.bean.mentoring.processor.IMentorshipProcessor;
+
+public class MentorshipProcessorTest {
+  private IMentorshipProcessor service;
+  private ServiceCommandHandler mockHandler;
+  private MentoringServiceBase mockServiceBase; 
+  private ValidationContext validationContext;
+
+  @BeforeMethod(groups = { "checkin" })
+  public void setUp() {
+    service = new MentorshipProcessor();
+    
+    this.mockHandler = mock(ServiceCommandHandler.class);
+    this.mockServiceBase = mock(MentoringServiceBase.class);
+    this.validationContext = mock(ValidationContext.class);
+    
+    TestUtils.setField(service, "scaHandler", mockHandler);
+    TestUtils.setField(service, "mentoringServiceBase", mockServiceBase);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testInvalidStatus() throws ServiceApplicationException {
+    MentoringProgramMatchedParticipant beanInactive = createMentorshipBean(MentorshipStatusEnum.CLOSED_INACTIVE);
+    MentoringProgramMatchedParticipant beanActive = createMentorshipBean(MentorshipStatusEnum.ACTIVE);
+    
+    boolean result = service.checkInactiveParticipant(beanInactive, beanActive);
+    assertFalse(result, "Not supported status change");
+  }
+
+  @Test(groups = { "checkin" })
+  public void testActiveParticipants() throws ServiceApplicationException {
+    when(mockServiceBase.getUsernameMapByIds(any(List.class))).thenReturn(createUserBeans(UserBean.FLAG_VALID_USER));
+
+    MentoringProgramMatchedParticipant bean1 = createMentorshipBean(MentorshipStatusEnum.ACTIVE);
+    MentoringProgramMatchedParticipant bean2 = createMentorshipBean(MentorshipStatusEnum.CLOSED_INACTIVE);
+    
+    boolean result = service.checkInactiveParticipant(bean1, bean2);
+    assertFalse(result, "The users are active, though not allowed the modification");
+    
+  }
+
+  @Test(groups = { "checkin" })
+  public void testCheckEmptyParticipant() throws ServiceApplicationException {
+    when(mockServiceBase.getUsernameMapByIds(any(List.class))).thenReturn(Collections.EMPTY_MAP);
+
+    MentoringProgramMatchedParticipant bean1 = createMentorshipBean(MentorshipStatusEnum.ACTIVE);
+    MentoringProgramMatchedParticipant bean2 = createMentorshipBean(MentorshipStatusEnum.CLOSED_INACTIVE);
+    
+    boolean result = service.checkInactiveParticipant(bean1, bean2);
+    assertTrue(result, "Not found users are considered inactive");
+  }
+
+  @Test(groups = { "checkin" })
+  public void testCheckInactiveParticipant() throws ServiceApplicationException {
+    when(mockServiceBase.getUsernameMapByIds(any(List.class))).thenReturn(createUserBeans(UserBean.FLAG_INVALID_USER));
+
+    MentoringProgramMatchedParticipant bean1 = createMentorshipBean(MentorshipStatusEnum.ACTIVE);
+    MentoringProgramMatchedParticipant bean2 = createMentorshipBean(MentorshipStatusEnum.CLOSED_INACTIVE);
+    
+    boolean result = service.checkInactiveParticipant(bean1, bean2);
+    assertTrue(result);
+  }
+  
+  @Test(groups = { "checkin" })
+  public void testInvalidStatus4ParticipantClosure() throws ServiceApplicationException {
+    MentoringProgramMatchedParticipant beanInactiveMentee = createMentorshipBean(MentorshipStatusEnum.CLOSED_BY_MENTEE);
+    MentoringProgramMatchedParticipant beanInactiveMentor = createMentorshipBean(MentorshipStatusEnum.CLOSED_BY_MENTOR);
+    
+    boolean result = service.checkParticipantClosure(beanInactiveMentor, beanInactiveMentee);
+    assertFalse(result, "Invalid status changed");
+    
+    result = service.checkParticipantClosure(beanInactiveMentee, beanInactiveMentor);
+    assertFalse(result, "Invalid status changed");
+  }
+  
+  @Test(groups = { "checkin" })
+  public void testClosureNotEnabled() throws ServiceApplicationException {
+    MentoringProgram program = new MentoringProgram();
+    program.setMentorshipClosureEnabled(false);
+    when(mockServiceBase.getProgramById(anyString())).thenReturn(program);
+
+    MentoringProgramMatchedParticipant beanActive = createMentorshipBean(MentorshipStatusEnum.ACTIVE);
+    MentoringProgramMatchedParticipant beanMentee = createMentorshipBean(MentorshipStatusEnum.CLOSED_BY_MENTEE);
+    
+    boolean result = service.checkParticipantClosure(beanActive, beanMentee);
+    assertFalse(result, "The closure flag was not enabled");
+  }
+  
+  @Test(groups = { "checkin" })
+  public void testCheckParticipantClosure() throws ServiceApplicationException {
+    final MentoringProgram program = new MentoringProgram();
+    program.setMentorshipClosureEnabled(true);
+    
+    when(mockServiceBase.getProgramById(anyString())).thenReturn(program);
+
+    MentoringProgramMatchedParticipant beanActive = createMentorshipBean(MentorshipStatusEnum.ACTIVE);
+    MentoringProgramMatchedParticipant beanMentee = createMentorshipBean(MentorshipStatusEnum.CLOSED_BY_MENTEE);
+    
+    boolean result = service.checkParticipantClosure(beanActive, beanMentee);
+    assertTrue(result);
+
+    MentoringProgramMatchedParticipant beanMentor = createMentorshipBean(MentorshipStatusEnum.CLOSED_BY_MENTOR);
+    result = service.checkParticipantClosure(beanActive, beanMentor);
+    assertTrue(result);
+    
+    result = service.checkParticipantClosure(beanMentor, beanActive);
+    assertTrue(result);
+    
+    result = service.checkParticipantClosure(beanMentee, beanActive);
+    assertTrue(result);
+  }
+  
+  private Map createUserBeans(String flag) {
+    UserBeanImpl bean = new UserBeanImpl();
+    bean.setUserIsValid(flag);
+    Map<String, UserBean> map = new HashMap();
+    map.put("mentorId", bean);
+    map.put("menteeId", bean);
+    return map;
+  }
+  
+  private MentoringProgramMatchedParticipant createMentorshipBean(MentorshipStatusEnum status) {
+    MentoringProgramMatchedParticipant bean = new MentoringProgramMatchedParticipant();
+    bean.setMentorshipStatus(status);
+    bean.setMentee("menteeId");
+    bean.setMentor("mentorId");
+    return bean;
+  }
+}

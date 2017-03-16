@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.propertiesfileeditor;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.IShowInTargetList;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.editors.text.ITextEditorHelpContextIds;
+import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ToggleCommentAction;
+
+public interface IPropertiesFileEditor {
+	Object getAdapter(Class adapter);
+
+	int getOrientation();
+}

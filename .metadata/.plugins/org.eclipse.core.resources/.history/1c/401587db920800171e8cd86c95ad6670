@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension2;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IClasspathContainerWizard {
+	IClasspathEntry[] getNewEntries();
+
+	boolean performFinish();
+
+	void addPages();
+
+	IWizardPage getNextPage(IWizardPage page);
+
+	void dispose();
+
+	boolean canFinish();
+}

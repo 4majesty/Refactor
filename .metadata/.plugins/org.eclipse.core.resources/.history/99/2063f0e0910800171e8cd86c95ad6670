@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.wizards.dialogfields;
+
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+public interface IStringButtonDialogField {
+	void setButtonLabel(String label);
+
+	void changeControlPressed();
+
+	Control[] doFillIntoGrid(Composite parent, int nColumns);
+
+	int getNumberOfControls();
+
+	Button getChangeControl(Composite parent);
+
+	void enableButton(boolean enable);
+}

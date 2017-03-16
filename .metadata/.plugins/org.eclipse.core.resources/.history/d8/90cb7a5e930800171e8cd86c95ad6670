@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+
+public interface IJavaSearchPageScoreComputer {
+	int computeScore(String id, Object element);
+}

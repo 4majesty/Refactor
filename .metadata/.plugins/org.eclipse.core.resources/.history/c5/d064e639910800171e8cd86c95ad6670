@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ICompliancePreferencePage {
+	void createControl(Composite parent);
+
+	void dispose();
+
+	void setVisible(boolean visible);
+
+	boolean performOk();
+
+	void performApply();
+
+	void setElement(IAdaptable element);
+}

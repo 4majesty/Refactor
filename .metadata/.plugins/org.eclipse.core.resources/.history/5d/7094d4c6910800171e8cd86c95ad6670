@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+public interface IJavaFormattingContext {
+	String[] getPreferenceKeys();
+
+	boolean isBooleanPreference(String key);
+
+	boolean isIntegerPreference(String key);
+}

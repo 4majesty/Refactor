@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpConfigurationBlock;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileConfigurationBlock;
+
+public interface ICleanUpPreferencePage {
+	void createControl(Composite parent);
+}

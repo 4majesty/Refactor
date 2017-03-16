@@ -1,0 +1,7 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import com.successfactors.cdp.service.util.mentoring.MentoringProgramSectionComparator;
+import com.successfactors.unittest.AbstractComparatorTest;
+
+public interface IMentoringProgramSectionComparatorTest {
+}

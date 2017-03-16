@@ -1,0 +1,107 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.gm.api.bean.IPermission;
+import com.successfactors.gm.bean.FindObjectiveBean;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.bean.TextReplacementEnum;
+import com.successfactors.gm.service.GetPermittedActiveTemplates;
+import com.successfactors.gm.service.ejb.Objective;
+import com.successfactors.gm.service.objective.FindObjectives;
+import com.successfactors.gm.service.objective.GetDefaultTemplate;
+import com.successfactors.gm.service.objective.GetDefaultTemplateId;
+import com.successfactors.gm.service.objective.GetObjById;
+import com.successfactors.gm.service.objective.GetTemplateById;
+import com.successfactors.gm.util.TGMCommonUtils;
+import com.successfactors.gm.util.permission.DelegateObjectiveRulesEngine;
+import com.successfactors.gm.util.permission.GMRulesEngine;
+import com.successfactors.gm.util.permission.ObjectiveRulesEngineException;
+import com.successfactors.gm.util.permission.TGMPermissionUtils;
+import com.successfactors.gm.util.type.ObjPlanStatusEnum;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.goalcommon.util.exception.ObjEJBException;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.jdm.bean.RoleMapBean;
+import com.successfactors.jdmng.bean.RoleEntity;
+import com.successfactors.jdmng.bean.jobprofile.JobProfile;
+import com.successfactors.jdmng.service.FindJDEntitiesByKey;
+import com.successfactors.jdmng.service.FindReferencedJDEntities;
+import com.successfactors.jdmng.util.JDConstants;
+import com.successfactors.legacy.bean.FeedbackBean;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.ScaleBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.bean.vo.listFramework.ListRowVOInterface;
+import com.successfactors.legacy.service.GetSysConfig;
+import com.successfactors.legacy.service.ejb.SysConfig;
+import com.successfactors.legacy.ui.controller.AjaxServiceStatus;
+import com.successfactors.legacy.util.JSONUtils;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.legacy.util.type.ProfileInfoCategoryEnum;
+import com.successfactors.legacy.util.type.ProfileInfoSourceEnum;
+import com.successfactors.legacy.util.type.ProfileInfoTypeEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.platform.di.SFContextUtils;
+import com.successfactors.platform.ui.servlet.BoilerPlateServlet;
+import com.successfactors.platform.util.DateUtils;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.platform.util.HtmlUtils;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.pmcommon.util.ClientDateFormat;
+import com.successfactors.rbp.app.api.RBPFacade;
+import com.successfactors.rbp.app.api.TargetPopulationCriteria;
+import com.successfactors.rbp.app.collector.ContextualPermissionSpec;
+import com.successfactors.rbp.app.collector.PermissionSpec;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.sm.service.GetSharedRolesInCWS;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.preference.PreferenceBean;
+import com.successfactors.user.service.FindUserById;
+import com.successfactors.user.service.GetUserCountByRoleId;
+import com.successfactors.user.service.ejb.preference.Preferences;
+import com.successfactors.user.service.preference.GetPreferenceBean;
+import com.successfactors.user.service.preference.GetPreferenceBeanV2;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+import com.successfactors.user.service.preference.UpdatePreferenceBeansV2;
+import com.successfactors.xi.ui.messages.SFMessages;
+
+public interface ICWSV12Controller {
+	AjaxServiceStatus setFilterSelections(String filterSelectionJsonString);
+
+	JSONObjectOutput getPageData();
+
+	String getSuggestedRoleList(String userId, long templateId);
+
+	String updateDefaultTargetRole(long planId, long roleId, String userId);
+
+	String getCompetenciesByRole(String userId, long roleId, long planId);
+
+	String getPlanData(long planId, String userId);
+
+	String getRoleMoreDetails(String userId, long roleId, long selectedPlanId);
+
+	String getEmployeesByRoleId(long selectedPlanId, long roleId);
+
+	String updateRoleInProfile(long roleId, String userId, String action);
+
+	String deleteGoal(long goalId);
+
+	String getObjectivesByCompetency(long planId, long compId, String userId, boolean isBehavior);
+
+	String searchRoleByKeyword(String roleName, String userId, long templateId);
+
+	String getInternalIdByRoleId(Long roleId) throws ServiceApplicationException;
+
+	String updateCWSInstructionDisplayPreference(String isShown);
+
+	String getCWSInstructionDisplayPreference();
+}

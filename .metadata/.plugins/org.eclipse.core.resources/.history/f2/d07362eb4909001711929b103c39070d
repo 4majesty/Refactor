@@ -1,0 +1,12 @@
+package com.successfactors.cdp.service.upgrade.impl;
+
+import com.successfactors.cdp.service.upgrade.InitSuggestedRolesWeight;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import javax.inject.Inject;
+
+public interface IInitSuggestedRolesWeightImpl {
+	Void execute(InitSuggestedRolesWeight cmd) throws ServiceApplicationException;
+}

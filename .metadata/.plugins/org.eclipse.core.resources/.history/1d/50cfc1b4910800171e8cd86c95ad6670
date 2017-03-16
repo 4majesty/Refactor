@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jdt.ui.text.IColorManagerExtension;
+
+public interface IJavaColorManager {
+	void dispose(Display display);
+
+	Color getColor(RGB rgb);
+
+	void dispose();
+
+	Color getColor(String key);
+
+	void bindColor(String key, RGB rgb);
+
+	void unbindColor(String key);
+}

@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.jdt.internal.ui.typehierarchy.TraditionalHierarchyViewer.TraditionalHierarchyContentProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+
+public interface IHierarchyInformationControl {
+	void setInput(Object information);
+}

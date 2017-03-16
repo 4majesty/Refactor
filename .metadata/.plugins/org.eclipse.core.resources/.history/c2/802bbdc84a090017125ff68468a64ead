@@ -1,0 +1,6 @@
+package com.successfactors.cdp.bean;
+
+import com.successfactors.unittest.AbstractComparableTest;
+
+public interface IUserReadinessVOComparableTest {
+}

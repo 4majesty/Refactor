@@ -1,0 +1,13 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerRoleBean;
+import com.successfactors.competency.bean.FamilyBean;
+
+public interface IGetCareerWorksheetSuggestedRolesImplTest {
+	void setup();
+
+	void testGetLeadingFromRoles();
+}

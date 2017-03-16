@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.ui.preferences.IWorkingCopyManager;
+import org.eclipse.ui.preferences.WorkingCopyManager;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IAbstractConfigurationBlockPreferenceAndPropertyPage {
+	void createControl(Composite parent);
+
+	boolean performOk();
+
+	void performDefaults();
+
+	void dispose();
+}

@@ -1,0 +1,45 @@
+package org.eclipse.jdt.internal.ui.infoviews;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+
+public interface IAbstractInfoView {
+	void partVisible(IWorkbenchPartReference ref);
+
+	void partHidden(IWorkbenchPartReference ref);
+
+	void partInputChanged(IWorkbenchPartReference ref);
+
+	void partActivated(IWorkbenchPartReference ref);
+
+	void partBroughtToTop(IWorkbenchPartReference ref);
+
+	void partClosed(IWorkbenchPartReference ref);
+
+	void partDeactivated(IWorkbenchPartReference ref);
+
+	void partOpened(IWorkbenchPartReference ref);
+
+	void createPartControl(Composite parent);
+
+	void menuAboutToShow(IMenuManager menu);
+
+	void propertyChange(PropertyChangeEvent event);
+
+	void selectionChanged(IWorkbenchPart part, ISelection selection);
+
+	void dispose();
+
+	void setInput(final IJavaElement element);
+}

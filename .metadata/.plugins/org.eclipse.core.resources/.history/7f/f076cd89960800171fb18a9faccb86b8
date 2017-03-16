@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
+
+public interface IDeleteAction {
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(IStructuredSelection selection);
+}

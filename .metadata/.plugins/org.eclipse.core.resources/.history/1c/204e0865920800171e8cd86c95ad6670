@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.jarpackager;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ui.IEditorLauncher;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IOpenJarExportWizardEditorLauncher {
+	void open(IPath filePath);
+}

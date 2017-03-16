@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+public interface IAppearanceAwareLabelProvider {
+	void propertyChange(PropertyChangeEvent event);
+
+	void propertyChanged(Object source, int propId);
+
+	void dispose();
+}

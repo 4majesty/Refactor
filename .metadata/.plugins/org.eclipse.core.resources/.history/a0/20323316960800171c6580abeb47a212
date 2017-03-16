@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.corext.refactoring.changes;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IDeletePackageFragmentRootChange {
+	String getName();
+
+	Object getModifiedElement();
+}

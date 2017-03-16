@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IArchiveFileFilter {
+	boolean select(Viewer viewer, Object parent, Object element);
+}

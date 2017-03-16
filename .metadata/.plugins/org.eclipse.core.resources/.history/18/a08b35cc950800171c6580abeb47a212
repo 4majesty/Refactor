@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+
+public interface IMoveStaticMemberAnalyzer {
+	RefactoringStatus getStatus();
+}

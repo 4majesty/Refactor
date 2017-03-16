@@ -1,0 +1,71 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragSupport;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropSupport;
+import org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.search.SearchUtil;
+import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
+import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
+
+public interface IJavaBrowsingPart {
+	void partActivated(IWorkbenchPartReference ref);
+
+	void partBroughtToTop(IWorkbenchPartReference ref);
+
+	void partInputChanged(IWorkbenchPartReference ref);
+
+	void partClosed(IWorkbenchPartReference ref);
+
+	void partDeactivated(IWorkbenchPartReference ref);
+
+	void partOpened(IWorkbenchPartReference ref);
+
+	void partVisible(IWorkbenchPartReference ref);
+
+	void partHidden(IWorkbenchPartReference ref);
+
+	void init(IViewSite site, IMemento memento) throws PartInitException;
+
+	void saveState(IMemento memento);
+
+	void createPartControl(Composite parent);
+
+	Object getAdapter(Class key);
+
+	void setFocus();
+
+	void dispose();
+
+	void menuAboutToShow(IMenuManager menu);
+
+	void selectionChanged(IWorkbenchPart part, ISelection selection);
+
+	String getTitleToolTip();
+
+	Object getViewPartInput();
+
+	void setLinkingEnabled(boolean enabled);
+}

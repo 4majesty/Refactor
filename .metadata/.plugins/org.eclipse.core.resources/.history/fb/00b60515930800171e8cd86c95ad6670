@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.text.java.hover;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
+import org.eclipse.jdt.core.IJavaElement;
+
+public interface IJavadocBrowserInformationControlInput {
+	int getLeadingImageWidth();
+
+	IJavaElement getElement();
+
+	String getHtml();
+
+	Object getInputElement();
+
+	String getInputName();
+}

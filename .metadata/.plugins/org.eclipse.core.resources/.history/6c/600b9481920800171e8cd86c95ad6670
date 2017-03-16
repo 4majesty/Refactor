@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.text.template.preferences;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.internal.corext.template.java.TemplateSet;
+
+public interface ITemplateContentProvider {
+	Object[] getElements(Object input);
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+
+	void dispose();
+}

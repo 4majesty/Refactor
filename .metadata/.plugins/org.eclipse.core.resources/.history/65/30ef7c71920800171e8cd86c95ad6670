@@ -1,0 +1,136 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.internal.text.html.BrowserInformationControl;
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.DefaultPositionUpdater;
+import org.eclipse.jface.text.DocumentCommand;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IPositionUpdater;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITextViewerExtension2;
+import org.eclipse.jface.text.ITextViewerExtension5;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.ILinkedModeListener;
+import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedModeUI;
+import org.eclipse.jface.text.link.LinkedPosition;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
+import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavadocBrowserInformationControlInput;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
+import org.eclipse.jdt.ui.text.java.IJavaContentAssistInvocationContext;
+
+public interface IAbstractJavaCompletionProposal {
+	void preReplace(IDocument document, int offset) throws BadLocationException;
+
+	int postReplace(IDocument document);
+
+	ExitFlags doExit(LinkedModeModel environment, VerifyEvent event, int offset, int length);
+
+	char[] getTriggerCharacters();
+
+	void setTriggerCharacters(char[] triggerCharacters);
+
+	void setProposalInfo(ProposalInfo proposalInfo);
+
+	void setCursorPosition(int cursorPosition);
+
+	void apply(IDocument document);
+
+	void apply(IDocument document, char trigger, int offset);
+
+	void apply(ITextViewer viewer, char trigger, int stateMask, int offset);
+
+	Point getSelection(IDocument document);
+
+	IContextInformation getContextInformation();
+
+	void setContextInformation(IContextInformation contextInformation);
+
+	String getDisplayString();
+
+	String getAdditionalProposalInfo();
+
+	Object getAdditionalProposalInfo(IProgressMonitor monitor);
+
+	int getContextInformationPosition();
+
+	int getReplacementOffset();
+
+	void setReplacementOffset(int replacementOffset);
+
+	int getPrefixCompletionStart(IDocument document, int completionOffset);
+
+	int getReplacementLength();
+
+	void setReplacementLength(int replacementLength);
+
+	String getReplacementString();
+
+	void setReplacementString(String replacementString);
+
+	CharSequence getPrefixCompletionText(IDocument document, int completionOffset);
+
+	Image getImage();
+
+	void setImage(Image image);
+
+	boolean isValidFor(IDocument document, int offset);
+
+	boolean validate(IDocument document, int offset, DocumentEvent event);
+
+	int getRelevance();
+
+	void setRelevance(int relevance);
+
+	void selected(ITextViewer viewer, boolean smartToggle);
+
+	void unselected(ITextViewer viewer);
+
+	IInformationControlCreator getInformationControlCreator();
+
+	String getSortString();
+
+	StyledString getStyledDisplayString();
+
+	void setStyledDisplayString(StyledString text);
+
+	String toString();
+
+	IJavaElement getJavaElement();
+}

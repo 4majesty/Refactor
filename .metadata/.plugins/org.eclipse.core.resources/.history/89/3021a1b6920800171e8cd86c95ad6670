@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.wizards;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+
+public interface ITypedElementSelectionValidator {
+	IStatus validate(Object[] elements);
+}

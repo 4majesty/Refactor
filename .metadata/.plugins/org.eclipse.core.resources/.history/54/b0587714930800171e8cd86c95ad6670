@@ -1,0 +1,61 @@
+package org.eclipse.jdt.internal.ui.text.template.contentassist;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
+import org.eclipse.jdt.internal.corext.template.java.JavaDocContext;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
+import org.eclipse.jdt.internal.ui.javaeditor.IndentUtil;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface ITemplateProposal {
+	Template getTemplate();
+
+	void apply(IDocument document);
+
+	void apply(ITextViewer viewer, char trigger, int stateMask, int offset);
+
+	Point getSelection(IDocument document);
+
+	String getAdditionalProposalInfo();
+
+	String getDisplayString();
+
+	StyledString getStyledDisplayString();
+
+	void setDisplayString(StyledString displayString);
+
+	Image getImage();
+
+	IContextInformation getContextInformation();
+
+	int getRelevance();
+
+	void setRelevance(int relevance);
+
+	IInformationControlCreator getInformationControlCreator();
+
+	void selected(ITextViewer viewer, boolean smartToggle);
+
+	void unselected(ITextViewer viewer);
+
+	boolean validate(IDocument document, int offset, DocumentEvent event);
+
+	CharSequence getPrefixCompletionText(IDocument document, int completionOffset);
+
+	int getPrefixCompletionStart(IDocument document, int completionOffset);
+
+	boolean isAutoInsertable();
+}

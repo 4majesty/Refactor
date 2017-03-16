@@ -1,0 +1,14 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import com.successfactors.cdp.app.mentoring.MatchingAlgorithmContext;
+import com.successfactors.cdp.app.mentoring.MatchingAlgorithmStrategy;
+import com.successfactors.cdp.app.mentoring.StandardMatchingAlgorithmStrategy;
+import com.successfactors.cdp.app.mentoring.WeightedMatchingAlgorithmStrategy;
+import com.successfactors.sca.ServiceApplicationException;
+
+public interface IMatchingAlgorithmFactory {
+	MatchingAlgorithmStrategy getAlgorithm(String type, MatchingAlgorithmContext context)
+			throws ServiceApplicationException;
+
+	MatchingAlgorithmStrategy getDefaultAlgorithm(MatchingAlgorithmContext context);
+}

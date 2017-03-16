@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
+
+import java.util.List;
+
+public interface ITypeEquivalenceSet {
+	void add(ConstraintVariable2 variable);
+
+	ConstraintVariable2[] getContributingVariables();
+
+	void addAll(ConstraintVariable2[] variables);
+
+	void setTypeEstimate(ITypeSet estimate);
+
+	ITypeSet getTypeEstimate();
+
+	String toString();
+}

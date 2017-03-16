@@ -1,0 +1,12 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
+
+public interface IOpenNewClassWizardAction {
+	void setConfiguredWizardPage(NewClassWizardPage page);
+
+	void setOpenEditorOnFinish(boolean openEditorOnFinish);
+}

@@ -1,0 +1,35 @@
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import java.util.ArrayList;
+import org.w3c.dom.Element;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
+public interface IContributedJavadocWizardPage {
+	Control createContents(Composite parent);
+
+	void createControl(Composite parent);
+
+	void setVisible(boolean visible);
+
+	IRunnableContext getRunnableContext();
+
+	void statusUpdated();
+
+	void performHelp();
+
+	void dispose();
+
+	String[] getConfiguredJavadocOptions();
+
+	String[] getConfiguredVMOptions();
+
+	IJavaElement[] getSelectedJavaElements();
+
+	void updateArguments(ArrayList vmOptions, ArrayList toolOptions);
+
+	void updateAntScript(Element xmlDocument);
+}

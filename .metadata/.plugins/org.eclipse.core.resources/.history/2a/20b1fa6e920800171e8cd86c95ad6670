@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IAccessRulesLabelProvider {
+	Image getColumnImage(Object element, int columnIndex);
+
+	String getColumnText(Object element, int columnIndex);
+}

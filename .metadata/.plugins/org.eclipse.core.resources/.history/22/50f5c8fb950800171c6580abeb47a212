@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.corext.refactoring.generics;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.eclipse.jdt.internal.corext.refactoring.generics.ParametricStructureComputer.ParametricStructure;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+
+public interface IElementStructureEnvironment {
+	void setElemStructure(ConstraintVariable2 v, ParametricStructure t);
+
+	ParametricStructure elemStructure(ConstraintVariable2 v);
+}

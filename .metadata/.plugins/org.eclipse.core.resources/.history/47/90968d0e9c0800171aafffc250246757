@@ -1,0 +1,156 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.OneToOne;
+
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.api.model.Type;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+
+@MDFEntity(effectiveDating = EffectiveDating.NONE, apiVisibility = APIVisibility.EDITABLE,  processors={MentoringProgramActivityProcessor.class})
+public class MentoringProgramActivity extends AuditFields {
+  // System Fields
+  /** Row Id. */
+  @Column(name = GENERIC_OBJECT_T.ROW_ID, nullable = false)
+  @Field(visibility = Visibility.READ_ONLY)
+  private Long rowId;
+
+  /** External Code. */
+  @Column(name = GENERIC_OBJECT_T.EXTERNAL_CODE, nullable = false)
+  @Field(visibility = Visibility.READ_ONLY, dataType = DataType.AUTO_NUMBER)
+  protected String externalId;
+
+  /** Internal Id. */
+  @Column(name = GENERIC_OBJECT_T.INTERNAL_ID)
+  @Field(visibility = Visibility.READ_ONLY)
+  protected Long internalId;
+  
+  // Business Fields
+  /** Activity name */
+  @Column(name = GENERIC_OBJECT_T.EXTERNAL_NAME, nullable = false)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.STRING, maxLength = GENERIC_OBJECT_T.CUSTOM_FIELD100_LEN)
+  private String name;
+    
+  /** Activity description */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD1, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.STRING, maxLength = GENERIC_OBJECT_T.CUSTOM_FIELD100_LEN)
+  private String description;
+  
+  /** Activity due date */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD2, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date dueDate;
+  
+  /** mentor of the activity */
+  @OneToOne()
+  @AssociationType(type = Type.VALID_WHEN)
+  @Field(visibility = Visibility.EDITABLE)
+  private MentoringProgramMentor mentor;
+  
+  @OneToOne()
+  @AssociationType(type = Type.VALID_WHEN)
+  @Field(visibility = Visibility.EDITABLE)
+  private MentoringProgramMentee mentee;
+  
+  /** Created By. Override the same field in AuditFiels class in order to display to all users*/
+  @Column(name = GENERIC_OBJECT_T.CREATED_BY)
+  @Field(visibility = Visibility.READ_ONLY)
+  private String createdBy;
+
+  /** Last Modified Date. Override the same field in AuditFiels class in order to display to all users*/
+  @Column(name = GENERIC_OBJECT_T.LAST_MODIFIED_DATE)
+  @Field(visibility = Visibility.READ_ONLY)
+  private Date lastModifiedDate;
+  
+  public Date getLastModifiedDate() {
+    return lastModifiedDate;
+  }
+
+  public void setLastModifiedDate(Date lastModifiedDate) {
+    this.lastModifiedDate = lastModifiedDate;
+  }
+
+  public String getCreatedBy() {
+    return createdBy;
+  }
+
+  public void setCreatedBy(String createdBy) {
+    this.createdBy = createdBy;
+  }
+
+  public Long getRowId() {
+    return rowId;
+  }
+
+  public void setRowId(Long rowId) {
+    this.rowId = rowId;
+  }
+
+  public String getExternalId() {
+    return externalId;
+  }
+
+  public void setExternalId(String externalId) {
+    this.externalId = externalId;
+  }
+
+  public Long getInternalId() {
+    return internalId;
+  }
+
+  public void setInternalId(Long internalId) {
+    this.internalId = internalId;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public Date getDueDate() {
+    return dueDate;
+  }
+
+  public void setDueDate(Date dueDate) {
+    this.dueDate = dueDate;
+  }
+
+  public MentoringProgramMentor getMentor() {
+    return mentor;
+  }
+
+  public void setMentor(MentoringProgramMentor mentor) {
+    this.mentor = mentor;
+  }
+
+  public MentoringProgramMentee getMentee() {
+    return mentee;
+  }
+
+  public void setMentee(MentoringProgramMentee mentee) {
+    this.mentee = mentee;
+  }
+  
+  
+  
+}

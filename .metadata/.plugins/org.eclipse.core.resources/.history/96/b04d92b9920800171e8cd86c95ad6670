@@ -1,0 +1,29 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ui.IImportWizard;
+import org.eclipse.ui.IObjectActionDelegate;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.jarimport.JarImportWizard;
+
+public interface IJarImportWizardAction {
+	void run();
+
+	void run(final IAction action);
+
+	void selectionChanged(final IAction action, final ISelection selection);
+
+	void selectionChanged(final SelectionChangedEvent event);
+
+	void setActivePart(final IAction action, final IWorkbenchPart part);
+}

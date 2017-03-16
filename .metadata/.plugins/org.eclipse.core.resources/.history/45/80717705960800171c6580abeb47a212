@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.corext.refactoring.scripting;
+
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringContribution;
+
+public interface IJavaUIRefactoringContribution {
+}

@@ -1,0 +1,9 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.service.mentoring.GetUserActiveProgram;
+import com.successfactors.sca.ServiceApplicationException;
+import java.util.Set;
+
+public interface IGetUserActiveProgramImpl {
+	GetUserActiveProgram execute(GetUserActiveProgram cmd) throws ServiceApplicationException;
+}

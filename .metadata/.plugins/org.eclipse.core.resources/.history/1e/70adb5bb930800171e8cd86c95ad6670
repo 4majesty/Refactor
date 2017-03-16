@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.jarpackagerfat;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IFatJarRsrcUrlAntExporter {
+}

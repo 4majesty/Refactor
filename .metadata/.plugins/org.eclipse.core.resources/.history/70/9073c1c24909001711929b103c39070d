@@ -1,0 +1,28 @@
+package com.successfactors.cdp.app.mentoring;
+
+import java.util.Map;
+import java.util.Set;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+
+public interface IMatchingAlgorithmContext {
+	MentoringProgram getProgram();
+
+	void setProgram(MentoringProgram program);
+
+	Map<String, Set<String>> getMentoringProfiles();
+
+	void setMentoringProfiles(Map<String, Set<String>> mentoringProfiles);
+
+	String getDrivenUserId();
+
+	void setDrivenUserId(String drivenUserId);
+
+	ProgramMatchingTypeEnum getMatchingType();
+
+	void setMatchingType(ProgramMatchingTypeEnum matchingType);
+
+	boolean isNeedLimitMenteeThreshold();
+
+	void setNeedLimitMenteeThreshold(boolean needLimitMenteeThreshold);
+}

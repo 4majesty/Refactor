@@ -1,0 +1,8 @@
+package com.successfactors.cdp.bean;
+
+import org.testng.annotations.BeforeMethod;
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
+
+public interface ICareerWorksheetSuggestedRoleVOSerializationTest {
+	void testSerialization();
+}

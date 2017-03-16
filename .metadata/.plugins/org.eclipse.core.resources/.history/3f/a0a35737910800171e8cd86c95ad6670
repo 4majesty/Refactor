@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
+
+public interface IProjectAndSourceFolderContentProvider {
+	Object[] getChildren(Object element);
+
+	boolean hasChildren(Object element);
+}

@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+
+public interface IHistoryListAction {
+	IJavaElement getResult();
+
+	IJavaElement[] getRemaining();
+
+	void run();
+}

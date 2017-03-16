@@ -1,0 +1,15 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.service.mentoring.SendMentoringProgramClosureEmail;
+import com.successfactors.sca.ServiceApplicationException;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.successfactors.cdp.service.util.mentoring.email.IMentoringEmailUtils;
+
+public interface ISendMentoringProgramClosureEmailImpl {
+	Void execute(SendMentoringProgramClosureEmail cmd) throws ServiceApplicationException;
+}

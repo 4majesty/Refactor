@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface IToggleViewAction {
+	int getViewerIndex();
+
+	void run();
+}

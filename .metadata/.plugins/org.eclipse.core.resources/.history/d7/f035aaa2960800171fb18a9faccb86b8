@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls;
+
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringDialogField;
+
+public interface INLSAccessorConfigurationDialog {
+	void dialogFieldChanged(DialogField field);
+
+	void changeControlPressed(DialogField field);
+}

@@ -1,0 +1,19 @@
+package com.successfactors.cdp.service.upgrade.impl;
+
+import java.sql.Connection;
+import org.jboss.seam.annotations.In;
+import com.successfactors.cdp.api.dao.SuggestedRolesSettingDAO;
+import com.successfactors.cdp.service.upgrade.InitSuggestedRolesWeight;
+import com.successfactors.db.dao.DAOException;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import javax.inject.Inject;
+
+public interface IInitSuggestedRolesWeightImpl {
+	Void execute(InitSuggestedRolesWeight cmd) throws ServiceApplicationException;
+}

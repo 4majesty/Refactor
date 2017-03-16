@@ -1,0 +1,103 @@
+package com.successfactors.platform.ui.login.determinator;
+
+import org.jboss.seam.mock.SeamTest;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.mockobjects.servlet.MockHttpServletRequest;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.legacy.service.ejb.SysConfig;
+
+import com.successfactors.platform.util.UIVersionManager.UIVersion;
+
+public class FinalEndPointDeterminatorTest extends SeamTest {
+    
+    ParamBean params = new ParamBean();
+    CompanyBean cbean;
+    EndPointContext context;
+    SysConfig config;
+    
+    IFeatureEnum selectedFeature = null;
+
+    @BeforeMethod(groups={"checkin"}) 
+    public void beforeTest(){
+        cbean = new CompanyBean(){
+            @Override
+            public boolean isFeatureExist(FeatureEnum feature) {
+                return getFeatureSet().contains(feature);
+            }
+        };   
+
+        context = new EndPointContext();
+        context.setRequest(new MockHttpServletRequest());
+        
+        params.setCompanyBean(cbean);
+       
+    }
+    
+    
+    @Test(groups={"checkin", "broken", "scaconverter"})
+    public void testNoEndPointV10() throws Exception
+    {
+        FinalEndPointDeterminator pcd = new FinalEndPointDeterminator();
+
+        setField(pcd, "params", params);
+        setField(pcd, "companybean", cbean);
+        
+        String result = pcd.determine(UIVersion.V10, context);
+        assert result == "/acme";
+
+    }
+    
+    @Test(groups={"checkin", "broken", "scaconverter"})
+    public void testNoEndPointV11() throws Exception
+    {
+
+        FinalEndPointDeterminator pcd = new FinalEndPointDeterminator();
+
+        setField(pcd, "params", params);
+        setField(pcd, "companybean", cbean);
+        
+        String result = pcd.determine(UIVersion.V11, context);
+        assert result == "/sf/home";
+
+    }
+    
+    @Test(groups={"checkin", "broken", "scaconverter"})
+    public void testOtherEndPointV11() throws Exception
+    {
+
+        FinalEndPointDeterminator pcd = new FinalEndPointDeterminator();
+
+        context.setReferer("/foldermaplookup?fmlu_pm_fdataid=317");
+        
+        setField(pcd, "params", params);
+        setField(pcd, "companybean", cbean);
+        
+        String result = pcd.determine(UIVersion.V11, context);
+        assert result == EndPointContext.V11_ENDPOINT;
+
+    }
+    
+    @Test(groups={"checkin", "broken", "scaconverter"})
+    public void testOtherEndPointV10() throws Exception
+    {
+
+        FinalEndPointDeterminator pcd = new FinalEndPointDeterminator();
+
+        context.setReferer("/foldermaplookup?fmlu_pm_fdataid=317");
+        
+        setField(pcd, "params", params);
+        setField(pcd, "companybean", cbean);
+        
+        String result = pcd.determine(UIVersion.V10, context);
+        assert result == "/foldermaplookup?fmlu_pm_fdataid=317";
+
+    }
+    
+    
+    
+    
+}

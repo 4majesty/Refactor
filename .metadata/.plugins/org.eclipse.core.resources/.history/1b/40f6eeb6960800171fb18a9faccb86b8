@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.refactoring.actions;
+
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
+
+public interface IRefactoringStarter {
+	boolean activate(RefactoringWizard wizard, Shell parent, String dialogTitle, int saveMode);
+
+	RefactoringStatus getInitialConditionCheckingStatus();
+}

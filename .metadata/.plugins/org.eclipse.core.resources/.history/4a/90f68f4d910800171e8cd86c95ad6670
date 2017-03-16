@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface ICancelSearchAction {
+	void run();
+}

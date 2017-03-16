@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+
+public interface IAddArgumentCorrectionProposal {
+}

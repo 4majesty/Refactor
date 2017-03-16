@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IOpenCallHierarchyAction {
+	void selectionChanged(ITextSelection selection);
+
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(ITextSelection selection);
+
+	void run(IStructuredSelection selection);
+}

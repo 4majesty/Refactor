@@ -1,0 +1,22 @@
+package com.successfactors.rbp.integration.grc.xml.binding;
+
+import java.util.List;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+public interface IRole {
+	String getId();
+
+	void setId(String value);
+
+	String getName();
+
+	void setName(String value);
+
+	String getDescription();
+
+	void setDescription(String value);
+
+	List<Category> getCategory();
+}

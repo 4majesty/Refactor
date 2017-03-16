@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
+public interface ISearchScopeActionGroup {
+	IJavaSearchScope getSearchScope();
+
+	void fillActionBars(IActionBars actionBars);
+
+	void fillContextMenu(IMenuManager menu);
+
+	void saveState(IMemento memento);
+
+	void restoreState(IMemento memento);
+
+	String getFullDescription();
+}

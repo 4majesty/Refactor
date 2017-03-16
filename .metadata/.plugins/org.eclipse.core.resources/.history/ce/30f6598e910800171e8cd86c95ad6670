@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import org.eclipse.osgi.util.NLS;
+
+public interface IJavaBrowsingMessages {
+}

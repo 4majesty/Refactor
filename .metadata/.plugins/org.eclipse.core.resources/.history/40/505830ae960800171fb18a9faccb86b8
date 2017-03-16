@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface IInferTypeArgumentsWizard {
+	void createControl(Composite parent);
+}

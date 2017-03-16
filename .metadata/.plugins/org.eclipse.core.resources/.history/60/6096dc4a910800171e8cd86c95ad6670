@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+
+public interface ILinkedCorrectionProposal {
+	void addLinkedPosition(ITrackedNodePosition position, boolean isFirst, String groupID);
+
+	void setEndPosition(ITrackedNodePosition position);
+
+	void addLinkedPositionProposal(String groupID, String proposal, Image image);
+
+	void addLinkedPositionProposal(String groupID, String displayString, String proposal, Image image);
+
+	void addLinkedPositionProposal(String groupID, ITypeBinding type);
+}

@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.compare.structuremergeviewer.ICompareInput;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface ICompareDialog {
+	void setImage(Image image);
+}

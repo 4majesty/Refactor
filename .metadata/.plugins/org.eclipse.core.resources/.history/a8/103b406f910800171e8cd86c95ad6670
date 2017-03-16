@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.ImageRegistry;
+
+public interface IJavaPluginImages {
+	ImageData getImageData();
+}

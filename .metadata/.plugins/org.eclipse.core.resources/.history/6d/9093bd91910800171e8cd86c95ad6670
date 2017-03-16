@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import java.util.Comparator;
+import org.eclipse.jdt.core.IJavaElement;
+
+public interface IJavaElementTypeComparator {
+	int compare(Object o1, Object o2);
+
+	int compare(Object o1, int elementType);
+}

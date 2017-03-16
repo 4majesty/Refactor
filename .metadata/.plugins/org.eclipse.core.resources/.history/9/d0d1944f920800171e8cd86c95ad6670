@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavaNode {
+	String getInitializerCount();
+
+	String extractMethodName();
+
+	String extractArgumentList();
+
+	String getName();
+
+	String getType();
+
+	Image getImage();
+
+	String toString();
+}

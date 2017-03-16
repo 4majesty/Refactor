@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.corext.refactoring.nls.changes;
+
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
+
+public interface ICreateTextFileChange {
+	String getTextType();
+
+	String getCurrentContent();
+
+	String getPreview();
+}

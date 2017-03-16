@@ -1,0 +1,56 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.service.mentoring.jam.GetJamBaseURL;
+import com.successfactors.cubetree.app.util.SAML2IdpUrlUtils;
+import com.successfactors.legacy.service.ejb.SysConfig;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+@Service
+public class GetJamBaseURLImpl implements ServiceQueryImpl<String, GetJamBaseURL> {
+
+  /** logger. */
+  private static Logger log = LogManager.getLogger();
+
+  /** param bean. */
+  @Inject
+  @In
+  private ParamBean params;
+
+  /** SysConfig EJB. */
+  @Inject
+  @In
+  private SysConfig sysConfigService;
+
+  @Override
+  public String execute(GetJamBaseURL cmd) throws ServiceApplicationException {
+    String provisionedURL = SAML2IdpUrlUtils.getCTHomeUrl(sysConfigService, params);
+
+    return getBaseURL(provisionedURL);
+  }
+
+  private String getBaseURL(String provisionedURL) throws ServiceApplicationException {
+    try {
+      URL baseURLFromConfig = new URL(provisionedURL);
+
+      return (new URL(baseURLFromConfig.getProtocol(),
+                         baseURLFromConfig.getHost(),
+                         baseURLFromConfig.getPort(), "")
+                        ).toString();
+       } catch (MalformedURLException e) {
+           throw new ServiceApplicationException("Could not derive well formed URL "
+               + "from URL data provided in Provisioning: " + provisionedURL);
+      }
+  }
+}

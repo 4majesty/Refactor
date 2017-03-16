@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IAccessorDescription {
+	String getLabel();
+
+	void serialize(IDialogSettings settings);
+
+	String getAccessorClassName();
+
+	IPackageFragment getAccessorClassPackage();
+
+	String getResourceBundleName();
+
+	IPackageFragment getResourceBundlePackage();
+
+	boolean equals(Object obj);
+
+	int hashCode();
+}

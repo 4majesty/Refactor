@@ -1,0 +1,15 @@
+package com.successfactors.cdp.bean;
+
+public interface ISuggestedRolesFilterSettingBean {
+	String getFlagLabel();
+
+	void setFlagLabel(String flagLabel);
+
+	String getFlagKey();
+
+	void setFlagKey(String flagKey);
+
+	boolean isEnabled();
+
+	void setEnabled(boolean enabled);
+}

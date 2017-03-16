@@ -1,0 +1,41 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension2;
+import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.preferences.UserLibraryPreferencePage;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ICheckedListDialogField;
+
+public interface IUserLibraryWizardPage {
+	void createControl(Composite parent);
+
+	boolean finish();
+
+	IClasspathEntry getSelection();
+
+	IClasspathEntry[] getNewContainers();
+
+	void setSelection(IClasspathEntry containerEntry);
+
+	void dialogFieldChanged(DialogField field);
+
+	void customButtonPressed(ListDialogField field, int index);
+
+	void selectionChanged(ListDialogField field);
+
+	void doubleClicked(ListDialogField field);
+
+	void initialize(IJavaProject project, IClasspathEntry[] currentEntries);
+}

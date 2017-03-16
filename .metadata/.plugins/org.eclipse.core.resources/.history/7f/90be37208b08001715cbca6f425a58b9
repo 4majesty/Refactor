@@ -1,0 +1,47 @@
+package com.successfactors.rbp.integration.grc.xml.binding;
+
+import javax.xml.bind.annotation.XmlRegistry;
+
+public interface IObjectFactory {
+	ReadWritePermission createReadWritePermission();
+
+	ReadPermission createReadPermission();
+
+	WritePermission createWritePermission();
+
+	Message createMessage();
+
+	FieldPermissions createFieldPermissions();
+
+	FieldPermission createFieldPermission();
+
+	PermissionUnit createPermissionUnit();
+
+	NoneAllOtherPermission createNoneAllOtherPermission();
+
+	OnOffPermission createOnOffPermission();
+
+	ObjectPermissions createObjectPermissions();
+
+	PermissionItem createPermissionItem();
+
+	OtherPermissions createOtherPermissions();
+
+	AllPermission createAllPermission();
+
+	FieldAction createFieldAction();
+
+	Content createContent();
+
+	Category createCategory();
+
+	Permissions createPermissions();
+
+	FieldId createFieldId();
+
+	Role createRole();
+
+	UserPermission createUserPermission();
+
+	User createUser();
+}

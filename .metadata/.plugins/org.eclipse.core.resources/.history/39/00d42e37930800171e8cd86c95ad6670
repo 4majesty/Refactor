@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.jdt.internal.corext.util.Resources;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IFileTransferDropAdapter {
+	Transfer getTransfer();
+
+	boolean isEnabled(DropTargetEvent event);
+
+	boolean validateDrop(Object target, int operation, TransferData transferType);
+
+	boolean performDrop(final Object data);
+}

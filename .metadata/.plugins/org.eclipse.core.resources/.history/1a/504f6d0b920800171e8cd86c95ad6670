@@ -1,0 +1,34 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.ui.IPageLayout;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.handlers.CollapseAllHandler;
+import org.eclipse.ui.handlers.IHandlerService;
+import org.eclipse.ui.part.IShowInTargetList;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.ProjectActionGroup;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.CollapseAllAction;
+import org.eclipse.jdt.internal.ui.viewsupport.FilterUpdater;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+import org.eclipse.jdt.internal.ui.actions.ICollapseAllAction;
+
+public interface IProjectsView {
+	void dispose();
+
+	Object getAdapter(Class key);
+
+	void selectionChanged(IWorkbenchPart part, ISelection selection);
+}

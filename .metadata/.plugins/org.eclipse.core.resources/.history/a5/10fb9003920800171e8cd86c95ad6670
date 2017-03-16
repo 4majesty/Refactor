@@ -1,0 +1,30 @@
+package org.eclipse.jdt.internal.ui.text.spelling.engine;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IAbstractSpellDictionary {
+	Set getProposals(final String word, final boolean sentence);
+
+	boolean isCorrect(String word);
+
+	void setStripNonLetters(boolean state);
+
+	boolean isLoaded();
+
+	void unload();
+
+	boolean acceptsWords();
+
+	void addWord(final String word);
+}

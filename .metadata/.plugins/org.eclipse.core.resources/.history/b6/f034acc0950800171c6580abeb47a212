@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
+public interface ITypeVariable {
+	int getKind();
+
+	boolean doEquals(TType type);
+
+	int hashCode();
+
+	String getName();
+
+	String getPrettySignature();
+}

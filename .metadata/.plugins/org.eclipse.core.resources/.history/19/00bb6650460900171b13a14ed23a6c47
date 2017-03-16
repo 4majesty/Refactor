@@ -1,0 +1,82 @@
+package com.successfactors.cdp.ui.controller;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.successfactors.cdp.bean.mentoring.vo.ProgramMenteeVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupTemplateSectionVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupTemplateVO;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramParticipantTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SectionDisplayTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormSectionCategoryEnum;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramVO;
+import com.successfactors.cdp.ui.util.mentoring.MentoringProgramBeanUtil;
+
+public class MentoringProgramBeanUtilTest {
+
+  @Test(groups={"checkin"})
+  public void testGetMentoringProgramFromOverview(){
+    MentoringProgramBeanUtil util = new MentoringProgramBeanUtil();
+    ProgramVO pvo = new ProgramVO();
+    pvo.setName("MockProgram");
+    pvo.setDescription("MockProgram Description");
+    pvo.setMentorSignupDate("02/02/2016");
+    List<String> owners = new ArrayList<String>();
+    owners.add("admin");
+    pvo.setOwners(owners);
+    List<ProgramMenteeVO> menteeVOsList = new ArrayList<ProgramMenteeVO>();
+    ProgramMenteeVO menteeVO = new ProgramMenteeVO();
+    menteeVO.setUserId("cgrant1");
+    menteeVO.setRowId(125l);
+    menteeVO.setType(ProgramParticipantTypeEnum.MENTEE);
+    menteeVOsList.add(menteeVO);
+    pvo.setMentees(menteeVOsList);
+
+    for(Method m : MentoringProgramBeanUtil.class.getDeclaredMethods()){
+      if(m.getName().equals("getMentoringProgramFromOverview")){
+        try {
+          m.setAccessible(true);
+          Object rtn = m.invoke(util, new MentoringProgram(), pvo, "zh_CN");
+          MentoringProgram p = (MentoringProgram) rtn;
+          Assert.assertEquals(p.getOwners().get(0).getUser(), "admin");
+          Assert.assertEquals(p.getMentees().get(0).getType(), ProgramParticipantTypeEnum.MENTEE);
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+
+
+  @Test(groups={"checkin"})
+  public void testGetProgram(){
+    MentoringProgramBeanUtil util = new MentoringProgramBeanUtil();
+    ProgramVO pvo = new ProgramVO();
+    pvo.setName("MockProgram");
+    pvo.setDescription("MockProgram Description");
+    pvo.setMentorSignupDate("02/03/2017");
+    List<String> owners = new ArrayList<String>();
+    owners.add("Alex");
+    pvo.setOwners(owners);
+
+    for(Method m : MentoringProgramBeanUtil.class.getDeclaredMethods()){
+      if(m.getName().equals("getProgram")){
+        try {
+          m.setAccessible(true);
+          Object rtn = m.invoke(util, new MentoringProgram(), pvo, "zh_CN");
+          MentoringProgram p = (MentoringProgram) rtn;
+          Assert.assertEquals(p.getOwners().get(0).getUser(), "Alex");
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+}

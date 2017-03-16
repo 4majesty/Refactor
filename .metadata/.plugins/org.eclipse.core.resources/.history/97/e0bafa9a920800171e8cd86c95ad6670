@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.model;
+
+import java.util.List;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+
+public interface IJavaModelContentProvider {
+	Object[] getChildren(final Object element);
+
+	boolean hasChildren(final Object element);
+}

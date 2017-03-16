@@ -1,0 +1,17 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RenameResourceAction;
+
+public interface IRenameAction {
+	void selectionChanged(SelectionChangedEvent event);
+
+	void update(ISelection selection);
+
+	void run(IStructuredSelection selection);
+
+	void run(ITextSelection selection);
+}

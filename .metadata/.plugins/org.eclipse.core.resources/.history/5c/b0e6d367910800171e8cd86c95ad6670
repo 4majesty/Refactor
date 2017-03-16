@@ -1,0 +1,16 @@
+package org.eclipse.jdt.ui.wizards;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface INewEnumWizardPage {
+	void init(IStructuredSelection selection);
+
+	void createControl(Composite parent);
+
+	void setVisible(boolean visible);
+}

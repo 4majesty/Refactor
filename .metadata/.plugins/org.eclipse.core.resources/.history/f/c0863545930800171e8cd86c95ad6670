@@ -1,0 +1,41 @@
+package org.eclipse.jdt.internal.ui.text.template.contentassist;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+
+public interface IPositionBasedCompletionProposal {
+	void apply(IDocument document);
+
+	Point getSelection(IDocument document);
+
+	IContextInformation getContextInformation();
+
+	Image getImage();
+
+	String getDisplayString();
+
+	String getAdditionalProposalInfo();
+
+	void apply(ITextViewer viewer, char trigger, int stateMask, int offset);
+
+	void selected(ITextViewer viewer, boolean smartToggle);
+
+	void unselected(ITextViewer viewer);
+
+	boolean validate(IDocument document, int offset, DocumentEvent event);
+
+	void apply(IDocument document, char trigger, int offset);
+
+	boolean isValidFor(IDocument document, int offset);
+
+	char[] getTriggerCharacters();
+
+	int getContextInformationPosition();
+}

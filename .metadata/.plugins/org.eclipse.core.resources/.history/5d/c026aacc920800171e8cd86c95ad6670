@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavadocProblemsPreferencePage {
+	void createControl(Composite parent);
+
+	void dispose();
+
+	boolean performOk();
+
+	void performApply();
+
+	void setElement(IAdaptable element);
+
+	void applyData(Object data);
+}

@@ -1,0 +1,17 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public interface IMatchingResult {
+	Map<String, List<MatchedParticipantVO>> getMatchedParticipantMap();
+
+	void setMatchedParticipantMap(Map<String, List<MatchedParticipantVO>> matchingUsersMap);
+
+	Map<String, UserProfileVO> getUserProfileMap();
+
+	void setUserProfileMap(Map<String, UserProfileVO> userProfileMap);
+
+	void addMatchedParticipant(String menteeUserId, MatchedParticipantVO mentor);
+}

@@ -1,0 +1,130 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import java.util.List;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.DropTargetListener;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.HelpListener;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Widget;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IElementComparer;
+import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jdt.core.IPackageFragment;
+
+public interface IPackageViewerWrapper {
+	void setViewer(StructuredViewer viewer);
+
+	void setSelection(ISelection selection, boolean reveal);
+
+	void addPostSelectionChangedListener(ISelectionChangedListener listener);
+
+	void addSelectionChangedListener(ISelectionChangedListener listener);
+
+	void addDoubleClickListener(IDoubleClickListener listener);
+
+	void addOpenListener(IOpenListener listener);
+
+	void addHelpListener(HelpListener listener);
+
+	void removeSelectionChangedListener(ISelectionChangedListener listener);
+
+	void removePostSelectionChangedListener(ISelectionChangedListener listener);
+
+	void removeHelpListener(HelpListener listener);
+
+	void removeDoubleClickListener(IDoubleClickListener listener);
+
+	void removeOpenListener(IOpenListener listener);
+
+	Control getControl();
+
+	void addFilter(ViewerFilter filter);
+
+	void setFilters(ViewerFilter[] filters);
+
+	ViewerFilter[] getFilters();
+
+	void refresh();
+
+	void removeFilter(ViewerFilter filter);
+
+	ISelection getSelection();
+
+	void refresh(boolean updateLabels);
+
+	void refresh(Object element, boolean updateLabels);
+
+	void refresh(Object element);
+
+	void resetFilters();
+
+	void reveal(Object element);
+
+	void setContentProvider(IContentProvider contentProvider);
+
+	void setSorter(ViewerSorter sorter);
+
+	void setComparator(ViewerComparator comparator);
+
+	void setUseHashlookup(boolean enable);
+
+	Widget testFindItem(Object element);
+
+	void update(Object element, String[] properties);
+
+	void update(Object[] elements, String[] properties);
+
+	IContentProvider getContentProvider();
+
+	Object getInput();
+
+	IBaseLabelProvider getLabelProvider();
+
+	void setLabelProvider(IBaseLabelProvider labelProvider);
+
+	Object getData(String key);
+
+	Item scrollDown(int x, int y);
+
+	Item scrollUp(int x, int y);
+
+	void setData(String key, Object value);
+
+	void setSelection(ISelection selection);
+
+	boolean equals(Object obj);
+
+	int hashCode();
+
+	String toString();
+
+	void setViewerInput(Object input);
+
+	ViewerComparator getComparator();
+
+	IElementComparer getComparer();
+
+	ViewerSorter getSorter();
+
+	void setComparer(IElementComparer comparer);
+
+	void addDragSupport(int operations, Transfer[] transferTypes, DragSourceListener listener);
+
+	void addDropSupport(int operations, Transfer[] transferTypes, DropTargetListener listener);
+
+	Widget[] testFindItems(Object element);
+}

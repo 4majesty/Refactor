@@ -1,0 +1,56 @@
+/*
+ * $Id: GetPersonIdByUsersSysId.java
+ */
+package com.successfactors.platform.api;
+
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Get PersonId by UsersSysId.
+ * 
+ * Success Factors
+ */
+public class GetPersonIdByUsersSysId implements ServiceCommand<Long> {
+
+  /**
+   * UsersSysId
+   */
+  private final String usersSysId;
+
+  /**
+   * If this parameter is true, it will query per_person by person_id_external if no emp_employment_info record is found.
+   */
+  private final boolean getByPersonIdExternal;
+
+  /**
+   * constructor
+   * 
+   * @param usersSysId
+   *          usersSysId
+   */
+  public GetPersonIdByUsersSysId(final String usersSysId) {
+    this.usersSysId = usersSysId;
+    this.getByPersonIdExternal = false;
+  }
+
+  /**
+   * constructor
+   * 
+   * @param usersSysId
+   *          usersSysId
+   * @param getByPersonIdExternal
+   *          If this parameter is true, it will query per_person by person_id_external if no emp_employment_info record is found.
+   */
+  public GetPersonIdByUsersSysId(final String usersSysId, final boolean getByPersonIdExternal) {
+    this.usersSysId = usersSysId;
+    this.getByPersonIdExternal = getByPersonIdExternal;
+  }
+
+  public String getUsersSysId() {
+    return usersSysId;
+  }
+
+  public boolean isGetByPersonIdExternal() {
+    return getByPersonIdExternal;
+  }
+}

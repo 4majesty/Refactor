@@ -1,0 +1,10 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+/**
+ * Program Mentee VO
+ * @author I309618
+ *
+ */
+public class ProgramMenteeVO extends ProgramParticipantVO {
+
+}

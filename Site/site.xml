@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/Feature_1.0.0.201703161313.jar" id="Feature" version="1.0.0.201703161313">
+      <category name="com.successfactors.RefactorAll_1"/>
+   </feature>
+   <category-def name="com.successfactors.RefactorAll_1" label="com.successfactors.RefactorAll_1"/>
+</site>

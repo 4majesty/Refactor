@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+
+public interface IResetAllAction {
+	String getDetailedDescription();
+
+	void setBreakPoint(IJavaProject javaProject);
+
+	void run();
+}

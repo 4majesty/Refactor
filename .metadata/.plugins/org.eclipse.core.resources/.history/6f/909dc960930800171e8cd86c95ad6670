@@ -1,0 +1,25 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.JavaCore;
+
+public interface ICPVariableElement {
+	IPath getPath();
+
+	void setPath(IPath path);
+
+	String getName();
+
+	void setName(String name);
+
+	boolean equals(Object other);
+
+	int hashCode();
+
+	boolean isReadOnly();
+
+	boolean isDeprecated();
+
+	String getDeprecationMessage();
+}

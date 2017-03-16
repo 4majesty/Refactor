@@ -1,0 +1,19 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.service.mentoring.GetMatchingCounts;
+import com.successfactors.cdp.service.util.mentoring.MatchingScoreTypeEnum;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.sql.MDFCriteria;
+import com.successfactors.genericobject.api.sql.MDFResultSet;
+import com.successfactors.genericobject.api.sql.Projections;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+public interface IGetMatchingCountsImpl {
+	GetMatchingCounts execute(GetMatchingCounts cmd) throws ServiceApplicationException;
+}

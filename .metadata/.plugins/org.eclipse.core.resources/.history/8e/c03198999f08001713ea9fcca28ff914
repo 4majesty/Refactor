@@ -1,0 +1,23 @@
+package com.successfactors.cdp.ui.util.mentoring;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionVO;
+import com.successfactors.cdp.bean.mentoring.vo.UserProfileVO;
+import com.successfactors.cdp.service.util.mentoring.MentoringBeanUtils;
+import com.successfactors.datamodel.api.DataModelFacade;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.bean.ObjTemplateBean.Field;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.sca.ServiceApplicationException;
+
+public interface IMentoringViewHelper {
+}

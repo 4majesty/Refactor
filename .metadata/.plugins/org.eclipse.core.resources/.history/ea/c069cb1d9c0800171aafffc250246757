@@ -1,0 +1,196 @@
+/*
+ * $Id$
+ */
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.appsec.HtmlSecUtils;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.service.mentoring.SendMentoringProgramClosureEmail;
+import com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailContent;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailTokenEnum;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailUtils;
+import com.successfactors.genericobject.api.bean.GenericObject;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.app.PrefetchFlags;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.proxy.GenericObjectToLazyBean;
+import com.successfactors.genericobject.service.LoadByObjectTypeExternalCode;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.MailInvalidAddressException;
+import com.successfactors.platform.bean.MailSendException;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import org.jboss.seam.annotations.In;
+
+import javax.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Sends an email to the counterpart mentor or mentee, when: 
+ *  - one closes the relationship
+ *  - one reopens the relationship (after it was closed)
+ * 
+ * Success Factors
+ */
+@Service
+public class SendMentoringProgramClosureEmailImpl implements ServiceCommandImpl<Void, SendMentoringProgramClosureEmail>{
+  /** Logger */
+  private static Logger logger = LogManager.getLogger();
+
+  /** Parameter bean */
+  @Inject
+  @In
+  private ParamBean params;
+  /** Email utility */
+  @Inject
+  @In(create = true)
+  private IMentoringEmailUtils mentoringEmailUtils;
+
+  /** Message resource */
+  @Inject
+  @In(create = true, value = "v10msgs")
+  private IMessageBundle msgs;
+
+  @Inject
+  @In(create=true)
+  private MentoringServiceBase mentoringServiceBase; 
+
+  /** MDF configuration provider */
+  @Inject
+  @In(create = true)
+  private ConfigurationProvider configurationProvider;
+
+  @Inject
+  @In
+  private transient ServiceCommandHandler scaHandler;
+
+
+  public SendMentoringProgramClosureEmailImpl() {
+    super();
+  }
+
+  @Override
+  public Void execute(SendMentoringProgramClosureEmail cmd) throws ServiceApplicationException {
+    MentoringProgramMatchedParticipant mentorship = getMentorshipById(cmd.getMentorshipId());
+    if (mentorship == null) {
+      throw new ServiceApplicationException("Invalid mentorship relationship with id "+cmd.getMentorshipId());
+    }
+    MentorshipStatusEnum status = mentorship.getMentorshipStatus();
+    if (status != MentorshipStatusEnum.CLOSED_BY_MENTEE && 
+        status != MentorshipStatusEnum.CLOSED_BY_MENTOR && 
+        status != MentorshipStatusEnum.ACTIVE) {
+      throw new ServiceApplicationException("Invalid mentorship status for email "+mentorship.getMentorshipStatus());
+    }
+    MentoringProgram program = mentoringServiceBase.getProgramById(cmd.getProgramId());
+    // Load user bean map for login user and mentee recieving approval email
+    Map<String, UserBean> userBeanMap = loadUserBeans(cmd);
+    sendEmail(program, mentorship, userBeanMap, cmd.getRecipientUser(), cmd.getSenderUser(), cmd.isClosureEmail());
+
+    return null;
+  }
+  /**
+   * Loads users beans based on userId
+   * @param users array of user ids to load
+   * @return map of userid per UserBean object
+   * @throws ServiceApplicationException
+   */
+  protected Map<String, UserBean> loadUserBeans(SendMentoringProgramClosureEmail cmd) throws ServiceApplicationException {
+    // Load user bean map for login user and mentee recieving approval email
+    List<String> userIdList = new ArrayList<String>(3);
+    userIdList.add(params.getUserId());
+    userIdList.add(cmd.getRecipientUser());
+    userIdList.add(cmd.getSenderUser());
+
+    return mentoringServiceBase.getUsernameMapByIds(userIdList);
+  }
+  
+  /**
+   * Sends the email to the counter part depending who started the closure
+   * If the closure was initiated by mentee, it sends an email to mentor. And if mentor
+   * it sends to mentee. 
+   * 
+   * @param program
+   * @param mentorship
+   * @param userBeanMap
+   * @throws ServiceApplicationException
+   */
+  protected void sendEmail(MentoringProgram program, MentoringProgramMatchedParticipant mentorship, 
+      Map<String, UserBean> userBeanMap, String recipientUser, String senderUser,  boolean isClosure) throws ServiceApplicationException {
+    UserBean recipient = userBeanMap.get(recipientUser);
+    UserBean sender = userBeanMap.get(senderUser);
+    
+    if (recipient == null) {
+      logger.warn("Not able to send closure email to null recipient");
+      return;
+    }
+
+    try {
+      MentoringEmailContent emailContent = new MentoringEmailContent();
+      emailContent.setSubject(mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTORING_CLOSURE_SUBJECT", recipient.getUserLocale()));
+      emailContent.setBody(isClosure?
+              mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTORING_CLOSURE_BODY", recipient.getUserLocale()):
+              mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTORING_WITHDRAW_BODY", recipient.getUserLocale()));
+      Map<MentoringEmailTokenEnum, String> tokenMap = new HashMap<MentoringEmailTokenEnum, String>();
+
+      if (isClosure) {
+        tokenMap.put(MentoringEmailTokenEnum.CLOSURE_NOTE_SECTION,
+            StringUtils.isEmpty(mentorship.getMentorshipClosureNote())? "" :
+            mentoringServiceBase.getMessageBundleByLocale(recipient.getUserLocale()).format("DEVELOPMENT_MENTORING_CLOSURE_NOTE", new Object[]{escape2HTML(mentorship.getMentorshipClosureNote())}));
+      }
+      tokenMap.put(MentoringEmailTokenEnum.RECIPIENT_NAME, mentoringEmailUtils.escapleHtmlTag(mentoringServiceBase.getLocalizedUserFullName(recipient)));
+      tokenMap.put(MentoringEmailTokenEnum.SENDER_NAME, mentoringEmailUtils.escapleHtmlTag(mentoringServiceBase.getLocalizedUserFullName(sender)));
+      tokenMap.put(MentoringEmailTokenEnum.PROGRAM_NAME, mentoringEmailUtils.generateUrlToken(program, recipient, mentoringEmailUtils.escapleHtmlTag(program.getName())));
+      tokenMap.put(MentoringEmailTokenEnum.PLAIN_PROGRAM_NAME, mentoringEmailUtils.escapleHtmlTag(program.getName()));
+
+      mentoringEmailUtils.sendEmail(emailContent, tokenMap, sender, recipient);
+    } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+      throw new ServiceApplicationException("Failed to generate sign-up URL token: " + e.getMessage(), e);
+    } catch (MailInvalidAddressException | MailSendException me) {
+      throw new ServiceApplicationException("Failed to send closure email to " + recipient.getUserId() + " : " + me.getMessage(), me);
+    }
+
+  }
+  
+  /**
+   * Escapes the text to be used in HTML.
+   * It is important to do it or an JS attack might be created.
+   * @param text
+   */
+  protected String escape2HTML(String text) {
+    return HtmlSecUtils.formatText(text);
+  }
+
+  /**
+   * Loads the MentoringProgramMatchedParticipant object
+   * @param mentorshipId
+   * @return
+   * @throws ServiceApplicationException 
+   */
+  protected MentoringProgramMatchedParticipant getMentorshipById(String externalId) throws ServiceApplicationException {
+    ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgramMatchedParticipant.class);
+    LoadByObjectTypeExternalCode loadByExtCode = new LoadByObjectTypeExternalCode(def, new PrefetchFlags(), externalId);
+    List<GenericObject> gos = scaHandler.execute(loadByExtCode);
+
+    MentoringProgramMatchedParticipant mentorship = null;
+    if (gos.size() > 0) {
+      mentorship = new GenericObjectToLazyBean<MentoringProgramMatchedParticipant>(def).transform(gos.get(0));
+    }
+
+    return mentorship;
+  }
+}

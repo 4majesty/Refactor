@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.text.javadoc;
+
+import java.util.List;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ILegacyJavadocCompletionProposalComputer {
+	List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor);
+
+	List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor);
+
+	String getErrorMessage();
+
+	void sessionStarted();
+
+	void sessionEnded();
+}

@@ -1,0 +1,67 @@
+package org.eclipse.jdt.internal.ui.wizards;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public class NewInterfaceCreationWizard extends NewElementWizard implements INewInterfaceCreationWizard {
+	private INewInterfaceWizardPage fPage;
+
+	private boolean fOpenEditorOnFinish;
+
+	public NewInterfaceCreationWizard(NewInterfaceWizardPage page, boolean openEditorOnFinish) {
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWINT);
+		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
+		setWindowTitle(NewWizardMessages.NewInterfaceCreationWizard_title);
+		fPage= page;
+		fOpenEditorOnFinish= openEditorOnFinish;
+	}
+
+	public NewInterfaceCreationWizard() {
+		this(null, true);
+	}
+
+	@Override
+	public void addPages() {
+		super.addPages();
+		if (fPage == null) {
+			fPage= new NewInterfaceWizardPage();
+			fPage.init(getSelection());
+		}
+		addPage(fPage);
+	}
+
+	protected boolean canRunForked() {
+		return !fPage.isEnclosingTypeSelected();
+	}
+
+	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
+		fPage.createType(monitor);
+	}
+
+	@Override
+	public boolean performFinish() {
+		warnAboutTypeCommentDeprecation();
+		boolean res= super.performFinish();
+		if (res) {
+			IResource resource= fPage.getModifiedResource();
+			if (resource != null) {
+				selectAndReveal(resource);
+				if (fOpenEditorOnFinish) {
+					openResource((IFile)resource);
+				}
+			}
+		}
+		return res;
+	}
+
+	@Override
+	public IJavaElement getCreatedElement() {
+		return fPage.getCreatedType();
+	}
+}

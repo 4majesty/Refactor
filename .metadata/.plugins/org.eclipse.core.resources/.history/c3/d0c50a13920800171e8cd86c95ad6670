@@ -1,0 +1,26 @@
+package org.eclipse.jdt.internal.ui.dnd;
+
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IEditorDescriptor;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.EditorInputTransfer;
+import org.eclipse.ui.part.EditorInputTransfer.EditorInputData;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+
+public interface IEditorInputTransferDragAdapter {
+	Transfer getTransfer();
+
+	void dragStart(DragSourceEvent event);
+
+	void dragSetData(DragSourceEvent event);
+
+	void dragFinished(DragSourceEvent event);
+}

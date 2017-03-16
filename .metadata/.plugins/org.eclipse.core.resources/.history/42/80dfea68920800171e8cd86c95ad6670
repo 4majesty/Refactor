@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IFileTransferDragAdapter {
+	Transfer getTransfer();
+
+	void dragStart(DragSourceEvent event);
+
+	void dragSetData(DragSourceEvent event);
+
+	void dragFinished(DragSourceEvent event);
+}

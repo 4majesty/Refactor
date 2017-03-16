@@ -1,0 +1,68 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import java.util.Date;
+import java.util.List;
+import com.successfactors.cdp.service.util.mentoring.MatchingScoreTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.api.model.Type;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+
+public interface IMentoringProgramMatchedParticipant {
+	Long getRowId();
+
+	void setRowId(Long rowId);
+
+	String getExternalId();
+
+	void setExternalId(String externalCode);
+
+	Long getInternalId();
+
+	void setInternalId(Long internalId);
+
+	String getProgramId();
+
+	void setProgramId(String programId);
+
+	String getMentor();
+
+	void setMentor(String mentorId);
+
+	String getMentee();
+
+	void setMentee(String menteeId);
+
+	Float getMatchingScore();
+
+	void setMatchingScore(Float matchingScore);
+
+	MatchingScoreTypeEnum getMatchingCategory();
+
+	void setMatchingCategory(MatchingScoreTypeEnum matchingCategory);
+
+	List<MentoringProgramSignupFormSection> getMentoringProgramMatchedArea();
+
+	void setMentoringProgramMatchedArea(List<MentoringProgramSignupFormSection> mentoringProgramMatchedArea);
+
+	String getMentorshipClosureNote();
+
+	void setMentorshipClosureNote(String mentorshipClosureNote);
+
+	MentorshipStatusEnum getMentorshipStatus();
+
+	void setMentorshipStatus(MentorshipStatusEnum mentorshipStatus);
+
+	Date getMentorshipClosureDate();
+
+	void setMentorshipClosureDate(Date mentorshipClosureDate);
+
+	Date getMentorshipWithdrawDate();
+
+	void setMentorshipWithdrawDate(Date mentorshipWithdrawDate);
+}

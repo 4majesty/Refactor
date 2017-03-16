@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
+
+public interface IResetAction {
+	String getDetailedDescription();
+
+	void run();
+}

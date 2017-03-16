@@ -1,0 +1,34 @@
+package org.eclipse.jdt.internal.ui.text.template.contentassist;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.text.templates.TemplateVariable;
+import org.eclipse.jface.text.templates.TemplateVariableType;
+
+public interface IMultiVariable {
+	void setChoices(Object key, Object[] values);
+
+	void setKey(Object defaultKey);
+
+	Object getCurrentChoice();
+
+	void setCurrentChoice(Object currentChoice);
+
+	void setValues(String[] values);
+
+	void setChoices(Object[] values);
+
+	String getDefaultValue();
+
+	String toString(Object object);
+
+	String[] getValues();
+
+	Object[] getChoices();
+
+	Object[] getChoices(Object key);
+
+	Object[][] getAllChoices();
+}

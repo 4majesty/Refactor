@@ -1,0 +1,30 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.FieldNameProcessor;
+
+public interface IPromoteTempWizard {
+	void createControl(Composite parent);
+
+	void addDeclareStaticCheckbox(Composite result);
+
+	void setVisible(boolean visible);
+}

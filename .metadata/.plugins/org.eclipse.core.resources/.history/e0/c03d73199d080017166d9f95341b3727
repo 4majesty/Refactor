@@ -1,0 +1,27 @@
+package com.successfactors.cdp.app.mentoring;
+
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.cdp.app.mentoring.IStandardMatchingAlgorithmStrategy;
+
+public interface IStandardMatchingAlgorithmStrategyTest {
+	void setup();
+
+	void testFilterValidUserMap();
+
+	void testEmptyMap();
+
+	void testInvalidUserMenteeMatching();
+
+	void testNoMatching();
+
+	void testNoMentorSlotAvailable();
+
+	void testNeedMenteeContinueMatching();
+
+	void testDecrementCounter();
+
+	void testEmptyDecrementCounter();
+
+	void testCheckMentorAvailable();
+}

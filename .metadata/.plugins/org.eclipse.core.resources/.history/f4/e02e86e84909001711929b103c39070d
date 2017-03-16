@@ -1,0 +1,10 @@
+package com.successfactors.cdp.service.upgrade;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Created by I324657 on 1/23/17.
+ * used for covert dirt competency data saved in mentoringProgramSectionValue
+ * Convert all competencyId to common_compentecyId for MDF mentoringProgramSectionValue object
+ */
+public class CorrectMentoringCompetencyIdToCommonCompetencyId implements ServiceCommand<Void> {
+}

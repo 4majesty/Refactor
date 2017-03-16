@@ -1,0 +1,38 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang.StringUtils;
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.service.mentoring.jam.GetJamBaseURL;
+import com.successfactors.cdp.service.mentoring.jam.GetJamGoToGroupURL;
+import com.successfactors.cdp.service.mentoring.jam.util.JamUtil;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+@Service
+public class GetJamGoToGroupURLImpl implements ServiceQueryImpl<String, GetJamGoToGroupURL> {
+
+  /** logger. */
+  private static Logger log = LogManager.getLogger();
+
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+
+  @Override
+  public String execute(GetJamGoToGroupURL cmd) throws ServiceApplicationException {
+    String baseURL = scaHandler.execute(new GetJamBaseURL());
+
+    if(StringUtils.isBlank(baseURL)) {
+      throw new ServiceApplicationException("Jam Base URL is not configured.");
+    }
+
+    return JamUtil.getGoToGroupUrl(baseURL, cmd.getGroupId());
+  }
+}

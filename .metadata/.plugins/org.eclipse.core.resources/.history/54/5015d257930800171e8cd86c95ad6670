@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.propertiesfileeditor;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ToggleCommentAction;
+
+public interface IPropertiesFileEditor {
+	Object getAdapter(Class adapter);
+
+	int getOrientation();
+}

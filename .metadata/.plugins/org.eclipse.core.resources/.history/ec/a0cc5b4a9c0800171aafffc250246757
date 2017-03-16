@@ -1,0 +1,65 @@
+package com.successfactors.cdp.bean.mentoring.jam;
+
+/**
+ * Jam Feed Widget Info
+ */
+public class JamFeedWidgetInfo {
+
+  /** Feed Javascript URL */
+  private String scriptURL;
+
+  /** Feed API URL */
+  private String apiURL;
+
+  /** Jam Group Id */
+  private String groupId;
+
+  /** Single Use Token for widget authentication */
+  private String singleUseToken;
+  
+  /** group url */
+  private String groupURL;
+
+  public JamFeedWidgetInfo() {
+  }
+
+  public String getScriptURL() {
+    return scriptURL;
+  }
+
+  public String getApiURL() {
+    return apiURL;
+  }
+
+  public String getSingleUseToken() {
+    return singleUseToken;
+  }
+
+  public void setScriptURL(String scriptURL) {
+    this.scriptURL = scriptURL;
+  }
+
+  public void setApiURL(String apiURL) {
+    this.apiURL = apiURL;
+  }
+
+  public void setSingleUseToken(String singleUseToken) {
+    this.singleUseToken = singleUseToken;
+  }
+
+  public String getGroupId() {
+    return groupId;
+  }
+
+  public void setGroupId(String groupId) {
+    this.groupId = groupId;
+  }
+
+  public String getGroupURL() {
+    return groupURL;
+  }
+
+  public void setGroupURL(String groupURL) {
+    this.groupURL = groupURL;
+  }
+}

@@ -1,0 +1,25 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.team.ui.mapping.SynchronizationStateTester;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.ResourceMappingContext;
+import org.eclipse.core.resources.mapping.ResourceTraversal;
+import org.eclipse.jface.viewers.DecorationContext;
+import org.eclipse.jface.viewers.IDecorationContext;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
+
+public interface IHierarchicalDecorationContext {
+	int getState(Object element, int stateMask, IProgressMonitor monitor) throws CoreException;
+
+	Object getModelObject();
+
+	IProject[] getProjects();
+
+	ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException;
+}

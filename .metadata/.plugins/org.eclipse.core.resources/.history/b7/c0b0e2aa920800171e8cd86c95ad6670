@@ -1,0 +1,9 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jdt.ui.wizards.NewPackageWizardPage;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.wizards.NewPackageCreationWizard;
+
+public interface IOpenNewPackageWizardAction {
+	void setConfiguredWizardPage(NewPackageWizardPage page);
+}

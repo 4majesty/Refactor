@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import com.ibm.icu.text.Collator;
+import org.eclipse.ui.IWorkingSet;
+
+public interface IWorkingSetComparator {
+	int compare(Object o1, Object o2);
+}

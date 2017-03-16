@@ -1,0 +1,14 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.edu.ui.controller.exception.ProfileAjaxException;
+import com.successfactors.serialization.SerializationException;
+import java.util.Set;
+
+public interface IDevPlanPortletController {
+	String get(String selectedUserId, String selectedPlanId, int pageNum) throws ProfileAjaxException;
+
+	String getGoalListWithoutPagination(String selectedUserId, String selectedPlanId)
+			throws ProfileAjaxException, SerializationException;
+
+	void saveSelectedPlanId(long planId);
+}

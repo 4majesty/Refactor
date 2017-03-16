@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavaMethodCompletionProposal {
+	void apply(IDocument document, char trigger, int offset);
+
+	int getPrefixCompletionStart(IDocument document, int completionOffset);
+
+	CharSequence getPrefixCompletionText(IDocument document, int completionOffset);
+}

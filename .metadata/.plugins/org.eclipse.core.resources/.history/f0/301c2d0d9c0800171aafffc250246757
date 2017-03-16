@@ -1,0 +1,78 @@
+package com.successfactors.cdp.service.util.deeplink;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.deeplink.annotation.DeepLink;
+import com.successfactors.deeplink.core.DeepLinkKeyMeta;
+import com.successfactors.deeplink.util.deeplink.DeepLinkCreator;
+import com.successfactors.deeplink.util.deeplink.DeepLinkParser;
+import com.successfactors.deeplink.util.deeplink.DeepLinkResolver;
+import com.successfactors.deeplink.util.deeplink.DeepLinkUtil;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.UIVersionManager.UIVersion;
+import com.successfactors.sfutil.util.URICreator;
+import com.successfactors.user.bean.UserBean;
+
+@DeepLink(names = "mentoring")
+public class MentoringResolver implements DeepLinkResolver {
+  /** The primary deep link key */
+  private static final DeepLinkKeyMeta DEEPLINK_KEY = DeepLinkUtil.firstKeyMeta(MentoringResolver.class);
+  
+  /**
+   * Resolves the alias for this resolver and returns the URI creator containing the destination URL.
+   * @param curVersion the current version of the product supported by the company say Ultra or v10.
+   * @param params instance of the params bean for the logged-in user.
+   * @param deepLink the deep link parser that allows parsing the prepared URL.
+   * @return an instance of URICreator that contains the destination URL.
+   */
+  public URICreator resolveAlias(UIVersion curVersion, ParamBean params, DeepLinkParser deepLink) {
+    UserBean user = params.getProxy();
+    String userID = params.getUserId();
+        
+    URICreator uriCreator = new URICreator("/xi/ui/cdp/pages/mentoring/MentorHomePage.xhtml");
+
+    if (deepLink != null) {
+      String programId = deepLink.getProperty("programId");
+      String authToken = deepLink.getProperty("auth_token");
+      
+      if (authToken != null) {
+        if (MentoringUtils.validateToken(user, userID, programId, authToken)){
+          uriCreator.addOptionalParam("auth_token", deepLink.getProperty("auth_token"));
+          
+          if (programId != null){
+             uriCreator.addOptionalParam("programId", deepLink.getProperty("programId"));
+          }
+        } else {
+          uriCreator.addOptionalParam("programId", "-1");
+        }
+      } else {
+        if (programId != null) {
+          uriCreator.addOptionalParam("programId", deepLink.getProperty("programId"));
+        }
+      }
+    }
+
+    return uriCreator;
+  }
+
+  /**
+   * Generate mentor/mentee homepage URL of a specific program
+   * @param params Parameter bean
+   * @param loginUser Login user
+   * @param programId Mentoring program external ID
+   * @return Mentor/mentee homepage URL
+   * @throws NoSuchAlgorithmException
+   * @throws UnsupportedEncodingException
+   */
+  public static final URL generateHomepageUrl(ParamBean params, UserBean loginUser, String programId)
+    throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    DeepLinkCreator creator = new DeepLinkCreator(DEEPLINK_KEY);
+    creator.addProperty("auth_token", MentoringUtils.generateSignupUrlToken(loginUser.getUserId(), programId));
+    creator.addProperty("programId", programId);
+
+    return DeepLinkUtil.createFullDeepLink(params, loginUser.getUsername(), creator);
+  }
+}

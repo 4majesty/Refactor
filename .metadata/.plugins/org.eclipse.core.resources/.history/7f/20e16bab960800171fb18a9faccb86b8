@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IReorgUserInputPage {
+	void createControl(Composite parent);
+}

@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.VariableBlock;
+
+public interface IClasspathVariablesPreferencePage {
+	void createControl(Composite parent);
+
+	void init(IWorkbench workbench);
+
+	boolean performOk();
+
+	void setVisible(boolean visible);
+
+	void applyData(Object data);
+}

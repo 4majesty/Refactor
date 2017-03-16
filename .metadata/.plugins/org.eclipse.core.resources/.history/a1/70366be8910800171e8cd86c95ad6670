@@ -1,0 +1,30 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import java.util.Iterator;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.JavaCore;
+
+public interface IJavaMarkerAnnotation {
+	String[] getArguments();
+
+	int getId();
+
+	boolean isProblem();
+
+	void setOverlay(IJavaAnnotation javaAnnotation);
+
+	boolean hasOverlay();
+
+	IJavaAnnotation getOverlay();
+
+	void addOverlaid(IJavaAnnotation annotation);
+
+	void removeOverlaid(IJavaAnnotation annotation);
+
+	Iterator getOverlaidIterator();
+
+	ICompilationUnit getCompilationUnit();
+
+	String getMarkerType();
+}

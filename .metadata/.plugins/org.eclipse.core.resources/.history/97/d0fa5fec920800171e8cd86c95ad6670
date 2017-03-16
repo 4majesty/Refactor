@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+public interface IFoldingActionGroup {
+	void update();
+
+	void dispose();
+
+	void fillMenu(IMenuManager manager);
+
+	void updateActionBars();
+}

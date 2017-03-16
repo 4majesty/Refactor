@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IComboDialogField;
+
+public interface IAccessRuleEntryDialog {
+	void dialogFieldChanged(DialogField field);
+
+	IAccessRule getRule();
+}

@@ -1,0 +1,8 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IGenerateToStringAction {
+}

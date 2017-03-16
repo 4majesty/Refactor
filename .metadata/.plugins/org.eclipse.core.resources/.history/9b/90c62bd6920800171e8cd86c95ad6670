@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IEditWorkingSetAction {
+	void run();
+}

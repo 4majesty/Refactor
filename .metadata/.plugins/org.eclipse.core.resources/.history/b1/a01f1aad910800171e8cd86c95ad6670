@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+public interface IBasicElementLabels {
+}

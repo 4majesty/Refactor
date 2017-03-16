@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.IChangeSignatureProcessor;
+
+public interface IChangeSignatureWizard {
+	void createControl(Composite parent);
+
+	void dispose();
+}

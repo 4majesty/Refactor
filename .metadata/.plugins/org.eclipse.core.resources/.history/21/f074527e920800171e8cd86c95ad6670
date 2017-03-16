@@ -1,0 +1,31 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
+
+public interface IClassFileEditor {
+	Control createControl(Composite parent);
+
+	void propertyChange(PropertyChangeEvent event);
+
+	void run();
+
+	void post(IClassFileEditorInput input);
+
+	void editorContextMenuAboutToShow(IMenuManager menu);
+
+	boolean isEditable();
+
+	boolean isEditorInputReadOnly();
+
+	void createPartControl(Composite parent);
+
+	void inputChanged(IClassFileEditorInput input);
+
+	void dispose();
+
+	void setFocus();
+}

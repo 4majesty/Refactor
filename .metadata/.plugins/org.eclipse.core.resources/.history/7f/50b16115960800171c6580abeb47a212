@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.corext.refactoring.util;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+
+public interface IChanges {
+}

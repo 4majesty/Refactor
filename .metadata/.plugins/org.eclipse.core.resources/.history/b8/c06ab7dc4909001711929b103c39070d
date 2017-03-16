@@ -1,0 +1,19 @@
+package com.successfactors.cdp.service;
+
+import java.util.List;
+import com.successfactors.cdp.bean.AutoCompleteRoleSearchVO;
+import com.successfactors.sca.ServiceQuery;
+
+public interface IAutoCompleteRoleSearch {
+	long getTemplateId();
+
+	void setTemplateId(long templateId);
+
+	String getUserId();
+
+	void setUserId(String userId);
+
+	String getKeyword();
+
+	void setKeyword(String roleName);
+}

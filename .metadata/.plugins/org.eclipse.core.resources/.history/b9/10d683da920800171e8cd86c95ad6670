@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.jdt.core.JavaCore;
+
+public interface IFilterUpdater {
+	void resourceChanged(IResourceChangeEvent event);
+}

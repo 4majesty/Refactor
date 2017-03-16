@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import java.util.List;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+
+public interface IClasspathOrderingWorkbookPage {
+	Control getControl(Composite parent);
+
+	List getSelection();
+
+	void setSelection(List selElements, boolean expand);
+
+	boolean isEntryKind(int kind);
+
+	void init(IJavaProject javaProject);
+
+	void setFocus();
+}

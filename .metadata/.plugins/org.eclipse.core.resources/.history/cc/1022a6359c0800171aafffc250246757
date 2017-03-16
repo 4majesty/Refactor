@@ -1,0 +1,31 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
+import org.jboss.seam.annotations.In;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.cdp.service.mentoring.jam.GetJamGoToGroupURL;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupAddAdminFailureEmail;
+import com.successfactors.cdp.service.mentoring.jam.util.JamUtil;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailUtils;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.service.FindUsersByIds;
+import com.successfactors.cdp.service.util.mentoring.email.IMentoringEmailUtils;
+
+public interface ISendJamGroupAddAdminFailureEmailImpl {
+	Void execute(SendJamGroupAddAdminFailureEmail cmd) throws ServiceApplicationException;
+}

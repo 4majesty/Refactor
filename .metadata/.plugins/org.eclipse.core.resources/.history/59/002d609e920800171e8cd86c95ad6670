@@ -1,0 +1,328 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+
+public class MembersOrderPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IMembersOrderPreferencePage {
+	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.MembersOrderPreferencePage";
+
+	private static final String ALL_SORTMEMBER_ENTRIES= "T,SI,SF,SM,I,F,C,M";
+
+	private static final String ALL_VISIBILITY_ENTRIES= "B,V,R,D";
+
+	private static final String PREF_OUTLINE_SORT_OPTION= PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER;
+
+	private static final String PREF_VISIBILITY_SORT_OPTION= PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER;
+
+	private static final String PREF_USE_VISIBILITY_SORT_OPTION= PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER;
+
+	public static final String CONSTRUCTORS= "C";
+
+	public static final String FIELDS= "F";
+
+	public static final String METHODS= "M";
+
+	public static final String STATIC_METHODS= "SM";
+
+	public static final String STATIC_FIELDS= "SF";
+
+	public static final String INIT= "I";
+
+	public static final String STATIC_INIT= "SI";
+
+	public static final String TYPES= "T";
+
+	public static final String PUBLIC= "B";
+
+	public static final String PRIVATE= "V";
+
+	public static final String PROTECTED= "R";
+
+	public static final String DEFAULT= "D";
+
+	private boolean fUseVisibilitySort;
+
+	private IListDialogField fSortOrderList;
+
+	private ListDialogField fVisibilityOrderList;
+
+	private SelectionButtonDialogField fUseVisibilitySortField;
+
+	private static boolean isValidEntries(List entries, String entryString) {
+		StringTokenizer tokenizer= new StringTokenizer(entryString, ",");
+		int i= 0;
+		for (; tokenizer.hasMoreTokens(); i++) {
+			String token= tokenizer.nextToken();
+			if (!entries.contains(token))
+				return false;
+		}
+		return i == entries.size();
+	}
+
+	public MembersOrderPreferencePage() {
+		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
+		setDescription(PreferencesMessages.MembersOrderPreferencePage_label_description);
+		String memberSortString= getPreferenceStore().getString(PREF_OUTLINE_SORT_OPTION);
+		String upLabel= PreferencesMessages.MembersOrderPreferencePage_category_button_up;
+		String downLabel= PreferencesMessages.MembersOrderPreferencePage_category_button_down;
+		fSortOrderList= new ListDialogField(null, new String[] { upLabel, downLabel }, new MemberSortLabelProvider());
+		fSortOrderList.setDownButtonIndex(1);
+		fSortOrderList.setUpButtonIndex(0);
+		List entries= parseList(memberSortString);
+		if (!isValidEntries(entries, ALL_SORTMEMBER_ENTRIES)) {
+			memberSortString= getPreferenceStore().getDefaultString(PREF_OUTLINE_SORT_OPTION);
+			entries= parseList(memberSortString);
+		}
+		fSortOrderList.setElements(entries);
+		fUseVisibilitySort= getPreferenceStore().getBoolean(PREF_USE_VISIBILITY_SORT_OPTION);
+		String visibilitySortString= getPreferenceStore().getString(PREF_VISIBILITY_SORT_OPTION);
+		upLabel= PreferencesMessages.MembersOrderPreferencePage_visibility_button_up;
+		downLabel= PreferencesMessages.MembersOrderPreferencePage_visibility_button_down;
+		fVisibilityOrderList= new ListDialogField(null, new String[] { upLabel, downLabel }, new VisibilitySortLabelProvider());
+		fVisibilityOrderList.setDownButtonIndex(1);
+		fVisibilityOrderList.setUpButtonIndex(0);
+		entries= parseList(visibilitySortString);
+		if (!isValidEntries(entries, ALL_VISIBILITY_ENTRIES)) {
+			visibilitySortString= getPreferenceStore().getDefaultString(PREF_VISIBILITY_SORT_OPTION);
+			entries= parseList(visibilitySortString);
+		}
+		fVisibilityOrderList.setElements(entries);
+	}
+
+	private static List parseList(String string) {
+		StringTokenizer tokenizer= new StringTokenizer(string, ",");
+		List entries= new ArrayList();
+		for (int i= 0; tokenizer.hasMoreTokens(); i++) {
+			String token= tokenizer.nextToken();
+			entries.add(token);
+		}
+		return entries;
+	}
+
+	@Override
+	public void createControl(Composite parent) {
+		super.createControl(parent);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.SORT_ORDER_PREFERENCE_PAGE);
+	}
+
+	protected Control createContents(Composite parent) {
+		Composite sortComposite= new Composite(parent, SWT.NONE);
+		sortComposite.setFont(parent.getFont());
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 2;
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		sortComposite.setLayout(layout);
+		GridData gd= new GridData();
+		gd.verticalAlignment= GridData.FILL;
+		gd.horizontalAlignment= GridData.FILL_HORIZONTAL;
+		sortComposite.setLayoutData(gd);
+		createListDialogField(sortComposite, fSortOrderList);
+		fUseVisibilitySortField= new SelectionButtonDialogField(SWT.CHECK);
+		fUseVisibilitySortField.setDialogFieldListener(new IDialogFieldListener() {
+			public void dialogFieldChanged(DialogField field) {
+				fVisibilityOrderList.setEnabled(fUseVisibilitySortField.isSelected());
+			}
+		});
+		fUseVisibilitySortField.setLabelText(PreferencesMessages.MembersOrderPreferencePage_usevisibilitysort_label);
+		fUseVisibilitySortField.doFillIntoGrid(sortComposite, 2);
+		fUseVisibilitySortField.setSelection(fUseVisibilitySort);
+		createListDialogField(sortComposite, fVisibilityOrderList);
+		fVisibilityOrderList.setEnabled(fUseVisibilitySortField.isSelected());
+		Dialog.applyDialogFont(sortComposite);
+		return sortComposite;
+	}
+
+	private void createListDialogField(Composite composite, ListDialogField dialogField) {
+		Control list= dialogField.getListControl(composite);
+		GridData gd= new GridData();
+		gd.horizontalAlignment= GridData.FILL;
+		gd.grabExcessHorizontalSpace= true;
+		gd.verticalAlignment= GridData.FILL;
+		gd.grabExcessVerticalSpace= true;
+		gd.widthHint= convertWidthInCharsToPixels(50);
+		list.setLayoutData(gd);
+		Composite buttons= dialogField.getButtonBox(composite);
+		gd= new GridData();
+		gd.horizontalAlignment= GridData.FILL;
+		gd.grabExcessHorizontalSpace= false;
+		gd.verticalAlignment= GridData.FILL;
+		gd.grabExcessVerticalSpace= true;
+		buttons.setLayoutData(gd);
+	}
+
+	@Override
+	public void init(IWorkbench workbench) {
+	}
+
+	protected void performDefaults() {
+		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		String str= prefs.getDefaultString(PREF_OUTLINE_SORT_OPTION);
+		if (str != null)
+			fSortOrderList.setElements(parseList(str));
+		else
+			fSortOrderList.setElements(parseList(ALL_SORTMEMBER_ENTRIES));
+		str= prefs.getDefaultString(PREF_VISIBILITY_SORT_OPTION);
+		if (str != null)
+			fVisibilityOrderList.setElements(parseList(str));
+		else
+			fVisibilityOrderList.setElements(parseList(ALL_VISIBILITY_ENTRIES));
+		fUseVisibilitySortField.setSelection(prefs.getDefaultBoolean(PREF_USE_VISIBILITY_SORT_OPTION));
+		super.performDefaults();
+	}
+
+	@Override
+	public boolean performOk() {
+		IPreferenceStore store= getPreferenceStore();
+		updateList(store, fSortOrderList, PREF_OUTLINE_SORT_OPTION);
+		updateList(store, fVisibilityOrderList, PREF_VISIBILITY_SORT_OPTION);
+		store.setValue(PREF_USE_VISIBILITY_SORT_OPTION, fUseVisibilitySortField.isSelected());
+		JavaPlugin.getDefault().savePluginPreferences();
+		return true;
+	}
+
+	private void updateList(IPreferenceStore store, ListDialogField list, String str) {
+		StringBuffer buf= new StringBuffer();
+		List curr= list.getElements();
+		for (Iterator iter= curr.iterator(); iter.hasNext();) {
+			String s= (String)iter.next();
+			buf.append(s);
+			buf.append(',');
+		}
+		store.setValue(str, buf.toString());
+	}
+
+	private class MemberSortLabelProvider extends LabelProvider {
+		public MemberSortLabelProvider() {
+		}
+
+		@Override
+		public Image getImage(Object element) {
+			ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
+			ImageDescriptor descriptor= null;
+			if (element instanceof String) {
+				int visibility= Flags.AccPublic;
+				String s= (String)element;
+				if (s.equals(FIELDS)) {
+					descriptor= JavaElementImageProvider.getFieldImageDescriptor(false, visibility);
+				} else if (s.equals(CONSTRUCTORS)) {
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
+					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
+				} else if (s.equals(METHODS)) {
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
+				} else if (s.equals(STATIC_FIELDS)) {
+					descriptor= JavaElementImageProvider.getFieldImageDescriptor(false, visibility);
+					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
+				} else if (s.equals(STATIC_METHODS)) {
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
+					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
+				} else if (s.equals(INIT)) {
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
+				} else if (s.equals(STATIC_INIT)) {
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, visibility);
+					descriptor= new JavaElementImageDescriptor(descriptor, JavaElementImageDescriptor.STATIC, JavaElementImageProvider.SMALL_SIZE);
+				} else if (s.equals(TYPES)) {
+					descriptor= JavaElementImageProvider.getTypeImageDescriptor(true, false, Flags.AccPublic, false);
+				} else {
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccPublic);
+				}
+				return registry.get(descriptor);
+			}
+			return null;
+		}
+
+		@Override
+		public String getText(Object element) {
+			if (element instanceof String) {
+				String s= (String)element;
+				if (s.equals(FIELDS)) {
+					return PreferencesMessages.MembersOrderPreferencePage_fields_label;
+				} else if (s.equals(METHODS)) {
+					return PreferencesMessages.MembersOrderPreferencePage_methods_label;
+				} else if (s.equals(STATIC_FIELDS)) {
+					return PreferencesMessages.MembersOrderPreferencePage_staticfields_label;
+				} else if (s.equals(STATIC_METHODS)) {
+					return PreferencesMessages.MembersOrderPreferencePage_staticmethods_label;
+				} else if (s.equals(CONSTRUCTORS)) {
+					return PreferencesMessages.MembersOrderPreferencePage_constructors_label;
+				} else if (s.equals(INIT)) {
+					return PreferencesMessages.MembersOrderPreferencePage_initialisers_label;
+				} else if (s.equals(STATIC_INIT)) {
+					return PreferencesMessages.MembersOrderPreferencePage_staticinitialisers_label;
+				} else if (s.equals(TYPES)) {
+					return PreferencesMessages.MembersOrderPreferencePage_types_label;
+				}
+			}
+			return "";
+		}
+	}
+
+	private class VisibilitySortLabelProvider extends LabelProvider {
+		public VisibilitySortLabelProvider() {
+		}
+
+		@Override
+		public Image getImage(Object element) {
+			ImageDescriptorRegistry registry= JavaPlugin.getImageDescriptorRegistry();
+			ImageDescriptor descriptor= null;
+			if (element instanceof String) {
+				String s= (String)element;
+				if (s.equals(PUBLIC)) {
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccPublic);
+				} else if (s.equals(PRIVATE)) {
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccPrivate);
+				} else if (s.equals(PROTECTED)) {
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccProtected);
+				} else if (s.equals(DEFAULT)) {
+					descriptor= JavaElementImageProvider.getMethodImageDescriptor(false, Flags.AccDefault);
+				}
+				return registry.get(descriptor);
+			}
+			return null;
+		}
+
+		@Override
+		public String getText(Object element) {
+			if (element instanceof String) {
+				String s= (String)element;
+				if (s.equals(PUBLIC)) {
+					return PreferencesMessages.MembersOrderPreferencePage_public_label;
+				} else if (s.equals(PRIVATE)) {
+					return PreferencesMessages.MembersOrderPreferencePage_private_label;
+				} else if (s.equals(PROTECTED)) {
+					return PreferencesMessages.MembersOrderPreferencePage_protected_label;
+				} else if (s.equals(DEFAULT)) {
+					return PreferencesMessages.MembersOrderPreferencePage_default_label;
+				}
+			}
+			return "";
+		}
+	}
+}

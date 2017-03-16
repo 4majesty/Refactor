@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
+
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManager;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ISuperTypeRefactoringProcessor {
+	boolean isInstanceOf();
+
+	boolean isReplace();
+
+	void setInstanceOf(final boolean rewrite);
+
+	void setReplace(final boolean replace);
+}

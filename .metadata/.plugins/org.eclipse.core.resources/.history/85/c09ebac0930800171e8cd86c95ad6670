@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+
+public interface INewSearchViewActionGroup {
+}

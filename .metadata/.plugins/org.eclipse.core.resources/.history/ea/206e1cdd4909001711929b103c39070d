@@ -1,0 +1,50 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.List;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.sca.ServiceQuery;
+
+public class GetSkillList implements ServiceQuery<GetSkillList> {
+    private boolean hasPickList;
+    private String sectionId;
+    private String sectionLabel;
+    private List<MentoringProgramSignupFormSectionValue> sectionValues;
+    private String type;
+    
+    
+    public boolean isHasPickList() {
+        return hasPickList;
+    }
+    public void setHasPickList(boolean hasPickList) {
+        this.hasPickList = hasPickList;
+    }
+    public String getSectionId() {
+        return sectionId;
+    }
+    public void setSectionId(String sectionId) {
+        this.sectionId = sectionId;
+    }
+    public String getSectionLabel() {
+        return sectionLabel;
+    }
+    public void setSectionLabel(String sectionLabel) {
+        this.sectionLabel = sectionLabel;
+    }    
+    public List<MentoringProgramSignupFormSectionValue> getSectionValues() {
+        return sectionValues;
+    }
+    public void setSectionValues(
+            List<MentoringProgramSignupFormSectionValue> sectionValues) {
+        this.sectionValues = sectionValues;
+    }
+    public String getType() {
+        return type;
+    }
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    
+    
+}

@@ -1,0 +1,37 @@
+package org.eclipse.jdt.internal.ui.dnd;
+
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
+
+public interface IJdtViewerDropAdapter {
+	void dragEnter(DropTargetEvent event);
+
+	void dragOperationChanged(DropTargetEvent event);
+
+	void dragOver(DropTargetEvent event);
+
+	void drop(DropTargetEvent event);
+
+	void dropAccept(DropTargetEvent event);
+
+	boolean getFeedbackEnabled();
+
+	boolean performDrop(Object data);
+
+	void setFeedbackEnabled(boolean value);
+
+	void setSelectionFeedbackEnabled(boolean value);
+
+	void setScrollExpandEnabled(boolean value);
+
+	void setExpandEnabled(boolean value);
+
+	void setScrollEnabled(boolean value);
+
+	boolean validateDrop(Object target, int operation, TransferData transferType);
+}

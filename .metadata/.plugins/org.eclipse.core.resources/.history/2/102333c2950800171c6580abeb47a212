@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.corext.refactoring.reorg;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaModelException;
+
+public interface ISourceReferenceUtil {
+}

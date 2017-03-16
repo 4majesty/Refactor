@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface ICallHierarchyUI {
+	int getMaxCallDepth();
+
+	void setMaxCallDepth(int maxCallDepth);
+}

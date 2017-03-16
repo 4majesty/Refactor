@@ -1,0 +1,29 @@
+package org.eclipse.jdt.internal.ui.navigator;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.navigator.CommonActionProvider;
+import org.eclipse.ui.navigator.ICommonActionExtensionSite;
+import org.eclipse.ui.navigator.ICommonViewerWorkbenchSite;
+import org.eclipse.jdt.ui.actions.CCPActionGroup;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup;
+import org.eclipse.jdt.ui.actions.IOpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.ICCPActionGroup;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.IGenerateBuildPathActionGroup;
+import org.eclipse.jdt.ui.actions.IGenerateActionGroup;
+
+public interface IJavaNavigatorActionProvider {
+	void fillActionBars(IActionBars actionBars);
+
+	void fillContextMenu(IMenuManager menu);
+
+	void init(ICommonActionExtensionSite site);
+
+	void setContext(ActionContext context);
+
+	void dispose();
+}

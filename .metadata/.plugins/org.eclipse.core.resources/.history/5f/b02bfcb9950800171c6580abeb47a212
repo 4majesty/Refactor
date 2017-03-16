@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.corext.refactoring.changes;
+
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
+public interface IDynamicValidationRefactoringChange {
+	ChangeDescriptor getDescriptor();
+}

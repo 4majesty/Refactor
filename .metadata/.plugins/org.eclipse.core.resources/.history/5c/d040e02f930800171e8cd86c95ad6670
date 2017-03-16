@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.navigator;
+
+import org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter;
+
+public interface INonEssentialEmptyPackageFilter {
+}

@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.util;
+
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.core.runtime.Assert;
+
+public interface IRowLayouter {
+	void setDefaultSpan();
+
+	void perform(Control c1);
+
+	void perform(Control c1, Control c2, int span);
+
+	void perform(Control c1, Control c2, Control c3, int span);
+
+	void perform(Control[] controls, int spanColumn);
+
+	void setDefaultGridData(GridData gd, int index);
+
+	GridData getGridData(int index);
+
+	int numColumns();
+}

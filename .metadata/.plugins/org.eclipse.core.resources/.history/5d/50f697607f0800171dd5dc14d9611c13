@@ -1,0 +1,84 @@
+package com.successfactors.platform.util;
+
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+
+/** System Properties */
+  public enum AdminSystemPropertiesEnum {
+    /** Company_Process*/
+    COMPANY_PROCESS("ADMIN_COMPANY_PROCESS", "Company_Process", null), 
+    /** Bulletin_Board_Message_Settings*/
+    BULLETIN_BOARD_MESSAGE_SETTINGS("ADMIN_SYSBBS","Bulletin_Board_Message_Settings", null), 
+    /** Password_Policy_Settings*/
+    PASSWORD_POLICY("ADMIN_SYSPPS", "Password_Policy_Settings", null), 
+    /** Company_System_and_Logo_Settings*/
+    COMPANY_SYSTEM_AND_LOGO_SETTINGS("ADMIN_SYSCLS", "Company_System_and_Logo_Settings", null), 
+    /** Email_Notification_Template_Settings*/
+    EMAIL_NOTIFICATION_TEMPLATE_SETTINGS("ADMIN_SYSNTS","Email_Notification_Template_Settings", null), 
+    /** Process_Guide_Settings*/
+    PROCESS_GUIDE_SETTINGS("ADMIN_SYSPGS", "Process_Guide_Settings",null), 
+    /** Help_Link_Settings*/
+    HELP_LINK_SETTINGS("ADMIN_SYSHLS", "Help_Link_Settings", null), 
+    /** Text_Replacement*/
+    TEXT_REP_N_QUICK_LINKS("ADMIN_TEXT_REP_AND_QUICK_LINKS", "Text_Replacement", null), 
+    /** Matrix_Grid_rating_Scales*/
+    MATRIX_GRID_RATING_SCALES("ADMIN_MATRIX_GRID_RATING_SCALES", "Matrix_Grid_rating_Scales", null), 
+    /**Matrix Grid Report*/
+    MATRIX_GRID_REPORT("ADMIN_MATRIX_GRID_TOPIC","Matrix_Grid_Report", null),
+    /** Retirement_Eligibility_Settings*/
+    RETIREMENT_ELIGIBILITY_SETTINGS("ADMIN_RETIREMENT_SETTINGS","Retirement_Eligibility_Settings", null),
+    /** Data Privacy consent statement*/
+    DPCS("ADMIN_SYSDPCS", "Dpcs", null), 
+    /** Data Privacy consent statement 2.0*/
+    DPCS2("ADMIN_SYSDPCS", "Dpcs2",FeatureEnum.ENABLE_DPCS2),
+    /**Company Dictionary*/
+    COMPANY_DICTIONARY("ADMIN_COMPANY_DICTIONARY","company_dictionary",null),
+    /**Change engine configuration*/
+    CHANGE_ENGINE_CONFIG("ADMIN_CHANGE_ENGINE","change_engine_config",null),
+    /**Picklist Mappings Setup*/
+    PICKLIST_MAPPINGS("ADMINV2_PICKLIST_MAPPINGS","picklist_mappings",null),
+    /**Succession Settings*/
+    SUCCESSION_SETTINGS("FB_ADMIN_SUCCESSION_SETTINGS","succession_settings",null),
+    /**Nomination Setup*/
+    NOMINATIONS_SETUP("ADMIN_NOMINATIONS_SETUP","nominations_setup",null),
+    /**Mobile Settings*/
+    //MOBILE_SETTINGS("ADMIN_MOBILE_SETTING_TITLE","mobile_settings",FeatureEnum.ENABLE_MOBILE_ACCESS);
+    MOBILE_SETTINGS("ADMIN_MOBILE_SETTING_TITLE","mobile_settings",null);
+
+    /** message key */
+    private String msgKey;
+
+    /** system property id */
+    private String sysPropId;
+
+    /** dependent feature */
+    private FeatureEnum dependentFeature;
+
+    AdminSystemPropertiesEnum(String msgKey, String sysPropId, FeatureEnum dependentFeature) {
+      this.msgKey = msgKey;
+      this.sysPropId = sysPropId;
+      this.dependentFeature = dependentFeature;
+    }
+    /**
+     * This method gives the msg key for enum
+     * @return Message Key
+     */
+    public String getMsgKey() {
+      return msgKey;
+    }
+    /**
+     * This method gives system property id for enum
+     * @return System property id
+     */
+    public String getSysPropId() {
+      return sysPropId;
+    }
+    /**
+     * This method gives dependent feature
+     * @return returns the dependent feature for enum
+     */
+    public FeatureEnum getDependentFeature() {
+      return dependentFeature;
+    }
+
+  }
+  

@@ -1,0 +1,176 @@
+package com.successfactors.cdp.app.mentoring;
+
+import static org.testng.Assert.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.bean.mentoring.vo.MatchedParticipantVO;
+import com.successfactors.cdp.bean.mentoring.vo.MatchingResult;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.cdp.app.mentoring.IStandardMatchingAlgorithmStrategy;
+
+public class StandardMatchingAlgorithmStrategyTest {
+  private IStandardMatchingAlgorithmStrategy algorithm;
+  
+  @BeforeMethod(groups = { "checkin" })
+  public void setup() {
+    algorithm = new StandardMatchingAlgorithmStrategy(null);
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testFilterValidUserMap() throws ServiceApplicationException{
+    Map<String, UserBean> input = new HashMap<String, UserBean>();
+    Map<String, UserBean> output = new HashMap<String, UserBean>();
+    
+    input.put("user1", createUserBean("user1", UserBeanImpl.FLAG_VALID_USER));
+    input.put("user2", createUserBean("user2", UserBeanImpl.FLAG_INVALID_USER));
+
+    algorithm.filterValidUserMap(input, output);
+    
+    Assert.assertEquals(1, output.size(), "Expecting one valid user");
+  }
+
+  
+  @Test(groups = {"checkin"})
+  public void testEmptyMap() throws ServiceApplicationException{
+    Map<String, UserBean> map = new HashMap<String, UserBean>();
+    algorithm.filterValidUserMap(null, map);
+    
+    Assert.assertTrue(map.isEmpty());
+    
+    algorithm.filterValidUserMap(Collections.EMPTY_MAP, map);
+    Assert.assertTrue(map.isEmpty());
+  }
+
+  @Test(groups = {"checkin"})
+  public void testInvalidUserMenteeMatching() throws ServiceApplicationException{
+    String menteeUserId = "user1";
+    MatchingResult matchingResult = new MatchingResult();
+    Map<String, Set<String>> matched = new HashMap<String, Set<String>>();
+    Map<String, Integer> mentorCounterMap = new HashMap<String, Integer>();
+    
+    boolean result = algorithm.needMenteeContinueMatching(menteeUserId, matchingResult, matched, mentorCounterMap);
+    Assert.assertFalse(result);
+    
+    result =  algorithm.needMenteeContinueMatching(null, matchingResult, matched, mentorCounterMap);
+    Assert.assertFalse(result);
+  }
+
+  @Test(groups = {"checkin"})
+  public void testNoMatching() throws ServiceApplicationException{
+    String menteeUserId = "user1";
+    MatchingResult matchingResult = new MatchingResult();
+    matchingResult.getMatchedParticipantMap().put(menteeUserId, Collections.EMPTY_LIST);
+    Map<String, Set<String>> matched = Collections.EMPTY_MAP;
+    Map<String, Integer> mentorCounterMap = Collections.EMPTY_MAP;
+    
+    boolean result = algorithm.needMenteeContinueMatching(menteeUserId, matchingResult, matched, mentorCounterMap);
+    Assert.assertFalse(result);
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testNoMentorSlotAvailable() throws ServiceApplicationException{
+    String menteeUserId = "mentee1";
+    String mentorId = "mentor1";
+    MatchingResult matchingResult = new MatchingResult();
+    List<MatchedParticipantVO> value = new ArrayList<MatchedParticipantVO>();
+    MatchedParticipantVO mentor = new MatchedParticipantVO();
+    mentor.setMentorId(mentorId);
+    value.add(mentor);
+    matchingResult.getMatchedParticipantMap().put(menteeUserId, value);
+    Map<String, Set<String>> matched = new HashMap<String, Set<String>>();
+    Map<String, Integer> mentorCounterMap = new HashMap<String, Integer>();
+    mentorCounterMap.put(mentorId, 0);
+    
+    boolean result = algorithm.needMenteeContinueMatching(menteeUserId, matchingResult, matched, mentorCounterMap);
+    Assert.assertFalse(result, "Mentor does not have a slot available");
+    
+    result = algorithm.needMenteeContinueMatching(menteeUserId, matchingResult, matched, Collections.EMPTY_MAP);
+    Assert.assertFalse(result, "Shouldnt fail when there is no available mentor counter");
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testNeedMenteeContinueMatching() throws ServiceApplicationException{
+    String menteeUserId = "mentee1";
+    String mentorId = "mentor1";
+    MatchingResult matchingResult = new MatchingResult();
+    List<MatchedParticipantVO> value = new ArrayList<MatchedParticipantVO>();
+    MatchedParticipantVO mentor = new MatchedParticipantVO();
+    mentor.setMentorId(mentorId);
+    value.add(mentor);
+    matchingResult.getMatchedParticipantMap().put(menteeUserId, value);
+    Map<String, Set<String>> matched = new HashMap<String, Set<String>>();
+    Map<String, Integer> mentorCounterMap = new HashMap<String, Integer>();
+    mentorCounterMap.put(mentorId, 1);
+    
+    boolean result = algorithm.needMenteeContinueMatching(menteeUserId, matchingResult, matched, mentorCounterMap);
+    Assert.assertTrue(result);
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testDecrementCounter() throws ServiceApplicationException{
+    String menteeUserId = "mentee1";
+    Map<String, Integer> counter = new HashMap<String, Integer>();
+    counter.put(menteeUserId, 2);
+    
+    Integer value = algorithm.decrementCounter(counter, menteeUserId);
+    Assert.assertEquals(1, value.intValue());
+    value = algorithm.decrementCounter(counter, menteeUserId);
+    Assert.assertEquals(0, value.intValue());
+    value = algorithm.decrementCounter(counter, menteeUserId);
+    Assert.assertEquals(-1, value.intValue());
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testEmptyDecrementCounter() throws ServiceApplicationException{
+    String menteeUserId = "mentee1";
+    Map<String, Integer> counter = new HashMap<String, Integer>();
+    
+    Integer value = algorithm.decrementCounter(counter, menteeUserId);
+    assertNull(value);
+  }
+
+  
+  @Test(groups = {"checkin"})
+  public void testCheckMentorAvailable() throws ServiceApplicationException{
+    String menteeUserId = "mentee";
+    MatchingResult localTempMatchingResult = new MatchingResult();
+    String mentorUserId = "mentor";
+    Map<String, Integer> localMentorCounter = new HashMap();
+    Map<String, Set<String>> localFinalMatchedCombinations = new HashMap();
+    Map<String, Integer> localMenteeCounter = new HashMap();
+    localMentorCounter.put(mentorUserId, 1);
+
+    boolean result = algorithm.checkMentorAvailable(menteeUserId, mentorUserId, localMentorCounter, localTempMatchingResult, localFinalMatchedCombinations, localMenteeCounter);
+    assertTrue(result);
+    
+    localMentorCounter.put(mentorUserId, 0);
+    result = algorithm.checkMentorAvailable(menteeUserId, mentorUserId, localMentorCounter, localTempMatchingResult, localFinalMatchedCombinations, localMenteeCounter);
+    assertFalse(result, "The counter has reached 0, so no more spots");
+    
+    localMentorCounter.clear();
+    result = algorithm.checkMentorAvailable(menteeUserId, mentorUserId, localMentorCounter, localTempMatchingResult, localFinalMatchedCombinations, localMenteeCounter);
+    assertFalse(result, "The counter has reached 0, so no more spots");
+
+  }
+  
+  protected UserBean createUserBean(String userId, String flagValidUser) {
+    UserBean bean1 = new UserBeanImpl();
+    bean1.setUserId(userId);
+    bean1.setUserIsValid(flagValidUser);
+    return bean1;
+  }
+
+    
+}

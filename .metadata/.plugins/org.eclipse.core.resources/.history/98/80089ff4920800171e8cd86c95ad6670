@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jdt.internal.ui.text.template.preferences.ITemplateVariableProcessor;
+
+public interface IEditTemplateDialog {
+	void update();
+
+	void run();
+
+	void create();
+
+	Template getTemplate();
+}

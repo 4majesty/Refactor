@@ -1,0 +1,26 @@
+package com.successfactors.cdp.bean.mentoring.jam;
+
+import java.io.Serializable;
+
+public class ProgramLaunchJamActivityJobPayload implements Serializable {
+
+  /** Default serialVersionUID. */
+  private static final long serialVersionUID = 1L;
+
+  private String programId;
+
+  public ProgramLaunchJamActivityJobPayload() {
+  }
+
+  public ProgramLaunchJamActivityJobPayload(String programId) {
+    this.programId = programId;
+  }
+
+  public String getProgramId() {
+    return programId;
+  }
+
+  public void setProgramId(String programId) {
+    this.programId = programId;
+  }
+}

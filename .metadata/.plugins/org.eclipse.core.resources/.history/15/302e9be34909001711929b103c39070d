@@ -1,0 +1,41 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.OneToMany;
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.api.model.Type;
+
+public interface IMentoringProgramSignupFormSection {
+	Long getRowId();
+
+	void setRowId(Long rowId);
+
+	String getExternalId();
+
+	void setExternalId(String externalCode);
+
+	Long getInternalId();
+
+	void setInternalId(Long internalId);
+
+	String getSectionId();
+
+	void setSectionId(String sectionId);
+
+	List<MentoringProgramSignupFormSectionValue> getSectionValue();
+
+	void setSectionValue(List<MentoringProgramSignupFormSectionValue> sectionValue);
+
+	String getSectionType();
+
+	void setSectionType(String sectionType);
+}

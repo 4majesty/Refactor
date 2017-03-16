@@ -1,0 +1,35 @@
+package com.successfactors.cdp.app.mentoring;
+
+import java.util.Arrays;
+import java.util.List;
+import javax.inject.Inject;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramActivity;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramEmailTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentee;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMenteeSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSendEmailRecord;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSection;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplateSection;
+import com.successfactors.genericobject.bean.model.impl.AbstractMDFEntityRegistry;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+
+public interface IMentoringEntitiesRegisterer {
+	List<Class> getEntitiesToBeRegistered();
+
+	boolean isFeatureEnabled();
+}

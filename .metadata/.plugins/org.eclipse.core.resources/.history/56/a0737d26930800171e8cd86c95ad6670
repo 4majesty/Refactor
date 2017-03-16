@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jface.text.DocumentCommand;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
+import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager.UndoSpec;
+
+public interface ISmartSemicolonAutoEditStrategy {
+	void customizeDocumentCommand(IDocument document, DocumentCommand command);
+}

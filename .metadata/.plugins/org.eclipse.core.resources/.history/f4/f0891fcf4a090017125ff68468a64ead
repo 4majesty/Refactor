@@ -1,0 +1,33 @@
+package com.successfactors.cdp.service.util.deeplink;
+
+import static org.mockito.Mockito.when;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+
+public interface IMentoringProgramManageOtherCheckTest {
+	void setup();
+
+	void tearDown();
+
+	void testFeatureDisabled();
+
+	void testIsAdmin();
+
+	void testIsOwner();
+
+	void testFeatureDisabledForNullObjDefinition();
+}

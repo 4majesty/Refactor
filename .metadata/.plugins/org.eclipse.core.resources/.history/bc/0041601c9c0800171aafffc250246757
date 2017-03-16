@@ -1,0 +1,76 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import javax.persistence.Column;
+import javax.persistence.OneToOne;
+
+import com.successfactors.cdp.service.util.mentoring.ProgramParticipantTypeEnum;
+import com.successfactors.genericobject.api.model.APISubVersion;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.api.model.Type;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import java.util.Date;
+import com.successfactors.genericobject.api.model.DataType;
+
+/**
+ * Program Mentor Entity
+ * @author I309618
+ */
+@MDFEntity(effectiveDating = EffectiveDating.FROM_PARENT, apiVisibility = APIVisibility.EDITABLE, apiSubVersion = APISubVersion.V1_0)
+public class MentoringProgramMentor extends MentoringProgramParticipant<MentoringProgramMentorSignupForm> {
+  /** signupForm */
+  @OneToOne()
+  @AssociationType(type = Type.COMPOSITE)
+  @Field(visibility = Visibility.EDITABLE)
+  private MentoringProgramMentorSignupForm signupForm;
+
+  /** mentor's available end date */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD10, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date unavailableEndDate;
+
+  /**
+   * set type as mentor when create a MentoringProgramMentor
+   * 
+   */
+  public MentoringProgramMentor() {
+    this.setType(ProgramParticipantTypeEnum.MENTOR);
+  }
+ 
+  /**
+   * getSignupForm
+   * @return signupForm
+   */
+  @Override
+  public MentoringProgramMentorSignupForm getSignupForm() {
+    return signupForm;
+  }
+/**
+ * setSignupForm
+ * @param signupForm
+ */
+  @Override
+  public void setSignupForm(MentoringProgramMentorSignupForm signupForm) {
+    this.signupForm = signupForm;
+  }
+
+    /**
+     * getUnavailableEndDate
+     * @return unavailableEndDate
+     */
+  public Date getUnavailableEndDate() {
+    return unavailableEndDate;
+  }
+
+    /**
+     * setUnavailableEndDate
+     * @param unavailableEndDate unavailableEndDate
+     */
+  public void setUnavailableEndDate(Date unavailableEndDate) {
+    this.unavailableEndDate = unavailableEndDate;
+  }
+}

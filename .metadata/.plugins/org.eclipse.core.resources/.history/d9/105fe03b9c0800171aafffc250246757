@@ -1,0 +1,120 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.platform.bean.ParamBean;
+
+/**
+ * @Author Frank Peng
+ * 12/19/16.
+ */
+public class MentoringPermissionChecker {
+
+  private MentoringPermissionChecker() {
+
+  }
+
+  /**
+   * check whether mentoring features enabled for the current company
+   *
+   * @param params
+   * @return boolean
+   */
+  public static boolean isMentoringFeatureEnabled(ParamBean params) {
+    CompanyBean c = params.getCompanyBean();
+    if (c != null) {
+      return c.isFeatureExist(FeatureEnum.CDP_MENTORING) &&
+              c.isFeatureExist(FeatureEnum.ROLE_BASED_PERMISSION) &&
+              c.isFeatureExist(FeatureEnum.GENERIC_OBJECTS) &&
+              c.isFeatureExist(FeatureEnum.ATTACHMENT_MANAGE);
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * check whether the login/proxied user has mentoring admin permission
+   *
+   * @param params
+   * @param permList
+   * @return boolean
+   */
+  public static boolean hasMentoringAdminPermission(ParamBean params, PermissionListBean permList) {
+    if (permList == null || params == null) {
+      return false;
+    }
+    if (permList.hasPermission(PermissionBean.ADMIN, PermissionBean.GENERAL_ADMIN, 0)) {
+      return true;
+    }
+    if (permList.hasPermission(PermissionBean.ADMIN, PermissionBean.DEVELOPMENT_ADMIN, 0)) {
+      return true;
+    }
+    if (permList.hasPermission(PermissionBean.DEVELOPMENT_ADMIN, PermissionBean.MANAGE_CDP_MENTORING_PROGRAM, 0)) {
+      return true;
+    }
+    return false;
+  }
+
+  public static boolean hasMentoringAccessPermission(ParamBean params, PermissionListBean permList) {
+    if (permList == null || params == null) {
+      return false;
+    }
+    if (permList.hasPermission(PermissionBean.CDP_ACCESS, PermissionBean.ACCESS_CDP_MENTORING_PROGRAM, 0)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * check whether the user can manage specified program
+   *
+   * @param params
+   * @param permList
+   * @param program
+   * @return true if user is admin or program owner
+   */
+  public static boolean hasProgramManagePermission(ParamBean params, PermissionListBean permList, MentoringProgram program) {
+    if (hasMentoringAdminPermission(params, permList)) {
+      return true;
+    }
+    if (program != null) {
+      String userId = params.getUserId();
+      for (MentoringProgramOwner owner : program.getOwners()) {
+        if (userId.equals(owner.getUser())) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @param fieldName
+   * @param programStatus
+   * @param matchingType
+   * @return
+   */
+  public static boolean hasFieldEditPermission(String fieldName, ProgramStatusEnum programStatus, ProgramMatchingTypeEnum matchingType) {
+    if (StringUtils.isBlank(fieldName)) {
+      return false;
+    }
+    FieldEditPermissionEnum targetField = FieldEditPermissionEnum.valueOf(fieldName.toUpperCase());
+    if (targetField != null) {
+      switch (matchingType) {
+        case SUPERVISED:
+          return targetField.getAllowEditStatusForSupervised().contains(programStatus);
+        case UNSUPERVISED:
+          return targetField.getAllowEditStatusForUnsupervised().contains(programStatus);
+        case OPEN_ENDED:
+          return targetField.getAllowEditStatusForOpenEnded().contains(programStatus);
+      }
+    }
+    return false;
+  }
+
+}

@@ -1,0 +1,6 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jdt.internal.ui.search.SearchUtil;
+
+public interface IFindImplementorsInWorkingSetAction {
+}

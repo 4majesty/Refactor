@@ -1,0 +1,15 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * @Author I324657
+ * 2/9/17
+ */
+public class MentoringCancelScheduleJob implements ServiceCommand<Void> {
+
+  public MentoringCancelScheduleJob(){
+
+  }
+
+}

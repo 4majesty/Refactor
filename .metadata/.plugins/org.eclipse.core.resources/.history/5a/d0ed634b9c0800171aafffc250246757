@@ -1,0 +1,110 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.OneToMany;
+
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.genericobject.api.model.APISubVersion;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.api.model.Type;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+
+/**
+ * Program Signup Form Template Entity
+ * 
+ * @author I309618
+ * 
+ */
+@MDFEntity(effectiveDating = EffectiveDating.FROM_PARENT, apiVisibility = APIVisibility.EDITABLE, apiSubVersion = APISubVersion.V1_0)
+public class MentoringProgramSignupTemplate extends AuditFields {
+
+    // System Fields
+    /** External Code. */
+    @Column(name = GENERIC_OBJECT_T.EXTERNAL_CODE, nullable = false)
+    @Field(visibility = Visibility.READ_ONLY, dataType = DataType.AUTO_NUMBER)
+    protected String externalId;
+
+    /** Internal Id. */
+    @Column(name = GENERIC_OBJECT_T.INTERNAL_ID)
+    @Field(visibility = Visibility.NOT_VISIBLE)
+    protected Long internalId;
+
+    /** Row ID **/
+    @Column(name = GENERIC_OBJECT_T.ROW_ID)
+    @Field(visibility = Visibility.NOT_VISIBLE)
+    private int rowId;
+
+    // Business Fields
+    /** sections */
+    @OneToMany()
+    @AssociationType(type = Type.COMPOSITE)
+    @Field(visibility = Visibility.EDITABLE)
+    private List<MentoringProgramSignupTemplateSection> sections;
+    
+    // Access Methods
+    /**
+     * getRowId
+     * @return rowId
+     */
+    public int getRowId() {
+        return rowId;
+    }
+   /**
+    * setRowId
+    * @param rowId rowId
+    */
+    public void setRowId(int rowId) {
+        this.rowId = rowId;
+    }
+    /**
+     * getExternalId
+     * @return externalId
+     */
+    public String getExternalId() {
+        return externalId;
+    }
+    /**
+     * setExternalId
+     * @param externalCode externalCode
+     */
+    public void setExternalId(String externalCode) {
+        this.externalId = externalCode;
+    }
+    /**
+     * getInternalId
+     * @return internalId
+     */
+    public Long getInternalId() {
+        return internalId;
+    }
+    /**
+     * internalId
+     * @param internalId internalId
+     */
+    public void setInternalId(Long internalId) {
+        this.internalId = internalId;
+    }
+    /**
+     * getSections
+     * @return sections
+     */
+    public List<MentoringProgramSignupTemplateSection> getSections() {
+        return sections;
+    }
+    /**
+     * setSections
+     * @param sections sections
+     */
+    public void setSections(List<MentoringProgramSignupTemplateSection> sections) {
+        this.sections = sections;
+    }
+
+}

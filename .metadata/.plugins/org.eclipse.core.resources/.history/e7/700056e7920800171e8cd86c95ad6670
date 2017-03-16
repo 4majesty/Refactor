@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+
+public interface IJavaTextSelection {
+	IJavaElement[] resolveElementAtOffset();
+
+	IJavaElement resolveEnclosingElement();
+
+	CompilationUnit resolvePartialAstAtOffset();
+
+	ASTNode[] resolveSelectedNodes();
+
+	ASTNode resolveCoveringNode();
+
+	boolean resolveInMethodBody();
+
+	boolean resolveInClassInitializer();
+
+	boolean resolveInVariableInitializer();
+}

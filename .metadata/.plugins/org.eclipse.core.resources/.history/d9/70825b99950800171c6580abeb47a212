@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+
+public interface IParameterTypeVariable2 {
+	void setCompilationUnit(ICompilationUnit cu);
+
+	ICompilationUnit getCompilationUnit();
+
+	int getParameterIndex();
+
+	String getKey();
+
+	int hashCode();
+
+	boolean equals(Object other);
+
+	String toString();
+}

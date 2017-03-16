@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.TypedPosition;
+import org.eclipse.jface.text.formatter.ContextBasedFormattingStrategy;
+import org.eclipse.jface.text.formatter.FormattingContextProperties;
+import org.eclipse.jface.text.formatter.IFormattingContext;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavaFormattingStrategy {
+	void format();
+
+	void formatterStarts(final IFormattingContext context);
+
+	void formatterStops();
+}

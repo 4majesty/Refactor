@@ -1,0 +1,33 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import java.text.CharacterIterator;
+import com.ibm.icu.text.BreakIterator;
+import org.eclipse.core.runtime.Assert;
+
+public interface IJavaBreakIterator {
+	int current();
+
+	int first();
+
+	int following(int offset);
+
+	CharacterIterator getText();
+
+	boolean isBoundary(int offset);
+
+	int last();
+
+	int next();
+
+	int next(int n);
+
+	int preceding(int offset);
+
+	int previous();
+
+	void setText(String newText);
+
+	void setText(CharSequence newText);
+
+	void setText(CharacterIterator newText);
+}

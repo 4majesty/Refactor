@@ -1,0 +1,7 @@
+package com.successfactors.cdp.ui.controller;
+
+import java.util.Set;
+
+public interface ICDPDevGoalController {
+	String getDefaultDevGoalList(String selectedUserId);
+}

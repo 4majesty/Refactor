@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+
+public interface IConstructorFromSuperclassProposal {
+	Image getImage();
+
+	String getName();
+}

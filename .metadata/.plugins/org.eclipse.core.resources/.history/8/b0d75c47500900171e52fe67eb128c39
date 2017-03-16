@@ -1,0 +1,161 @@
+package com.successfactors.cdp.ui.controller;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.json.JSONArray;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramParticipant;
+import com.successfactors.cdp.bean.mentoring.vo.MatchedParticipantVO;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormStatusEnum;
+import com.successfactors.cdp.ui.controller.mentoring.MentoringProgramAdminController;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.unittest.TestUtils;
+
+public class MentoringProgramAdminControllerTest {
+  private Mockery context;
+  private MentoringProgramAdminController controller;
+  private ParamBean params;
+  private IMessageBundle msgs;
+  /** service command handler */
+  protected ServiceCommandHandler scaHandler;
+
+  @BeforeMethod(groups = { "checkin" })
+  public void setUp() throws Exception {
+    context = new Mockery();
+    context.setImposteriser(ClassImposteriser.INSTANCE);
+    controller = new MentoringProgramAdminController();
+
+    params = new ParamBean();
+    params.setUserId("cgrant");
+    msgs = context.mock(IMessageBundle.class);
+    scaHandler = context.mock(ServiceCommandHandler.class);    
+    TestUtils.setField(controller, "scaHandler", scaHandler);
+    TestUtils.setField(controller, "params", params);
+    TestUtils.setField(controller, "msgs", msgs);
+  }
+  
+  
+public void calculateSizeOfObject()
+{
+  MatchedParticipantVO matchingUserVO= new MatchedParticipantVO();
+  try{
+    FileOutputStream fos = new FileOutputStream("abc.txt");
+    ObjectOutputStream oos = new ObjectOutputStream(fos);
+    oos.writeObject(matchingUserVO);
+    oos.flush();
+    oos.close();
+    } catch (IOException e) {
+    e.printStackTrace();
+    }
+
+    }
+  
+  @Test()
+  public void testGetSignedParticipantCount(){
+    List<MentoringProgramParticipant> participants = new ArrayList<MentoringProgramParticipant>();
+    
+    MentoringProgramParticipant p1 = new MentoringProgramMentor();
+    MentoringProgramMentorSignupForm sf1 = new MentoringProgramMentorSignupForm();
+    sf1.setStatus(SignupFormStatusEnum.ACCEPTED);
+    p1.setSignupForm(sf1);
+    
+    MentoringProgramParticipant p2 = new MentoringProgramMentor();
+    MentoringProgramMentorSignupForm sf2 = new MentoringProgramMentorSignupForm();
+    sf2.setStatus(SignupFormStatusEnum.ACCEPTED);
+    p2.setSignupForm(sf2);
+    
+    participants.add(p1);
+    participants.add(p2);
+    
+    
+    for (Method m : MentoringProgramAdminController.class.getDeclaredMethods()){
+      if(m.getName().equals("MentoringProgramAdminController")){
+        m.setAccessible(true);
+        try {
+          Object rtn = m.invoke(controller, participants);
+          if(rtn!=null){
+            Assert.assertEquals(String.valueOf(rtn), 2);
+          }
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+  
+  @Test
+  public void testGetAllFieldEditablePermission(){
+    MentoringProgram p1 = new MentoringProgram();
+    p1.setMatchingType(ProgramMatchingTypeEnum.SUPERVISED);
+    p1.setStatus(ProgramStatusEnum.COMPLETED);
+    
+    for (Method m : MentoringProgramAdminController.class.getDeclaredMethods()){
+      if(m.getName().equals("getAllFieldEditablePermission")){
+        m.setAccessible(true);
+        try {
+          Object rtn = m.invoke(controller, p1);
+          if(rtn!=null){
+            JSONArray ja = new JSONArray(rtn.toString().replaceAll("'", "\""));            
+            Assert.assertEquals(ja.optBoolean(0), false);
+          }
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | ParseException e) {
+          e.printStackTrace();
+        }
+      }
+    }        
+  }
+
+  @Test
+  public void testHasAccessProgramPermission(){
+    List<MentoringProgram> programs = new ArrayList<MentoringProgram>();
+    
+    MentoringProgram p1 = new MentoringProgram();
+    p1.setExternalId("1");
+    
+    MentoringProgram p2 = new MentoringProgram();
+    p1.setExternalId("2");
+    
+    MentoringProgram p3 = new MentoringProgram();
+    p1.setExternalId("3");
+    
+    programs.add(p1);
+    programs.add(p2);
+    programs.add(p3);
+    
+    for (Method m : MentoringProgramAdminController.class.getDeclaredMethods()){
+      if(m.getName().equals("hasAccessProgramPermission")){
+        m.setAccessible(true);
+        try {
+          Object rtn = m.invoke(controller, programs, "2");
+          if(rtn!=null){
+            Assert.assertEquals((boolean) rtn, false);
+          }
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+    
+    
+  }
+}
+

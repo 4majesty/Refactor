@@ -1,0 +1,83 @@
+package com.successfactors.cdp.service.impl;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.sca.ServiceApplicationException;
+
+public class GetMentoringProgramsForMentorUnavailabilityExpirationCheckImplTest {
+  private IGetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl service;
+
+  @BeforeMethod(groups={"checkin"})
+  public void setup(){
+    service = new GetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl();
+  }
+
+  @Test(groups = {"checkin"})
+  public void testGatherAllUsers() throws ServiceApplicationException {
+    MentoringProgram program = new MentoringProgram();
+    MentoringProgramMentor programMentor = new MentoringProgramMentor();
+    programMentor.setUser("mentor1");
+    
+    MentoringProgram program2 = new MentoringProgram();
+
+    Map<MentoringProgram, List<MentoringProgramMentor>> map = new HashMap(); 
+    map.put(program, Collections.singletonList(programMentor));
+    map.put(program2, Collections.singletonList(programMentor));
+
+    List result = service.gatherAllUsers(map);
+    assertNotNull(result);
+    assertEquals(result.size(), 2);
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testCalculateDaysDifferenceWithToday() throws ParseException {
+    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    Date baseDate = format.parse("01/01/2017 00:00");
+    
+    Date today = format.parse("01/01/2017 23:59");
+    Date oneDay = format.parse("02/01/2017 23:59");
+    Date sevenDays = format.parse("08/01/2017 23:59");
+    
+    Date moreDays = format.parse("20/01/2017 00:00");
+    
+    int result = service.calculateDaysDifferenceWithToday(baseDate, today);
+    assertEquals(result, 0);
+    
+    result = service.calculateDaysDifferenceWithToday(baseDate, oneDay);
+    assertEquals(result, 1);
+
+    result = service.calculateDaysDifferenceWithToday(baseDate, sevenDays);
+    assertEquals(result, 7);
+    
+    result = service.calculateDaysDifferenceWithToday(baseDate, moreDays);
+    assertTrue(result > 7);
+  }
+  
+
+  @Test(groups = {"checkin"})
+  public void testCalculateDaysDifferenceWithYesterday() throws ParseException {
+    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+    Date baseDate = format.parse("01/01/2017 00:00");
+
+    Date yesterday = format.parse("31/12/2016 00:00");
+
+    int result = service.calculateDaysDifferenceWithToday(baseDate, yesterday);
+    assertEquals(result, -1);
+  }
+
+}

@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+
+public interface INativeLibrariesPropertyPage {
+	void createControl(Composite parent);
+
+	void statusChanged(IStatus status);
+
+	boolean performOk();
+}

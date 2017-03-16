@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.ui.JavaUI;
+
+public interface IInitializeAfterLoadJob {
+	boolean belongsTo(Object family);
+
+	IStatus runInUIThread(IProgressMonitor monitor);
+}

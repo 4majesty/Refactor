@@ -1,0 +1,36 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
+
+/** 
+ * Action used to enable / disable method filter properties
+ */
+public class MemberFilterAction extends Action implements IMemberFilterAction {
+	private int fFilterProperty;
+
+	private IMemberFilterActionGroup fFilterActionGroup;
+
+	public MemberFilterAction(MemberFilterActionGroup actionGroup, String title, int property, String contextHelpId, boolean initValue) {
+		super(title);
+		fFilterActionGroup= actionGroup;
+		fFilterProperty= property;
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, contextHelpId);
+		setChecked(initValue);
+	}
+
+	/** 
+	* Returns this action's filter property.
+	* @return returns the property
+	*/
+	@Override
+	public int getFilterProperty() {
+		return fFilterProperty;
+	}
+
+	@Override
+	public void run() {
+		fFilterActionGroup.setMemberFilter(fFilterProperty, isChecked());
+	}
+}

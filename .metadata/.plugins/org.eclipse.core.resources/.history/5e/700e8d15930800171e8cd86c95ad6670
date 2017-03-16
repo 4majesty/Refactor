@@ -1,0 +1,29 @@
+package org.eclipse.jdt.internal.ui.text.spelling.engine;
+
+import java.util.Locale;
+import java.util.Set;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+public interface IDefaultSpellChecker {
+	void addDictionary(final ISpellDictionary dictionary);
+
+	boolean acceptsWords();
+
+	void addWord(final String word);
+
+	void checkWord(final String word);
+
+	void execute(final ISpellEventListener listener, final ISpellCheckIterator iterator);
+
+	Set getProposals(final String word, final boolean sentence);
+
+	void ignoreWord(final String word);
+
+	boolean isCorrect(final String word);
+
+	void removeDictionary(final ISpellDictionary dictionary);
+
+	Locale getLocale();
+}

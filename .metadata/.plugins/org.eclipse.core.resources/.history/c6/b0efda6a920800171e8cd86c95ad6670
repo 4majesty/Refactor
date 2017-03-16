@@ -1,0 +1,30 @@
+package org.eclipse.jdt.ui.text.java;
+
+import org.eclipse.jdt.core.CompletionContext;
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+
+public interface ICompletionProposalCollector {
+	void setIgnored(int completionProposalKind, boolean ignore);
+
+	void setInvocationContext(JavaContentAssistInvocationContext context);
+
+	void accept(CompletionProposal proposal);
+
+	void acceptContext(CompletionContext context);
+
+	void beginReporting();
+
+	void completionFailure(IProblem problem);
+
+	void endReporting();
+
+	String getErrorMessage();
+
+	IJavaCompletionProposal[] getJavaCompletionProposals();
+
+	IJavaCompletionProposal[] getKeywordCompletionProposals();
+
+	void setReplacementLength(int length);
+}

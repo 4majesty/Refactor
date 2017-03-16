@@ -1,0 +1,17 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.unittest.TestUtils;
+
+public interface IGetJamSingleUseTokenImplTest {
+	ParamBean getDefaultParam();
+
+	void setUp();
+
+	void testSuccessResponse();
+
+	void testwithAccessToken();
+
+	void testServiceUnavailable();
+}

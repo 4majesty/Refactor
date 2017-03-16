@@ -1,0 +1,29 @@
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.ui.JavaUI;
+
+public interface IRecentSettingsStore {
+	void store(IDialogSettings settings);
+
+	void setProjectSettings(IJavaProject project, String destination, String antpath, String[] hrefs);
+
+	String[] getHRefs(IJavaProject project);
+
+	String getDestination(IJavaProject project);
+
+	String getAntpath(IJavaProject project);
+
+	void setHRefs(String hrefs);
+
+	void setDestination(String destination);
+
+	void setAntpath(String antpath);
+
+	String getHRefs();
+
+	String getDestination();
+
+	String getAntPath();
+}

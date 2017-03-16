@@ -1,0 +1,25 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.contentassist.IContextInformationExtension;
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IProposalContextInformation {
+	boolean equals(Object object);
+
+	int hashCode();
+
+	String getInformationDisplayString();
+
+	Image getImage();
+
+	String getContextDisplayString();
+
+	int getContextInformationPosition();
+
+	void setContextInformationPosition(int position);
+}

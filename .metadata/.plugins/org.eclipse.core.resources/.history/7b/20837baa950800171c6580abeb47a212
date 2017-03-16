@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.corext.refactoring.reorg;
+
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+
+public interface IDeleteChangeCreator {
+}

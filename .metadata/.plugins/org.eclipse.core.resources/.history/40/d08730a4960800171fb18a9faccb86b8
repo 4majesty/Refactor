@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
+
+import java.lang.reflect.InvocationTargetException;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IJavaMoveProcessor;
+
+public interface IReorgMoveStarter {
+	boolean run(Shell parent) throws InterruptedException, InvocationTargetException;
+}

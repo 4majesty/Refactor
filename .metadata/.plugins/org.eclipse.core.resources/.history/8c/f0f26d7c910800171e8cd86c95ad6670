@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.dnd;
+
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.util.DelegatingDropAdapter;
+import org.eclipse.jface.util.TransferDropTargetListener;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.ui.part.PluginTransfer;
+import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+import org.eclipse.jdt.internal.ui.packageview.FileTransferDropAdapter;
+import org.eclipse.jdt.internal.ui.packageview.PluginTransferDropAdapter;
+import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
+
+public interface IJdtViewerDropSupport {
+	void addDropTargetListener(TransferDropTargetListener listener);
+
+	void start();
+
+	void setFeedbackEnabled(boolean enabled);
+}

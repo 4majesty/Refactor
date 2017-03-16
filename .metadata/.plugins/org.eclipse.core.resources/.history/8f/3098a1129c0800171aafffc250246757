@@ -1,0 +1,37 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import java.util.List;
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.cdp.service.util.mentoring.SignupFormStatusEnum;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.api.model.Type;
+
+public interface IMentoringProgramSignupForm {
+	String getExternalId();
+
+	void setExternalId(String externalId);
+
+	Long getInternalId();
+
+	void setInternalId(Long internalId);
+
+	List<MentoringProgramSignupFormSection> getSections();
+
+	void setSections(List<MentoringProgramSignupFormSection> sections);
+
+	String getUser();
+
+	void setUser(String userId);
+
+	String getProgramId();
+
+	void setProgramId(String programId);
+
+	SignupFormStatusEnum getStatus();
+
+	void setStatus(SignupFormStatusEnum status);
+}

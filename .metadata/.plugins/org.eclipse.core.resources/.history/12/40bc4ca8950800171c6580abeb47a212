@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.corext.refactoring;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface ITypeContextChecker {
+	RefactoringStatus[] checkAndResolveMethodTypes();
+
+	RefactoringStatus[] checkSyntax();
+}

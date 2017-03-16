@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import org.w3c.dom.Element;
+import org.eclipse.core.runtime.Assert;
+
+public interface IJavadocReader {
+	void close();
+
+	Element readXML();
+}

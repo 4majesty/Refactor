@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.action.Action;
+
+public interface IViewAction {
+	void run();
+}

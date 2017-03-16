@@ -1,0 +1,125 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.TreeExpansionEvent;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.ShowInContext;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragSupport;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropSupport;
+import org.eclipse.jdt.internal.ui.filters.OutputFolderFilter;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.FilterUpdater;
+import org.eclipse.jdt.internal.ui.viewsupport.IRefreshable;
+import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.ConfigureWorkingSetAction;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
+import org.eclipse.jdt.internal.ui.viewsupport.IProblemTreeViewer;
+
+public interface IPackageExplorerPart {
+	void partVisible(IWorkbenchPartReference partRef);
+
+	void partBroughtToTop(IWorkbenchPartReference partRef);
+
+	void partClosed(IWorkbenchPartReference partRef);
+
+	void partDeactivated(IWorkbenchPartReference partRef);
+
+	void partHidden(IWorkbenchPartReference partRef);
+
+	void partOpened(IWorkbenchPartReference partRef);
+
+	void partInputChanged(IWorkbenchPartReference partRef);
+
+	void partActivated(IWorkbenchPartReference partRef);
+
+	void treeCollapsed(TreeExpansionEvent event);
+
+	void treeExpanded(TreeExpansionEvent event);
+
+	void add(Object parentElement, Object[] childElements);
+
+	void init(IViewSite site, IMemento memento) throws PartInitException;
+
+	void dispose();
+
+	void createPartControl(Composite parent);
+
+	boolean isFlatLayout();
+
+	void setShowLibrariesNode(boolean enabled);
+
+	void setFlatLayout(boolean enable);
+
+	PackageExplorerContentProvider createContentProvider();
+
+	Object getAdapter(Class key);
+
+	String getTitleToolTip();
+
+	void setFocus();
+
+	void menuAboutToShow(IMenuManager menu);
+
+	void refresh(IStructuredSelection selection);
+
+	void selectReveal(final ISelection selection);
+
+	ISelection convertSelection(ISelection s);
+
+	void selectAndReveal(Object element);
+
+	boolean isLinkingEnabled();
+
+	void saveState(IMemento memento);
+
+	TreeViewer getTreeViewer();
+
+	void setLabelDecorator(ILabelDecorator decorator);
+
+	void propertyChange(PropertyChangeEvent event);
+
+	Object getViewPartInput();
+
+	void collapseAll();
+
+	boolean show(ShowInContext context);
+
+	void setLinkingEnabled(boolean enabled);
+
+	int tryToReveal(Object element);
+
+	void rootModeChanged(int newMode);
+
+	IWorkingSet getFilterWorkingSet();
+
+	WorkingSetModel getWorkingSetModel();
+
+	int getRootMode();
+
+	void internalTestShowWorkingSets(IWorkingSet[] workingSets);
+}

@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jdt.internal.ui.browsing.JavaBrowsingMessages;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropSupport;
+import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionComparator;
+
+public interface ILexicalSortingAction {
+	void run();
+}

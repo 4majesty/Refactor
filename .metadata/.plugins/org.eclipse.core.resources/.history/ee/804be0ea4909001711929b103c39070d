@@ -1,0 +1,10 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.service.mentoring.SaveOverview;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+public interface ISaveOverviewImpl {
+	SaveOverview execute(SaveOverview cmd) throws ServiceApplicationException;
+}

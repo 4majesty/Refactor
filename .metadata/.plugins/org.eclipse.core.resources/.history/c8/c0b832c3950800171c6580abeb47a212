@@ -1,0 +1,51 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
+
+import java.util.Iterator;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
+
+public interface ITypeSetIntersection {
+	TypeSet getLHS();
+
+	TypeSet getRHS();
+
+	boolean isUniverse();
+
+	TypeSet makeClone();
+
+	boolean isEmpty();
+
+	boolean contains(TType t);
+
+	boolean containsAll(TypeSet s);
+
+	TypeSet subTypes();
+
+	TypeSet superTypes();
+
+	TypeSet upperBound();
+
+	TypeSet lowerBound();
+
+	boolean isSingleton();
+
+	TType anyMember();
+
+	Iterator iterator();
+
+	boolean equals(Object o);
+
+	int hashCode();
+
+	String toString();
+
+	boolean hasUniqueLowerBound();
+
+	boolean hasUniqueUpperBound();
+
+	TType uniqueLowerBound();
+
+	TType uniqueUpperBound();
+
+	EnumeratedTypeSet enumerate();
+}

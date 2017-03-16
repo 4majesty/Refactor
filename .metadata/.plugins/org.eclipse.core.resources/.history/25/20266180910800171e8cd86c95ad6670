@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IAbstractConfigurationBlockPreferencePage {
+	void init(IWorkbench workbench);
+
+	void createControl(Composite parent);
+
+	boolean performOk();
+
+	void performDefaults();
+
+	void dispose();
+}

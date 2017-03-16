@@ -1,0 +1,29 @@
+package org.eclipse.jdt.internal.corext.refactoring.delegates;
+
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+public interface IDelegateCreator {
+	void setSourceRewrite(CompilationUnitRewrite rewrite);
+
+	void setDeclaration(BodyDeclaration declaration);
+
+	void setNewElementName(String newName);
+
+	void setNewLocation(ITypeBinding binding);
+
+	void setCopy(boolean isCopy);
+
+	void setDeclareDeprecated(boolean declareDeprecated);
+
+	void setInsertBefore(boolean insertBefore);
+
+	void prepareDelegate();
+
+	void createEdit();
+
+	CompilationUnitRewrite getDelegateRewrite();
+}

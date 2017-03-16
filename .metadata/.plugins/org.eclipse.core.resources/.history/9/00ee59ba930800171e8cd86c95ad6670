@@ -1,0 +1,29 @@
+package org.eclipse.jdt.internal.ui.text.spelling;
+
+import java.util.List;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.RankedWordProposal;
+
+public interface IWordCompletionProposalComputer {
+	List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor);
+
+	List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor);
+
+	String getErrorMessage();
+
+	void sessionStarted();
+
+	void sessionEnded();
+}

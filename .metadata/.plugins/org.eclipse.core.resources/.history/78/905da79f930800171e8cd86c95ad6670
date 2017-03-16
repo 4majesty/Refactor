@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.dialogs;
+
+import java.util.Comparator;
+import org.eclipse.ui.dialogs.FilteredList;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+
+public interface IMultiElementListSelectionDialog {
+	void setPageInfoMessage(String message);
+
+	void setElements(Object[][] elements);
+
+	int open();
+
+	int getCurrentPage();
+
+	void setComparator(Comparator comparator);
+}

@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
+
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
+public interface IRenameMethodWizard {
+}

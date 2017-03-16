@@ -1,0 +1,106 @@
+package org.eclipse.jdt.internal.corext.refactoring.generics;
+
+import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.WildcardType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ArrayElementVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ImmutableTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterizedTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
+public interface IInferTypeArgumentsConstraintCreator {
+	boolean visit(CompilationUnit node);
+
+	boolean visit(Javadoc node);
+
+	boolean visit(Type node);
+
+	void endVisit(Type node);
+
+	void endVisit(SimpleName node);
+
+	void endVisit(FieldAccess node);
+
+	void endVisit(QualifiedName node);
+
+	void endVisit(ArrayAccess node);
+
+	void endVisit(Assignment node);
+
+	void endVisit(CastExpression node);
+
+	void endVisit(ParenthesizedExpression node);
+
+	void endVisit(ConditionalExpression node);
+
+	boolean visit(CatchClause node);
+
+	void endVisit(StringLiteral node);
+
+	void endVisit(NumberLiteral node);
+
+	void endVisit(BooleanLiteral node);
+
+	void endVisit(CharacterLiteral node);
+
+	void endVisit(ThisExpression node);
+
+	void endVisit(TypeLiteral node);
+
+	void endVisit(MethodDeclaration node);
+
+	void endVisit(MethodInvocation node);
+
+	void endVisit(ClassInstanceCreation node);
+
+	void endVisit(ArrayCreation node);
+
+	void endVisit(ReturnStatement node);
+
+	void endVisit(VariableDeclarationExpression node);
+
+	void endVisit(VariableDeclarationStatement node);
+
+	void endVisit(FieldDeclaration node);
+
+	void endVisit(SingleVariableDeclaration node);
+
+	void endVisit(VariableDeclarationFragment node);
+
+	InferTypeArgumentsTCModel getTCModel();
+}

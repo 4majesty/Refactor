@@ -1,0 +1,11 @@
+package com.successfactors.cdp.ui.util.mentoring;
+
+
+public class MentoringProgramUIUtils {
+    
+
+    private MentoringProgramUIUtils(){
+        
+    }
+
+}

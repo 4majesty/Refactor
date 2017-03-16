@@ -1,0 +1,45 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import java.util.Date;
+
+import com.successfactors.jobscheduler.IScheduledJobType;
+import com.successfactors.jobscheduler.bean.JobRequestStatusEnum;
+import com.successfactors.jobscheduler.bean.JobScheduleRequestEO;
+import com.successfactors.jobscheduler.bean.SchedulingConfig;
+import com.successfactors.jobscheduler.bean.SchedulingTypeEnum;
+import com.successfactors.legacy.bean.eo.RequestDefinition;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+
+public class MentoringJobUtil {
+
+  private static Logger log = LogManager.getLogger();
+
+  public static JobScheduleRequestEO createOneTimeJobRequest(ParamBean params, String jobName, 
+      IScheduledJobType jobType, byte[] payload) {
+    JobScheduleRequestEO newRequest = new JobScheduleRequestEO();
+
+    newRequest.setJobName(jobName);
+    newRequest.setJobType(jobType);
+    newRequest.setStatus(JobRequestStatusEnum.NEW);
+    newRequest.setCreatorId(params.getUsername());
+    newRequest.setOwnerId(params.getUsername());
+    newRequest.setCreatedBy(params.getUsername());
+    newRequest.setLastModifiedBy(params.getUsername());
+
+    SchedulingConfig sConfig = new SchedulingConfig(SchedulingTypeEnum.ONE_TIME, new Date(), null, null); // runs immediately
+    RequestDefinition reqDef = newRequest.getRequestDef();
+
+    if(reqDef == null) {
+      reqDef = new RequestDefinition();
+      newRequest.setRequestDef(reqDef);
+    }
+
+    newRequest.getRequestDef().setSchedulingConfig(sConfig);
+    newRequest.getRequestDef().addPayload(payload);
+    newRequest.getRequestDef().setRequestSpec();
+
+    return newRequest;
+  }
+}

@@ -1,0 +1,18 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.ui.wizards.NewEnumWizardPage;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.wizards.NewEnumCreationWizard;
+import org.eclipse.jdt.ui.wizards.INewEnumWizardPage;
+
+public interface IOpenNewEnumWizardAction {
+	void setConfiguredWizardPage(NewEnumWizardPage page);
+
+	void setOpenEditorOnFinish(boolean openEditorOnFinish);
+}

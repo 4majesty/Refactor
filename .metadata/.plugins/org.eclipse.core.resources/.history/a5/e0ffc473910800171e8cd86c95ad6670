@@ -1,0 +1,27 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import java.util.List;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IBuildPathBasePage {
+	List getSelection();
+
+	void setSelection(List selection, boolean expand);
+
+	void addElement(CPListElement element);
+
+	boolean isEntryKind(int kind);
+
+	void init(IJavaProject javaProject);
+
+	Control getControl(Composite parent);
+
+	void setFocus();
+}

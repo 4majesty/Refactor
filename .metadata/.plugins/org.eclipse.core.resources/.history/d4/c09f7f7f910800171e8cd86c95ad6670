@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
+
+public interface IProposalInfo {
+	IJavaElement getJavaElement();
+
+	String getInfo(IProgressMonitor monitor);
+}

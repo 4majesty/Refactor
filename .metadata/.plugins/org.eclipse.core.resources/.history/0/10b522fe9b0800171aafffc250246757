@@ -1,0 +1,22 @@
+package com.successfactors.cdp.service.impl;
+
+import java.util.Map;
+import com.successfactors.cdp.bean.SuggestedRolesSettingBean;
+import com.successfactors.cdp.api.dao.SuggestedRolesSettingDAO;
+import com.successfactors.cdp.service.GetSuggestedRolesWeight;
+import com.successfactors.competency.bean.CompetencySearchSpecBean;
+import com.successfactors.competency.dao.CompetencyDAO;
+import com.successfactors.db.dao.DAOException;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.legacy.bean.SearchResultBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+import javax.inject.Inject;
+
+public interface IGetSuggestedRolesWeightImpl {
+	Map<String, SuggestedRolesSettingBean> execute(GetSuggestedRolesWeight cmd) throws ServiceApplicationException;
+}

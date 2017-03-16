@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.search.ui.text.Match;
+
+public interface IOccurrenceMatch {
+	void setOffset(int offset);
+
+	void setLength(int length);
+
+	int getOriginalOffset();
+
+	int getOriginalLength();
+
+	int getFlags();
+}

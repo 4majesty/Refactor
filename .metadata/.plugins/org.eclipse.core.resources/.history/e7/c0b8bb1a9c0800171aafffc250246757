@@ -1,0 +1,173 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+
+import com.successfactors.dashboard.util.DashboardUtils;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjPlanBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.bean.ObjTemplateBean.EnumValue;
+import com.successfactors.gm.bean.ObjTemplateBean.Field;
+import com.successfactors.gm.service.objective.GetObjListByPlanV5;
+import com.successfactors.gm.util.permission.DelegateObjectiveRulesEngine;
+import com.successfactors.gm.util.permission.GMRulesEngine;
+import com.successfactors.gm.util.permission.ObjectiveRulesEngineException;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.rbp.app.api.RBPFacade;
+import com.successfactors.rbp.app.api.TargetPopulationCriteria;
+import com.successfactors.rbp.app.collector.ContextualPermissionSpec;
+import com.successfactors.rbp.app.collector.PermissionSpec;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+
+@Name("devGoalService")
+@javax.inject.Named("devGoalService")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope()
+public class DevGoalService {
+
+  @Inject
+  @In
+  private transient ServiceCommandHandler scaHandler;
+
+  @Inject
+  @In(value = "params")
+  private ParamBean params;
+
+  @Inject
+  @In(value = PermissionUtils.PERMISSION_LIST_BEAN)
+  private PermissionListBean permList;
+
+  @Inject
+  @In(value = RBPFacade.RBP_FACADE_NAME, create = true)
+  protected RBPFacade rbp;
+
+  @Inject
+  @In(create = true)
+  protected EJBList ejbListAdapter;
+
+  /**
+   * Get all fields configured in template and check read permission
+   * 
+   * @param targetUserId should not be null
+   * @param obj Dev Goal bean, should not be null
+   * @param goalPlan should not be null
+   * @return
+   * @throws ServiceApplicationException
+   */
+  public Map<String, Field> getGoalFieldReadPermissionMap(String targetUserId, ObjBean obj, ObjTemplateBean goalPlan)
+      throws ServiceApplicationException {
+    GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine.getRulesEngine(null, params, ejbListAdapter,
+        params.getUserId(), goalPlan, null, targetUserId);
+
+    // use singleton to save performance for goal fields permission of
+    // competenies and behaviors
+    Map<String, Field> goalFieldsPermSet = new LinkedHashMap<String, Field>();
+
+    for (Iterator fld = goalPlan.getFields().iterator(); fld.hasNext();) {
+      Field field = (Field) fld.next();
+      String fieldId = field.getId();
+      try {
+        if (rulesEngine.hasReadPermission(targetUserId, field, obj)) {
+          goalFieldsPermSet.put(fieldId, field);
+        }
+      } catch (ObjectiveRulesEngineException e) {
+        throw new ServiceApplicationException("Failed to check read permission for field " + fieldId);
+      }
+    }
+
+    return goalFieldsPermSet;
+  }
+
+  /**
+   * Get all possible states field which have lable and style info.
+   * 
+   * @param goalPlan should not be null
+   * @return
+   */
+  public Map<String, EnumValue> getStateFieldsMap(ObjTemplateBean goalPlan) {
+    Map<String, ObjTemplateBean.EnumValue> stateFieldsMap = null;
+    List<ObjTemplateBean> templates = new ArrayList<ObjTemplateBean>();
+    templates.add(goalPlan);
+    stateFieldsMap = new LinkedHashMap<String, ObjTemplateBean.EnumValue>();
+    DashboardUtils.getStateFields(templates, params.getLocale(),
+        (LinkedHashMap<String, ObjTemplateBean.EnumValue>) stateFieldsMap);
+    return stateFieldsMap;
+  }
+
+  /**
+   * Get all dev goals in specified goal plan of specified user
+   * 
+   * @param goalPlan should not be null
+   * @param userId should not be null
+   * @return goalList 
+   */
+  public List<ObjBean> getDevGoalList(ObjTemplateBean goalPlan, String userId)
+      throws ServiceApplicationException {
+    List<ObjBean> goalList = new ArrayList<ObjBean>();
+    // exclude deleted goals
+    List<Integer> excludedStatus = new ArrayList();
+    excludedStatus.add(ObjBean.STATUS_DELETED);
+    ObjPlanBean objPlan = scaHandler.execute(new GetObjListByPlanV5(goalPlan.getObjPlanId(), userId, false, true,
+        false, false, false, false, true, -1, -1, excludedStatus, false, false));
+    Iterator ite = objPlan.getObjList().values().iterator();
+    while (ite.hasNext()) {
+      List objVector = (List) ite.next();
+      goalList.addAll(objVector);
+    }
+    return goalList;
+  }
+  
+  /**
+   * Check if user has permission to view the specified Goal Plan of the specified user
+   * 
+   * @param goalPlan
+   * @param userId
+   * @return false if goalPlan or userId is null
+   */
+  public boolean hasGoalPlanPermission(ObjTemplateBean goalPlan, String userId) {
+    if(goalPlan == null || userId == null){
+      return false;
+    }
+    PermissionSpec permSpec = new ContextualPermissionSpec<Long>(null, PermissionBean.TGM,
+        PermissionBean.TGM_TEMPLATE_VIEW, goalPlan.getObjPlanId(), Long.class);
+    TargetPopulationCriteria criteria = new TargetPopulationCriteria(false, false);
+    Set<String> targetPopulation = rbp.getTargetPopulation(params.getUserId(), permSpec, criteria);
+    if (targetPopulation == null || !targetPopulation.contains(userId)) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Check if user has CDP Access Permission
+   * 
+   * @return
+   */
+  public boolean hasCDPAccessPermission() {
+    boolean cdpEnabled = params.isFeatureExist(FeatureEnum.DEVELOPMENT_PLAN_V12)
+        || params.isFeatureExist(FeatureEnum.IDP);
+    boolean hasCdpAccess = permList.hasPermission(PermissionBean.CDP_ACCESS, PermissionBean.VIEW_CDP, 0);
+    if (cdpEnabled && hasCdpAccess) {
+      return true;
+    }
+    return false;
+  }
+}

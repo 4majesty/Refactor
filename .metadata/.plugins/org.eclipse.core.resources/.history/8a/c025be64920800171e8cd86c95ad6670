@@ -1,0 +1,13 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.jdt.internal.ui.search.SearchUtil;
+
+public interface IImplementorsSearchGroup {
+	void fillContextMenu(IMenuManager manager);
+
+	void fillActionBars(IActionBars actionBars);
+
+	void dispose();
+}

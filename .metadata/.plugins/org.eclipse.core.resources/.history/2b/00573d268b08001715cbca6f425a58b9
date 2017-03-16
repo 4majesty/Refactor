@@ -1,0 +1,54 @@
+/*
+ * $Id: ObjMgtEnum.java 825974 2015-08-25 07:34:36Z haixunlu $
+ */
+package com.successfactors.pmcommon.util.type;
+
+import java.util.List;
+
+import com.successfactors.legacy.util.EnumeratedType;
+
+public class ObjMgtEnum
+  extends EnumeratedType
+{
+  public static final int
+    NONE_ORDINAL = 0,
+    BASIC_ORDINAL = 1,
+    ADVANCED_ORDINAL = 2,
+    PLAN_ORDINAL = 3;
+  
+  public static final ObjMgtEnum
+    NONE = new ObjMgtEnum("None", NONE_ORDINAL),
+    BASIC = new ObjMgtEnum("Basic", BASIC_ORDINAL),
+    ADVANCED = new ObjMgtEnum("Advanced", ADVANCED_ORDINAL),
+    PLAN = new ObjMgtEnum("Plan", PLAN_ORDINAL);
+  
+  protected ObjMgtEnum() {}
+  
+  private ObjMgtEnum(String name, int id) {
+    super(name, id);
+  }
+  
+  /**
+   * Returns an ordered list of the values of the enumerated type.
+   */
+  public static List getValues() {
+    return getValues(ObjMgtEnum.class);
+  }
+  
+  /**
+   * Returns the value of the enumerated type with the specified ID.
+   *
+   * @throws java.lang.IllegalArgumentException if an invalid ID is specified.
+   */
+  public static ObjMgtEnum getValue(int id) {
+    return (ObjMgtEnum) getValue(ObjMgtEnum.class, id);
+  }
+  
+  /**
+   * Returns the value of the enumerated type with the specified name
+   */
+  public static ObjMgtEnum parseEnum(String name) {
+    return (ObjMgtEnum)parseEnum(ObjMgtEnum.class, name);
+  }
+}
+

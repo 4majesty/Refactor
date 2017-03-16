@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.corext.refactoring.util;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.search.core.text.TextSearchMatchAccess;
+import org.eclipse.jdt.internal.ui.util.PatternConstructor;
+
+public interface IQualifiedNameFinder {
+	boolean acceptFile(IFile file) throws CoreException;
+
+	boolean acceptPatternMatch(TextSearchMatchAccess matchAccess) throws CoreException;
+}

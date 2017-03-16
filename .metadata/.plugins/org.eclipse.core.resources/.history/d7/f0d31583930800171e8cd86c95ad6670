@@ -1,0 +1,54 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
+import org.eclipse.jdt.internal.ui.util.IStringMatcher;
+
+public interface IAbstractInformationControl {
+	boolean select(Viewer viewer, Object parentElement, Object element);
+
+	void setInformation(String information);
+
+	void setInput(Object information);
+
+	void setVisible(boolean visible);
+
+	int open();
+
+	void dispose();
+
+	void widgetDisposed(DisposeEvent event);
+
+	boolean hasContents();
+
+	void setSizeConstraints(int maxWidth, int maxHeight);
+
+	Point computeSizeHint();
+
+	void setLocation(Point location);
+
+	void setSize(int width, int height);
+
+	void addDisposeListener(DisposeListener listener);
+
+	void removeDisposeListener(DisposeListener listener);
+
+	void setForegroundColor(Color foreground);
+
+	void setBackgroundColor(Color background);
+
+	boolean isFocusControl();
+
+	void setFocus();
+
+	void addFocusListener(FocusListener listener);
+
+	void removeFocusListener(FocusListener listener);
+}

@@ -1,0 +1,18 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.cdp.service.mentoring.jam.MakeJamGroupAdminByMemberId;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sfutil.UrlUtils;
+
+public interface IMakeJamGroupAdminByMemberIdImpl {
+	Boolean execute(MakeJamGroupAdminByMemberId cmd) throws ServiceApplicationException;
+
+	ServiceCommandHandler getSCAHandler();
+
+	ParamBean getParams();
+}

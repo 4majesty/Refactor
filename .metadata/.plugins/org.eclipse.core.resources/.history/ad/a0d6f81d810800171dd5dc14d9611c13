@@ -1,0 +1,76 @@
+package com.successfactors.sm.api.bean.pool;
+
+import java.io.Serializable;
+
+public class TalentPoolBean implements Serializable {
+  
+  /** serialVersionUID */
+  private static final long serialVersionUID = 1L;
+
+  /** talent pool Id to access the POOL database table. */
+  private long id; 
+  
+  /** talent pool external code. */
+  private String code;
+  
+  /** localized talent pool name for current locale. */
+  private String name;
+  
+  /** talent pool type. */
+  private String type;
+
+  /** localized talent pool description for current locale. */
+  private String description;
+
+  
+  /**
+   * Default Constructor.
+   * 
+   * @param id Pool ID
+   * @param name Pool Name, localized.
+   */
+  public TalentPoolBean(long id, String name) {
+    this.id = id;
+    this.name = name;
+  }
+  
+  public long getId() {
+    return id;
+  }
+
+  public void setId(long id) {
+    this.id = id;
+  }
+
+  public String getCode() {
+    return code;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+}

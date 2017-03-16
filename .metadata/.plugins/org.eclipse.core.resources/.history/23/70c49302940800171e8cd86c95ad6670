@@ -1,0 +1,45 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
+
+public interface ISelectionDispatchAction {
+	IWorkbenchSite getSite();
+
+	ISelection getSelection();
+
+	Shell getShell();
+
+	ISelectionProvider getSelectionProvider();
+
+	void setSpecialSelectionProvider(ISelectionProvider provider);
+
+	void update(ISelection selection);
+
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(IStructuredSelection selection);
+
+	void selectionChanged(JavaTextSelection selection);
+
+	void run(JavaTextSelection selection);
+
+	void selectionChanged(ITextSelection selection);
+
+	void run(ITextSelection selection);
+
+	void selectionChanged(ISelection selection);
+
+	void run(ISelection selection);
+
+	void run();
+
+	void selectionChanged(SelectionChangedEvent event);
+}

@@ -1,0 +1,82 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import javax.persistence.Column;
+
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.genericobject.api.model.APISubVersion;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+
+/**
+ * Signup Form Entity
+ * @author I309618
+ */
+@MDFEntity(effectiveDating = EffectiveDating.FROM_PARENT, apiVisibility = APIVisibility.EDITABLE, apiSubVersion = APISubVersion.V1_0)
+public class MentoringProgramMenteeSignupForm extends MentoringProgramSignupForm {
+  // System Fields
+  /** Row Id. */
+  @Column(name = GENERIC_OBJECT_T.ROW_ID, nullable = false)
+  @Field(visibility = Visibility.READ_ONLY)
+  private Long rowId;
+
+  /** External Code. */
+  @Column(name = GENERIC_OBJECT_T.EXTERNAL_CODE, nullable = false)
+  @Field(visibility = Visibility.READ_ONLY, dataType = DataType.AUTO_NUMBER)
+  protected String externalId;
+
+  /** Internal Id. */
+  @Column(name = GENERIC_OBJECT_T.INTERNAL_ID)
+  @Field(visibility = Visibility.READ_ONLY)
+  protected Long internalId;
+
+  // Business Fields
+/**
+ * getRowId
+ * @return rowId
+ */
+  public Long getRowId() {
+    return rowId;
+  }
+/**
+ * setRowId
+ * @param rowId rowId
+ */
+  public void setRowId(Long rowId) {
+    this.rowId = rowId;
+  }
+
+ /**
+  * getExternalId
+  * @return externalCode
+  */
+  public String getExternalId() {
+    return externalId;
+  }
+/**
+ * setExternalId
+ * @param externalCode externalCode
+ */
+  public void setExternalId(String externalCode) {
+    this.externalId = externalCode;
+  }
+
+  /**
+   * getInternalId
+   * @return internalId
+   */
+  public Long getInternalId() {
+    return internalId;
+  }
+
+  /**
+   * setInternalId
+   * @param internalId internalId
+   */
+  public void setInternalId(Long internalId) {
+    this.internalId = internalId;
+  }
+}

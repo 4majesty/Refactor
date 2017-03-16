@@ -1,0 +1,30 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
+
+public interface IPackageExplorerContentProvider {
+	void elementChanged(final ElementChangedEvent event);
+
+	void runPendingUpdates();
+
+	void dispose();
+
+	Object[] getChildren(Object parentElement);
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+
+	Object getHierarchicalPackageParent(IPackageFragment child);
+
+	void setIsFlatLayout(boolean state);
+
+	void setShowLibrariesNode(boolean state);
+
+	void propertyChange(PropertyChangeEvent event);
+}

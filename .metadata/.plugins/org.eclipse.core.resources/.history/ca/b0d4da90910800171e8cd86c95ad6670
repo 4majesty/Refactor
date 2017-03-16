@@ -1,0 +1,34 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import java.util.List;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.core.JavaModelException;
+
+public interface IGenerateConstructorUsingFieldsContentProvider {
+	boolean canMoveDown(List selectedElements);
+
+	boolean canMoveUp(List selected);
+
+	void dispose();
+
+	void down(List checked, CheckboxTreeViewer tree);
+
+	Object[] getChildren(Object parentElement);
+
+	Object[] getElements(Object inputElement);
+
+	List getFieldsList();
+
+	Object[] getInitiallySelectedElements();
+
+	Object getParent(Object element);
+
+	boolean hasChildren(Object element);
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+
+	void setElements(List elements, CheckboxTreeViewer tree);
+
+	void up(List checked, CheckboxTreeViewer tree);
+}

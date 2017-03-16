@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
+
+import org.eclipse.core.runtime.Assert;
+
+public interface ISubTypeConstraint2 {
+	boolean equals(Object other);
+
+	ConstraintVariable2 getLeft();
+
+	ConstraintVariable2 getRight();
+
+	int hashCode();
+
+	String toString();
+}

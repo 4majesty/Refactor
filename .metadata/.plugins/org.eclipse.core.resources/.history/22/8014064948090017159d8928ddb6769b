@@ -1,0 +1,37 @@
+package com.successfactors.cdp.service.util.mentoring.email;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.platform.bean.MailInvalidAddressException;
+import com.successfactors.platform.bean.MailSendException;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.user.bean.UserBean;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+
+public interface IMentoringEmailUtils {
+	void sendEmail(String subject, String body, UserBean sender, UserBean[] recipients, Messages msgs)
+			throws ServiceApplicationException;
+
+	void sendEmail(String subject, String body, UserBean[] recipients, Messages msgs)
+			throws ServiceApplicationException;
+
+	void sendEmail(String subject, String body, Map<String, String> tokenMap, UserBean sender, UserBean[] recipients,
+			Messages msgs) throws ServiceApplicationException;
+
+	void sendEmail(MentoringEmailContent emailContent, Map<MentoringEmailTokenEnum, String> tokenMap, UserBean sender,
+			UserBean... recipients) throws ServiceApplicationException, MailInvalidAddressException, MailSendException;
+
+	String escapleHtmlTag(String value);
+
+	String generateUrlToken(MentoringProgram program, UserBean recipient, String label)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException;
+
+	String generateMenteeListToken(List<UserBean> mentees);
+
+	UserBean getDummyEmailSender();
+}

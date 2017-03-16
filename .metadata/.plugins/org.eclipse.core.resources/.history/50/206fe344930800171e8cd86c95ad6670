@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringDialogField;
+
+public interface IAppearancePreferencePage {
+	void createControl(Composite parent);
+
+	void init(IWorkbench workbench);
+
+	boolean performOk();
+}

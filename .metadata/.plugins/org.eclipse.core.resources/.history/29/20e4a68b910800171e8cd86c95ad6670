@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface ICPListLabelProvider {
+	String getText(Object element);
+
+	String getCPUserLibraryText(CPUserLibraryElement element);
+
+	String getCPListElementAttributeText(CPListElementAttribute attrib);
+
+	String getCPListElementText(CPListElement cpentry);
+
+	Image getImage(Object element);
+}

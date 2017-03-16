@@ -1,0 +1,20 @@
+package com.successfactors.cdp.ui.util.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramVO;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import org.apache.commons.lang.StringUtils;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+public interface IMentoringProgramBeanUtil {
+	ProgramVO getProgramVO(MentoringProgram program);
+
+	MentoringProgram getProgram(MentoringProgram p, ProgramVO programVO, String locale)
+			throws ServiceApplicationException;
+
+	MentoringProgram getMentoringProgramFromOverview(MentoringProgram p, ProgramVO pvo, String locale)
+			throws ServiceApplicationException;
+}

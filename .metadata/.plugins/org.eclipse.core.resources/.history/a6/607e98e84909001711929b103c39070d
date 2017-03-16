@@ -1,0 +1,31 @@
+package com.successfactors.cdp.bean.mentoring.vo.overview;
+
+import com.successfactors.cdp.bean.mentoring.vo.ProgramMenteeVO;
+
+import java.util.List;
+
+/**
+ * Created by root on 12/7/16.
+ */
+public class ProgramMenteesTabVO extends ProgramOverviewParentVO {
+  private List<ProgramMenteeVO> mentees;
+
+  /**
+   * getMentees
+   * @return mentees
+   */
+  public List<ProgramMenteeVO> getMentees() {
+    return mentees;
+  }
+
+  /**
+   * setMentees
+   * @param mentees mentees
+   */
+  public void setMentees(List<ProgramMenteeVO> mentees) {
+    this.mentees = mentees;
+  }
+
+
+
+}

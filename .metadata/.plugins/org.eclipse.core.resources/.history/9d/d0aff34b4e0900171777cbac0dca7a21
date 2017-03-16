@@ -1,0 +1,169 @@
+package com.successfactors.cdp.bean;
+
+import java.io.Serializable;
+
+/***
+ * 
+ * @author Blake HAN
+ * 
+ */
+public class AutoCompleteRoleSearchVO implements Comparable<AutoCompleteRoleSearchVO>, Serializable {
+  /** serialVersionUID */
+  private static final long serialVersionUID = 1L;
+  /**roleId*/
+  private long roleId;
+  /**roleName*/
+  private String roleName;
+  /**canAdd*/
+  private boolean canAdd;
+  /**familyName*/
+  private String familyName;
+
+  /**
+   * compare method
+   * @param o o
+   * @return int 
+   */
+  @Override
+  public int compareTo(AutoCompleteRoleSearchVO o) {
+    if (roleName != null) {
+      int result = roleName.compareTo(o.roleName);
+      if (result == 0) {
+        if(familyName != null) {
+          return familyName.compareTo(o.familyName);
+        } else {
+          return -1;
+        }
+      } else {
+        return result;
+      }
+    } else {
+      return -1;
+    }
+  }
+
+  /***
+   * construtor
+   */
+  public AutoCompleteRoleSearchVO() {
+    super();
+  }
+
+  /**
+   * getter 
+   * @return 
+   */
+  public long getRoleId() {
+    return roleId;
+  }
+
+  /**
+   * setter 
+   * @param roleId 
+   */
+  public void setRoleId(long roleId) {
+    this.roleId = roleId;
+  }
+
+  /**
+   * getter 
+   * @return 
+   */
+  public String getRoleName() {
+    return roleName;
+  }
+
+  /**
+   * setter 
+   * @param roleName
+   */
+  public void setRoleName(String roleName) {
+    this.roleName = roleName;
+  }
+  
+  /**
+   * getter 
+   * @return 
+   */
+  public boolean isCanAdd() {
+    return canAdd;
+  }
+
+  /**
+   * setter 
+   * @param canAdd 
+   */
+  public void setCanAdd(boolean canAdd) {
+    this.canAdd = canAdd;
+  }
+
+  /**
+   * getter 
+   * @return 
+   */
+  public static long getSerialversionuid() {
+    return serialVersionUID;
+  }
+
+  /**
+   * setter  
+   * @return 
+   */
+  public String getFamilyName() {
+    return familyName;
+  }
+
+  /**
+   * getter 
+   * @param familyName
+   */
+  public void setFamilyName(String familyName) {
+    this.familyName = familyName;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result
+        + ((familyName == null) ? 0 : familyName.hashCode());
+    result = prime * result + (int) (roleId ^ (roleId >>> 32));
+    result = prime * result + ((roleName == null) ? 0 : roleName.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    AutoCompleteRoleSearchVO other = (AutoCompleteRoleSearchVO) obj;
+    if (familyName == null) {
+      if (other.familyName != null) {
+        return false;
+      }
+    } else if (!familyName.equals(other.familyName)) {
+      return false;
+    }
+    if (roleId != other.roleId) {
+      return false;
+    }
+    if (roleName == null) {
+      if (other.roleName != null) {
+        return false;
+      }
+    } else if (!roleName.equals(other.roleName)) {
+      return false;
+    }
+    return true;
+  }
+  
+  
+
+}

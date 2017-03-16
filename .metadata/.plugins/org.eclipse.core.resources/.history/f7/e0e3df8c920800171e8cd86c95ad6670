@@ -1,0 +1,26 @@
+package org.eclipse.jdt.internal.ui.navigator;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.navigator.IExtensionStateModel;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.MultiActionGroup;
+import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
+import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
+
+public interface ICommonLayoutActionGroup {
+	void run();
+
+	void fillActionBars(IActionBars actionBars);
+
+	void unfillActionBars(IActionBars actionBars);
+
+	void setFlatLayout(boolean flatLayout);
+}

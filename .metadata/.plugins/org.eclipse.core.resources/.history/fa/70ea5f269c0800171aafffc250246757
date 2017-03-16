@@ -1,0 +1,12 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.List;
+import com.successfactors.cdp.service.mentoring.AddMentoringJamAdmins;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.service.FindUsersByIds;
+
+public interface IAddMentoringJamAdminsImpl {
+	List<String> execute(AddMentoringJamAdmins cmd) throws ServiceApplicationException;
+}

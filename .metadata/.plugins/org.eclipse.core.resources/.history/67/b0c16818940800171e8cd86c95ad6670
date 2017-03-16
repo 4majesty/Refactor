@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProcessor;
+
+public interface IContentAssistPreference {
+}

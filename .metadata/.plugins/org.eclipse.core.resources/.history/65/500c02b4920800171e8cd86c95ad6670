@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.text.java.hover;
+
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+
+public interface IProblemHover {
+	void run();
+
+	ICompletionProposal[] getCompletionProposals();
+
+	void fillToolBar(ToolBarManager manager, IInformationControl infoControl);
+}

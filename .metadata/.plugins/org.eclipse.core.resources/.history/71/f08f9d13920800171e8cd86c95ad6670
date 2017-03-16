@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.core.commands.IHandler;
+import org.eclipse.ui.actions.QuickMenuCreator;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
+
+public interface IJDTQuickMenuCreator {
+	IHandler createHandler();
+}

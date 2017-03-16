@@ -1,0 +1,53 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import com.successfactors.cdp.service.util.mentoring.SectionDisplayTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormSectionCategoryEnum;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.GOLocalizedData;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+
+public interface IMentoringProgramSignupTemplateSection {
+	Long getRowId();
+
+	void setRowId(Long rowId);
+
+	Long getInternalId();
+
+	void setInternalId(Long internalId);
+
+	String getSectionId();
+
+	void setSectionId(String sectionId);
+
+	boolean isMentorVisible();
+
+	void setMentorVisible(boolean mentorVisible);
+
+	boolean isMenteeVisible();
+
+	void setMenteeVisible(boolean menteeVisible);
+
+	SignupFormSectionCategoryEnum getCategory();
+
+	void setCategory(SignupFormSectionCategoryEnum category);
+
+	int getOrder();
+
+	void setOrder(int order);
+
+	SectionDisplayTypeEnum getDisplayType();
+
+	void setDisplayType(SectionDisplayTypeEnum displayType);
+
+	GOLocalizedData getMentorQuestion();
+
+	void setMentorQuestion(GOLocalizedData mentorQuestion);
+
+	GOLocalizedData getMenteeQuestion();
+
+	void setMenteeQuestion(GOLocalizedData menteeQuestion);
+}

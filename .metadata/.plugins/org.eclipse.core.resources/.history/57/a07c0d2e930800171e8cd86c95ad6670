@@ -1,0 +1,15 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
+import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
+import org.eclipse.jdt.ui.wizards.INewJavaProjectWizardPageTwo;
+import org.eclipse.jdt.ui.wizards.INewJavaProjectWizardPageOne;
+
+public interface IOpenNewJavaProjectWizardAction {
+	void setConfiguredWizardPages(NewJavaProjectWizardPageOne pageOne, NewJavaProjectWizardPageTwo pageTwo);
+}

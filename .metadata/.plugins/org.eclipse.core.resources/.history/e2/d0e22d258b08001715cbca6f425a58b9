@@ -1,0 +1,27 @@
+package com.successfactors.arb.bean;
+
+/**
+ * Factory class to instantiate StringBooleanPairVO
+ * 
+ * @author I073141
+ * @since b1508
+ */
+public class ColumnSortOrderFactory {
+
+    /**
+     * Get StringBooleanPairVO instance
+     * 
+     * @return IColumnSortOrder
+     * @since b1508
+     */
+    public static IColumnSortOrder getStringBooleanPairVO() {
+        return (IColumnSortOrder) ReflectiveInvoker.invoke("com.successfactors.arb.bean.StringBooleanPairVO", "get");
+    }
+
+    /**
+     * private constructor
+     */
+    private ColumnSortOrderFactory() {
+        // empty block
+    }
+}

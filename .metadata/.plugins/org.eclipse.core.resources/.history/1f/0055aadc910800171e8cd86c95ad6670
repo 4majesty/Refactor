@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.model;
+
+import org.eclipse.ltk.ui.refactoring.model.AbstractResourceMappingMerger;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavaModelMerger {
+}

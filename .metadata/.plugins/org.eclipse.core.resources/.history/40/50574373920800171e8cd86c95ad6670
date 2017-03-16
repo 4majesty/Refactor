@@ -1,0 +1,106 @@
+package org.eclipse.jdt.internal.ui.text.java.hover;
+
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Layout;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IInformationControlExtension;
+import org.eclipse.jface.text.IInformationControlExtension2;
+import org.eclipse.jface.text.IInformationControlExtension5;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.IViewportListener;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextViewer;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationAccess;
+import org.eclipse.jface.text.source.IAnnotationAccessExtension;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRulerInfo;
+import org.eclipse.jface.text.source.IVerticalRulerListener;
+import org.eclipse.jface.text.source.VerticalRulerEvent;
+
+public interface IAnnotationExpansionControl {
+	void selected();
+
+	void defaultSelected();
+
+	void deselect();
+
+	void widgetDisposed(DisposeEvent e);
+
+	void handleEvent(Event event);
+
+	void mouseDoubleClick(MouseEvent e);
+
+	void mouseDown(MouseEvent e);
+
+	void mouseEnter(MouseEvent e);
+
+	void mouseExit(MouseEvent e);
+
+	void mouseHover(MouseEvent e);
+
+	Layout getLayout(int itemCount);
+
+	Object getLayoutData();
+
+	int getAnnotationSize();
+
+	int getBorderWidth();
+
+	org.eclipse.swt.graphics.Region getShellRegion(int itemCount);
+
+	void paintControl(PaintEvent e);
+
+	void setInformation(String information);
+
+	void setInput(Object input);
+
+	void setVisible(boolean visible);
+
+	void dispose();
+
+	boolean hasContents();
+
+	void setSizeConstraints(int maxWidth, int maxHeight);
+
+	Point computeSizeHint();
+
+	void setLocation(Point location);
+
+	void setSize(int width, int height);
+
+	void addDisposeListener(DisposeListener listener);
+
+	void removeDisposeListener(DisposeListener listener);
+
+	void setForegroundColor(Color foreground);
+
+	void setBackgroundColor(Color background);
+
+	boolean isFocusControl();
+
+	void setFocus();
+
+	void addFocusListener(FocusListener listener);
+
+	void removeFocusListener(FocusListener listener);
+
+	Point computeSizeConstraints(int widthInChars, int heightInChars);
+
+	boolean containsControl(Control control);
+
+	IInformationControlCreator getInformationPresenterControlCreator();
+
+	boolean isVisible();
+}

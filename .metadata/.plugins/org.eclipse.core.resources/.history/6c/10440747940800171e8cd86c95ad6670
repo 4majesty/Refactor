@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.navigator;
+
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.navigator.ICommonActionExtensionSite;
+import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
+
+public interface IJavaNavigatorViewActionProvider {
+	void onExtensionActivation(String viewerId, String[] theNavigatorExtensionIds, boolean isCurrentlyActive);
+
+	void fillActionBars(IActionBars actionBars);
+
+	void init(ICommonActionExtensionSite site);
+
+	void dispose();
+
+	void setContext(ActionContext context);
+
+	void restoreState(IMemento memento);
+
+	void saveState(IMemento aMemento);
+}

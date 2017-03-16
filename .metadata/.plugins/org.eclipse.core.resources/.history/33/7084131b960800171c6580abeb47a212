@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.corext.refactoring.participants;
+
+import java.util.HashSet;
+import java.util.Set;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IProject;
+
+public interface IRefactoringProcessors {
+}

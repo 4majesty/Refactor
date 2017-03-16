@@ -1,0 +1,234 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import static com.successfactors.unittest.TestUtils.setField;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.List;
+import java.util.Locale;
+
+import org.apache.http.HttpStatus;
+import org.apache.http.message.BasicNameValuePair;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.json.JSONObject;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.bean.mentoring.jam.Group;
+import com.successfactors.cdp.service.mentoring.jam.CreateJamGroup;
+import com.successfactors.cdp.service.mentoring.jam.exception.DuplicateJamGroupException;
+import com.successfactors.cdp.service.mentoring.jam.exception.JamAuthenticationException;
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.cdp.service.mentoring.jam.util.CreateGroupConstants;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.unittest.TestUtils;
+
+public class CreateJamGroupImplTest {
+  private Mockery context;
+
+  private ParamBean params;
+
+  private ServiceCommandHandler scaHandler;
+
+  private static final String JAM_BASE_URL = "https://stage.sapjam.com";
+
+  private static final String TEST_GROUP_JSON_FILE_PATH = "jam/test-group.json";
+
+  private static final String ACCESS_TOKEN = "test_access_token";
+
+  private static final String DEFAULT_TEMPLATE = "{\"__metadata\":{\"uri\":\"GroupTemplates(Id='mentoring_and_coaching',GroupTemplateType='system_key')\"}}";
+
+  final public ParamBean getDefaultParam() {
+    if (params == null) {
+        params = new ParamBean();
+        params.setCompanyId("ABCINC");
+        params.setUserId("user1");
+        params.setDateFormat("mm/dd/yyyy");
+        params.setLocale(Locale.ENGLISH);
+    }
+
+    return params;
+  }
+  
+  @BeforeMethod(groups = { "checkin" })
+  public void setUp() throws Exception {
+    context = new Mockery();
+    context.setImposteriser(ClassImposteriser.INSTANCE);
+
+    this.params = this.getDefaultParam();
+    this.scaHandler = context.mock(ServiceCommandHandler.class);
+  }
+
+  private void setAttributes(MockCreateJamGroupImplTest service) {
+    setField(service, "params", this.params);
+    setField(service, "scaHandler", this.scaHandler);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testSuccessResponse() throws ServiceApplicationException  {
+    MockCreateJamGroupImplTest service = new MockCreateJamGroupImplTest(HttpStatus.SC_CREATED);
+
+    setAttributes(service);
+    Group group = service.execute(new CreateJamGroup("test name","test desc"));
+
+    Assert.assertTrue(group != null);
+    Assert.assertTrue(group.getGroupId() != null);
+    Assert.assertTrue(group.getGroupId().trim().length() > 0);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testwithAccessToken() throws ServiceApplicationException  {
+    MockCreateJamGroupImplTest service = new MockCreateJamGroupImplTest(HttpStatus.SC_CREATED);
+
+    setAttributes(service);
+    Group group = service.execute(new CreateJamGroup("test name","test desc",ACCESS_TOKEN));
+
+    Assert.assertTrue(group != null);
+    Assert.assertTrue(group.getGroupId() != null);
+    Assert.assertTrue(group.getGroupId().trim().length() > 0);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testDuplicateGroup() throws ServiceApplicationException {
+    MockCreateJamGroupImplTest service = new MockCreateJamGroupImplTest(HttpStatus.SC_CONFLICT);
+
+    setAttributes(service);
+
+    boolean duplicateGroupException = false;
+
+    try {
+      service.execute(new CreateJamGroup("test name","test desc"));
+    } catch(DuplicateJamGroupException e) {
+      duplicateGroupException = true;
+    }
+
+    Assert.assertTrue(duplicateGroupException);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testAuthFailure() throws ServiceApplicationException {
+    MockCreateJamGroupImplTest service = new MockCreateJamGroupImplTest(HttpStatus.SC_FORBIDDEN);
+
+    setAttributes(service);
+
+    boolean authFailureException = false;
+
+    try {
+      service.execute(new CreateJamGroup("test name","test desc"));
+    } catch(JamAuthenticationException e) {
+      authFailureException = true;
+    }
+
+    Assert.assertTrue(authFailureException);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testServiceUnavailable() {
+    MockCreateJamGroupImplTest service = new MockCreateJamGroupImplTest(HttpStatus.SC_SERVICE_UNAVAILABLE);
+
+    setAttributes(service);
+
+    boolean serviceUnavailableException = false;
+
+    try {
+      service.execute(new CreateJamGroup("test name","test desc"));
+    } catch(ServiceApplicationException e) {
+      serviceUnavailableException = true;
+    }
+
+    Assert.assertTrue(serviceUnavailableException);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testRequestBodyNotNull() throws ParseException {
+    CreateJamGroupImpl service = new CreateJamGroupImpl();
+
+    String requestBody = service.getRequestBody(new CreateJamGroup("test name","test desc"));
+    
+    JSONObject reqBodyJson = new JSONObject(requestBody);
+
+    Assert.assertTrue(reqBodyJson != null);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testRequestBodyDefaultTemplate() throws ParseException {
+    CreateJamGroupImpl service = new CreateJamGroupImpl();
+
+    String requestBody = service.getRequestBody(new CreateJamGroup("test name","test desc"));
+    
+    JSONObject reqBodyJson = new JSONObject(requestBody);
+
+    String template = reqBodyJson.getString(CreateGroupConstants.PARAM_GROUP_TEMPLATE);
+
+    Assert.assertTrue(template != null && DEFAULT_TEMPLATE.equals(template));
+  }
+
+  private class MockCreateJamGroupImplTest extends CreateJamGroupImpl {
+    
+    private int responseCode;
+
+    public MockCreateJamGroupImplTest(int responseCode) {
+      this.responseCode = responseCode;
+    }
+
+    @Override
+    protected BasicHttpResponse invoke(String url,String requestType,
+      List<BasicNameValuePair> headers,String body) {
+      return mockInvoke();
+    }
+
+    private BasicHttpResponse mockInvoke() {
+      switch (responseCode) {
+      case HttpStatus.SC_CREATED:
+        return getMockSuccessResponse();
+      case HttpStatus.SC_CONFLICT:
+        return getMockConflictResponse();
+      case HttpStatus.SC_FORBIDDEN:
+        return getMockForbiddenResponse();
+      default:
+        return getMockDefaultFailureResponse();
+      }
+    }
+
+    private BasicHttpResponse getMockSuccessResponse() {
+      byte[] payloadBytes;
+
+      try {
+        payloadBytes = TestUtils.readTestData(TEST_GROUP_JSON_FILE_PATH);
+      } catch (IOException e) {
+        e.printStackTrace();
+        return null;
+      }
+
+      String payload = new String(payloadBytes);
+
+      return new BasicHttpResponse(HttpStatus.SC_CREATED,null,payload);
+    }
+
+    private BasicHttpResponse getMockConflictResponse() {
+      return new BasicHttpResponse(HttpStatus.SC_CONFLICT,null,null);
+    }
+
+    private BasicHttpResponse getMockForbiddenResponse() {
+      return new BasicHttpResponse(HttpStatus.SC_FORBIDDEN,null,null);
+    }
+
+    private BasicHttpResponse getMockDefaultFailureResponse() {
+      return new BasicHttpResponse(HttpStatus.SC_SERVICE_UNAVAILABLE,null,null);
+    }
+
+    @Override
+    protected String getJamBaseURL() throws ServiceApplicationException {
+      return JAM_BASE_URL;
+    }
+    
+    @Override
+    protected String getAccessToken() throws ServiceApplicationException {
+      return ACCESS_TOKEN;
+    }
+  }
+}

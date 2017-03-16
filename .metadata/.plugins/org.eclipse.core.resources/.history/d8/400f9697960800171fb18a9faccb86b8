@@ -1,0 +1,73 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls.search;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.IShowInTargetList;
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+import org.eclipse.search.ui.text.Match;
+import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
+import org.eclipse.jdt.internal.ui.search.TextSearchTableContentProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+import org.eclipse.jdt.internal.ui.search.ITextSearchTableContentProvider;
+
+public class NLSSearchResultPage extends AbstractTextSearchViewPage implements IAdaptable, INLSSearchResultPage {
+	private ITextSearchTableContentProvider fContentProvider;
+
+	private NLSSearchEditorOpener fEditorOpener= new NLSSearchEditorOpener();
+
+	public NLSSearchResultPage() {
+		super(AbstractTextSearchViewPage.FLAG_LAYOUT_FLAT);
+	}
+
+	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
+		IEditorPart editor= fEditorOpener.openMatch(match);
+		if (editor != null && activate)
+			editor.getEditorSite().getPage().activate(editor);
+		if (editor instanceof ITextEditor) {
+			ITextEditor textEditor= (ITextEditor)editor;
+			textEditor.selectAndReveal(currentOffset, currentLength);
+		}
+	}
+
+	protected void elementsChanged(Object[] objects) {
+		if (fContentProvider != null)
+			fContentProvider.elementsChanged(objects);
+	}
+
+	protected void clear() {
+		if (fContentProvider != null)
+			fContentProvider.clear();
+	}
+
+	protected void configureTreeViewer(TreeViewer viewer) {
+		throw new IllegalStateException("Doesn't support tree mode.");
+	}
+
+	protected void configureTableViewer(TableViewer viewer) {
+		viewer.setComparator(new ViewerComparator() {
+			public int category(Object element) {
+				if (element instanceof FileEntry) {
+					return 0;
+				} else {
+					return 1;
+				}
+			}
+		});
+		viewer.setLabelProvider(new ColoringLabelProvider(new NLSSearchResultLabelProvider2(this)));
+		fContentProvider= new TextSearchTableContentProvider();
+		viewer.setContentProvider(fContentProvider);
+	}
+
+	@Override
+	public Object getAdapter(Class adapter) {
+		if (IShowInTargetList.class.equals(adapter)) {
+			return JavaSearchResultPage.SHOW_IN_TARGET_LIST;
+		}
+		return null;
+	}
+}

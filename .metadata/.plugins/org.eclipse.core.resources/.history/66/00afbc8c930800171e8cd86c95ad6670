@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.util;
+
+import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
+
+public interface IOpenTypeHierarchyUtil {
+}

@@ -1,0 +1,11 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jdt.ui.wizards.NewAnnotationWizardPage;
+import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
+import org.eclipse.jdt.ui.wizards.INewAnnotationWizardPage;
+
+public interface IOpenNewAnnotationWizardAction {
+	void setConfiguredWizardPage(NewAnnotationWizardPage page);
+
+	void setOpenEditorOnFinish(boolean openEditorOnFinish);
+}

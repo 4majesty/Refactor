@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.corext.refactoring.rename;
+
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+public interface IMethodChecks {
+}

@@ -1,0 +1,27 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IOthersWorkingSetUpdater {
+	void resourceChanged(IResourceChangeEvent event);
+
+	void propertyChange(PropertyChangeEvent event);
+
+	void elementChanged(ElementChangedEvent event);
+
+	void add(IWorkingSet workingSet);
+
+	boolean remove(IWorkingSet workingSet);
+
+	boolean contains(IWorkingSet workingSet);
+
+	void init(WorkingSetModel model);
+
+	void dispose();
+
+	void updateElements();
+}

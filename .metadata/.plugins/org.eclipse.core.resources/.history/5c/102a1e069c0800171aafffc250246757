@@ -1,0 +1,27 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.cdp.service.GetRecommendedSuccessors;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.pmcommon.dao.FormDAO;
+import com.successfactors.rbp.app.api.RBPFacade;
+import com.successfactors.rbp.app.api.TargetPopulationCriteria;
+import com.successfactors.rbp.app.collector.ContextualPermissionSpec;
+import com.successfactors.rbp.app.collector.PermissionSpec;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.UserInfoBean;
+import com.successfactors.user.bean.util.UserFormatUtils;
+import com.successfactors.user.dao.UserDAO;
+import javax.inject.Inject;
+
+public interface IGetRecommendedSuccessorsImpl {
+	GetRecommendedSuccessors execute(GetRecommendedSuccessors cmd) throws ServiceApplicationException;
+}

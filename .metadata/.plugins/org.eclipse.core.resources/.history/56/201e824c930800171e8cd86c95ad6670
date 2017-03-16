@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.propertiesfileeditor;
+
+import org.eclipse.jface.text.rules.WhitespaceRule;
+import org.eclipse.jface.text.rules.WordRule;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
+import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
+
+public interface IPropertyValueScanner {
+	boolean isWordStart(char c);
+
+	boolean isWordPart(char c);
+}

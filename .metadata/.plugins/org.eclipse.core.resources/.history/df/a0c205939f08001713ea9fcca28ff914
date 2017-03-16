@@ -1,0 +1,87 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.ui.controller.mentoring.MentoringProgramAdminController;
+import com.successfactors.cdp.ui.controller.mentoring.MentoringProgramController;
+import com.successfactors.cdp.ui.util.mentoring.MentoringProgramViewConstants;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.service.FindUsersGenericV3;
+import com.successfactors.user.service.UserAutoCompleteSearch;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @Author Jojo wang9I324657)
+ * 3/10/17
+ */
+public class findMentorByNameTest {
+
+
+  private IMentoringProgramController controller;
+  private ParamBean params;
+  private PermissionListBean permList;
+  /** service command handler */
+  protected ServiceCommandHandler scaHandler;
+  /** service command handler */
+  /** context */
+  private Mockery context;
+
+  @BeforeMethod(groups = { "checkin" })
+  public void setup() {
+//    context.setImposteriser(ClassImposteriser.INSTANCE);
+    List<String> users= new ArrayList<String>();
+    users.add("admin user");
+    users.add("calra grant");
+    List<UserBean> userBeans= new ArrayList<UserBean>();
+    context = new Mockery();
+    scaHandler = context.mock(ServiceCommandHandler.class);
+    controller = new MentoringProgramController();
+
+
+    context.checking(new Expectations() {
+      {
+        try {
+          allowing(scaHandler).execute(with(any(UserAutoCompleteSearch.class)));
+          allowing(scaHandler).execute(with(any(FindUsersGenericV3.class)));
+
+        } catch (ServiceApplicationException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+  }
+  @Test(groups = {"checkin"})
+  public void findTest(){
+    Class[] parameterTypes = new Class[3];
+    parameterTypes[0] = Object.class;
+    parameterTypes[1] = MentoringProgram.class;
+    for (Method m : MentoringProgramController.class.getDeclaredMethods()) {
+      if (m.getName().equals("userAutoSearch")) {
+        m.setAccessible(true);
+      }
+      try {
+        Object rtn = m.invoke(controller, "ad", 20, 1);
+      }catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException e){
+        e.printStackTrace();
+      }
+
+    }
+  }
+
+
+
+}

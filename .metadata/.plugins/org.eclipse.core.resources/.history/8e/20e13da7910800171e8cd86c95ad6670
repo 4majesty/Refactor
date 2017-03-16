@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.util;
+
+import org.eclipse.help.IHelpResource;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+
+public interface IJavadocHelpContext {
+	String getHref();
+
+	String getLabel();
+
+	IHelpResource[] getRelatedTopics();
+
+	String getText();
+
+	String getStyledText();
+
+	String getCategory(IHelpResource topic);
+
+	String getTitle();
+}

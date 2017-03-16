@@ -1,0 +1,57 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.vo.MatchedParticipantVO;
+import com.successfactors.sca.ServiceCommand;
+import com.successfactors.cdp.bean.mentoring.IMentoringProgram;
+
+/**
+ * Service command to confirm matching result
+ * @author Keqin Liu
+ */
+public class ConfirmMatchingResult implements ServiceCommand<ConfirmMatchingResult> {
+  private IMentoringProgram program;
+
+  private List<MatchedParticipantVO> matchList;
+
+  private List<MatchedParticipantVO> matchresultsFromCache;
+
+  /** output matched participants map */
+  private Map<String, Set<String>> matchedParticipants;
+
+  public MentoringProgram getProgram() {
+    return program;
+  }
+
+  public void setProgram(MentoringProgram program) {
+    this.program = program;
+  }
+
+  public List<MatchedParticipantVO> getMatchList() {
+    return matchList;
+  }
+
+  public void setMatchList(List<MatchedParticipantVO> matchList) {
+    this.matchList = matchList;
+  }
+
+  public List<MatchedParticipantVO> getMatchresultsFromCache() {
+    return matchresultsFromCache;
+  }
+
+  public void setMatchresultsFromCache(List<MatchedParticipantVO> matchresultsFromCache) {
+    this.matchresultsFromCache = matchresultsFromCache;
+  }
+
+  public Map<String, Set<String>> getMatchedParticipants() {
+    return matchedParticipants;
+  }
+
+  public void setMatchedParticipants(Map<String, Set<String>> matchedParticipants) {
+    this.matchedParticipants = matchedParticipants;
+  }
+}

@@ -1,0 +1,69 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.handlers.IHandlerService;
+import org.eclipse.ui.part.IPageSite;
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+import org.eclipse.search.ui.text.Match;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
+import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
+import org.eclipse.jdt.internal.ui.actions.IAbstractToggleLinkingAction;
+
+public interface IOccurrencesSearchResultPage {
+	void install(IWorkbenchPage page);
+
+	void uninstall(IWorkbenchPage page);
+
+	void partActivated(IWorkbenchPartReference partRef);
+
+	void partDeactivated(IWorkbenchPartReference partRef);
+
+	void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot);
+
+	void partVisible(IWorkbenchPartReference partRef);
+
+	void partHidden(IWorkbenchPartReference partRef);
+
+	void partBroughtToTop(IWorkbenchPartReference partRef);
+
+	void partClosed(IWorkbenchPartReference partRef);
+
+	void partInputChanged(IWorkbenchPartReference partRef);
+
+	void partOpened(IWorkbenchPartReference partRef);
+
+	void run();
+
+	void init(IPageSite pageSite);
+
+	void dispose();
+
+	void createControl(Composite parent);
+
+	boolean isLinkingEnabled();
+
+	void setLinkingEnabled(boolean enabled);
+}

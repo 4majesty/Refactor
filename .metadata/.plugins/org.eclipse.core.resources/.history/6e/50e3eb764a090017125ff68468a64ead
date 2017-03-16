@@ -1,0 +1,164 @@
+package com.successfactors.cdp.ui.util.mentoring;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.sf.sfv4.util.StringUtils;
+
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionVO;
+import com.successfactors.cdp.bean.mentoring.vo.UserProfileVO;
+import com.successfactors.cdp.service.util.mentoring.MentoringBeanUtils;
+import com.successfactors.datamodel.api.DataModelFacade;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.bean.ObjTemplateBean.Field;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.sca.ServiceApplicationException;
+
+public class MentoringViewHelper {
+
+  // Suppresses default constructor, ensuring non-instantiability.
+  private MentoringViewHelper() {
+  }
+
+  /**
+   * retrieve DevGoal's name and status, check Field Permission, and return in JSON format.
+   * 
+   * @param goalList
+   * @param stateFieldsMap the map contains all possible states which have lable and style info.
+   * @param locale
+   * @param goalFieldsPermMap the map contains all goal fields which have view permission.
+   * @return DevGoal's name and status array in JSON format
+   */
+  public static JSONArrayOutput getDevGoalsJSON(List<ObjBean> goalList,
+      Map<String, ObjTemplateBean.EnumValue> stateFieldsMap, Locale locale, Map<String, Field> goalFieldsPermMap) {
+    JSONArrayOutput objArray = new JSONArrayOutput();
+
+    if (null != goalList) {
+      for (ObjBean obj : goalList) {
+        JSONObjectOutput objOutput = new JSONObjectOutput();
+        objOutput.put("id", obj.getObjId());
+        if (goalFieldsPermMap != null && goalFieldsPermMap.size() > 0) {
+          Set<String> fieldKeys = goalFieldsPermMap.keySet();
+
+          if (fieldKeys.contains(ObjTemplateBean.Field.ID_NAME)) {
+            objOutput.put(ObjTemplateBean.Field.ID_NAME, StringUtils.notNull(obj.getObjName()));
+          }
+          if (fieldKeys.contains(ObjTemplateBean.Field.ID_STATE)) {
+            ObjTemplateBean.EnumValue enumValue = (ObjTemplateBean.EnumValue) stateFieldsMap.get(obj
+                .getProperty(ObjBean.STATE));
+            String stateStr = (enumValue == null) ? "" : enumValue.getLabel().getString(locale);
+            String stateStyle = (enumValue == null) ? "" : enumValue.getStyle();
+            objOutput.put(ObjTemplateBean.Field.ID_STATE, StringUtils.notNull(stateStr));
+            objOutput.put("stateStyle", StringUtils.notNull(stateStyle));
+          }
+        }
+
+        objArray.add(objOutput);
+      }
+    }
+
+    return objArray;
+  }
+
+  /**
+   * retrieve DevGoal's name and status, and return in JSON format.
+   * @param objBeanList
+   * @param stateFieldValues
+   * @param locale
+   * @return
+   */
+  public static JSONArrayOutput getDevGoalsJSON(List<ObjBean> objBeanList,
+      Map<String, ObjTemplateBean.EnumValue> stateFieldValues, Locale locale) {
+    JSONArrayOutput objArray = new JSONArrayOutput();
+    if (null != objBeanList) {
+      for (ObjBean obj : objBeanList) {
+        JSONObjectOutput objOutput = new JSONObjectOutput();
+        objOutput.put("id", obj.getObjId());
+        objOutput.put(ObjTemplateBean.Field.ID_NAME, StringUtils.notNull(obj.getObjName()));
+        ObjTemplateBean.EnumValue enumValue = (ObjTemplateBean.EnumValue) stateFieldValues.get(obj
+            .getProperty(ObjBean.STATE));
+        String stateStr = (enumValue == null) ? "" : enumValue.getLabel().getString(locale);
+        String stateStyle = (enumValue == null) ? "" : enumValue.getStyle();
+        objOutput.put(ObjTemplateBean.Field.ID_STATE, StringUtils.notNull(stateStr));
+        objOutput.put("stateStyle", StringUtils.notNull(stateStyle));
+        objArray.add(objOutput);
+      }
+    }
+    return objArray;
+  }
+  
+  public static JSONObjectOutput getUserProfileMapJSON(Map<String, UserProfileVO> map) {
+    JSONObjectOutput objOutput = new JSONObjectOutput();
+    if(map == null || map.isEmpty()) {
+      return objOutput;
+    }
+    for(UserProfileVO profileVO : map.values()){
+      JSONObjectOutput obj = new JSONObjectOutput();
+      obj.put("userId", profileVO.getUserId());
+      obj.put("userName", profileVO.getUserName());
+      obj.put("fullname", profileVO.getFullname());
+      obj.put("jobFamily", profileVO.getJobFamily());
+      obj.put("jobTitle", profileVO.getJobTitle());
+      obj.put("threshold", profileVO.getThreshold());
+      obj.put("employeeType", profileVO.getType());
+      JSONArrayOutput preferences = new JSONArrayOutput();
+      for(ProgramSignupFormSectionVO preference : profileVO.getPreferences()){
+        JSONObjectOutput objPrefer = new JSONObjectOutput();
+        objPrefer.put("sectionId", preference.getSectionId());
+        objPrefer.put("sectionLabel", preference.getSectionLabel());
+        objPrefer.put("sectionValues", MentoringBeanUtils.getSectionValuesString(preference.getSectionValues()));
+        preferences.add(objPrefer);
+      }
+      obj.put("preferences", preferences);
+      objOutput.put(profileVO.getUserId(), obj);
+    }
+    
+    return objOutput;
+  }
+
+  public static JSONObjectOutput getFeatureCheckFailureJSONOutput(JSONObjectOutput output, IMessageBundle msgs) {
+    output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+    output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_TRANSCRIPT_ERR_NO_ACTION_PERMISSION"));
+    return output;
+  }
+
+  /**
+   * return mentoring admin permission check failure JSON output
+   * @param output
+   * @param msgs
+   * @return
+   */
+  public static JSONObjectOutput getPermissionCheckFailureJSONOutput(JSONObjectOutput output, IMessageBundle msgs) {
+    output.put(MentoringProgramViewConstants.PERMISSION_CHECK_SUCCESS, false);
+    output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+    output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_TRANSCRIPT_ERR_NO_ACTION_PERMISSION"));
+    return output;
+  }
+
+  /**
+   * filter inactive elements in data model
+   * @param matchedArea
+   * @return
+   * @throws ServiceApplicationException
+   */
+  public static List<ProgramSignupFormSectionVO> removeInactiveElementsInDataModel(DataModelFacade dataModelFacade, List<ProgramSignupFormSectionVO> matchedArea) throws ServiceApplicationException {
+    List<ProgramSignupFormSectionVO> result = new ArrayList<ProgramSignupFormSectionVO>();
+
+    SuccessionDataModelBean dataModel = dataModelFacade.getDataModel();
+    for(ProgramSignupFormSectionVO section : matchedArea){
+      SuccessionDataModelBean.StandardElement dmEle = dataModel.lookupStandardElementById(section.getSectionId());
+      if(dmEle != null){
+        result.add(section);
+      }
+    }
+
+    return result;
+  }
+}

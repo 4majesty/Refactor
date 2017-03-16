@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
+
+public interface ISearchScopeWorkingSetAction {
+	IJavaSearchScope getSearchScope();
+
+	IWorkingSet[] getWorkingSets();
+
+	int getSearchScopeType();
+
+	String getFullDescription();
+}

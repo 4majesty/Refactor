@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.PlatformUI;
+
+public interface IWorkingSetMenuContributionItem {
+	void fill(Menu menu, int index);
+
+	void dispose();
+
+	boolean isDynamic();
+}

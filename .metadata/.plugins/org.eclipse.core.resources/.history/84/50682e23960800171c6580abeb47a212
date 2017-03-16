@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.corext.refactoring.reorg;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
+
+public interface IParentChecker {
+	boolean haveCommonParent();
+
+	Object getCommonParent();
+
+	IResource[] getResources();
+
+	IJavaElement[] getJavaElements();
+
+	void removeElementsWithAncestorsOnList(boolean removeOnlyJavaElements);
+}

@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.jdt.core.ITypeHierarchy;
+
+public interface IHierarchyViewerSorter {
+	void setSortByDefiningType(boolean sortByDefiningType);
+
+	boolean isSortByDefiningType();
+
+	boolean isSortAlphabetically();
+}

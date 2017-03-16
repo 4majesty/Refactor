@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.fix;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+
+public interface IAbstractMultiFix {
+	ICleanUpFix createFix(CleanUpContext context) throws CoreException;
+
+	int computeNumberOfFixes(CompilationUnit compilationUnit);
+}

@@ -1,0 +1,7 @@
+package test2;
+
+import test1.a;
+
+public class test2 {
+	a test = new a();
+}

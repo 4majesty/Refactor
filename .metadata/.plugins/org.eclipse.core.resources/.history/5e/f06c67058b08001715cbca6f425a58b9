@@ -1,0 +1,83 @@
+/*
+ * $Id: FeatureReadinessEnum.java 825974 2015-08-25 07:34:36Z haixunlu $
+ *
+ * Copyright (C) 2005 SuccessFactors, Inc.
+ * All Rights Reserved
+ */
+package com.successfactors.legacy.bean;
+
+import com.successfactors.gm.util.type.EnumType;
+import com.successfactors.i18n.service.IMessageBundle;
+
+/**
+ * FeatureReadinessEnum
+ * 
+ * @author Jeffrey Ichnowski
+ * @version $Revision: 825974 $
+ */
+public abstract class FeatureReadinessEnum extends EnumType {
+  /**
+   * Feature is production ready
+   */
+  public static final FeatureReadinessEnum PRODUCTION = new FeatureReadinessEnum(
+      "production") {
+    @Override
+    public String getLabel(final IMessageBundle messages) {
+      return messages.getString("FEATUREREADINESS_PRODUCTION");
+    }
+  };
+
+  /**
+   * Feature is demoable, but not production ready
+   */
+  public static final FeatureReadinessEnum DEMOABLE = new FeatureReadinessEnum(
+      "demoable") {
+    @Override
+    public String getLabel(final IMessageBundle messages) {
+      return messages.getString("FEATUREREADINESS_DEMOABLE");
+    }
+  };
+
+  /**
+   * Feature is in development, and should not be used for demos or production
+   */
+  public static final FeatureReadinessEnum DEVELOPMENT = new FeatureReadinessEnum(
+      "development") {
+    @Override
+    public String getLabel(final IMessageBundle messages) {
+      return messages.getString("FEATUREREADINESS_DEVELOPMENT");
+    }
+  };
+
+  /**
+   * Feature is deprecated and should no longer appear in the Provisioning UI.
+   * This means that either feature should no longer be used or it now the
+   * default setting and we don't want it to be modified via the UI. You can
+   * still set the feature using the Provisioning Client.
+   */
+  public static final FeatureReadinessEnum DEPRECATED = new FeatureReadinessEnum(
+      "deprecated") {
+    @Override
+    public String getLabel(final IMessageBundle messages) {
+      return messages.getString("FEATUREREADINESS_DEPRECATED");
+    }
+  };
+
+  /**
+   * Feature will never be released. For development only.
+   */
+  public static final FeatureReadinessEnum NEVER = new FeatureReadinessEnum(
+      "never") {
+    @Override
+    public String getLabel(final IMessageBundle messages) {
+      return messages.getString("FEATUREREADINESS_NEVER");
+    }
+  };
+
+  private FeatureReadinessEnum(final String name) {
+    super(name);
+  }
+
+  public abstract String getLabel(IMessageBundle messages);
+
+} // FeatureReadinessEnum

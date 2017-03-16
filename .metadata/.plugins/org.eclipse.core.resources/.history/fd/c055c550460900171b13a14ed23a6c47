@@ -1,0 +1,12 @@
+package com.successfactors.cdp.ui.controller;
+
+import org.testng.annotations.Test;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramVO;
+import com.successfactors.cdp.ui.util.mentoring.MentoringProgramBeanUtil;
+
+public interface IMentoringProgramBeanUtilTest {
+	void testGetMentoringProgramFromOverview();
+
+	void testGetProgram();
+}

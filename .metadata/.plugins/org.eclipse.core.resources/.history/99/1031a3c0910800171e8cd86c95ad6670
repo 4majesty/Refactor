@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import java.util.List;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IProposalSorterHandle {
+	String getId();
+
+	String getName();
+
+	void sortProposals(ContentAssistInvocationContext context, List proposals);
+
+	String getErrorMessage();
+}

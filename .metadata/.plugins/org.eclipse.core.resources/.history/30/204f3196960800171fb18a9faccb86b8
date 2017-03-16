@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.refactoring.code;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.corext.refactoring.code.IInlineMethodRefactoring;
+
+public interface IInlineMethodInputPage {
+	void createControl(Composite parent);
+}

@@ -1,0 +1,1904 @@
+package com.successfactors.cdp.ui.controller.mentoring;
+
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.StandardElement;
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.ajaxservice.annotation.AjaxMethod;
+import com.successfactors.ajaxservice.annotation.AjaxService;
+import com.successfactors.cdp.app.mentoring.MatchingAlgorithmContext;
+import com.successfactors.cdp.app.mentoring.MatchingFacade;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.app.mentoring.RetrieveLabelService;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentee;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMenteeSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSection;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplateSection;
+import com.successfactors.cdp.bean.mentoring.jam.JamFeedWidgetInfo;
+import com.successfactors.cdp.bean.mentoring.vo.MatchedParticipantVO;
+import com.successfactors.cdp.bean.mentoring.vo.MatchingResult;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionValueVO;
+import com.successfactors.cdp.bean.mentoring.vo.UserProfileVO;
+import com.successfactors.cdp.service.UpdateMentorUnavailableEndDate;
+import com.successfactors.cdp.service.mentoring.DevGoalService;
+import com.successfactors.cdp.service.mentoring.GetMatchedParticipants;
+import com.successfactors.cdp.service.mentoring.GetMentoringRequest;
+import com.successfactors.cdp.service.mentoring.GetMentoringSignupForm;
+import com.successfactors.cdp.service.mentoring.GetSkillList;
+import com.successfactors.cdp.service.mentoring.GetStandardElementValue;
+import com.successfactors.cdp.service.mentoring.ProcessMentoringRequest;
+import com.successfactors.cdp.service.mentoring.UnsupervisedMatchJamGroupInviteObserver;
+import com.successfactors.cdp.service.mentoring.jam.GetJamFeedWidgetInfo;
+import com.successfactors.cdp.service.mentoring.jam.exception.JamGroupPermissionException;
+import com.successfactors.cdp.service.util.mentoring.DMFieldWhiteListEnum;
+import com.successfactors.cdp.service.util.mentoring.MatchingScoreTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.MentoringBeanUtils;
+import com.successfactors.cdp.service.util.mentoring.MentoringConstants;
+import com.successfactors.cdp.service.util.mentoring.MentoringDateUtils;
+import com.successfactors.cdp.service.util.mentoring.MentoringPermissionChecker;
+import com.successfactors.cdp.service.util.mentoring.MentoringProgramUtilsImpl;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.SectionDisplayTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormSectionCategoryEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormStatusEnum;
+import com.successfactors.cdp.ui.util.mentoring.MentoringProgramViewConstants;
+import com.successfactors.cdp.ui.util.mentoring.MentoringViewHelper;
+import com.successfactors.competency.service.GetRolesByJobCode;
+import com.successfactors.datamodel.api.DataModelFacade;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.api.sql.MDFCriteria;
+import com.successfactors.genericobject.api.sql.MDFResultRow;
+import com.successfactors.genericobject.api.sql.MDFResultSet;
+import com.successfactors.genericobject.api.sql.Projections;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.bean.ObjTemplateBean.EnumValue;
+import com.successfactors.gm.bean.ObjTemplateBean.Field;
+import com.successfactors.gm.service.objective.GetDefaultTemplate;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.legacy.bean.FindUserBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.service.ejb.SysConfig;
+import com.successfactors.legacy.ui.servlet.js.AutoCompleteHelper;
+import com.successfactors.legacy.ui.tag.widget.AutoCompTag;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.legacy.util.type.ProfileInfoCategoryEnum;
+import com.successfactors.legacy.util.type.ProfileInfoSourceEnum;
+import com.successfactors.legacy.util.type.ProfileInfoTypeEnum;
+import com.successfactors.listviews.app.EmpListColumnEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.quickcard.bean.vo.QuickCardSearchCriteriaVO;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sfutil.util.HexUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.preference.PreferenceBean;
+import com.successfactors.user.bean.util.UserFormatUtils;
+import com.successfactors.user.service.FindUserById;
+import com.successfactors.user.service.FindUsersByIds;
+import com.successfactors.user.service.FindUsersGenericV3;
+import com.successfactors.user.service.UserAutoCompleteSearch;
+import com.successfactors.user.service.preference.GetPreferenceBean;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import javax.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import com.successfactors.cdp.app.mentoring.IRetrieveLabelService;
+import com.successfactors.cdp.service.mentoring.IDevGoalService;
+import com.successfactors.cdp.service.mentoring.IUnsupervisedMatchJamGroupInviteObserver;
+
+
+/**
+ * Controller for mentoring program
+ *
+ * @author I309618
+ *
+ */
+@AjaxService
+@Name("mentoringProgramController")
+@javax.inject.Named("mentoringProgramController")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+public class MentoringProgramController {
+  private static Logger logger = LogManager.getLogger();
+
+
+  @Inject
+  @In
+  private ParamBean params;
+
+  @Inject
+  @In
+  private transient ServiceCommandHandler scaHandler;
+
+  @Inject
+  @In(create = true)
+  private ConfigurationProvider configurationProvider;
+
+  @Inject
+  @In(value = PermissionUtils.PERMISSION_LIST_BEAN)
+  private PermissionListBean permList;
+
+  @Inject
+  @In(create = true, value = "v10msgs")
+  private IMessageBundle msgs;
+
+  private static final String ENCODING = "ISO-8859-1";
+
+  @Inject
+  @In(create = true)
+  private MentoringServiceBase mentoringServiceBase;
+
+  @Inject
+  @In(create = true)
+  private IDevGoalService devGoalService;
+
+  @Inject
+  @In(create = true)
+  private IRetrieveLabelService retrieveLabelService;
+
+  @Inject
+  @In(value = DataModelFacade.NAME, create = true)
+  private DataModelFacade dataModelFacade;
+
+  @Inject
+  @In(create = true)
+  private IUnsupervisedMatchJamGroupInviteObserver unsupervisedMatchJamGroupInviteObserver;
+
+
+
+  /**
+   * get program list and card info according to mentor or mentee
+   * @param programId
+   * @return program
+   */
+  @AjaxMethod
+  public JSONObjectOutput getMentoringProgramList(String programId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    MentoringProgramUtilsImpl mentorUtils = new MentoringProgramUtilsImpl();
+    String userId = params.getUserId();
+    List programList = mentorUtils.hasActivePrograms();
+
+    if(isMentoringFeatureEnabled() && programList.size()>0) {
+      JSONArrayOutput programs = new JSONArrayOutput();
+      String selectedProgramId = null;
+      if(programId != null){
+        selectedProgramId = programId;
+      }
+      else{
+        selectedProgramId = this.getDefaultProgramExternalCode();
+      }
+      try{
+        boolean isDefaultInActiveProgram = false;
+        String firstProgramID = "";
+        //Generate program dropdown for homepage
+        for(Object p : programList) {
+          MentoringProgram program = (MentoringProgram) p;
+          boolean isMentor = isMentor(userId, program);
+          if (checkProgramStatusForHomePage(program, isMentor)) {
+            String programExternalCode = program.getExternalId();
+            if (programExternalCode.equalsIgnoreCase(selectedProgramId) && !isDefaultInActiveProgram) {
+              isDefaultInActiveProgram = true;
+            }
+            if ("".equalsIgnoreCase(firstProgramID)) {
+              firstProgramID = programExternalCode;
+            }
+
+            //program basic info
+            JSONObjectOutput po = new JSONObjectOutput();
+            po.put("externalCode", programExternalCode);
+            po.put("name", program.getName());
+            po.put("programStatus", program.getStatus());
+            po.put("isMentor", isMentor);
+            po.put("isMentee", isMentee(userId, program));
+            po.put("isFinishSignup", isSignupFormFinished(programExternalCode, userId, isMentor));
+            po.put("completedDate",getMentoringProgramCompletedDate(program));
+
+            programs.add(po);
+          }
+        }
+
+        if(!isDefaultInActiveProgram){
+          selectedProgramId = firstProgramID;
+        }
+        output.put("programs", programs);
+
+        output.put("defaultProgram", selectedProgramId);
+
+        output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+      }catch(ServiceApplicationException e){
+        logger.error("MentoringProgramController.getProgramList error occurs due to "+e.getMessage(), e);
+        output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+        output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+      }
+    } else {
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_HOME_NO_PERM_OR_NO_VALID_PROGRAM"));
+    }
+    return output;
+  }
+
+  /**checkprogramStatusForHomePage
+   * @param program
+   * @param isMentor
+   * @return permission
+   */
+  private boolean checkProgramStatusForHomePage(MentoringProgram program, boolean isMentor) {
+
+    // check program status, to make sure home page can not be accessed when
+    // previous steps have not finished yet
+    boolean permission = ((isMentor && program.getStatus() != ProgramStatusEnum.DRAFT && program.getStatus() != ProgramStatusEnum.CONFIRMED && program
+            .getStatus() != ProgramStatusEnum.DELETED)
+            || (!isMentor && program.getStatus() != ProgramStatusEnum.DRAFT && program.getStatus() != ProgramStatusEnum.CONFIRMED
+            && program.getStatus() != ProgramStatusEnum.DELETED && program.getStatus() != ProgramStatusEnum.MENTOR_SIGNUP)
+            || (program.getStatus() == ProgramStatusEnum.MATCHED)
+            || (program.getStatus() == ProgramStatusEnum.MATCHING)
+            || (program.getStatus() == ProgramStatusEnum.INPROGRESS) || (program.getStatus() == ProgramStatusEnum.COMPLETED));
+
+    return permission;
+
+  }
+
+  /**
+   * Get the count of how many mentee request for the current login user as mentor.
+   * @return output
+   */
+  @AjaxMethod
+  public JSONObjectOutput getNewMenteeRequestCountFromMentor() {
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.isMentoringFeatureEnabled(params)) {
+      return MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+    }
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    String currentUserId = params.getUserId();
+    try{
+      ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgramMentorRequest.class);
+
+
+      MDFCriteria search = new GOSQLGeneratorContext(def, params);
+      search.setProjection(Projections.rowCount());
+      search.add(Restrictions.and(Restrictions.eq("mentor", currentUserId),Restrictions.eq("mentoringRequestStatus", MentorRequestStatusEnum.CONFIRMED)));
+      MDFResultSet resultSet = search.execute();
+      List<? extends MDFResultRow> resultRows = resultSet.getResultRows();
+      Long totalNumberOfRecords = new Long(0);
+      if (!resultRows.isEmpty()) {
+        totalNumberOfRecords = (Long) resultRows.get(0).getValue(0);
+      }
+      output.put("newMenteeRequestCount", totalNumberOfRecords.longValue());
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    }catch(ServiceApplicationException e){
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put("errorMessage", msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+      logger.error("getProgramDataById error occurs: ", e);
+    }
+    return output;
+  }
+
+  /**
+   * Get data shown on mentee home page including mentee cards and mentoring requests
+   * @param programId Mentoring program ID
+   * @return Data shown on mentor home page
+   */
+  @AjaxMethod
+  public JSONObjectOutput getMentorProgramDataById(String programId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.isMentoringFeatureEnabled(params)) {
+      return MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+    }
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    try {
+      // Set current program as default program
+      updatePreferredMentoringProgram(programId);
+
+      // Get current program
+      MentoringProgram program = mentoringServiceBase.getProgramById(programId);
+
+      String mentorExternalId =null;
+      for (MentoringProgramMentor mentor:program.getMentors())
+      {
+        if(mentor.getUser().equals(params.getUserId()))
+        {
+          output.put("unavailableEndDate",
+                  mentor.getUnavailableEndDate() == null ?
+                          "" :
+                          MentoringDateUtils.formatDate(mentor.getUnavailableEndDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+          mentorExternalId=mentor.getExternalId();
+        }
+      }
+      output.put("programName", program.getName());
+      output.put("description", program.getDescription());
+      output.put("startDate", MentoringDateUtils.formatDate(program.getStartDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+      output.put("photoId", program.getPhotoId());
+      output.put("mentorExternalId", mentorExternalId);
+      output.put("matchingType", program.getMatchingType());
+      output.put("isNeedMentorApproval", program.isNeedMentorApproval());
+      output.put("programStatus", program.getStatus());
+      output.put("mentorshipClosureEnabled", program.isMentorshipClosureEnabled());
+      output.put("completedDate",getMentoringProgramCompletedDate(program));
+
+      // Get all matched mentees and generate mentee cards
+      GetMatchedParticipants getMatchedParticipants = new GetMatchedParticipants();
+      getMatchedParticipants.setProgramId(programId);
+      getMatchedParticipants.setMentorIds(params.getUserId());
+      List<MentoringProgramMatchedParticipant> matchedParticipants = scaHandler.execute(getMatchedParticipants);
+
+      Map<String,String> programMenteeMap =new HashMap<String,String>();
+      for (MentoringProgramMentee mentee:program.getMentees())
+      {
+        programMenteeMap.put(mentee.getUser(), mentee.getExternalId());
+      }
+
+      List participantCardInfos = new ArrayList();
+      program.getMentees();
+
+      if (matchedParticipants != null && matchedParticipants.size() > 0) {
+        for (MentoringProgramMatchedParticipant participant : matchedParticipants) {
+          JSONObjectOutput cardInfo = generateCardInfo(program, false, participant);
+          cardInfo.put("mentorshipId", participant.getExternalId());
+          cardInfo.put("devGoals", getDevGoalListJSON(participant.getMentee(), false));//if Mentor Homepage, we will get mentee card
+          cardInfo.put("menteeExternalId", (programMenteeMap != null ? programMenteeMap.get(participant.getMentee()) : null));
+          participantCardInfos.add(cardInfo);
+        }
+      }
+
+      output.put("mentoringList", participantCardInfos);
+
+      // Decide whether to show hint
+      boolean showHint = (!ProgramStatusEnum.INPROGRESS.equals(program.getStatus()))
+              ? true : false;
+      output.put("showHint", showHint);
+
+      output.put("menteeRequests", getMeteeRequestJSONObject(program));
+      output.put("jamEnabled", program.isJamEnabled());
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put("errorMessage", msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+      logger.error("getProgramDataById error occurs: ", e);
+    }
+
+    return output;
+  }
+
+  /**
+   * Get data shown on mentee home page including mentor cards, mentoring preferences and development goals
+   * @param programId Program ID
+   * @return Data shown on mentee home page
+   */
+  @AjaxMethod
+  public JSONObjectOutput getMenteeProgramDataById(String programId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.isMentoringFeatureEnabled(params)) {
+      return MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+    }
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    String menteeId = params.getUserId();
+
+    try {
+      // Set current program as default program
+      updatePreferredMentoringProgram(programId);
+
+      // Get current program
+      MentoringProgram program = mentoringServiceBase.getProgramById(programId);
+      String mentorExternalId =null;
+      for (MentoringProgramMentee mentee:program.getMentees())
+      {
+        if(mentee.getUser().equals(params.getUserId()))
+        {
+          mentorExternalId=mentee.getExternalId();
+        }
+      }
+      output.put("programName", program.getName());
+      output.put("description", program.getDescription());
+      output.put("startDate", MentoringDateUtils.formatDate(program.getStartDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+      output.put("photoId", program.getPhotoId());
+      output.put("menteeExternalId", mentorExternalId);
+      output.put("programStatus", program.getStatus());
+      output.put("mentorshipClosureEnabled", program.isMentorshipClosureEnabled());
+      output.put("completedDate",getMentoringProgramCompletedDate(program));
+
+
+      // Get all matched mentors and generate mentor cards
+      GetMatchedParticipants getMatchedparticipants = new GetMatchedParticipants();
+      getMatchedparticipants.setProgramId(programId);
+      getMatchedparticipants.setMenteeIds(menteeId);
+      List<MentoringProgramMatchedParticipant> matchedParticipants = scaHandler.execute(getMatchedparticipants);
+      List participantCardInfos = new ArrayList();
+
+      Map<String,String> programMentorMap =new HashMap<String,String>();
+      for (MentoringProgramMentor mentor:program.getMentors())
+      {
+        programMentorMap.put(mentor.getUser(), mentor.getExternalId());
+      }
+      if (matchedParticipants != null && matchedParticipants.size() > 0) {
+        for (MentoringProgramMatchedParticipant matchedParticipant : matchedParticipants) {
+          JSONObjectOutput cardInfo = generateCardInfo(program, true, matchedParticipant);//if menteehomepage, we will get mentor card
+          cardInfo.put("mentorExternalId", (programMentorMap != null ? programMentorMap.get(matchedParticipant.getMentor()) : null));
+          participantCardInfos.add(cardInfo);
+        }
+      }
+
+      output.put("mentoringList", participantCardInfos);
+
+      // Decide whether to show hint
+      boolean showHint = (!ProgramStatusEnum.INPROGRESS.equals(program.getStatus()))
+              ? true : false;
+      output.put("showHint", showHint);
+
+      // Get development goals
+      output.put("devGoals", getDevGoalListJSON(menteeId, true));
+
+      // Get mentee's sign-up form and get mentoring preferences from that form
+      MentoringProgramSignupForm signupForm = null;
+
+      for (MentoringProgramMentee mentee : program.getMentees()) {
+        if (mentee.getUser().equals(menteeId)) {
+          signupForm = mentee.getSignupForm();
+
+          break;
+        }
+      }
+
+      output.put("preferences",sortPreference(getPreference(signupForm, program)));
+
+      boolean showSignLink = false; // Whether we need to show sign up form link
+
+      // If matching is unsupervised and program not started, check whether we need to show sign up form link
+      if (ProgramMatchingTypeEnum.UNSUPERVISED.equals(program.getMatchingType()) && !ProgramStatusEnum.INPROGRESS.equals(program.getStatus())
+              && !ProgramStatusEnum.COMPLETED.equals(program.getStatus())) {
+        GetMentoringRequest getMentoringRequest = new GetMentoringRequest();
+        getMentoringRequest.setProgramId(programId);
+        getMentoringRequest.setStatus(MentorRequestStatusEnum.CONFIRMED);
+        getMentoringRequest.setMenteeIds(menteeId);
+
+        List<MentoringProgramMentorRequest> requests = scaHandler.execute(getMentoringRequest);
+
+        // If there is no unprocessed mentoring requests and mentee can have more mentors, we need to show sign up form link. So that mentee
+        // can send more mentoring requests
+        if (requests.size() == 0 && (program.getMaximumOfMentor() > matchedParticipants.size())) {
+          showSignLink = true;
+        }
+      }
+
+      output.put("showSignLink", showSignLink);
+      output.put("jamEnabled", program.isJamEnabled());
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put("errorMessage", msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+      logger.error("getProgramDataById error occurs: ", e);
+    }
+
+    return output;
+  }
+
+  /**
+   * Get completedDate of MentoringProgram
+   * @param program MentoringProgram
+   * @return completedDate String
+   */
+  private String getMentoringProgramCompletedDate(final MentoringProgram program){
+    String completedDate = "";
+    try {
+      final boolean isProgramCompleted = ProgramStatusEnum.COMPLETED.equals(program.getStatus());
+      if (isProgramCompleted) {
+        completedDate = MentoringDateUtils.formatDate(program.getCompletedDate(), MentoringConstants.DEFAULT_DATE_FORMAT);
+      }
+    }catch(Exception e){
+      logger.error("getMentoringProgramCompletedDate error occurs: ", e);
+    }
+    return completedDate;
+  }
+
+  /**
+   * sort JSONObjectOutput by order
+   * @param json
+   * @return
+   */
+  private List sortPreference(JSONObjectOutput json){
+    List<JSONObjectOutput> result = new ArrayList<JSONObjectOutput>();
+
+    for(String key : json.keySet()){
+      result.add((JSONObjectOutput)json.get(key));
+    }
+
+    Comparator<JSONObjectOutput> c = new Comparator<JSONObjectOutput>(){
+      @Override
+      public int compare(JSONObjectOutput o1, JSONObjectOutput o2) {
+        return Integer.parseInt(o1.get("order").toString())-Integer.parseInt(o2.get("order").toString());
+      }
+    };
+
+    Collections.sort(result, c);
+
+    return result;
+  }
+
+  /**
+   * Get prefrerences mentor/mentee chosen from mentor/mentee sign-up form
+   * @param signupForm Mentor/mentee sign-up form
+   * @param program Mentoring program
+   * @return Prefrerences mentor/mentee chosen from mentor/mentee sign-up form
+   * @throws ServiceApplicationException Service application exception
+   */
+  private JSONObjectOutput getPreference(MentoringProgramSignupForm signupForm, MentoringProgram program) throws ServiceApplicationException {
+    JSONObjectOutput preferences = new JSONObjectOutput();
+    SuccessionDataModelBean dataModel = dataModelFacade.getDataModel();
+
+    if (signupForm == null || signupForm.getSections() == null || signupForm.getSections().size() == 0) {
+      return preferences;
+    }
+
+    Map<String, MentoringProgramSignupFormSection> sectionMap = new HashMap();
+
+    for (MentoringProgramSignupFormSection section : signupForm.getSections()) {
+        sectionMap.put(section.getSectionId(), section);
+    }
+
+    for (MentoringProgramSignupTemplateSection templateSection : program.getSignupFormTemplate().getSections()) {
+      StandardElement dmEle = dataModel.lookupStandardElementById(templateSection.getSectionId());
+      if(dmEle == null){
+        continue;
+      }
+
+      MentoringProgramSignupFormSection formSection = sectionMap.get(templateSection.getSectionId());
+      JSONObjectOutput section = new JSONObjectOutput();
+
+      if (formSection != null) {
+        List<MentoringProgramSignupFormSectionValue> sectionValues = formSection.getSectionValue();
+        List<ProgramSignupFormSectionValueVO> valueVOs = new ArrayList<>();
+        JSONArrayOutput values = new JSONArrayOutput();
+
+        for (MentoringProgramSignupFormSectionValue sectionValue : sectionValues) {
+          valueVOs.add(MentoringBeanUtils.convertSignupFormSectionValue2VO(sectionValue));
+        }
+        retrieveLabelService.fillSectionValuesLabel(templateSection.getSectionId(), valueVOs);
+
+        for (int i = 0; i < sectionValues.size(); i++) {
+          JSONObjectOutput value = new JSONObjectOutput();
+          if (valueVOs.get(i).getItemLabel() != null && !valueVOs.get(i).getItemLabel().isEmpty()) {
+            value.put(sectionValues.get(i).getItemId(), valueVOs.get(i).getItemLabel());
+            values.add(value);
+          }
+        }
+        if (values != null && values.size()>0) {
+          section.put("sectionValue", values);
+          section.put("sectionMentorQuestion", templateSection.getMentorQuestion() == null ? "" : templateSection.getMentorQuestion().getString(params.getLocale()));
+          section.put("sectionMenteeQuestion", templateSection.getMenteeQuestion() == null ? "" : templateSection.getMenteeQuestion().getString(params.getLocale()));
+          section.put("isMentorVisible", templateSection.isMentorVisible());
+          section.put("isMenteeVisible", templateSection.isMenteeVisible());
+          section.put("order", templateSection.getOrder());
+          preferences.put(templateSection.getSectionId(), section);
+        }
+      }
+    }
+
+    return preferences;
+  }
+
+  /*
+   * private void addDevGoalSectionToOutput(JSONObjectOutput output, List
+   * matchedParticipants, boolean isMentor) throws ServiceApplicationException {
+   * boolean hasCDPAccessPermission = devGoalService.hasCDPAccessPermission();
+   * if (hasCDPAccessPermission) { output.put("hasCDPAccessPermission", true);
+   * if (isMentor) { JSONArrayOutput goalsArray = new JSONArrayOutput(); for
+   * (Object mentee : matchedParticipants) { JSONObjectOutput goalsJson =
+   * getDevGoalListJSON
+   * (((MentoringProgramMatchedParticipant)mentee).getMenteeId(), false);
+   * goalsArray.add(goalsJson); } output.put("devGoals", goalsArray); } else {
+   * JSONObjectOutput goalsJson = getDevGoalListJSON(params.getUserId(), true);
+   * output.put("devGoals", goalsJson); } } else {
+   * output.put("hasCDPAccessPermission", false); } }
+   */
+  /**
+   *
+   * Convert Map MatchingAreaas to MentoringProgramSignFormSection Format
+   *
+   * @param matchingAreasOutput
+   * @return An JsonArrayOut contains sectionid, sectionlabel, itemid and
+   *         itemvalue
+   * @throws ServiceApplicationException
+   * @throws ParseException
+   */
+  private List<MentoringProgramSignupFormSection> prepareMentoringProgramSignupFormSection(
+          String matchingAreasOutput) throws ServiceApplicationException,
+          ParseException {
+    List<MentoringProgramSignupFormSection> sections = new ArrayList<MentoringProgramSignupFormSection>();
+
+
+    if (matchingAreasOutput != null && !matchingAreasOutput.trim().equals("")) {
+      JSONArray matchingAreasArray = new JSONArray(matchingAreasOutput);
+      for (int i = 0; i < matchingAreasArray.length(); i++) {
+        MentoringProgramSignupFormSection section = new MentoringProgramSignupFormSection();
+        List<MentoringProgramSignupFormSectionValue> sectionvalues = new ArrayList<MentoringProgramSignupFormSectionValue>();
+        JSONObject matchingAreas = matchingAreasArray.getJSONObject(i);
+        section.setSectionId(matchingAreas.optString(("sectionId")));
+        JSONArray items = matchingAreas.optJSONArray("sectionValues");
+        if (items != null) {
+          for (int j = 0; j < items.length(); j++) {
+
+            MentoringProgramSignupFormSectionValue sectionvalue = new MentoringProgramSignupFormSectionValue();
+            sectionvalue.setItemLabel(items.getJSONObject(j).optString(
+                    "itemLabel"));
+            sectionvalue.setItemId(items.getJSONObject(j).optString("itemId"));
+            sectionvalues.add(sectionvalue);
+            section.setSectionValue(sectionvalues);
+          }
+          sections.add(section);
+
+        }
+      }
+    }
+    return sections;
+
+  }
+
+  /**
+   * prepare DevGoalList for users (which will be used in Mentor/Mentee Home
+   * Page)
+   *
+   * @param userId
+   * @param checkFieldPermission
+   * @return Json goalList
+   * @throws ServiceApplicationException
+   */
+
+  private JSONObjectOutput getDevGoalListJSON(String userId,
+                                              boolean checkFieldPermission) throws ServiceApplicationException {
+    ObjTemplateBean goalPlan = scaHandler.execute(new GetDefaultTemplate(
+            ObjPlanTypeEnum.DEVELOPMENT));
+
+    boolean hasGoalPanPermission = devGoalService.hasGoalPlanPermission(
+            goalPlan, userId);
+    JSONObjectOutput objOutput = new JSONObjectOutput();
+    JSONArrayOutput goalListJson = null;
+    objOutput.put("goalUser", userId);
+    boolean hasCDPAccessPermission = devGoalService.hasCDPAccessPermission();
+    if (hasCDPAccessPermission) {
+      objOutput.put("hasCDPAccessPermission", true);
+      if (!hasGoalPanPermission) {
+        objOutput.put("hasGoalPlanPermission", false);
+      } else {
+        objOutput.put("hasGoalPlanPermission", true);
+        List<ObjBean> goalList =  devGoalService.getDevGoalList(goalPlan, userId);
+        Map<String, EnumValue> stateFieldsMap = devGoalService.getStateFieldsMap(goalPlan);
+        if (goalList.isEmpty()) {
+          goalListJson = new JSONArrayOutput();
+        } else if (checkFieldPermission) {
+          ObjBean firstObjBean = (ObjBean) goalList.get(0);
+          Map<String, Field> goalFieldsPermMap = devGoalService.getGoalFieldReadPermissionMap(userId, firstObjBean,
+                  goalPlan);
+          goalListJson = MentoringViewHelper.getDevGoalsJSON(goalList, stateFieldsMap, params.getLocale(),
+                  goalFieldsPermMap);
+        } else {
+          goalListJson = MentoringViewHelper.getDevGoalsJSON(goalList, stateFieldsMap, params.getLocale());
+        }
+      }
+    }
+    else
+    {
+      objOutput.put("hasCDPAccessPermission", false);
+      objOutput.put("hasGoalPlanPermission", false);
+    }
+    objOutput.put("goals", goalListJson);
+
+    return objOutput;
+  }
+
+  /**
+   * getMatchingAreas from DB. Used for MentorHomePage
+   *
+   * @param matchedPart
+   * @return a string set of matching areas
+   * @throws ServiceApplicationException
+   */
+
+  private Set<String> getMatchingAreas(List<MentoringProgramSignupTemplateSection> templateSections, List<MentoringProgramSignupFormSection> matchedAreas) throws ServiceApplicationException {
+    //order matched areas by template section order
+    List<MentoringProgramSignupFormSection> sortedMatchedAreas = MentoringUtils.sortSignupSectionsSameWithWizard(templateSections, matchedAreas);
+
+    SuccessionDataModelBean dataModel = dataModelFacade.getDataModel();
+    Set<String> sectionLabels = new HashSet<String>();
+    for (MentoringProgramSignupFormSection m : sortedMatchedAreas) {
+      StandardElement dmEle = dataModel.lookupStandardElementById(m.getSectionId());
+      if(dmEle == null){
+        continue;
+      }
+
+      sectionLabels.add(retrieveLabelService.getSectionLabelbyId(m.getSectionId()));
+    }
+
+    return sectionLabels;
+  }
+
+  /**
+   * generate card info
+   *
+   * @param request
+   * @param p
+   * @param clazz
+   * @return Usercard informations
+   *
+   */
+
+  private JSONObjectOutput generateCardInfo(MentoringProgram p, boolean isMentor, MentoringProgramMatchedParticipant matchedPart)
+          throws ServiceApplicationException {
+    JSONObjectOutput cardInfo = new JSONObjectOutput();
+    // Map<String, String> cardInfo = new HashMap<String, String>();
+    String targetUserId = null;
+    UserBean userBean;
+    targetUserId = isMentor ? matchedPart.getMentor():matchedPart.getMentee();
+    MentoringProgramParticipant participant=MentoringUtils.getParticipantByUserId(p,targetUserId,isMentor);
+    cardInfo.put("matchingAreas", getMatchingAreas(p.getSignupFormTemplate().getSections(), matchedPart.getMentoringProgramMatchedArea()));
+    cardInfo.put("preferences", sortPreference(getPreference(participant.getSignupForm(), p)));
+    try {
+      userBean = scaHandler.execute(new FindUserById(targetUserId, true));
+      cardInfo.put("userId", userBean.getUserId());
+      cardInfo.put("userName",UserFormatUtils.formatFullName(msgs, userBean.getFullNameBean()));
+      cardInfo.put("invalidUser", userBean.isInvalidUser());
+      List<RoleBean> roles = scaHandler.execute(new GetRolesByJobCode(userBean.getUserJobCode()));
+      if (roles.size() > 0) {
+        cardInfo.put("title", ((RoleBean) roles.get(0)).getRoleName());
+        cardInfo.put("family",((RoleBean) roles.get(0)).getFamilyName());
+
+      } else {
+        cardInfo.put("title", "");
+        cardInfo.put("family","");
+
+      }
+    } catch (ServiceApplicationException e) {
+      logger.error("generateCardInfo error occurs: ", e);
+    }
+
+    return cardInfo;
+  }
+
+  /**
+   * check whether user's signup form finished
+   *
+   * @param programId
+   * @param userId
+   * @param clazz
+   * @return boolean
+   */
+  private boolean isSignupFormFinished(String programId, String userId, boolean isMentor){
+    boolean result = false;
+
+    ObjectDefinition def = null;
+    if(isMentor){
+      def = configurationProvider.getObjectDefinition(MentoringProgramMentorSignupForm.class);
+    }else{
+      def = configurationProvider.getObjectDefinition(MentoringProgramMenteeSignupForm.class);
+    }
+    MDFCriteria search = new GOSQLGeneratorContext(def, params);
+    search.setProjection(Projections.all());
+    search.add(Restrictions.and(Restrictions.eq("programId", programId), Restrictions.eq("user", userId), Restrictions.eq("status", SignupFormStatusEnum.ACCEPTED)));
+    try {
+      MDFResultSet resultSet = search.execute();
+      if(resultSet.getResultRows() != null && resultSet.getResultRows().size() > 0){
+        result = true;
+      }else{
+        result = false;
+      }
+    } catch (ServiceApplicationException e) {
+      logger.error("MentoringProgramController.isMentorSignupFormActive failed due to ", e);
+    }
+
+    return result;
+  }
+
+  /**
+   * check whether the user is a mentor of the given program
+   *
+   * @param userId
+   * @param program
+   * @return boolean
+   */
+  private boolean isMentor(String userId, MentoringProgram program) throws ServiceApplicationException {
+    for (MentoringProgramMentor mentor : program.getMentors()) {
+      if (Objects.equals(userId, mentor.getUser())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * check whether the user is a mentee of the given program
+   *
+   * @param userId
+   * @param program
+   * @return boolean
+   */
+  private boolean isMentee(String userId, MentoringProgram program) throws ServiceApplicationException{
+    for (MentoringProgramMentee mentee : program.getMentees()) {
+      if (Objects.equals(userId, mentee.getUser())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * getDefaultProgramExternalCode (programId)
+   *
+   * @return defaultProgramExternalCode;
+   */
+
+  private String getDefaultProgramExternalCode() {
+    try{
+      String defaultProgramExternalCode = null;
+      PreferenceBean prefCriteria = new PreferenceBean();
+      prefCriteria.setCategory(ProfileInfoCategoryEnum.CDP_MENTORING_PREFS);
+      prefCriteria.setSource(ProfileInfoSourceEnum.CDP_MENTORING_USER_PREFS);
+      prefCriteria.setKey(MentoringProgramViewConstants.SELECTED_MENTORING_PROGRAM_PREF_KEY);
+      GetPreferenceBean cmd = new GetPreferenceBean(prefCriteria);
+      PreferenceBean prefBean = scaHandler.execute(cmd);
+      if(null!=prefBean && !StringUtils.isBlank(prefBean.getValue())&&prefBean.getValue().length()>2){
+        defaultProgramExternalCode = prefBean.getValue().toString();
+      }
+      return defaultProgramExternalCode;
+    }catch(ServiceApplicationException e){
+      logger.error("MentoringProgramController.getDefaultProgramExternalCode() ServiceApplicationException", e);
+      return null;
+    }
+  }
+
+  /**
+   * keep the last browsed Program of the user, if no last browser Program(First
+   * Use), will return the default programId
+   *
+   * @param programId
+   */
+  private void updatePreferredMentoringProgram(String programId) {
+
+    try{
+      PreferenceBean prefBean = new PreferenceBean();
+      prefBean.setCategory(ProfileInfoCategoryEnum.CDP_MENTORING_PREFS);
+      prefBean.setSource(ProfileInfoSourceEnum.CDP_MENTORING_USER_PREFS);
+      prefBean.setType(ProfileInfoTypeEnum.STRING);
+      prefBean.setKey(MentoringProgramViewConstants.SELECTED_MENTORING_PROGRAM_PREF_KEY);
+      prefBean.setValue(String.valueOf(programId));
+      List<PreferenceBean> prefList = new ArrayList<PreferenceBean>();
+      prefList.add(prefBean);
+      scaHandler.execute(new UpdatePreferenceBeans(prefList));
+    }catch(ServiceApplicationException e){
+      logger.error("MentoringProgramController.updateDefaultMentoringProgram() Failed to update default mentoring program", e);
+    }
+  }
+
+  private boolean isMentoringFeatureEnabled() {
+    CompanyBean c = params.getCompanyBean();
+    if (c != null) {
+      return c.isFeatureEnabledForCompany(FeatureEnum.CDP_MENTORING);
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Get section list and their values from mentor/mentee signup form.
+   * @param mentorOrMentee Mentor or mentee
+   * @param programId Mentoring program ID
+   * @return SingupForm information in JSON
+   */
+  @AjaxMethod
+  public JSONObjectOutput getSignupForm(String mentorOrMentee, String programId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.isMentoringFeatureEnabled(params)) {
+      return MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+    }
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    MentoringProgramParticipant participant = null;
+
+    try {
+      // Set current program as default program
+      updatePreferredMentoringProgram(programId);
+
+      // Get current program
+      MentoringProgram program = mentoringServiceBase.getProgramById(programId);
+      int threshold = 0; // Maximum number of mentor/mentee a mentee/mentor can have
+
+      // Find mentor or mentee from mentoring program according to login user
+      if (MentoringProgramViewConstants.MENTEE.equalsIgnoreCase(mentorOrMentee)) {
+        for (MentoringProgramParticipant mentee : program.getMentees()) {
+          if (mentee.getUser().equals(params.getUserId())) {
+            participant = mentee;
+            threshold = program.getMaximumOfMentor();
+
+            break;
+          }
+        }
+      } else {
+        for (MentoringProgramParticipant mentor : program.getMentors()) {
+          if (mentor.getUser().equals(params.getUserId())) {
+            participant = mentor;
+            threshold = program.getMaximumOfMentee();
+
+            break;
+          }
+        }
+      }
+
+      if (participant != null) {
+        // Get section list from sign up form
+        MentoringProgramSignupForm signupForm = participant.getSignupForm();
+
+        output.put("sections", getSectionListFromSignupForm(program, signupForm.getSections(), mentorOrMentee));
+        output.put("preferences", getPreference(signupForm, program));
+        output.put("formId", signupForm.getExternalId());
+        output.put("threshold", threshold);
+      }
+
+      // Get program name and description
+      output.put("programName", program.getName());
+      output.put("description", program.getDescription());
+      output.put("startDate", program.getStartDate());
+      output.put("endDate", program.getEndDate());
+      output.put("lastDay", program.getEndDate() == null ? "" : getLastDay(program, mentorOrMentee));
+      output.put("photoId", program.getPhotoId());
+      output.put("matchingType", program.getMatchingType());
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException sae) {
+      logger.error("Failed to get section list due to " + sae.getMessage(), sae);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put("errorMessage", msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+    }
+
+    return output;
+  }
+
+  /**
+   *
+   * @param program
+   * @param sections
+   * @return sectionsOutput
+   * @throws ServiceApplicationException
+   */
+
+  private List<JSONObjectOutput> getSectionListFromSignupForm(
+          MentoringProgram program,
+          List<MentoringProgramSignupFormSection> sections,
+          String mentorOrMentee) throws ServiceApplicationException {
+    // Get section list from sign up form
+    SuccessionDataModelBean dataModel = dataModelFacade.getDataModel();
+    Map<String, Map<String, String>> sectionIdQuestionMap = new HashMap<String, Map<String, String>>();
+    Map<String, Map<String, Boolean>> sectionIdQuestionVisibilityMap = new HashMap<String, Map<String, Boolean>>();
+    Map<String, SectionDisplayTypeEnum> sectionIdSectionDisplayTypeMap = new HashMap<String, SectionDisplayTypeEnum>();
+    List sectionsOutput = new ArrayList();
+    for (MentoringProgramSignupTemplateSection section : program.getSignupFormTemplate().getSections()) {
+      Map<String, String> mentorMenteeQuestionMap = new HashMap<String, String>();
+      mentorMenteeQuestionMap.put(MentoringProgramViewConstants.MENTOR, section.getMentorQuestion() == null ? "" : section.getMentorQuestion().getString(params.getLocale()));
+      mentorMenteeQuestionMap.put(MentoringProgramViewConstants.MENTEE, section.getMenteeQuestion() == null ? "" : section.getMenteeQuestion().getString(params.getLocale()));
+      sectionIdQuestionMap.put(section.getSectionId(), mentorMenteeQuestionMap);
+      Map<String, Boolean> questionVisibilityMap = new HashMap<String, Boolean>();
+      questionVisibilityMap.put(MentoringProgramViewConstants.MENTOR, section.isMentorVisible());
+      questionVisibilityMap.put(MentoringProgramViewConstants.MENTEE, section.isMenteeVisible());
+      sectionIdQuestionVisibilityMap.put(section.getSectionId(), questionVisibilityMap);
+      sectionIdSectionDisplayTypeMap.put(section.getSectionId(), section.getDisplayType());
+    }
+
+    //sort signup sections by template section order
+    List<MentoringProgramSignupFormSection> sortedSections = MentoringUtils.sortSignupSectionsSameWithWizard(program.getSignupFormTemplate().getSections(), sections);
+
+    for (MentoringProgramSignupFormSection section : sortedSections) {
+      Map<String, Boolean> questionVisibilityMap = sectionIdQuestionVisibilityMap.get(section.getSectionId());
+      if ((MentoringProgramViewConstants.MENTEE.equalsIgnoreCase(mentorOrMentee) &&
+              !questionVisibilityMap.get(MentoringProgramViewConstants.MENTEE))
+              ||
+              (MentoringProgramViewConstants.MENTOR.equalsIgnoreCase(mentorOrMentee) &&
+                      !questionVisibilityMap.get(MentoringProgramViewConstants.MENTOR))
+              ) {
+        continue;
+      }
+
+      StandardElement dmEle = dataModel.lookupStandardElementById(section
+              .getSectionId());
+      if(dmEle == null){
+        continue;
+      }
+
+      JSONObjectOutput sectionJSON = new JSONObjectOutput();
+      sectionJSON.put("sectionId", section.getSectionId());
+      // Set how section values displayed according to section category
+      if (section.getSectionId().equals(SignupFormSectionCategoryEnum.SKILLS.toString())) {
+        // Skill is multiple select
+        sectionJSON.put("sectionLabel", msgs.getString("skill"));
+      } else if (section.getSectionId().equals(SignupFormSectionCategoryEnum.COMPETENCY.toString())) {
+        // Competency is multiple select
+        sectionJSON.put("sectionLabel", msgs.getString("competency"));
+      } else if (section.getSectionId().startsWith(SignupFormSectionCategoryEnum.FREE_TEXT.toString())) {
+        sectionJSON.put("sectionLabel", msgs.getString("DEVELOPMENT_MENTORING_FREE_TEXT_LABEL"));
+      } else {
+        // Display standard element value as defined in white list
+        DMFieldWhiteListEnum standardElement = DMFieldWhiteListEnum.forName(section.getSectionId());
+        if (standardElement == null) {
+          continue; // TODO require to change later for name
+        }
+
+        if (standardElement.getId().equalsIgnoreCase(
+                DMFieldWhiteListEnum.LOCATION.toString())) {
+          sectionJSON.put("sectionLabel", MentoringUtils.getStdEleLabel(dmEle,
+                  standardElement.getId(), params.getLocale()));
+        } else {
+          sectionJSON.put("sectionLabel", MentoringUtils.getStdEleLabel(dmEle,
+                  standardElement.getId(), params.getLocale()));
+        }
+      }
+      JSONArrayOutput sectionValuesOutPut = new JSONArrayOutput();
+
+      if (getSectionValuesById(section.getSectionId()) != null) {
+        for (MentoringProgramSignupFormSectionValue value : getSectionValuesById(section.getSectionId())) {
+          JSONObjectOutput sectionValueJSON = new JSONObjectOutput();
+          sectionValueJSON.put("itemId", value.getItemId());
+          sectionValueJSON.put("itemLabel", value.getItemLabel());
+          sectionValuesOutPut.add(sectionValueJSON);
+        }
+        sectionJSON.put("sectionValue", sectionValuesOutPut);
+
+      }
+      sectionJSON.put("sectionQuestion", sectionIdQuestionMap.get(section.getSectionId()));
+      sectionJSON.put("sectionVisibility", sectionIdQuestionVisibilityMap.get(section.getSectionId()));
+      sectionJSON.put("sectionType", sectionIdSectionDisplayTypeMap.get(section.getSectionId()));
+      sectionsOutput.add(sectionJSON);
+    }
+
+    return sectionsOutput;
+  }
+
+  private Date getLastDay(MentoringProgram program, String mentorOrMentee){
+    // Get last sign-up date for mentor/mentee
+    Calendar calendar = Calendar.getInstance();
+
+    if (ProgramMatchingTypeEnum.UNSUPERVISED.equals(program.getMatchingType())) {
+      // If program is unsupervised matching, last sign-up date is program end date for both mentor and mentee
+      calendar.setTime(program.getEndDate());
+    } else {
+      if (MentoringProgramViewConstants.MENTEE.equalsIgnoreCase(mentorOrMentee)) {
+        calendar.setTime(program.getMatchingDate()); // To mentee, last sign-up date is matching date
+      } else{
+        calendar.setTime(program.getMenteeSignupDate()); // To mentor, last sign-up date is mentee sign-up date
+      }
+    }
+
+    calendar.add(Calendar.DAY_OF_YEAR, -1);
+
+    return calendar.getTime();
+  }
+
+  /**
+   *
+   * @param sectionId
+   * @return List of MentoringProgramSignupFormSectionValue
+   * @throws ServiceApplicationException
+   */
+  private List<MentoringProgramSignupFormSectionValue> getSectionValuesById(String sectionId) throws ServiceApplicationException {
+    if (sectionId.equals(SignupFormSectionCategoryEnum.SKILLS.toString())) {
+      if(params.isFeatureExist(FeatureEnum.JDM_NG)){
+        GetSkillList cmd = new GetSkillList();
+        cmd = scaHandler.execute(cmd);
+
+        return cmd.getSectionValues();
+      }else{
+        return new ArrayList<MentoringProgramSignupFormSectionValue>();
+      }
+
+    } else if (sectionId.equals(SignupFormSectionCategoryEnum.COMPETENCY.toString())
+            || sectionId.startsWith(SignupFormSectionCategoryEnum.FREE_TEXT.toString())) {
+      return null;
+    } else {
+      GetStandardElementValue cmd = new GetStandardElementValue();
+      cmd.setMsgs(msgs);
+      cmd.setStandardElementId(sectionId);
+      cmd = scaHandler.execute(cmd);
+
+      return cmd.getSectionValues();
+    }
+  }
+  /**
+   * Complete mentor sign-up
+   * @param programId Mentoring program ID
+   * @param formId Sign-up form ID
+   * @param sectionValues Preferences mentor selected in sign-up form
+   * @param status Accept or reject
+   * @param threshold Number of mentees a mentor can have
+   * @return output
+   */
+  @AjaxMethod
+  public JSONObjectOutput saveMentorSignupForm(String programId, String formId, Map<String, List<String>> sectionValues, String status,
+                                               Integer threshold) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.isMentoringFeatureEnabled(params)) {
+      return MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+    }
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    String mentorId = params.getUserId();
+    int maxnum = (threshold < 1 || threshold > 20) ? 20 : threshold;
+
+    try{
+      // Get mentor sign-up form
+      GetMentoringSignupForm<MentoringProgramMentorSignupForm> getSignupForm = new GetMentoringSignupForm<MentoringProgramMentorSignupForm>();
+      getSignupForm.setProgramId(programId);
+      getSignupForm.setParticipantId(mentorId);
+      getSignupForm.setClasz(MentoringProgramMentorSignupForm.class);
+      MentoringProgramMentorSignupForm signupForm = scaHandler.execute(getSignupForm);
+
+      // If signup form doesn't exist, it's not expected. Every participant should have a signup form after signup email sent.
+      if (signupForm == null) {
+        throw new ServiceApplicationException("mentor signup form doesn't exist");
+      }
+      // Save preferences mentor selected to sign-up form
+
+      List<MentoringProgramSignupFormSection> sections = signupForm.getSections();
+      if (sectionValues != null) {
+        signupFormsetSectionValue(sections,sectionValues);
+      }
+
+      if (status.equalsIgnoreCase("ACCEPTED")) {
+        signupForm.setStatus(SignupFormStatusEnum.ACCEPTED);
+      } else if (status.equalsIgnoreCase("REJECTED")) {
+        signupForm.setStatus(SignupFormStatusEnum.REJECTED);
+      } else {
+        // this condition is not expected, so considered invalid.
+        signupForm.setStatus(SignupFormStatusEnum.DELETED);
+      }
+
+      // Save UI threshold to participant object
+      saveMentroringProgramThreshold(programId, mentorId, maxnum);
+
+      // Save mentor sign-up form
+      ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgramMentorSignupForm.class, signupForm));
+      mentoringServiceBase.validateContext(context);
+
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      logger.info("MentoringProgramController.saveMentorSignupForm failed due to "+e.getMessage(), e);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put("errorMessage", msgs.getString("DEVELOPMENT_TRANSCRIPT_EVENT_SAVE_FAIL"));
+    }
+
+    return output;
+  }
+
+  private void signupFormsetSectionValue(List<MentoringProgramSignupFormSection> sections, Map<String, List<String>>sectionValues) throws ServiceApplicationException
+  {
+
+    for (MentoringProgramSignupFormSection section : sections) {
+      String sectionId = section.getSectionId();
+      List<MentoringProgramSignupFormSectionValue> sectionValueList = new ArrayList<>();
+      if (sectionValues.containsKey(sectionId)) {
+        for (String value : sectionValues.get(sectionId)) {
+          MentoringProgramSignupFormSectionValue sectionValue = new MentoringProgramSignupFormSectionValue();
+          if (sectionId.startsWith(SignupFormSectionCategoryEnum.FREE_TEXT.toString())) {
+            sectionValue.setItemId(sectionId);
+            sectionValue.setItemLabel(value);
+          }else {
+            sectionValue.setItemId(value);
+          }
+          sectionValueList.add(sectionValue);
+        }
+      }
+      section.setSectionValue(sectionValueList);
+    }
+  }
+
+
+
+
+  /**
+   * save mentoring program Threshold in DB
+   *
+   * @param programId
+   * @param userId
+   * @param threshold
+   * @throws ServiceApplicationException
+   */
+  private void saveMentroringProgramThreshold(String programId,String userId,int threshold) throws ServiceApplicationException
+  {
+
+    MentoringProgram pm = mentoringServiceBase.getProgramById(programId);
+    for ( MentoringProgramMentor m :  pm.getMentors()) {
+      if (m.getUser().equals(userId)) {
+        m.setThreshold(threshold);
+        ValidationContext context=null;
+        context = scaHandler.execute(new SaveBean(MentoringProgramMentor.class, m));
+        mentoringServiceBase.validateContext(context);
+        m = (MentoringProgramMentor) context.getSuccessfullOperationContexts().get(0).getBean();
+        break;
+      }
+    }
+  }
+
+  @AjaxMethod
+  public JSONObjectOutput checkTokenValid(String programId, String token){
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.isMentoringFeatureEnabled(params)) {
+      return MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+    }
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    String loginUserId = params.getUserId();
+    String generatedToken = null;
+    String seed = loginUserId + programId;
+
+
+    try {
+      MessageDigest md = MessageDigest.getInstance("md5");
+      byte[] data = seed.getBytes(ENCODING);
+      md.update(data);
+
+      byte[] digestedByteArray = md.digest();
+      generatedToken = HexUtils.bytesToHex(digestedByteArray);
+      generatedToken = URLEncoder.encode(generatedToken.toLowerCase(), ENCODING);
+
+      if(generatedToken.equals(token)){
+        output.put("status", true);
+      }else{
+        output.put("status", false);
+      }
+    } catch ( NoSuchAlgorithmException ns ) {
+      logger.error("MentoringProgramController.prepareSignupLink failed due to "+ns.getMessage(), ns);
+    } catch ( UnsupportedEncodingException uee ) {
+      logger.error("MentoringProgramController.prepareSignupLink failed due to "+uee.getMessage(), uee);
+    }
+    return output;
+  }
+  /**
+   * getMeteeRequestJSONObject
+   * @param program program
+   * @return menteeRequestList
+   */
+  private JSONObjectOutput getMeteeRequestJSONObject(MentoringProgram program) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    JSONArrayOutput menteeRequestList = new JSONArrayOutput();
+    String programId = program.getExternalId();
+    int menteeThreshod = program.getMaximumOfMentor();
+    ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgramMentorRequest.class);
+    List<MentoringProgramMentorRequest> requests = null;
+    int processedCount = 0;
+    String menteeUserName = null;
+    try {
+      // get mentee request
+      MDFCriteria search = new GOSQLGeneratorContext(def, params);
+      search.setProjection(Projections.all());
+      search.add(Restrictions.and(Restrictions.eq("programId", programId),
+              Restrictions.eq("mentor", params.getUserId())));
+
+      MDFResultSet resultSet = search.execute();
+      if (resultSet.getResultRows() != null
+              && resultSet.getResultRows().size() > 0) {
+        requests = resultSet.getBeans();
+      }
+      if (requests != null) {
+        for (MentoringProgramMentorRequest request : requests) {
+          JSONObjectOutput jsonOutputtemp = new JSONObjectOutput();
+          if (request.getMentoringRequestStatus() == MentorRequestStatusEnum.CONFIRMED) {
+            String menteeUserId = request.getMentee();
+            GetMatchedParticipants getMatchedparticipants = new GetMatchedParticipants();
+            getMatchedparticipants.setProgramId(programId);
+            getMatchedparticipants.setMenteeIds(menteeUserId);
+            int count = scaHandler.execute(getMatchedparticipants).size();
+            int remainsThreshold = menteeThreshod - count;
+            UserBean userBean = scaHandler.execute(new FindUserById(menteeUserId, true));
+            if (userBean != null) {
+              menteeUserName = UserFormatUtils.formatFullName(msgs, userBean.getFullNameBean());
+              // FullNameBean fullNameBean = userBean.getFullNameBean();
+            }
+            if (remainsThreshold > 0 && userBean.isValidUser()) {
+              Enum mentoringRequestStatus = request.getMentoringRequestStatus();
+              String externalId = request.getExternalId();
+              jsonOutputtemp.put("mentoringRequestStatus", mentoringRequestStatus.toString());
+              jsonOutputtemp.put("menteeUserId", menteeUserId);
+              jsonOutputtemp.put("menteeName", menteeUserName);
+              jsonOutputtemp.put("id", externalId);
+              jsonOutputtemp.put("matchedAreas", getMatchingAreas(program.getSignupFormTemplate().getSections(), request.getMentoringProgramMatchedArea()));
+              menteeRequestList.add(jsonOutputtemp);
+            }
+          }
+        }
+      }
+
+      // initialize accepted threshold
+      GetMatchedParticipants getMatchedParticipants = new GetMatchedParticipants();
+      getMatchedParticipants.setProgramId(programId);
+      getMatchedParticipants.setMentorIds(params.getUserId());
+      List matchedMenteeList = scaHandler.execute(getMatchedParticipants);
+      processedCount = matchedMenteeList.size();
+
+      // get threshold by userid
+      // get mentor threshold
+
+      output.put("menteeRequestList", menteeRequestList);
+      output.put("threshold",
+              MentoringUtils.getMentorThreshold(program, params.getUserId()));
+      output.put("processedCount", processedCount);
+    } catch (ServiceApplicationException e) {
+      logger.error("MentoringProgramController.getMeteeRequest failed due to ",
+              e);
+    }
+    return output;
+  }
+
+  /**
+   * Accept or decline a mentoring request
+   * @param programId Mentoring program ID
+   * @param mentoringRequestStatus Accept or decline request
+   * @param id Request ID
+   * @param rejectComment Reject comment
+   * @return output
+   * @throws ServiceApplicationException
+   */
+  @AjaxMethod
+  public JSONObjectOutput updateMenteeRequest(String programId, String mentoringRequestStatus, String id, String rejectComment)
+          throws ServiceApplicationException {
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.isMentoringFeatureEnabled(params)) {
+      return MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+    }
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    try {
+      ProcessMentoringRequest cmd = new ProcessMentoringRequest(programId, id,
+                                          Enum.valueOf(MentorRequestStatusEnum.class, mentoringRequestStatus),rejectComment);
+      scaHandler.execute(cmd);
+
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+      output.put("statusText", "success");
+
+      unsupervisedMatchJamGroupInviteObserver.onMatchSuccess(cmd);
+    } catch (ServiceApplicationException e) {
+      logger.error("MentoringProgramController.updateMenteeRequest failed due to ", e);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put("errorMessage", e.getMessage());
+      output.put("statusText", "failed");
+    }
+
+    return output;
+  }
+
+  private JSONArrayOutput matchingUserResultJsonOutput(
+          Map<String,UserProfileVO> mentorsProfile, List<MatchedParticipantVO> matchedParticipant, MentoringProgram program) throws ServiceApplicationException {
+    JSONArrayOutput outputs = new JSONArrayOutput();
+    if (matchedParticipant != null) {
+      for (MatchedParticipantVO m : matchedParticipant) {
+        JSONObjectOutput output = new JSONObjectOutput();
+        UserProfileVO userProfileVO = mentorsProfile.get(m.getMentorId());
+        MentoringProgramParticipant participant=MentoringUtils.getParticipantByUserId(program, m.getMentorId(),true);
+        output.put("score", m.getScore());
+        output.put("userId", m.getMentorId());
+        output.put("matchedCategory", m.getMatchedCategory());
+        retrieveLabelService.fillSectionAllLabels(MentoringViewHelper.removeInactiveElementsInDataModel(dataModelFacade, m.getMatchedAreas()));
+        output.put("matchedAreas", MentoringViewHelper.removeInactiveElementsInDataModel(dataModelFacade, m.getMatchedAreas()));
+        output.put("fullname", userProfileVO.getFullname());
+        output.put("jobFamily", userProfileVO.getJobFamily());
+        output.put("jobTitle",userProfileVO.getJobTitle());
+        output.put("userName", userProfileVO.getUserName());
+        output.put("preferences",(participant!=null)?sortPreference(getPreference(participant.getSignupForm(),program)):null);
+        outputs.add(output);
+      }
+    }
+    return outputs;
+
+  }
+
+  /**
+   * Get a list of recommended mentors according to preferences mentee chosen in sign-up form
+   * @param programId Mentoring program ID
+   * @param sectionValues Preferences mentee chosen in sign-up form
+   * @return Recommended mentors according to preferences mentee chosen in sign-up form
+   */
+  @AjaxMethod
+  public JSONObjectOutput getMatchingMentorList(String programId, Map<String, Set<String>> sectionValues) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.isMentoringFeatureEnabled(params)) {
+      return MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+    }
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    String menteeId = params.getUserId();
+
+    try {
+      // Get current program
+      MentoringProgram program = mentoringServiceBase.getProgramById(programId);
+      // Run matching engine to get a list of recommended mentors according to preferences mentee chosen in sign-up form
+      MatchingAlgorithmContext context = new MatchingAlgorithmContext();
+      context.setProgram(program);
+      context.setMatchingType(ProgramMatchingTypeEnum.UNSUPERVISED);
+      context.setMentoringProfiles(sectionValues);
+      context.setDrivenUserId(menteeId);
+      context.setNeedLimitMenteeThreshold(false);
+
+      MatchingFacade matchingFacade = new MatchingFacade();
+      MatchingResult matchingResult = matchingFacade.getRecommendationList(context);
+      List<MatchedParticipantVO> mentors = matchingResult.getMatchedParticipantMap().get(params.getUserId());
+      Map<String, UserProfileVO> mentorsProfile = matchingResult.getUserProfileMap();
+
+      // Get mentors already accepted this mentee's request or this mentee had already sent request to them
+      Set<String> mentorsToRemove = getMentorsToRemove(programId,program.getMatchingType(), menteeId);
+
+      // Remove all mentors already accepted this mentee's request or this mentee had already sent request to them
+      if (mentors == null) {
+        mentors = new ArrayList<MatchedParticipantVO>();
+      }
+
+      for (Iterator<MatchedParticipantVO> iterator = mentors.iterator(); iterator.hasNext();) {
+        MatchedParticipantVO mentor = iterator.next();
+
+        if (mentorsToRemove.contains(mentor.getMentorId())) {
+          iterator.remove();
+          mentorsProfile.remove(mentor.getMentorId());
+        }
+      }
+
+      output.put("mentors", matchingUserResultJsonOutput(mentorsProfile, mentors,program));
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException sae) {
+      logger.error("Failed to get section list due to " + sae.getMessage(), sae);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put("errorMessage", msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+    }
+
+    return output;
+  }
+
+  /**
+   * Find a mentor according to name mentee input in mentor search box
+   * @param programId Mentoring program ID
+   * @param name Input name in search box
+   * @return Matched mentor
+   */
+  @AjaxMethod
+  public JSONObjectOutput findMentorsByName(String programId, String name) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.isMentoringFeatureEnabled(params)) {
+      return MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+    }
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    // Mentors shown in UI
+    List<UserProfileVO> mentors = new ArrayList<UserProfileVO>();
+
+    try {
+      MentoringProgram program = mentoringServiceBase.getProgramById(programId);
+      Map<String, MentoringProgramMentor> mentorMap = new HashMap<String, MentoringProgramMentor>();
+
+      // Get all available mentors
+      for (MentoringProgramMentor mentor : program.getMentors()) {
+        // Mentor signed up form
+        if (MentoringUtils.isMentorValidUser(mentor)
+                && MentoringUtils.isMentorAvailable(mentor)
+                && MentoringUtils.isParticipantSigned(mentor)) {
+          mentorMap.put(mentor.getUser(), mentor);
+        }
+      }
+
+      if (StringUtils.isEmpty(name)) {
+        // If nothing input, just return all mentors
+        List<String> userIdList = new ArrayList<String>();
+        userIdList.addAll(mentorMap.keySet());
+
+        FindUsersByIds findUsersInBatchCmd = new FindUsersByIds(userIdList);
+        List<UserBean> userBeans = scaHandler.execute(findUsersInBatchCmd);
+
+        for (UserBean user : userBeans) {
+          MentoringProgramParticipant participant=MentoringUtils.getParticipantByUserId(program,user.getUserId(),true);
+          UserProfileVO userVO = generateMatchingUserObj(user);
+          userVO.setPreferences(sortPreference(getPreference(participant.getSignupForm(),program)));
+          mentors.add(userVO);
+        }
+      } else {
+
+        List users = userAutoSearch(name,20,1);
+        for (UserBean user : (List<UserBean>) users) {
+          MentoringProgramMentor mentor = mentorMap.get(user.getUserId());
+
+          if (mentor != null) {
+            mentors.add(generateMatchingUserObj(user));
+          }
+        }
+      }
+
+      // Get mentors still have seats to accept mentee
+      mentors = getAvailableMentors(programId, mentors, mentorMap);
+
+      // Get mentors already accepted this mentee's request or this mentee had already sent request to them
+      Set<String> mentorsToRemove = getMentorsToRemove(programId,program.getMatchingType(), params.getUserId());
+
+      // Remove all mentors already accepted this mentee's request or this mentee had already sent request to them
+      for (Iterator<UserProfileVO> iterator = mentors.iterator(); iterator.hasNext();) {
+        if (mentorsToRemove.contains(iterator.next().getUserId())) {
+          iterator.remove();
+        }
+      }
+
+      output.put("mentors", mentors);
+      output.put(MentoringProgramViewConstants. JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException sae) {
+      logger.error("Failed to search mentor by name due to " + sae.getMessage(), sae);
+      output.put(MentoringProgramViewConstants. JSON_KEY_SUCCESS, false);
+      output.put("errorMessage", msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+    }
+
+    return output;
+  }
+  /** username auto search. temporarily solution , better way is ask plate form to provide a unique sca.
+   * TODO: need to solve "if the first search page doesnot contains target userid, the target user in mentor list still cannot be search out."
+   * **/
+  public List userAutoSearch (String name,Integer maxResults, Integer pageNumber) throws ServiceApplicationException{
+
+    QuickCardSearchCriteriaVO searchCriteriaVO = new QuickCardSearchCriteriaVO();
+    String searchValue=StringUtils.isBlank(name)?null: name.toLowerCase().trim();
+    searchCriteriaVO.setSearchValue(searchValue);
+    searchCriteriaVO.setFindtype(AutoCompTag.FIND_TYPE_FULL_NAME);
+    searchCriteriaVO.setM("autocomplete");
+    searchCriteriaVO.setMaxresults(maxResults);
+    searchCriteriaVO.setPage(pageNumber);
+
+
+    List users=new ArrayList<>();
+
+    if ((searchValue.indexOf(" ") == -1) && (searchValue.indexOf(",") == -1)) {
+      UserAutoCompleteSearch userSearch = new UserAutoCompleteSearch();
+      userSearch.setValueFromSearchVO(searchCriteriaVO, false, 0,permList, null, false);
+      userSearch = scaHandler.execute(userSearch);
+      users = userSearch.getUsers();
+
+    }else{
+      AutoCompleteHelper autoCompleteHelper = new AutoCompleteHelper();
+      List findTypeList = new ArrayList<>();
+      FindUserBean criteria = autoCompleteHelper.buildFindUserCriteria(searchCriteriaVO.getFindtype(), searchCriteriaVO.getSearchValue(), "false",
+              true, searchCriteriaVO.getMaxresults(), findTypeList);
+      criteria.setSortBy(EmpListColumnEnum.FIRSTNAME.getName() + "," + EmpListColumnEnum.LASTNAME.getName());
+      criteria.setMaxRows(searchCriteriaVO.getMaxresults());
+      users = scaHandler.execute(new FindUsersGenericV3(criteria,permList));
+    }
+    return users;
+  }
+
+  private UserProfileVO generateMatchingUserObj(UserBean user) {
+    UserProfileVO matchingUser = new UserProfileVO();
+    try{
+      matchingUser.setUserId(user.getUserId());
+      matchingUser.setFullname(UserFormatUtils.formatFullName(msgs, user));
+      //matchingUser.setJobTitle(user.getTitle());
+      List<RoleBean> roles = scaHandler.execute(new GetRolesByJobCode(user.getUserJobCode()));
+      if (roles.size() > 0) {
+        matchingUser.setJobTitle((roles.get(0)).getRoleName());
+        matchingUser.setJobFamily((roles.get(0)).getFamilyName());
+
+      } else {
+        matchingUser.setJobTitle("");
+        matchingUser.setJobFamily("");
+
+      }
+    }catch (ServiceApplicationException e) {
+      logger.error("generateMatchingUserObj error occurs: ", e);
+    }
+    return matchingUser;
+  }
+
+  private Set<String> getMentorsToRemove(String programId,ProgramMatchingTypeEnum programMatchingType, String menteeId) throws ServiceApplicationException {
+    Set<String> mentorsToRemove = new HashSet<String>();
+
+    // Get all mentors already accepted request from this mentee
+    GetMatchedParticipants getMatchedparticipants = new GetMatchedParticipants();
+    getMatchedparticipants.setProgramId(programId);
+    getMatchedparticipants.setMenteeIds(menteeId);
+    List<MentoringProgramMatchedParticipant> matchedParticipants = scaHandler.execute(getMatchedparticipants);
+
+    for (MentoringProgramMatchedParticipant participant : matchedParticipants) {
+      mentorsToRemove.add(participant.getMentor());
+    }
+
+    // Get all mentors this mentee had already sent request to them
+    GetMentoringRequest getMentoringRequest = new GetMentoringRequest();
+    getMentoringRequest.setProgramId(programId);
+    getMentoringRequest.setStatus(ProgramMatchingTypeEnum.SUPERVISED.equals(programMatchingType)
+            ? MentorRequestStatusEnum.DRAFT : MentorRequestStatusEnum.CONFIRMED);
+    getMentoringRequest.setMenteeIds(menteeId);
+    List<MentoringProgramMentorRequest> requests = scaHandler.execute(getMentoringRequest);
+
+    for (MentoringProgramMentorRequest request : requests) {
+      mentorsToRemove.add(request.getMentor());
+    }
+
+    return mentorsToRemove;
+  }
+
+  private List<UserProfileVO> getAvailableMentors(String programId, List<UserProfileVO> mentors, Map<String, MentoringProgramMentor> mentorMap)
+          throws ServiceApplicationException {
+    List<UserProfileVO> result = new ArrayList<UserProfileVO>();
+    List<String> mentorIdList = new ArrayList<String>();
+
+    for (UserProfileVO mentor : mentors) {
+      mentorIdList.add(mentor.getUserId());
+    }
+
+    // Get all matched mentees for all mentors
+    GetMatchedParticipants getMatchedParticipants = new GetMatchedParticipants();
+    getMatchedParticipants.setProgramId(programId);
+    getMatchedParticipants.setMentorIds(mentorIdList);
+    List<MentoringProgramMatchedParticipant> matchedParticipants = scaHandler.execute(getMatchedParticipants);
+
+    // Get number of matched mentees for all mentors
+    Map<String, Integer> acceptedCounts = new HashMap<String, Integer>();
+
+    for (MentoringProgramMatchedParticipant participant : matchedParticipants) {
+      Integer count = acceptedCounts.get(participant.getMentor());
+
+      if (count == null) {
+        acceptedCounts.put(participant.getMentor(), 1);
+      } else {
+        acceptedCounts.put(participant.getMentor(), count + 1);
+      }
+    }
+
+    // Get mentors still have seats to accept mentee
+    for (UserProfileVO mentor : mentors) {
+      String mentorId = mentor.getUserId();
+      Integer count = acceptedCounts.get(mentorId);
+
+      if (count == null || count < mentorMap.get(mentorId).getThreshold()) {
+        result.add(mentor);
+      }
+    }
+
+    return result;
+  }
+
+
+
+
+
+  /**
+   * Complete mentee sign-up
+   * @param programId Mentoring program ID
+   * @param formId Sign-up form ID
+   * @param status Accept or reject
+   * @param sectionValues Preferences mentee selected in sign-up form
+   * @param mentors Mentors mentee want to send request to
+   * @return output
+   */
+  @AjaxMethod
+  public JSONObjectOutput saveMenteeSignupForm(String programId, String formId, String status, Map<String, List<String>> sectionValues,
+                                               String mentors) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.isMentoringFeatureEnabled(params)) {
+      return MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+    }
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    String menteeId = params.getUserId();
+
+    try {
+      // Get mentee sign-up form
+      GetMentoringSignupForm<MentoringProgramMenteeSignupForm> getSignupForm = new GetMentoringSignupForm<MentoringProgramMenteeSignupForm>();
+      getSignupForm.setProgramId(programId);
+      getSignupForm.setParticipantId(menteeId);
+      getSignupForm.setClasz(MentoringProgramMenteeSignupForm.class);
+      MentoringProgramMenteeSignupForm signupForm = scaHandler.execute(getSignupForm);
+      if (sectionValues != null) {
+        signupFormsetSectionValue(signupForm.getSections(), sectionValues);
+      }
+
+        boolean accepted = status.equalsIgnoreCase(SignupFormStatusEnum.ACCEPTED.toString());
+        signupForm.setStatus(accepted ? SignupFormStatusEnum.ACCEPTED : SignupFormStatusEnum.REJECTED);
+
+        // Save mentee sign up form
+        ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgramMenteeSignupForm.class, signupForm));
+        mentoringServiceBase.validateContext(context);
+
+        if (accepted) {
+          JSONObject jsonObject = new JSONObject(mentors);
+          JSONArray mentorArray = new JSONArray();
+
+          if(jsonObject.has("mentors")){
+            mentorArray = jsonObject.getJSONArray("mentors");
+          }
+
+          // Get current mentoring program
+          MentoringProgram program = mentoringServiceBase.getProgramById(programId);
+
+          Set<String> mentees = new HashSet<String>();
+          mentees.add(menteeId);
+
+          // Create mentor requests for each mentor selected in sign up form
+          for (int i = 0; i < mentorArray.length(); i++) {
+            JSONObject mentor = mentorArray.optJSONObject(i);
+            String mentorId = mentor.optString("userId");
+            MentoringProgramMentorRequest request = new MentoringProgramMentorRequest();
+            request.setMentee(menteeId);
+            request.setMentor(mentorId);
+            request.setProgramId(programId);
+
+            // If program is supervised matching, then request is in draft. Otherwise, it should be confirmed
+            request.setMentoringRequestStatus(ProgramMatchingTypeEnum.SUPERVISED.equals(program.getMatchingType())
+                    ? MentorRequestStatusEnum.DRAFT : MentorRequestStatusEnum.CONFIRMED);
+
+            request.setMatchingScore(Float.valueOf(mentor.optString("score").trim().equalsIgnoreCase("")?"0":mentor.optString("score")));
+            request.setMentoringProgramMatchedArea(prepareMentoringProgramSignupFormSection(mentor.optString("matchedAreas")));
+
+            // If program is supervised matching, then this request indicates a preferred request
+            if (ProgramMatchingTypeEnum.SUPERVISED.equals(program.getMatchingType())) {
+              request.setMatchingCategory(MatchingScoreTypeEnum.PREFERRED);
+            }
+
+            // Save mentoring request
+            context = scaHandler.execute(new SaveBean(MentoringProgramMentorRequest.class, request));
+            mentoringServiceBase.validateContext(context);
+
+            Map<String, Set<String>> mentorMenteeMap = new HashMap<String, Set<String>>();
+            mentorMenteeMap.put(mentorId, mentees);
+
+            // Send matching reuqest email to mentor to approve only if program is unsupervised matching
+            if (ProgramMatchingTypeEnum.UNSUPERVISED.equals(program.getMatchingType())) {
+              mentoringServiceBase.sendMatchingRequestEmail(program, mentorMenteeMap);
+            }
+          }
+        }
+
+        output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ParseException | ServiceApplicationException sae) {
+      logger.error( "Failed to save mentee sign up form due to " + sae.getMessage(), sae);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put("errorMessage", msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+    }
+
+    return output;
+  }
+
+  @AjaxMethod
+  public JSONObjectOutput updateMentorUnavailableEndDate(String programId, String mentorExternalId, String updatedUnavailableEndDate){
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.isMentoringFeatureEnabled(params)) {
+      return MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+    }
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    UpdateMentorUnavailableEndDate cmd = new UpdateMentorUnavailableEndDate();
+    SimpleDateFormat sdf = new SimpleDateFormat(MentoringConstants.DEFAULT_DATE_FORMAT);
+    Date updatedEndDate = null;
+    try {
+      updatedEndDate = sdf.parse(updatedUnavailableEndDate);
+    } catch (ParseException e) {
+      logger.error( "unparsable date");
+    }
+    cmd.setMentorId(mentorExternalId);
+    cmd.setProgramId(programId);
+    cmd.setUnavailableEndDate(updatedEndDate);
+
+    try {
+      scaHandler.execute(cmd);
+    } catch (ServiceApplicationException e) {
+      logger.error( "Failed to set unavailable end date for mentor externalId[" + mentorExternalId + "]");
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+    }
+    output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    return output;
+  }
+
+  @AjaxMethod
+  public JSONObjectOutput getJamFeedWidgetInfo(String programId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    if (!MentoringPermissionChecker.hasMentoringAccessPermission(params, permList)) {
+      logger.info("User don't have the required permission.");
+      output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+    try {
+      JamFeedWidgetInfo widgetInfo = scaHandler.execute(new GetJamFeedWidgetInfo(programId));
+
+      output.put("scriptURL",widgetInfo.getScriptURL());
+      output.put("apiURL",widgetInfo.getApiURL());
+      output.put("singleUseToken",widgetInfo.getSingleUseToken());
+      output.put("groupId",widgetInfo.getGroupId());
+      output.put("groupURL",widgetInfo.getGroupURL());
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (JamGroupPermissionException e) {
+      logger.error( "Jam Group Permission exception occured for Program Id:"+programId+". Root Cause:"+e);
+
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put("failType", "permission"); // no error msg to be shown if permission error occurs
+    } catch (ServiceApplicationException e) {
+      logger.error("Failed to fetch Jam widget feed information. Program Id:"+programId+". Root Cause:"+e);
+
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put("errorMessage", msgs.getString("DEVELOPMENT_MENTORING_JAM_ERROR"));
+    }
+
+    return output;
+  }
+
+
+
+}

@@ -1,0 +1,27 @@
+package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
+
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeViewerListener;
+import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeExpansionEvent;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.ui.forms.FormColors;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+
+public interface IBreadcrumbItemDropDown {
+	int getWidth();
+
+	void setEnabled(boolean enabled);
+
+	boolean isMenuShown();
+
+	Shell getDropDownShell();
+
+	ISelectionProvider getDropDownSelectionProvider();
+
+	void showMenu();
+}

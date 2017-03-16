@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.util;
+
+import org.eclipse.help.IContext;
+import org.eclipse.swt.events.HelpEvent;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+public interface IJavaUIHelp {
+	void helpRequested(HelpEvent e);
+
+	int getContextChangeMask();
+
+	IContext getContext(Object target);
+
+	String getSearchExpression(Object target);
+}

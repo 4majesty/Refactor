@@ -1,0 +1,15 @@
+package com.successfactors.cdp.ui.controller;
+
+public interface ICWSV12ControllerTest {
+	void setUp() throws Exception;
+
+	void testAddBehaviors();
+
+	void testGetSuggestedRoleListWithNoPermission();
+
+	void testGetSuggestedRoleListWithNoSameUser();
+
+	void testGetSuggestedRoleList();
+
+	void testGetSuggestedRoleListWithNoRoles();
+}

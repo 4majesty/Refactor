@@ -1,0 +1,34 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
+import org.eclipse.jdt.ui.actions.IMemberFilterActionGroup;
+
+public interface IMethodsViewer {
+	void showInheritedMethods(boolean on);
+
+	void sortByDefiningType(boolean on);
+
+	boolean isShowInheritedMethods();
+
+	boolean isShowDefiningTypes();
+
+	void saveState(IMemento memento);
+
+	void restoreState(IMemento memento);
+
+	void initContextMenu(IMenuListener menuListener, String popupId, IWorkbenchPartSite viewSite);
+
+	void contributeToContextMenu(IMenuManager menu);
+
+	void contributeToToolBar(ToolBarManager tbm);
+
+	void dispose();
+}

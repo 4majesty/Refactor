@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.IMemento;
+import org.eclipse.jdt.core.JavaModelException;
+
+public interface IClassFileEditorInputFactory {
+	IAdaptable createElement(IMemento memento);
+}

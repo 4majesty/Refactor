@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.dnd;
+
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.jface.util.DelegatingDragAdapter;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
+
+public interface IJdtViewerDragAdapter {
+	void dragStart(DragSourceEvent event);
+}

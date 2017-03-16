@@ -1,0 +1,24 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.List;
+
+import com.successfactors.sca.ServiceQuery;
+
+public class GetUserActiveProgram implements ServiceQuery<GetUserActiveProgram>{
+    private static final long serialVersionUID = 1L;    
+    private List result;
+
+    public List getResult() {
+        return result;
+    }
+
+    public void setResult(List result) {
+        this.result = result;
+    }
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
+    
+    
+}

@@ -1,0 +1,36 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess;
+
+public interface ICPListElementAttribute {
+	IClasspathAttribute getClasspathAttribute();
+
+	CPListElement getParent();
+
+	boolean isBuiltIn();
+
+	boolean isNonModifiable();
+
+	boolean isNotSupported();
+
+	String getKey();
+
+	Object getValue();
+
+	void setValue(Object value);
+
+	boolean equals(Object obj);
+
+	int hashCode();
+
+	CPListElementAttribute copy();
+
+	ClasspathAttributeAccess getClasspathAttributeAccess();
+}

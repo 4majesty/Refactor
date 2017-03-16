@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.model;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+
+public interface IJavaModelLabelProvider {
+	void dispose();
+
+	Image getImage(final Object element);
+
+	String getText(final Object element);
+}

@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+
+public interface ICallHierarchyLabelProvider {
+	Image getImage(Object element);
+
+	String getText(Object element);
+
+	StyledString getStyledText(Object element);
+}

@@ -1,0 +1,28 @@
+package com.successfactors.cdp.bean;
+
+public class CareerWorkSheetSuggestedRolesFilterSettingBean {
+  private CareerWorkSheetSuggestedRolesFlagEnum flagEnum;
+  private boolean enabled;
+  private String uiLabel;
+  public CareerWorkSheetSuggestedRolesFlagEnum getFlagEnum() {
+    return flagEnum;
+  }
+  public void setFlagEnum(CareerWorkSheetSuggestedRolesFlagEnum flagEnum) {
+    this.flagEnum = flagEnum;
+  }
+  public boolean isEnabled() {
+    return enabled;
+  }
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
+  public String getUiLabel() {
+    return uiLabel;
+  }
+  public void setUiLabel(String uiLabel) {
+    this.uiLabel = uiLabel;
+  }
+  
+  
+
+}

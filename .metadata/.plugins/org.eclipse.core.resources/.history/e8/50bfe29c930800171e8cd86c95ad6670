@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListDialogField;
+
+public interface IHistoryListAction {
+	IMember[] getResult();
+
+	IMember[][] getRemaining();
+
+	void run();
+}

@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IJavaReplaceWithEditionActionImpl {
+	void run(ISelection selection);
+
+	void replace(IMember input, IFile file, ITypedElement element);
+}

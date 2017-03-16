@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls.search;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jdt.internal.ui.viewsupport.IAppearanceAwareLabelProvider;
+
+public interface INLSSearchResultLabelProvider2 {
+	StyledString getStyledText(Object element);
+
+	String getText(Object element);
+
+	Image getImage(Object element);
+
+	void dispose();
+}

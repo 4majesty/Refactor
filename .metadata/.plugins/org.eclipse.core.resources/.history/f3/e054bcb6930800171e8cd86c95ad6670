@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+
+public interface ITopLevelTypeProblemsLabelDecorator {
+}

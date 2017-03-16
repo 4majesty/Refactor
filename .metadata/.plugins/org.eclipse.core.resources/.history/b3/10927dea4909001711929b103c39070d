@@ -1,0 +1,40 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+import java.io.Serializable;
+
+public class ProgramSignupFormSectionValueVO implements Serializable {
+
+  private String itemId;
+
+  private String itemLabel;
+  
+  public ProgramSignupFormSectionValueVO(String itemId){
+    this.itemId = itemId;    
+  }
+
+  public ProgramSignupFormSectionValueVO(String itemId, String itemLabel){
+    this.itemId = itemId;    
+    this.itemLabel = itemLabel;
+  }
+  
+  public String getItemId() {
+    return itemId;
+  }
+
+  public void setItemId(String itemId) {
+    this.itemId = itemId;
+  }
+
+  public String getItemLabel() {
+    return itemLabel;
+  }
+
+  public void setItemLabel(String itemLabel) {
+    this.itemLabel = itemLabel;
+  }
+
+  @Override
+  public String toString() {
+    return "ProgramSignupFormSectionValueVO [itemId=" + itemId + ", itemLabel=" + itemLabel + "]";
+  }
+}

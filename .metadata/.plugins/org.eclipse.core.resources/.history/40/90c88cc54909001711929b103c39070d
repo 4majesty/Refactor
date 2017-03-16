@@ -1,0 +1,8 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.service.mentoring.GetMatchingCounts;
+import com.successfactors.sca.ServiceApplicationException;
+
+public interface IGetMatchingCountsImpl {
+	GetMatchingCounts execute(GetMatchingCounts cmd) throws ServiceApplicationException;
+}

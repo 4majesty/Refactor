@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Element;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+
+public interface IJavadocWriter {
+	Element createXML(JavadocOptionsManager store) throws ParserConfigurationException;
+}

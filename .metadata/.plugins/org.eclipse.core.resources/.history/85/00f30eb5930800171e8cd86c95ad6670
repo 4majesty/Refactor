@@ -1,0 +1,48 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.filters.CustomFiltersDialog;
+import org.eclipse.jdt.internal.ui.filters.FilterDescriptor;
+import org.eclipse.jdt.internal.ui.filters.FilterMessages;
+import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
+import org.eclipse.jdt.internal.ui.filters.INamePatternFilter;
+import org.eclipse.jdt.internal.ui.filters.IFilterDescriptor;
+
+public interface ICustomFiltersActionGroup {
+	void run();
+
+	void fill(Menu menu, int index);
+
+	boolean isDynamic();
+
+	ViewerFilter getFilterInstance();
+
+	void fillActionBars(IActionBars actionBars);
+
+	String[] internalGetEnabledFilterIds();
+
+	String[] removeFiltersFor(Object parent, Object element, IContentProvider contentProvider);
+
+	void setFilters(String[] newFilters);
+
+	void fillViewMenu(IMenuManager viewMenu);
+
+	void dispose();
+
+	void saveState(IMemento memento);
+
+	void restoreState(IMemento memento);
+}

@@ -1,0 +1,432 @@
+/*
+ * $Id: LicenseBean.java 883603 2015-11-27 11:25:36Z wwang $
+ */
+package com.successfactors.legacy.bean.provisioning;
+
+
+
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.sfutil.util.SFDefaultHandler;
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.sfutil.util.XMLUtils;
+import com.successfactors.pmcommon.bean.FeatureSet;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+
+
+/**
+ * This class implements a bean that captures all elements in a license file.
+ *
+ * IMPORTANT:
+ *
+ * Since this file will be packaged and shipped with the product, make sure
+ * that you do not add any function that will generate a license key
+ * that matches the feature list.  The license key creation is in
+ * LicenseClient.java.
+ * This file is only for parsing/generate the license XML file, and validating
+ * a license key against the product/feature list.
+ *
+ */
+public class LicenseBean extends DefaultHandler implements Serializable
+{
+   private static final Logger logger = LogManager.getLogger();
+  public static final String PRODUCT_PMREVIEW = "PM Appraisal Form";
+   public static final String PRODUCT_WRITINGASST = "Writing Assistant";
+   public static final String PRODUCT_ADMINCONFIG = "Admin Configuration Tool";
+   public static final String PRODUCT_USERDIRECTORY = "User Directory";
+   public static final String PRODUCT_WORKFLOW = "Workflow";
+   public static final String PRODUCT_DASHBOARD = "Manager Dashboard";
+   public static final String PRODUCT_OBJMGMT = "Objective Management Suite";
+   public static final String PRODUCT_COMPLIBMGMT = "Competency Library Management Suite";
+   public static final String PRODUCT_REPORTS = "Reporting";
+   public static final String PRODUCT_GAPANALYSIS = "Gap Analysis";
+   public static final String PRODUCT_PM360 = "360 Multi-Rater";
+   public static final String PRODUCT_360REPORTS = "Graphical Report (360)";
+   public static final String PRODUCT_LEGALSCAN = "Legal Scan";
+   public static final String PRODUCT_SPELLCHECK = "Spell Check";
+   public static final String PRODUCT_ADVOBJMGMT = "Advanced Objective Management";
+   public static final String PRODUCT_LIVEPROFILE = "Live Profile";
+   public static final String PRODUCT_OFFLINE = "Offline Form";
+   public static final String PRODUCT_PMSUCCESSION = "Succession Planning";
+   public static final String PRODUCT_PMNOTE = "PM Note";
+   public static final String PRODUCT_IDP = "Development Plan";
+   public static final String PRODUCT_STAGERPT = "Hierarchical Report";
+   public static final String PRODUCT_LANGPACK = "Language Packs";
+   public static final String PRODUCT_PLANOBJ = "Objective Planning";
+   public static final String PRODUCT_SUCCMAN = "Succession Managment";
+   public static final String PRODUCT_LEFTNAV = "Left Navigation";
+   public static final String PRODUCT_COMPENSATION = "Compensation Management";
+   public static final String PRODUCT_REPORTS_V2 = "Reporting v2";
+   public static final String PRODUCT_ANALYTICS = "Analytics";
+   public static final String PRODUCT_UI_CONSOLIDATION = "Consolidation of UI code";
+   public static final String PRODUCT_MATRIX_GRID_REPORT = "Matrix Grid Report (9-Box)";
+   public static final String PRODUCT_PERFORMANCE_PROFILE = "Performance Profile";
+
+  private static final String CDATABEGIN = "<![CDATA[";
+  private static final String CDATAEND = "]]>";
+  //
+  // These static strings define all the XML element names.
+  //
+  private static final String xmlPMLicense = "pm-licenses";
+  private static final String xmlProduct = "product";
+  private static final String xmlKey = "key";
+
+  private static final String parserName = "org.apache.xerces.parsers.SAXParser";
+
+  // Product Name
+  public Hashtable productList = new Hashtable();
+  // Product Key
+  public String licenseKey = "";
+
+  // Calculated or given feature set.
+  public IFeatureSet featureSet = new FeatureSet();
+
+  public void setProductList(Hashtable inValue) {
+    this.productList = inValue;
+  }
+  public Hashtable getProductList() {
+    return this.productList;
+  }
+
+  public void setLicenseKey(String inValue) {
+    this.licenseKey = inValue;
+  }
+  public String getLicenseKey() {
+    return this.licenseKey;
+  }
+
+  public void setFeatureSet(FeatureSet inValue) {
+    this.featureSet = inValue;
+  }
+  public FeatureSet getFeatureSet() {
+    return this.featureSet;
+  }
+
+  public LicenseBean()
+  {
+  }
+
+  public void updateContent(XMLReader parser, DefaultHandler caller)
+  {
+    this.parser = parser;
+    this.caller = caller;
+    parser.setContentHandler(this);
+  }
+
+  /**
+   * This method validates if the license key is valid for the feature
+   * list against the given company Id.
+   *
+   * @return true if the license key is valid for the feature list; false otherwise
+   *
+   * @throws Exception
+   */
+  public boolean isLicenseValid(String againstCompanyId)
+    throws Exception
+  {
+    if (this.licenseKey != null) {
+      CompanyBean companyBean = new CompanyBean();
+      companyBean.setCompanyId(againstCompanyId);
+      companyBean.setFeatureSet(this.featureSet);
+      long key = companyBean.generateFeatureKey();
+      if (this.licenseKey.equals(Long.toString(key))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * This method sets the product feature list.
+   *
+   * @param featureSet  Feature set
+   */
+  public void resetProductList(FeatureSet featureSet)
+  {
+    this.featureSet = featureSet;
+    this.productList = new Hashtable();
+
+    Iterator i = FeatureEnum.iterator();
+    while (i.hasNext()) {
+      FeatureEnum feature = (FeatureEnum)i.next();
+      if (this.featureSet.contains(feature)) {
+        this.productList.put(feature.getProduct(), feature);
+      }
+    }
+  }
+
+  /*
+   * Updates the content of the bean with the given data.
+   */
+  public void updateContent(byte[] data, boolean validate)
+    throws IOException, SAXException
+  {
+    try {
+      parser = (XMLReader)Class.forName(parserName).newInstance();
+    } catch (IllegalAccessException ei) {
+      throw new SAXException("Cannot access the Parser");
+    } catch (InstantiationException ci) {
+      throw new SAXException("Cannot instantiate the Parser");
+    } catch (ClassNotFoundException ce) {
+      throw new SAXException("Cannot find the Parser");
+    }
+
+    if(validate)
+      parser.setFeature("http://xml.org/sax/features/validation", true);
+    parser.setFeature( "http://xml.org/sax/features/namespaces",false );
+    parser.setFeature( "http://apache.org/xml/features/validation/schema",false );
+    parser.setContentHandler(this);
+    parser.setEntityResolver(new SFDefaultHandler());
+    parser.setErrorHandler(this);
+
+    InputSource is = new InputSource(new ByteArrayInputStream(data));
+    is.setSystemId(Thread.currentThread().getContextClassLoader().getResource(
+      "com/sf/dtd/license.dtd").toString());
+    parser.parse(is);
+
+    /* Very important !!! We don't want to maintain references to all these
+       temporary objects that were created for parsing. Especially since we
+       might get serialized as part of an RMI return!!!
+     */
+    cleanupAfterParse();
+  }
+
+  /*
+   * Constructor.
+   */
+  public LicenseBean(XMLReader parser, DefaultHandler caller)
+  {
+    this.parser = parser;
+    this.caller = caller;
+    parser.setContentHandler(this);
+  }
+
+  private XMLReader parser = null;
+  private DefaultHandler caller = null;
+  private StringBuffer content = new StringBuffer();
+  private Locator locator = null;
+
+  private void cleanupAfterParse()
+  {
+    parser = null;
+    caller = null;
+    content = null;
+    locator = null;
+  }
+
+  public void setDocumentLocator(Locator locator)
+  {
+    this.locator = locator;
+  }
+
+   public Locator getDocumentLocator() {
+      return locator;
+   }
+
+  private boolean enabled = false;
+
+  public void startElement(String uri,String localName,String name, Attributes atts) throws SAXException
+  {
+    if (xmlProduct.equals(name)) {
+      enabled = false;
+      String tmpStr = atts.getValue("enabled");
+      if (null != tmpStr && "true".equals(tmpStr)) {
+        enabled = true;
+      }
+    }
+    content.setLength(0);
+  }
+
+  public void characters(char[] chars, int start, int len)
+  {
+    content.append(chars, start, len);
+  }
+
+  public void endElement(String uri,String localName,String name) throws SAXException
+  {
+    if (name.equals(xmlPMLicense)) {
+      if (null != caller) {
+        parser.setContentHandler(caller);
+        cleanupAfterParse();
+        return;
+      }
+    } else if (name.equals(xmlProduct)) {
+      String product = content.toString();
+      // BEGIN: This is for backward compatibility due to implementation change.
+      int index = product.indexOf("enabled");
+      if (index > 0) {
+        String tmpStr = content.toString();
+        product = tmpStr.substring(0, index-1);
+        int first = tmpStr.indexOf("\"");
+        int second = tmpStr.lastIndexOf("\"");
+        String enabledFlag = tmpStr.substring(first+1, second);
+        if ("true".equals(enabledFlag)) {
+          enabled = true;
+        }
+      }
+      // END: This is for backward compatibility due to implementation change.
+      FeatureEnum feature = FeatureEnum.forProduct(product);
+      //System.out.println("Product : " + product + " / " + "Feature : " + feature);
+      if (null == feature) {
+    	logger.error("Product and Feature are invalid :");
+    	logger.error("Product : " + product + " / " + "Feature : " + feature);  
+        return;
+      }
+      productList.put(product, feature);
+      if (enabled) {
+        featureSet.add(feature);
+      }
+      enabled = false; // reset
+    } else if (name.equals(xmlKey)) {
+      licenseKey = content.toString();
+    }
+
+    content.setLength(0);
+  }
+
+  public void warning(SAXParseException ex) throws SAXParseException
+  {
+    throw ex;
+  }
+
+  public void error(SAXParseException ex) throws SAXParseException
+  {
+    throw ex;
+  }
+
+  public void fatalError(SAXParseException ex) throws SAXParseException
+  {
+    throw ex;
+  }
+
+  private static final String indentString = "  ";
+
+  private void indent(StringBuffer sb, int level)
+  {
+    for (int i = 0; i < level; i++) {
+      sb.append(indentString);
+    }
+  }
+
+  public String toXML()
+  {
+    return toXML(0, false);
+  }
+
+  public String toXML(int indentLevel, boolean configMode)
+  {
+    StringBuffer sb = new StringBuffer();
+
+    if (0 == indentLevel) {
+      sb.append("<?xml version=\"1.0\" encoding=\""+com.sf.sfv4.util.StringUtils.DEFAULT_ENCODING+"\"?>\n");
+      sb.append("<!DOCTYPE pm-licenses SYSTEM \"license.dtd\">\n");
+    }
+
+    indent(sb, indentLevel);
+    sb.append("<").append(xmlPMLicense).append(">\n");
+
+    for (Enumeration keys = productList.keys(); keys.hasMoreElements();) {
+      String featureStr = (String)keys.nextElement();
+      if (configMode) {
+        indent(sb, indentLevel+1);
+        sb.append("<").append(xmlProduct);
+        if (featureSet.contains(FeatureEnum.forProduct(featureStr))) {
+          sb.append(" enabled=\"true\">");
+        } else {
+          sb.append(" enabled=\"false\">");
+        }
+        sb.append(XMLUtils.escapeContent(featureStr));
+        sb.append("</").append(xmlProduct).append(">\n");
+      } else if (featureSet.contains(FeatureEnum.forProduct(featureStr))) {
+        indent(sb, indentLevel+1);
+        sb.append("<").append(xmlProduct);
+        sb.append(" enabled=\"true\">");
+        sb.append(XMLUtils.escapeContent(featureStr));
+        sb.append("</").append(xmlProduct).append(">\n");
+      }
+    }
+
+    indent(sb, indentLevel+1);
+    sb.append("<").append(xmlKey).append(">");
+    sb.append(XMLUtils.escapeContent(licenseKey));
+    sb.append("</").append(xmlKey).append(">\n");
+
+    indent(sb, indentLevel);
+    sb.append("</").append(xmlPMLicense).append(">\n");
+
+    return sb.toString();
+  }
+
+  public String toString()
+  {
+    return "licenseKey: " + licenseKey + ";\n" +
+      "productList: " + productList + ".";
+  }
+
+  public static void main(String[] args)
+  {
+    LicenseBean bean = new LicenseBean();
+    Iterator featureEnum = FeatureEnum.iterator();
+    FeatureSet set = new FeatureSet();
+//    Hashtable requiredList = new Hashtable();
+//    for (int i = 0; i < args.length; i ++) {
+//        requiredList.put(args[i], args[i]);
+//    }
+
+    while (featureEnum.hasNext()) {
+        FeatureEnum feature = (FeatureEnum) featureEnum.next();
+        //System.out.println("Adding feature: "+feature.getProduct());
+        if (null == feature.getKey()) continue;
+       // if (requiredList.get(feature.getKey())== null) continue;
+        bean.productList.put(feature.getProduct(), new Integer(feature.getId()));
+        set.add(feature);
+    }
+
+    // This is not a real valid license key.  It is for testing purpose only.
+    CompanyBean company = new CompanyBean();
+    company.setFeatureSet(set);
+    try{
+        bean.licenseKey = new Long(company.generateFeatureKey()).toString(); //"1843654638747478239437";
+    }
+    catch(NoSuchAlgorithmException e) {
+        logger.error("Exception caught in LicenseBean");
+    }
+
+    logger.info(bean.toXML(0, true));
+
+
+      LicenseBean bean2 = null;
+    try {
+      bean2 = new LicenseBean();
+      bean2.updateContent(StringUtils.toBytes(bean.toXML(0, true)), true);
+    } catch (IOException e) {
+      e.printStackTrace();
+    } catch (SAXParseException e) {
+      logger.error(
+        "Line " + e.getLineNumber() + ", column " + e.getColumnNumber() +
+        ": " + e.getMessage());
+    } catch (SAXException e) {
+      e.printStackTrace();
+    }
+
+    if (null != bean2) {
+      logger.info("**********************************************");
+      logger.info(bean2.toXML());
+    }
+
+  }
+}

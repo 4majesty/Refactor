@@ -1,0 +1,306 @@
+package com.successfactors.cdp.dao.impl.oracle;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.jboss.seam.annotations.Name;
+
+import com.successfactors.cdp.bean.CareerWorkSheetSuggestedRolesFilterSettingBean;
+import com.successfactors.cdp.bean.CareerWorkSheetSuggestedRolesFlagEnum;
+import com.successfactors.cdp.bean.CareerWorksheetScoreCriteriaBean;
+import com.successfactors.cdp.bean.SuggestedRolesFilterSettingBean;
+import com.successfactors.cdp.bean.SuggestedRolesSettingBean;
+import com.successfactors.cdp.bean.SuggestedRolesSubItemBean;
+import com.successfactors.cdp.api.dao.SuggestedRolesSettingDAO;
+import com.successfactors.db.dao.DAOException;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.dao.util.SQLUtil;
+import com.successfactors.platform.di.SFContextConstant;
+
+@Name("suggestedRolesSettingDAO")
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+@javax.inject.Named("suggestedRolesSettingDAO")
+public class OracleSuggestedRolesSettingDAO implements
+    SuggestedRolesSettingDAO {
+  
+  private static Logger logger = LogManager.getLogger();
+
+  /**
+   * 
+   */
+  @Override
+  public int updateSuggestedRolesSetting(String companySchema, String locale,
+      Connection dbConnection, Set<SuggestedRolesSettingBean> settingBeans) {
+    PreparedStatement ps = null;
+    try {
+      if (settingBeans != null && settingBeans.size() > 0) {
+        // update weight settings
+        ps = dbConnection.prepareStatement("update " + companySchema + "SUGGESTED_ROLES_WEIGHT set WEIGHT_VALUE = ?, ENABLED = ? where WEIGHT_KEY = ?");
+        for(SuggestedRolesSettingBean settingBean : settingBeans) {
+          if(settingBean != null) {
+            ps.setDouble(1, settingBean.getWeightValue());
+            ps.setBoolean(2, settingBean.isEnabled());
+            ps.setString(3, settingBean.getWeightKey());
+            ps.addBatch();
+          }
+        }
+        ps.executeBatch();
+        SQLUtil.closeStatement(ps);
+        ps = null;
+        
+        // update sub item settings
+        // library may be deleted already, remove & insert new values. 
+        ps = dbConnection.prepareStatement("delete from " + companySchema + "SUGGESTED_ROLES_SUB_ITEM");
+        ps.executeUpdate();
+        SQLUtil.closeStatement(ps);
+        ps = null;
+        
+        for(SuggestedRolesSettingBean settingBean : settingBeans) {
+          if(settingBean.isEnabled() && settingBean.getSubItems() != null && settingBean.getSubItems().size() > 0) {
+            ps = dbConnection.prepareStatement("insert into " + companySchema + "SUGGESTED_ROLES_SUB_ITEM"
+                + "(WEIGHT_KEY, ITEM_KEY, ENABLED, LOCALE, ITEM_LEVEL) values (?, ?, ?, ?, ?)");
+            for (SuggestedRolesSubItemBean itemBean : settingBean.getSubItems().values()) {
+              int itemLevel = 0;
+              ps.setString(1, itemBean.getWeightKey());
+              ps.setString(2, itemBean.getItemKey());
+              ps.setBoolean(3, itemBean.isEnabled());
+              ps.setString(4, locale);
+              ps.setInt(5, itemLevel);
+              ps.addBatch();
+              
+              Set<SuggestedRolesSubItemBean> subItemSet = itemBean.getSubItems();
+              if (itemBean.isEnabled() && subItemSet!=null && subItemSet.size()>0) {
+                itemLevel = 1;
+                for(SuggestedRolesSubItemBean subItemBean : subItemSet) {
+                  ps.setString(1, subItemBean.getWeightKey());
+                  ps.setString(2, subItemBean.getItemKey());
+                  ps.setBoolean(3, subItemBean.isEnabled());
+                  ps.setString(4, locale);
+                  ps.setInt(5, itemLevel);
+                  ps.addBatch();
+                }
+              }
+              ps.executeBatch();
+            }
+          }
+        }
+      }
+    } catch (SQLException e) {
+      logger.error("SQLException", e);
+      throw new DAOException("SQLException caught: " + e.getMessage(), e);
+    } finally {
+      SQLUtil.closeStatement(ps);
+    }
+    
+    return DAO_OK;
+  }
+
+  @Override
+  public Map<String, SuggestedRolesSettingBean> getSuggestedRolesSetting(
+      String companySchema, String locale, Connection dbConnection) {
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    Map<String, SuggestedRolesSettingBean> settingMap = new LinkedHashMap<String, SuggestedRolesSettingBean>();
+    try {
+      ps = dbConnection.prepareStatement("select t.ITEM_KEY, t.ie, t.WEIGHT_KEY, t.WEIGHT_VALUE, t.we, t.DISP_ORDER, si.ITEM_KEY, si.ENABLED from "
+          + "(select i.ITEM_KEY,i.ENABLED as ie, w.WEIGHT_KEY, w.WEIGHT_VALUE, w.ENABLED as we, w.DISP_ORDER, i.locale from "
+          + companySchema + "SUGGESTED_ROLES_WEIGHT w, "
+          + companySchema + "SUGGESTED_ROLES_SUB_ITEM i"
+          + " where nvl(w.is_filter,0) = 0 and i.WEIGHT_KEY (+)= w.WEIGHT_KEY and (i.ITEM_LEVEL=0 or i.ITEM_LEVEL is null)) t, "
+          + companySchema + "SUGGESTED_ROLES_SUB_ITEM si"
+          + " where si.WEIGHT_KEY (+)= t.ITEM_KEY and (si.ITEM_LEVEL=1 or si.ITEM_LEVEL is null) and (si.LOCALE is null or (t.LOCALE=si.LOCALE and si.LOCALE=?)) "
+          + " order by t.WEIGHT_KEY,t.ITEM_KEY desc");
+      ps.setString(1, locale);
+      rs = ps.executeQuery();
+      
+      while (rs.next()) {
+        String weightKey = rs.getString(3);
+        SuggestedRolesSettingBean settingBean = settingMap.get(weightKey);
+        if(settingBean == null) {
+          double weightValue = rs.getDouble(4);
+          boolean enabled = rs.getBoolean(5);
+          int dispOrder = rs.getInt(6);
+          settingBean = new SuggestedRolesSettingBean(weightKey, weightValue, enabled, dispOrder, null);
+          settingMap.put(weightKey, settingBean);
+        }
+        
+        String itemKey = rs.getString(1);
+        if(itemKey != null) {
+          boolean enabled = rs.getBoolean(2);
+          SuggestedRolesSubItemBean itemBean = new SuggestedRolesSubItemBean(weightKey, itemKey, enabled);
+          if(settingBean.getSubItems() == null) {
+            settingBean.setSubItems(new HashMap<String, SuggestedRolesSubItemBean>());
+          }
+          Map<String, SuggestedRolesSubItemBean> itemsMap = settingBean.getSubItems();
+          if (itemsMap.get(itemKey) == null) {
+            itemsMap.put(itemKey, itemBean);
+          }
+          String subItemKey = rs.getString(7);
+          if(subItemKey != null) {
+            boolean subEnabled = rs.getBoolean(8);
+            SuggestedRolesSubItemBean subItemBean = new SuggestedRolesSubItemBean(itemKey, subItemKey, subEnabled);
+            if (itemsMap.get(itemKey).getSubItems() == null) {
+              itemsMap.get(itemKey).setSubItems(new LinkedHashSet<SuggestedRolesSubItemBean>());
+            }
+            itemsMap.get(itemKey).getSubItems().add(subItemBean);
+          }
+        }
+      }
+    } catch (SQLException e) {
+      logger.error("SQLException", e);
+      throw new DAOException("SQLException caught: " + e.getMessage(), e);
+    } finally {
+      SQLUtil.closeResultSet(rs);
+      SQLUtil.closeStatement(ps);
+    }
+    return settingMap;
+  }
+
+  @Override
+  public int initData(String companySchema, Connection dbConnection) {
+    PreparedStatement ps = null;
+    try {
+      ps = dbConnection.prepareStatement("insert into " + companySchema + "SUGGESTED_ROLES_WEIGHT(WEIGHT_KEY, WEIGHT_VALUE, ENABLED, DISP_ORDER) values (?, ?, ?, ?)");
+      ps.setString(1, CareerWorksheetScoreCriteriaBean.COMPETENCY);
+      ps.setDouble(2, CareerWorksheetScoreCriteriaBean.WEIGHT_MAP.get(CareerWorksheetScoreCriteriaBean.COMPETENCY) * 100);
+      ps.setBoolean(3, true);
+      ps.setInt(4, 100);
+      ps.addBatch();
+      
+      ps.setString(1, CareerWorksheetScoreCriteriaBean.FAMILY);
+      ps.setDouble(2, CareerWorksheetScoreCriteriaBean.WEIGHT_MAP.get(CareerWorksheetScoreCriteriaBean.FAMILY) * 100);
+      ps.setBoolean(3, true);
+      ps.setInt(4, 100);
+      ps.addBatch();
+      
+      ps.setString(1, CareerWorksheetScoreCriteriaBean.JOBOPENINGS);
+      ps.setDouble(2, CareerWorksheetScoreCriteriaBean.WEIGHT_MAP.get(CareerWorksheetScoreCriteriaBean.JOBOPENINGS) * 100);
+      ps.setBoolean(3, true);
+      ps.setInt(4, 100);
+      ps.addBatch();
+      
+      ps.setString(1, CareerWorksheetScoreCriteriaBean.CAREERPATH);
+      ps.setDouble(2, CareerWorksheetScoreCriteriaBean.WEIGHT_MAP.get(CareerWorksheetScoreCriteriaBean.CAREERPATH) * 100);
+      ps.setBoolean(3, true);
+      ps.setInt(4, 100);
+      ps.addBatch();
+      
+      ps.setString(1, CareerWorksheetScoreCriteriaBean.PEER);
+      ps.setDouble(2, CareerWorksheetScoreCriteriaBean.WEIGHT_MAP.get(CareerWorksheetScoreCriteriaBean.PEER) * 100);
+      ps.setBoolean(3, true);
+      ps.setInt(4, 100);
+      ps.addBatch();
+      
+      ps.executeBatch();
+    } catch (SQLException e) {
+      logger.error("SQLException", e);
+      throw new DAOException("SQLException caught: " + e.getMessage(), e);
+    } finally {
+      SQLUtil.closeStatement(ps);
+    }
+    return DAO_OK;
+  }
+
+@Override
+public List<CareerWorkSheetSuggestedRolesFilterSettingBean> getFilterFlags(
+        String companySchema, Connection dbConnection) {
+    List<CareerWorkSheetSuggestedRolesFilterSettingBean> resultList = new ArrayList<CareerWorkSheetSuggestedRolesFilterSettingBean>();
+    
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+
+    try {
+      ps = dbConnection.prepareStatement("select weight_key, enabled from " + companySchema + "SUGGESTED_ROLES_WEIGHT where nvl(is_filter,0) = 1") ;
+      rs = ps.executeQuery();
+      
+      while (rs.next()) {
+        CareerWorkSheetSuggestedRolesFilterSettingBean filterBean = new CareerWorkSheetSuggestedRolesFilterSettingBean();
+        String weightKey = rs.getString(1);
+        try {
+            CareerWorkSheetSuggestedRolesFlagEnum flag = CareerWorkSheetSuggestedRolesFlagEnum.valueOf(weightKey);
+            filterBean.setFlagEnum(flag);
+            int enabled = rs.getInt(2);
+            filterBean.setEnabled(enabled == 0 ? false : true);
+            resultList.add(filterBean);
+        } catch(IllegalArgumentException ex) {
+            logger.warn("Invalid Suggested Roles Flag: " + weightKey);
+        }
+      }
+    } catch (SQLException e) {
+      logger.error("SQLException", e);
+      throw new DAOException("SQLException caught: " + e.getMessage(), e);
+    } finally {
+      SQLUtil.closeResultSet(rs);
+      SQLUtil.closeStatement(ps);
+    }
+    return resultList;
+}
+
+    @Override
+    public void setFilterFlags(String companySchema, Connection dbConnection,
+            List<SuggestedRolesFilterSettingBean> filterSettingBeans) {
+        Statement queryStmt = null;
+        PreparedStatement insertPStmt = null;
+        PreparedStatement updatePStmt = null;
+        ResultSet rs = null;
+        try {
+            queryStmt = dbConnection.createStatement();//();
+            insertPStmt = dbConnection.prepareStatement("insert into " + companySchema + "SUGGESTED_ROLES_WEIGHT(weight_key, enabled, weight_value, disp_order, is_filter) values (?, ?, 0, 0, 1)");
+            updatePStmt = dbConnection.prepareStatement("update " + companySchema + "SUGGESTED_ROLES_WEIGHT set enabled = ? where weight_key= ? and nvl(is_filter,0) = 1");
+            Set<String> weightKeysFromUI = new HashSet<String>();
+            for (SuggestedRolesFilterSettingBean filterSettingBean : filterSettingBeans) {
+                weightKeysFromUI.add("'" + filterSettingBean.getFlagKey() + "'");
+            }
+            String inCondition = StringUtils.join(weightKeysFromUI.iterator(), ",");
+            rs = queryStmt.executeQuery("select weight_key from " + companySchema + "SUGGESTED_ROLES_WEIGHT where nvl(is_filter,0) = 1 and weight_key in ("+inCondition+")");
+            Set<String> weightKeysInDB = new HashSet<String>();
+            while (rs.next()) {
+                String weightKey = rs.getString(1);
+                weightKeysInDB.add(weightKey);
+            }
+            boolean hasUpdate = false, hasInsert = false;
+            for (SuggestedRolesFilterSettingBean filterSettingBean : filterSettingBeans) {
+                if (weightKeysInDB.contains(filterSettingBean.getFlagKey())) {
+                    updatePStmt.setInt(1, filterSettingBean.isEnabled() ? 1 : 0);
+                    updatePStmt.setString(2, filterSettingBean.getFlagKey());
+                    updatePStmt.addBatch();
+                    hasUpdate = true;
+                } else {
+                    insertPStmt.setString(1, filterSettingBean.getFlagKey());
+                    insertPStmt.setInt(2, filterSettingBean.isEnabled() ? 1 : 0);
+                    insertPStmt.addBatch();
+                    hasInsert = true;
+                }
+            }
+            if (hasInsert) {
+                insertPStmt.executeBatch();
+            }
+            if (hasUpdate) {
+                updatePStmt.executeBatch();
+            }
+        } catch (SQLException e) {
+            logger.error("SQLException", e);
+            throw new DAOException("SQLException caught: " + e.getMessage(), e);
+        } finally {
+            SQLUtil.closeResultSet(rs);
+            SQLUtil.closeStatement(insertPStmt);
+            SQLUtil.closeStatement(updatePStmt);
+        }
+
+    }
+
+  
+}

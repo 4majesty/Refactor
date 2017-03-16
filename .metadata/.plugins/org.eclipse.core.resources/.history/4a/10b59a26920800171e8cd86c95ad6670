@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+
+public interface INewVariableEntryDialog {
+	void customButtonPressed(ListDialogField field, int index);
+
+	void selectionChanged(ListDialogField field);
+
+	void doubleClicked(ListDialogField field);
+
+	void dialogFieldChanged(DialogField field);
+
+	IPath[] getResult();
+}

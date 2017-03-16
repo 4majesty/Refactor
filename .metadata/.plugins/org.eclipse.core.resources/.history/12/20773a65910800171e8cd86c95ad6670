@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.swt.widgets.Widget;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jdt.ui.IWorkingCopyProvider;
+import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
+
+public interface IProblemTreeViewer {
+	void doUpdateItem(Widget item);
+
+	void addFilter(ViewerFilter filter);
+
+	void removeFilter(ViewerFilter filter);
+
+	void setFilters(ViewerFilter[] filters);
+
+	void resetFilters();
+
+	boolean isExpandable(Object parent);
+
+	boolean hasFilteredChildren(Object parent);
+
+	boolean isFiltered(Object object, Object parent);
+}

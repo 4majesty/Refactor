@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.JavaCore;
+
+public interface IExternalClassFileEditorInput {
+	IClassFile getClassFile();
+
+	void refresh();
+
+	Object getAdapter(Class adapter);
+}

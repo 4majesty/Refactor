@@ -1,0 +1,34 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
+import org.eclipse.jdt.internal.ui.actions.IMultiOrganizeImportAction;
+
+public interface IOrganizeImportsAction {
+	void setActivePart(IAction action, IWorkbenchPart targetPart);
+
+	void run(IAction action);
+
+	void selectionChanged(IAction action, ISelection selection);
+
+	int compare(Object o1, Object o2);
+
+	void selectionChanged(ITextSelection selection);
+
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(ITextSelection selection);
+
+	void run(IStructuredSelection selection);
+
+	void runOnMultiple(final ICompilationUnit[] cus);
+
+	void run(ICompilationUnit cu);
+}

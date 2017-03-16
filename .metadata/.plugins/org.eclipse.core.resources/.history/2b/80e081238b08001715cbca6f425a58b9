@@ -1,0 +1,75 @@
+package com.successfactors.rbp.integration.grc.xml.binding;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+/** 
+ */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "", propOrder = { "readPermission", "writePermission", "message" })
+@XmlRootElement(name = "read-write-permission")
+public class ReadWritePermission implements IReadWritePermission {
+	@XmlElement(name = "read-permission", required = true)
+	protected ReadPermission readPermission;
+	@XmlElement(name = "write-permission", required = true)
+	protected WritePermission writePermission;
+	@XmlElement(required = true)
+	protected IMessage message;
+
+	/** 
+	* Gets the value of the readPermission property.
+	* @return possible object is {@link ReadPermission }
+	*/
+	@Override
+	public ReadPermission getReadPermission() {
+		return readPermission;
+	}
+
+	/** 
+	* Sets the value of the readPermission property.
+	* @param value allowed object is {@link ReadPermission }
+	*/
+	@Override
+	public void setReadPermission(ReadPermission value) {
+		this.readPermission = value;
+	}
+
+	/** 
+	* Gets the value of the writePermission property.
+	* @return possible object is {@link WritePermission }
+	*/
+	@Override
+	public WritePermission getWritePermission() {
+		return writePermission;
+	}
+
+	/** 
+	* Sets the value of the writePermission property.
+	* @param value allowed object is {@link WritePermission }
+	*/
+	@Override
+	public void setWritePermission(WritePermission value) {
+		this.writePermission = value;
+	}
+
+	/** 
+	* Gets the value of the message property.
+	* @return possible object is {@link Message }
+	*/
+	@Override
+	public Message getMessage() {
+		return message;
+	}
+
+	/** 
+	* Sets the value of the message property.
+	* @param value allowed object is {@link Message }
+	*/
+	@Override
+	public void setMessage(Message value) {
+		this.message = value;
+	}
+}

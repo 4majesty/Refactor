@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.jarpackager.ICheckboxTreeAndListGroup;
+
+public interface IJavadocTreeWizardPage {
+	void createControl(Composite parent);
+
+	boolean getCustom();
+
+	IJavaProject[] getCheckedProjects();
+
+	void init();
+
+	void setVisible(boolean visible);
+}

@@ -1,0 +1,181 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import java.text.ParseException;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.http.HttpStatus;
+import org.apache.http.message.BasicNameValuePair;
+import org.jboss.seam.annotations.In;
+import org.json.JSONObject;
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.bean.mentoring.jam.Group;
+import com.successfactors.cdp.service.mentoring.jam.CreateJamGroup;
+import com.successfactors.cdp.service.mentoring.jam.exception.DuplicateJamGroupException;
+import com.successfactors.cdp.service.mentoring.jam.exception.JamAuthenticationException;
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.cdp.service.mentoring.jam.util.CreateGroupConstants;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+@Service
+public class CreateJamGroupImpl extends AbstractJamService 
+               implements ServiceCommandImpl<Group, CreateJamGroup>, CreateGroupConstants {
+
+  /** Logger. */
+  private static final Logger log = LogManager.getLogger();
+
+  /** param bean. */
+  @Inject
+  @In
+  protected ParamBean params;
+
+  /** scaHandler. */
+  @Inject
+  @In
+  protected ServiceCommandHandler scaHandler;
+
+  public Group execute(CreateJamGroup cmd) throws ServiceApplicationException {
+      String url = getCreateGroupURL();
+      List<BasicNameValuePair> requestHeaders = getHeaderContent(cmd.getAccessToken());
+      String requestBody = getRequestBody(cmd);
+
+      BasicHttpResponse response = invoke(url, REQUEST_TYPE_POST, requestHeaders, requestBody);
+
+      if (isGroupCreated(response)) {
+        return getResult(response);
+      } else {
+        int errorCode = response.getResponseCode();
+        String errorResponse = getPayload(response);
+
+        if (isGroupExists(response)) {
+           throw new DuplicateJamGroupException("Group Name:"+cmd.getName()+" already exists."
+               +". Jam Response Code:"+ errorCode +"; Jam Error Response:" + errorResponse);
+        } else if (isForbidden(response)) {
+           throw new JamAuthenticationException("Jam Authentication failed."
+               + "Group Name:"+cmd.getName()+"; Description:"+cmd.getDescription()
+               +". Jam Response Code:"+ errorCode +"; Jam Error Response:" + errorResponse);
+        } else {
+           throw new ServiceApplicationException("Create Group API failed for "
+               + "Group Name:"+cmd.getName()+"; Description:"+cmd.getDescription()
+               +". Jam Response Code:"+ errorCode +"; Jam Error Response:" + errorResponse);
+        }
+      }
+  }
+  
+  @Override
+  protected List<BasicNameValuePair> getHeaderContent(String accessToken)
+      throws ServiceApplicationException {
+    List<BasicNameValuePair> requestHeaders = super.getHeaderContent(accessToken);
+
+    requestHeaders.add(new BasicNameValuePair(HEADER_CONTENT_TYPE, CONTENT_TYPE_JSON));
+
+    return requestHeaders;
+  }
+
+  private Group getResult(BasicHttpResponse response) throws ServiceApplicationException {
+    Group group = new Group();
+
+    try {
+      String payload = getPayload(response);
+
+      log.info("Create Group response payload:"+payload);
+
+      JSONObject responseJson = new JSONObject(payload);
+
+      JSONObject bodyTag = responseJson.getJSONObject(ODATA_BODY_TAG);
+
+      if (bodyTag != null) {
+        JSONObject groupJson = bodyTag.getJSONObject(GROUP_RESULTS);
+
+            if(groupJson != null) {
+              String groupId = groupJson.getString(GROUP_ID_ODATA);
+
+              if(StringUtils.isEmpty(groupId)) {
+                throw new ServiceApplicationException("Unable to find group Id in OData Response."+responseJson);
+              }
+
+              group.setGroupId(groupId);
+            } else {
+              throw new ServiceApplicationException("Unable to find group data in OData Response."+responseJson);
+            }
+      } else {
+        throw new ServiceApplicationException("Unable to find OData Response Body Tag 'd'."+responseJson);
+      }
+    } catch (ParseException e) {
+      throw new ServiceApplicationException(e);
+    }
+
+    return group;
+  }
+
+  protected String getRequestBody(CreateJamGroup cmd) {
+    JSONObject reqBodyJson = new JSONObject();
+
+    reqBodyJson.put(CREATE_GROUP_REQUEST_PARAM_NAME, cmd.getName());
+    reqBodyJson.put(CREATE_GROUP_REQUEST_PARAM_DESCRIPTION,cmd.getDescription());
+    reqBodyJson.put(CREATE_GROUP_REQUEST_PARAM_OVERVIEWASLANDING, Boolean.TRUE);
+    reqBodyJson.put(CREATE_GROUP_REQUEST_PARAM_GROUPTYPE, CREATE_GROUP_REQUEST_PARAM_GROUPTYPE_VALUE);
+    reqBodyJson.put(PARAM_GROUP_TEMPLATE, getDefaultTemplate()); // Constructs template json with default uri. Replace it with input uri as needed.
+
+    return reqBodyJson.toString();
+  }
+
+  private JSONObject getDefaultTemplate() {
+    return getTemplate(DEFAULT_MENTORING_TEMPLATE_METADATA_URI);
+  }
+
+  private JSONObject getTemplate(String uri) {
+    JSONObject reqBodyJson = new JSONObject();
+
+    reqBodyJson.put(PARAM_GROUP_TEMPLATE_META_DATA, getTemplateMetaData(uri));
+
+    return reqBodyJson;
+  }
+
+  private JSONObject getTemplateMetaData(String uri) {
+    JSONObject reqBodyJson = new JSONObject();
+
+    reqBodyJson.put(PARAM_GROUP_TEMPLATE_META_DATA_URI, uri);
+
+    return reqBodyJson;
+  }
+
+  /**
+   * Fetches create group URL
+   * 
+   * @return createGroupURL String
+   */
+  private String getCreateGroupURL() throws ServiceApplicationException {
+    StringBuilder urlBuilder = new StringBuilder();
+
+    urlBuilder.append(getJamBaseURL()).append(GROUPS_API_ODATA_URL);
+
+    return urlBuilder.toString();
+  }
+
+  private boolean isGroupCreated(BasicHttpResponse response) {
+    return (response.getResponseCode() == HttpStatus.SC_CREATED);
+  }
+
+  private boolean isGroupExists(BasicHttpResponse response) {
+    return (response.getResponseCode() == HttpStatus.SC_CONFLICT);
+  }
+
+  @Override
+  public ServiceCommandHandler getSCAHandler() {
+    return scaHandler;
+  }
+
+  @Override
+  public ParamBean getParams() {
+    return params;
+  }
+}

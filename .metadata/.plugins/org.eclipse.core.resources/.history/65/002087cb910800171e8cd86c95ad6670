@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.SortMembersMessageDialog;
+import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+public interface IMultiSortMembersAction {
+}

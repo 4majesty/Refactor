@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.corext.refactoring.changes;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.ui.ide.undo.ResourceDescription;
+import org.eclipse.ltk.core.refactoring.Change;
+
+public interface IUndoablePackageDeleteChange {
+	Change perform(IProgressMonitor pm) throws CoreException;
+}

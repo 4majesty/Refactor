@@ -1,0 +1,51 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.internal.corext.util.History;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.MultiOrganizeImportAction;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
+import org.eclipse.jdt.internal.ui.actions.IMultiOrganizeImportAction;
+
+public interface IOrganizeImportsAction {
+	void setActivePart(IAction action, IWorkbenchPart targetPart);
+
+	void run(IAction action);
+
+	void selectionChanged(IAction action, ISelection selection);
+
+	int compare(Object o1, Object o2);
+
+	void selectionChanged(ITextSelection selection);
+
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(ITextSelection selection);
+
+	void run(IStructuredSelection selection);
+
+	void runOnMultiple(final ICompilationUnit[] cus);
+
+	void run(ICompilationUnit cu);
+}

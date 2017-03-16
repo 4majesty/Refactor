@@ -1,0 +1,106 @@
+package org.eclipse.jdt.internal.corext.refactoring.code;
+
+import java.util.List;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
+import org.eclipse.jdt.internal.corext.refactoring.code.SourceAnalyzer.NameData;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ISourceProvider {
+	boolean visit(ReturnStatement node);
+
+	RefactoringStatus checkActivation();
+
+	void initialize();
+
+	boolean isExecutionFlowInterrupted();
+
+	boolean getResult();
+
+	boolean visit(SimpleName node);
+
+	boolean isVariableReferenced(IVariableBinding binding);
+
+	boolean hasReturnValue();
+
+	boolean hasArrayAccess();
+
+	boolean hasSuperMethodInvocation();
+
+	boolean mustEvaluateReturnedExpression();
+
+	boolean returnValueNeedsLocalVariable();
+
+	int getNumberOfStatements();
+
+	boolean isSimpleFunction();
+
+	boolean isLastStatementReturn();
+
+	boolean isDangligIf();
+
+	MethodDeclaration getDeclaration();
+
+	String getMethodName();
+
+	ITypeBinding getReturnType();
+
+	List getReturnExpressions();
+
+	boolean returnTypeMatchesReturnExpressions();
+
+	ParameterData getParameterData(int index);
+
+	ITypeRoot getTypeRoot();
+
+	boolean needsReturnedExpressionParenthesis();
+
+	boolean returnsConditionalExpression();
+
+	int getReceiversToBeUpdated();
+
+	boolean isVarargs();
+
+	int getVarargIndex();
+
+	TextEdit getDeleteEdit();
+
+	String[] getCodeBlocks(CallContext context);
+}

@@ -1,0 +1,8 @@
+package com.successfactors.cdp.ui.util;
+
+import java.util.List;
+import com.successfactors.gm.api.bean.IField;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+
+public interface ICWSV12ViewConstants {
+}

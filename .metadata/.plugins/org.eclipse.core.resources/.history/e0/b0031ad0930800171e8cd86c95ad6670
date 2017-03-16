@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface ICPVariableElementLabelProvider {
+	Image getImage(Object element);
+
+	String getText(Object element);
+
+	Color getForeground(Object element);
+
+	Color getBackground(Object element);
+
+	void dispose();
+}

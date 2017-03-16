@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.corext.refactoring.util;
+
+import java.util.Set;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
+public interface IQualifiedNameSearchResult {
+	TextChange getChange(IFile file);
+
+	TextChange[] getAllChanges();
+
+	IFile[] getAllFiles();
+
+	Change getSingleChange(IFile[] alreadyTouchedFiles);
+}

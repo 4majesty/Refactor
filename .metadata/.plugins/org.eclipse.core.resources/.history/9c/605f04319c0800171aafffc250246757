@@ -1,0 +1,126 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.successfactors.cdp.service.util.mentoring.MatchingScoreTypeEnum;
+
+
+public class MatchedParticipantVO implements Serializable{
+  /** score */
+  private float score;
+  /** menteeId */
+  private String menteeId;
+  /** mentorId */
+  private String mentorId;
+  /** matchedCategory z*/
+  private MatchingScoreTypeEnum matchedCategory;
+  /** machingFinalScore */
+  private float machingFinalScore;  // score after normalization.
+  /** priority **/
+  private int priority; // only used in Match Engine
+  /** matchedAreas */
+  private List<ProgramSignupFormSectionVO> matchedAreas=new ArrayList<ProgramSignupFormSectionVO>();
+  /**
+   * getScore
+   * @return score
+   */
+  public float getScore() {
+    return score;
+  }
+  /**
+   * setScore
+   * @param score score
+   */
+  public void setScore(float score) {
+    this.score = score;
+  }
+   /**
+    * getMatchedCategory
+    * @return matchedCategory
+    */
+  public MatchingScoreTypeEnum getMatchedCategory() {
+    return matchedCategory;
+  }
+  /**
+   * setMatchedCategory
+   * @param matchedCategory matchedCategory
+   */
+  public void setMatchedCategory(MatchingScoreTypeEnum matchedCategory) {
+    this.matchedCategory = matchedCategory;
+  }
+  /**
+   * getMatchedAreas
+   * @return matchedAreas
+   */
+  public List<ProgramSignupFormSectionVO> getMatchedAreas() {
+    return matchedAreas;
+  }
+  /**
+   * setMatchedAreas
+   * @param matchedAreas matchedAreas
+   */
+  public void setMatchedAreas(List<ProgramSignupFormSectionVO> matchedAreas) {
+    this.matchedAreas = matchedAreas;
+  }
+  /**
+   * getMenteeId
+   * @return menteeId
+   */
+  public String getMenteeId() {
+    return menteeId;
+  }
+  /**
+   * setMenteeId
+   * @param menteeId menteeId
+   */
+  public void setMenteeId(String menteeId) {
+    this.menteeId = menteeId;
+  }
+  /**
+   * getMentorId
+   * @return mentorId
+   */
+  public String getMentorId() {
+    return mentorId;
+  }
+  /**
+   * setMentorId
+   * @param mentorId
+   */
+  public void setMentorId(String mentorId) {
+    this.mentorId = mentorId;
+  }
+  /**
+   * getMachingFinalScore
+   * @return machingFinalScore
+   */
+  public float getMachingFinalScore() {
+    return machingFinalScore;
+  }
+  /**
+   * setMachingFinalScore
+   * @param machingFinalScore machingFinalScore
+   */
+  public void setMachingFinalScore(float machingFinalScore) {
+    this.machingFinalScore = machingFinalScore;
+  }
+  /**
+   * getPriority
+   * @return priority
+   */
+  public int getPriority() {
+    return priority;
+  }
+  /**
+   * setPriority
+   * @param priority priority
+   */
+  public void setPriority(int priority) {
+    this.priority = priority;
+  }
+
+}

@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+
+public interface IMarkOccurrencesConfigurationBlock {
+	void widgetDefaultSelected(SelectionEvent e);
+
+	void widgetSelected(SelectionEvent e);
+
+	Control createControl(final Composite parent);
+
+	void initialize();
+
+	void performOk();
+
+	void performDefaults();
+
+	void dispose();
+}

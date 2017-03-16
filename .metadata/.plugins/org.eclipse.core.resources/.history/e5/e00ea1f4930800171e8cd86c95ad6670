@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.propertiesfileeditor;
+
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.IWordDetector;
+import org.eclipse.jface.text.rules.WordPatternRule;
+
+public interface ILeadingWhitespacePredicateRule {
+	boolean isWordStart(char c);
+
+	boolean isWordPart(char c);
+}

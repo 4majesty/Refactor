@@ -1,0 +1,28 @@
+package org.eclipse.jdt.internal.ui.wizards.dialogfields;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.jface.resource.JFaceResources;
+
+public interface IStringButtonStatusDialogField {
+	void setStatus(String status);
+
+	void setStatus(Image image);
+
+	void setStatusWidthHint(String widthHintString);
+
+	void setStatusWidthHint(int widthHint);
+
+	Control[] doFillIntoGrid(Composite parent, int nColumns);
+
+	int getNumberOfControls();
+
+	Label getStatusLabelControl(Composite parent);
+
+	void refresh();
+}

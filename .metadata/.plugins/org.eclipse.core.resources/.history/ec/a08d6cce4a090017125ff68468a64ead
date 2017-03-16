@@ -1,0 +1,42 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramEmailTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentee;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplateSection;
+import com.successfactors.cdp.service.mentoring.impl.SaveProgramImpl;
+import com.successfactors.cdp.service.util.mentoring.ProgramEmailTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.genericobject.bean.model.impl.GOLocalizedData;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+
+public interface ISaveProgramImplTest {
+	void setup();
+
+	void mergeProgram();
+
+	void updateSignupTemplateTest();
+
+	void testValidateParticipants();
+
+	void testInvalidParticipants();
+
+	void mergeEmailTemplateTest();
+}

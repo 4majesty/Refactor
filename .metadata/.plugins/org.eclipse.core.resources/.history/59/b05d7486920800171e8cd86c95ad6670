@@ -1,0 +1,32 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPersistableElement;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface IInternalClassFileEditorInput {
+	boolean equals(Object obj);
+
+	int hashCode();
+
+	IClassFile getClassFile();
+
+	IPersistableElement getPersistable();
+
+	String getName();
+
+	String getToolTipText();
+
+	ImageDescriptor getImageDescriptor();
+
+	boolean exists();
+
+	Object getAdapter(Class adapter);
+
+	void saveState(IMemento memento);
+
+	String getFactoryId();
+}

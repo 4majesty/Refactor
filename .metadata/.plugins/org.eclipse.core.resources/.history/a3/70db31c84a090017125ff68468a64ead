@@ -1,0 +1,34 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.cdp.bean.mentoring.jam.Group;
+import com.successfactors.cdp.bean.mentoring.jam.JamFeedWidgetInfo;
+import com.successfactors.cdp.service.mentoring.CheckJAMPermission;
+import com.successfactors.cdp.service.mentoring.jam.GetJamAuthToken;
+import com.successfactors.cdp.service.mentoring.jam.GetJamBaseURL;
+import com.successfactors.cdp.service.mentoring.jam.GetJamFeedWidgetInfo;
+import com.successfactors.cdp.service.mentoring.jam.GetJamGroup;
+import com.successfactors.cdp.service.mentoring.jam.GetJamSingleUseToken;
+import com.successfactors.cdp.service.mentoring.jam.util.JamConstants;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+
+public interface IGetJamFeedWidgetInfoImplTest {
+	void setup();
+
+	void tearDown();
+
+	void testOuputNotNull();
+
+	void testGroupId();
+
+	void testSingleUseToken();
+
+	void testGroupURL();
+
+	void testNoGroupPermission();
+
+	void testNoJamPermission();
+
+	void testMentoringJamSwitchDisabled();
+}

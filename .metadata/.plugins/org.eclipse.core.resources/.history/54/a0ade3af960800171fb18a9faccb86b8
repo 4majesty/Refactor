@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
+
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
+public interface IRenameJavaProjectWizard {
+}

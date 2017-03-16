@@ -1,0 +1,25 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceRollback;
+
+/**
+ * MDF related exception fro CDP mentoring program
+ * Throw this exception will cause database roll back.
+ * @author I309618
+ *
+ */
+@ServiceRollback
+public class MentoringProgramMDFException extends ServiceApplicationException {
+  public MentoringProgramMDFException(String message) {
+    super(message);
+  }
+  
+  public MentoringProgramMDFException(String message, Throwable cause) {
+    super(message, cause);
+  }
+  
+  public MentoringProgramMDFException(Throwable cause) {
+    super(cause);
+  }
+}

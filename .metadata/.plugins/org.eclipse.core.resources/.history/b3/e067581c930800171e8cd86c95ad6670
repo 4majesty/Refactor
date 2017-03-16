@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.text.spelling;
+
+import java.net.URL;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary;
+
+public interface IJavaDocTagDictionary {
+	boolean isCorrect(final String word);
+}

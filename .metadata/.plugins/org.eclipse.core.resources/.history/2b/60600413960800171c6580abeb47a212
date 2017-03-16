@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
+
+import org.eclipse.core.runtime.Assert;
+
+public interface ICompositeOrTypeConstraint {
+	String toResolvedString();
+
+	boolean isSimpleTypeConstraint();
+
+	String toString();
+
+	ITypeConstraint[] getConstraints();
+}

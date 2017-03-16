@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.reconciler.DirtyRegion;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
+import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
+import org.eclipse.jdt.internal.ui.text.spelling.JavaSpellingReconcileStrategy;
+
+public interface IJavaCompositeReconcilingStrategy {
+	void reconcile(DirtyRegion dirtyRegion, IRegion subRegion);
+
+	void reconcile(IRegion partition);
+
+	void notifyListeners(boolean notify);
+
+	void initialReconcile();
+
+	void aboutToBeReconciled();
+}

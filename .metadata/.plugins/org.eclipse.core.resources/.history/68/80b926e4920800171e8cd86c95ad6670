@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.dnd;
+
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.ui.part.ResourceTransfer;
+import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+import org.eclipse.jdt.internal.ui.packageview.FileTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+
+public interface IJdtViewerDragSupport {
+	void start();
+}

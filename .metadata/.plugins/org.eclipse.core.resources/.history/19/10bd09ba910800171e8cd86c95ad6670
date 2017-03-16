@@ -1,0 +1,59 @@
+package org.eclipse.jdt.internal.ui.navigator;
+
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.navigator.ICommonContentExtensionSite;
+import org.eclipse.ui.navigator.ICommonLabelProvider;
+import org.eclipse.ui.navigator.IExtensionStateModel;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IJavaNavigatorLabelProvider {
+	void init(ICommonContentExtensionSite commonContentExtensionSite);
+
+	String getDescription(Object element);
+
+	void dispose();
+
+	void propertyChange(PropertyChangeEvent event);
+
+	void addLabelDecorator(ILabelDecorator decorator);
+
+	void addListener(ILabelProviderListener listener);
+
+	Color getBackground(Object element);
+
+	Color getForeground(Object element);
+
+	Image getImage(Object element);
+
+	boolean isLabelProperty(Object element, String property);
+
+	void removeListener(ILabelProviderListener listener);
+
+	boolean equals(Object obj);
+
+	int hashCode();
+
+	String toString();
+
+	String getText(Object element);
+
+	StyledString getStyledText(Object element);
+
+	void setIsFlatLayout(boolean state);
+
+	void restoreState(IMemento memento);
+
+	void saveState(IMemento memento);
+}

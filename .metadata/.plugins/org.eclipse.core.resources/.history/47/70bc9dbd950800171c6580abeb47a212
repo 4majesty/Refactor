@@ -1,0 +1,60 @@
+package org.eclipse.jdt.internal.corext.refactoring.code;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IExtractConstantRefactoring {
+	void setCheckResultForCompileProblems(boolean checkResultForCompileProblems);
+
+	void setLinkedProposalModel(LinkedProposalModel linkedProposalModel);
+
+	String getName();
+
+	boolean replaceAllOccurrences();
+
+	void setReplaceAllOccurrences(boolean replaceAllOccurrences);
+
+	void setVisibility(String am);
+
+	String getVisibility();
+
+	boolean getTargetIsInterface();
+
+	boolean qualifyReferencesWithDeclaringClassName();
+
+	void setQualifyReferencesWithDeclaringClassName(boolean qualify);
+
+	String guessConstantName();
+
+	String[] guessConstantNames();
+
+	RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException;
+
+	boolean selectionAllStaticFinal();
+
+	void setConstantName(String newName);
+
+	String getConstantName();
+
+	RefactoringStatus checkConstantNameOnChange();
+
+	String getConstantSignaturePreview();
+
+	CompilationUnitChange createTextChange(IProgressMonitor pm) throws CoreException;
+
+	RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException;
+
+	Change createChange(IProgressMonitor monitor) throws CoreException;
+}

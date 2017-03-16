@@ -1,0 +1,121 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+import java.io.Serializable;
+
+import com.successfactors.cdp.service.util.mentoring.ProgramEmailTypeEnum;
+
+public class ProgramEmailTemplateVO implements Serializable {
+    /** rowId */
+    private Long rowId;
+    /** externalCode */
+    protected String externalCode;
+    /** internalId */
+    protected Long internalId;
+    /** emailType */
+    private ProgramEmailTypeEnum emailType;
+    /** emailSubject */
+    private String emailSubject;
+    /** emailContent */
+    private String emailContent;
+    /** language */
+    private String language;
+    /**
+     * getRowId
+     * @return rowId
+     */
+    public Long getRowId() {
+        return rowId;
+    }
+    /**
+     * setRowId
+     * @param rowId rowId
+     */
+    public void setRowId(Long rowId) {
+        this.rowId = rowId;
+    }
+    /**
+     * getExternalCode
+     * @return externalCode
+     */
+    public String getExternalCode() {
+        return externalCode;
+    }
+    /**
+     * setExternalCode
+     * @param externalCode externalCode
+     */
+    public void setExternalCode(String externalCode) {
+        this.externalCode = externalCode;
+    }
+    /**
+     * getInternalId
+     * @return internalId
+     */
+    public Long getInternalId() {
+        return internalId;
+    }
+    /**
+     * setInternalId
+     * @param internalId internalId
+     */
+    public void setInternalId(Long internalId) {
+        this.internalId = internalId;
+    }
+    /**
+     * getEmailType
+     * @return emailType
+     */
+    public ProgramEmailTypeEnum getEmailType() {
+        return emailType;
+    }
+    /**
+     * emailType
+     * @param emailType emailType
+     */
+    public void setEmailType(ProgramEmailTypeEnum emailType) {
+        this.emailType = emailType;
+    }
+    /**
+     * getEmailSubject
+     * @return emailSubject
+     */
+    public String getEmailSubject() {
+        return emailSubject;
+    }
+    /**
+     * setEmailSubject
+     * @param emailSubject emailSubject
+     */
+    public void setEmailSubject(String emailSubject) {
+        this.emailSubject = emailSubject;
+    }
+    /**
+     * getEmailContent
+     * @return emailContent
+     */
+    public String getEmailContent() {
+        return emailContent;
+    }
+   /**
+    *    setEmailContent
+    * @param emailContent emailContent
+    */
+    public void setEmailContent(String emailContent) {
+        this.emailContent = emailContent;
+    }
+    /**
+     * getLanguage
+     * @return language
+     */
+    public String getLanguage() {
+        return language;
+    }
+    /**
+     * setLanguage
+     * @param language language
+     */
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+}

@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IMemberCheckUtil {
+}

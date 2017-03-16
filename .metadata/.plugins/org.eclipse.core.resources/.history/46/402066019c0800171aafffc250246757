@@ -1,0 +1,55 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.bean.mentoring.jam.ProgramLaunchJamActivityJobPayload;
+import com.successfactors.cdp.service.mentoring.jam.ScheduleProgramLaunchJamGroupActivityJob;
+import com.successfactors.cdp.service.scheduledjob.MentoringProgramLaunchJamActivityJob;
+import com.successfactors.cdp.service.scheduledjob.MentoringProgramLaunchJamActivityJobType;
+import com.successfactors.cdp.service.util.mentoring.MentoringJobUtil;
+import com.successfactors.jobscheduler.JobSchedulerException;
+import com.successfactors.jobscheduler.bean.JobScheduleRequestEO;
+import com.successfactors.jobscheduler.service.JobScheduleFacade;
+import com.successfactors.legacy.util.Serializer;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+@Service
+public class ScheduleProgramLaunchJamGroupActivityJobImpl
+  implements ServiceCommandImpl<Void, ScheduleProgramLaunchJamGroupActivityJob> {
+
+  private static Logger log = LogManager.getLogger();
+
+  @Inject
+  @In
+  private ParamBean params;
+
+  @Override
+  public Void execute(ScheduleProgramLaunchJamGroupActivityJob cmd) throws ServiceApplicationException {
+    JobScheduleRequestEO newRequest = MentoringJobUtil.createOneTimeJobRequest(params, MentoringProgramLaunchJamActivityJobType.NAME, 
+        new MentoringProgramLaunchJamActivityJobType(), getPayload(cmd));
+
+    try {
+      JobScheduleFacade.scheduleAndRunJob(newRequest);
+    } catch (JobSchedulerException e) {
+      throw new ServiceApplicationException("Failed to schedule program launch jam group activity job:" + newRequest.getJobName(), e);
+    }
+
+    return null;
+  }
+
+   private byte[] getPayload(ScheduleProgramLaunchJamGroupActivityJob cmd) {
+     return serialize(new ProgramLaunchJamActivityJobPayload(cmd.getProgramId()));
+   }
+
+   private byte[] serialize(ProgramLaunchJamActivityJobPayload payload) {
+     Serializer ser = Serializer.getInstanceFor(ProgramLaunchJamActivityJobPayload.class);
+     return ser.serialize(payload);
+   }
+}

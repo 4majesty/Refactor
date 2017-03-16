@@ -1,0 +1,248 @@
+package com.successfactors.cdp.ui.controller;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.bean.SuggestedRolesSettingBean;
+import com.successfactors.cdp.service.GetSuggestedRolesWeight;
+import com.successfactors.cdp.service.SetSuggestedRolesWeight;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.legacy.ui.controller.AjaxServiceStatus;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.xi.ui.messages.SFMessages;
+
+/**
+ * CDP Admin Controller Unit Test
+ * @author I309618
+ *
+ */
+public class CDPAdminControllerTest {
+  private ICDPAdminController controller;
+  private ParamBean params;
+  private PermissionListBean permList;
+  private SFMessages msgs;
+  /** service command handler */
+  protected ServiceCommandHandler scaHandler;
+  /** service command handler */
+  private LocalContextSCAHandler localHandler;
+  /** context */
+  private Mockery context;
+  
+  @BeforeMethod
+  public void setUp() throws Exception {
+    controller = new CDPAdminController();
+    context = new Mockery();
+    context.setImposteriser(ClassImposteriser.INSTANCE);
+
+    permList = context.mock(PermissionListBean.class);
+    params = context.mock(ParamBean.class);
+    msgs = context.mock(SFMessages.class);
+    scaHandler = context.mock(ServiceCommandHandler.class);
+    localHandler = context.mock(LocalContextSCAHandler.class);
+    TestUtils.setField(controller,"scaHandler",scaHandler);
+    TestUtils.setField(controller,"params",params);
+    TestUtils.setField(controller,"permList",permList);
+    TestUtils.setField(controller,"msgs",msgs);
+  }
+  
+  @Test(groups = {"checkin"}, enabled = false)
+  public void testNoPermission() {
+    context.checking(new Expectations() {
+      {
+        allowing(permList).hasPermission(PermissionBean.ADMIN, PermissionBean.GENERAL_ADMIN, 0);
+        will(returnValue(true));
+        
+        allowing(permList).hasPermission(PermissionBean.ADMIN, PermissionBean.DEVELOPMENT_ADMIN, 0);
+        will(returnValue(true));
+        
+        allowing(permList).hasPermission(PermissionBean.DEVELOPMENT_ADMIN, PermissionBean.MANAGE_SUGGESTED_ROLES_ADMIN, 0);
+        will(returnValue(false));
+        
+        allowing(params).isFeatureExist(FeatureEnum.CAREER_WORKSHEET_V12);
+        will(returnValue(true));
+      }
+   });
+    AjaxServiceStatus ass =controller.setSuggestedRolesWeightSetting(null, null);
+    Assert.assertEquals(ass.get("statusCode"), "error");
+  }
+  
+  @Test(groups = {"checkin"}, enabled = false)
+  public void testHasPermission() {
+    List<SuggestedRolesSettingBean> settingBeans = getSimpleValidSettingBeans();
+    final SetSuggestedRolesWeight cmd = new SetSuggestedRolesWeight();
+    context.checking(new Expectations() {
+      {
+        try {
+          allowing(permList).hasPermission(PermissionBean.ADMIN, PermissionBean.GENERAL_ADMIN, 0);
+          will(returnValue(true));
+          
+          allowing(permList).hasPermission(PermissionBean.ADMIN, PermissionBean.DEVELOPMENT_ADMIN, 0);
+          will(returnValue(true));
+          
+          allowing(permList).hasPermission(PermissionBean.DEVELOPMENT_ADMIN, PermissionBean.MANAGE_SUGGESTED_ROLES_ADMIN, 0);
+          will(returnValue(true));
+          
+          allowing(params).isFeatureExist(FeatureEnum.CAREER_WORKSHEET_V12);
+          will(returnValue(true));
+          
+          allowing(scaHandler).execute(with(any(SetSuggestedRolesWeight.class)));
+          will(returnValue(cmd));
+        } catch (ServiceApplicationException e) {
+          Assert.fail("ServiceApplicationException in setup");
+        }
+      }
+   });
+    AjaxServiceStatus ass =controller.setSuggestedRolesWeightSetting(settingBeans, null);
+    Assert.assertEquals(ass.get("statusCode"), "ok");
+  }
+  
+  @Test(groups = {"checkin"}, enabled = false)
+  public void testNoNPE() {
+    final SetSuggestedRolesWeight cmd = new SetSuggestedRolesWeight();
+    context.checking(new Expectations() {
+      {
+        try {
+          allowing(permList).hasPermission(PermissionBean.ADMIN, PermissionBean.GENERAL_ADMIN, 0);
+          will(returnValue(true));
+          
+          allowing(permList).hasPermission(PermissionBean.ADMIN, PermissionBean.DEVELOPMENT_ADMIN, 0);
+          will(returnValue(true));
+          allowing(permList).hasPermission(PermissionBean.DEVELOPMENT_ADMIN, PermissionBean.MANAGE_SUGGESTED_ROLES_ADMIN, 0);
+          will(returnValue(true));
+           
+          allowing(params).isFeatureExist(FeatureEnum.CAREER_WORKSHEET_V12);
+          will(returnValue(true));
+          
+          allowing(scaHandler).execute(with(any(SetSuggestedRolesWeight.class)));
+          will(returnValue(cmd));
+        } catch (ServiceApplicationException e) {
+          Assert.fail("ServiceApplicationException in setup");
+        }
+      }
+   });
+    AjaxServiceStatus ass =controller.setSuggestedRolesWeightSetting(null, null);
+    Assert.assertEquals(ass.get("statusCode"), "error");
+  }
+  
+  @Test(groups = {"checkin"}, enabled = false)
+  public void testSumCheck() {
+    List<SuggestedRolesSettingBean> validSetting = getSimpleValidSettingBeans();
+    List<SuggestedRolesSettingBean> invalidSetting = getSimpleInvalidSettingBeans();
+    
+    sumCheck(validSetting, true);
+    sumCheck(invalidSetting, false);
+  }
+  
+  private void sumCheck(List<SuggestedRolesSettingBean> param, boolean result) {
+    final SetSuggestedRolesWeight cmd = new SetSuggestedRolesWeight();
+    context.checking(new Expectations() {
+      {
+        try {
+          allowing(permList).hasPermission(PermissionBean.ADMIN, PermissionBean.GENERAL_ADMIN, 0);
+          will(returnValue(true));
+          
+          allowing(permList).hasPermission(PermissionBean.ADMIN, PermissionBean.DEVELOPMENT_ADMIN, 0);
+          will(returnValue(true));
+          
+          allowing(permList).hasPermission(PermissionBean.DEVELOPMENT_ADMIN, PermissionBean.MANAGE_SUGGESTED_ROLES_ADMIN, 0);
+          will(returnValue(true));
+          
+          allowing(params).isFeatureExist(FeatureEnum.CAREER_WORKSHEET_V12);
+          will(returnValue(true));
+          
+          allowing(scaHandler).execute(with(any(SetSuggestedRolesWeight.class)));
+          will(returnValue(cmd));
+        } catch (ServiceApplicationException e) {
+          Assert.fail("ServiceApplicationException in setup");
+        }
+      }
+   });
+    AjaxServiceStatus ass =controller.setSuggestedRolesWeightSetting(param, null);
+    if(result) {
+      Assert.assertEquals(ass.get("statusCode"), "ok");
+    } else {
+      Assert.assertEquals(ass.get("statusCode"), "error");
+    }
+  }
+  
+  @Test(groups = {"checkin"}, enabled = false)
+  public void testGetSetting() {
+    JSONObjectOutput output;
+    SuggestedRolesSettingBean inputBean = new SuggestedRolesSettingBean("k1", 100.0, true, 80, null);
+    final Map<String, SuggestedRolesSettingBean> settingBeans = new LinkedHashMap<String, SuggestedRolesSettingBean>();
+    settingBeans.put("k1", inputBean);
+    final String i18nStr = "i18nk1";
+    context.checking(new Expectations() {
+      {
+        try {
+          allowing(permList).hasPermission(PermissionBean.ADMIN, PermissionBean.GENERAL_ADMIN, 0);
+          will(returnValue(true));
+          
+          allowing(permList).hasPermission(PermissionBean.ADMIN, PermissionBean.DEVELOPMENT_ADMIN, 0);
+          will(returnValue(true));
+          
+          allowing(permList).hasPermission(PermissionBean.DEVELOPMENT_ADMIN, PermissionBean.MANAGE_SUGGESTED_ROLES_ADMIN, 0);
+          will(returnValue(true));
+          
+          allowing(scaHandler).execute(with(any(GetSuggestedRolesWeight.class)));
+          will(returnValue(settingBeans));
+          
+          allowing(msgs).getString("ADMIN_CDP_CONFIGURE_SUGGESTED_ROLES_K1");
+          will(returnValue(i18nStr));
+        } catch (ServiceApplicationException e) {
+          Assert.fail("ServiceApplicationException in setup");
+        }
+      }
+   });
+    
+    output = controller.getSuggestedRolesWeightSetting();
+    Assert.assertNotNull(output);
+    Object outputSettings = output.get("suggestedRolesWeightSetting");
+    Assert.assertNotNull(outputSettings);
+    Assert.assertTrue(outputSettings instanceof Collection);
+    SuggestedRolesSettingBean outputBean = (SuggestedRolesSettingBean) ((Collection) outputSettings).iterator().next();
+    Assert.assertNotNull(outputBean);
+    Assert.assertEquals(outputBean.getWeightKey(), inputBean.getWeightKey());
+    Assert.assertEquals(outputBean.getWeightValue(), inputBean.getWeightValue());
+    Assert.assertEquals(outputBean.getDisplayName(), i18nStr);
+    
+    //Assert.assertSame(output.get("suggestedRolesWeightSetting"), settingBeans.values());
+  }
+  
+  private List<SuggestedRolesSettingBean> getSimpleValidSettingBeans() {
+    SuggestedRolesSettingBean bean = new SuggestedRolesSettingBean();
+    bean.setEnabled(true);
+    bean.setWeightValue(100.00);
+    List<SuggestedRolesSettingBean> settingBeans = new ArrayList<SuggestedRolesSettingBean>();
+    settingBeans.add(bean);
+    
+    return settingBeans;
+  }
+  
+  private List<SuggestedRolesSettingBean> getSimpleInvalidSettingBeans() {
+    SuggestedRolesSettingBean bean = new SuggestedRolesSettingBean();
+    bean.setEnabled(true);
+    bean.setWeightValue(20.00);
+    List<SuggestedRolesSettingBean> settingBeans = new ArrayList<SuggestedRolesSettingBean>();
+    settingBeans.add(bean);
+    
+    return settingBeans;
+  }
+}

@@ -1,0 +1,174 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import javax.persistence.Column;
+
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.cdp.service.util.mentoring.ProgramEmailTypeEnum;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+import com.successfactors.genericobject.api.model.Visibility;
+
+@MDFEntity(effectiveDating = EffectiveDating.NONE, apiVisibility = APIVisibility.EDITABLE)
+public class MentoringProgramSendEmailRecord extends AuditFields{
+    // System Fields
+    /** Row Id. */
+    @Column(name = GENERIC_OBJECT_T.ROW_ID, nullable = false)
+    @Field(visibility = Visibility.READ_ONLY)
+    private Long rowId;
+
+    /** External Code. */
+    @Column(name = GENERIC_OBJECT_T.EXTERNAL_CODE, nullable = false)
+    @Field(visibility = Visibility.READ_ONLY, dataType = DataType.AUTO_NUMBER)
+    protected String externalId;
+
+    /** Internal Id. */
+    @Column(name = GENERIC_OBJECT_T.INTERNAL_ID)
+    @Field(visibility = Visibility.READ_ONLY)
+    protected Long internalId;
+    
+    
+    // Business Fields
+    /** Program ID */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD1, nullable = true)
+    @Field(visibility = Visibility.READ_ONLY, dataType = DataType.STRING, maxLength = GENERIC_OBJECT_T.CUSTOM_FIELD100_LEN)
+    private String programId;
+    
+    /** User ID */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD2, nullable = true)
+    @Field(visibility = Visibility.READ_ONLY, dataType = DataType.USER)
+    private String user;
+    
+    /** Send Date */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD3, nullable = true)
+    @Field(visibility = Visibility.READ_ONLY, dataType = DataType.STRING)
+    private String sendDate;
+    
+    /** Status */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD4, nullable = true)
+    @Field(visibility = Visibility.READ_ONLY, dataType = DataType.STRING)
+    private String status;
+    
+    //TODO: check all reference of send email 
+    /** Email Type */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD5, nullable = true)
+    @Field(visibility = Visibility.READ_ONLY, dataType = DataType.ENUM)
+    private ProgramEmailTypeEnum emailType;
+
+    /**
+     * getRowId
+     * @return rowId
+     */
+    public Long getRowId() {
+        return rowId;
+    }
+   /**
+    * setRowId
+    * @param rowId rowId
+    */
+    public void setRowId(Long rowId) {
+        this.rowId = rowId;
+    }
+   /**
+    * getExternalId
+    * @return externalId
+    */
+    public String getExternalId() {
+        return externalId;
+    }
+   /**
+    * setExternalId
+    * @param externalCode externalCode
+    */
+    public void setExternalId(String externalCode) {
+        this.externalId = externalCode;
+    }
+   /**
+    * getInternalId
+    * @return internalId
+    */
+    public Long getInternalId() {
+        return internalId;
+    }
+   /**
+    * setInternalId
+    * @param internalId internalId
+    */
+    public void setInternalId(Long internalId) {
+        this.internalId = internalId;
+    }
+    /**
+     * getProgramId
+     * @return programId programId
+     */
+    public String getProgramId() {
+        return programId;
+    }
+   /**
+    * setProgramId
+    * @param programId programId
+    */
+    public void setProgramId(String programId) {
+        this.programId = programId;
+    }
+    /**
+     * getUser
+     * @return userId
+     */
+    public String getUser() {
+        return user;
+    }
+    /**
+     * setUser
+     * @param userId userId
+     */
+    public void setUser(String userId) {
+        this.user = userId;
+    }
+    /**
+     * getSendDate
+     * @return sendDate
+     */
+    public String getSendDate() {
+        return sendDate;
+    }
+   /**
+    * setSendDate
+    * @param sendDate setSendDate
+    */
+    public void setSendDate(String sendDate) {
+        this.sendDate = sendDate;
+    }
+   /**
+    * getStatus
+    * @return status
+    */
+    public String getStatus() {
+        return status;
+    }
+   /**
+    * setStatus
+    * @param status status
+    */
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    /**
+     * getEmailType
+     * @return emailType
+     */
+    public ProgramEmailTypeEnum getEmailType() {
+      return emailType;
+    }
+    /**
+     * setEmailType
+     * @param emailType emailType
+     */
+    public void setEmailType(ProgramEmailTypeEnum emailType) {
+      this.emailType = emailType;
+    }
+        
+}

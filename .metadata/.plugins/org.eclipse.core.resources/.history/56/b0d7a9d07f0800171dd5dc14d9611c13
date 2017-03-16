@@ -1,0 +1,23 @@
+package com.successfactors.provisioning.service.upgrade;
+
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * EnableProvisioningFeature API
+ */
+public class EnableProvisioningFeature implements ServiceCommand<Void> {
+  /** Default serialVersionUID. */
+  private static final long serialVersionUID = 1L;
+
+  /** Feature Enum */
+  private FeatureEnum feature;
+
+  public FeatureEnum getFeature() {
+    return feature;
+  }
+
+  public void setFeature(FeatureEnum feature) {
+    this.feature = feature;
+  }
+}

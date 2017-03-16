@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.corext.refactoring.rename;
+
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IRefactoringAnalyzeUtil {
+}

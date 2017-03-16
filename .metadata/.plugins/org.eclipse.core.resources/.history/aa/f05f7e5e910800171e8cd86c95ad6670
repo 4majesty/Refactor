@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface IAbstractToggleLinkingAction {
+	void run();
+}

@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import org.eclipse.ui.IPageLayout;
+import org.eclipse.jdt.internal.ui.JavaPerspectiveFactory;
+
+public interface IJavaBrowsingPerspectiveFactory {
+	void createInitialLayout(IPageLayout layout);
+}

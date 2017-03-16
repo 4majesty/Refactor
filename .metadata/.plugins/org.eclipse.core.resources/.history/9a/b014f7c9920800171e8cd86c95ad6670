@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.core.IJavaElement;
+
+public interface IJavaTaskListAdapter {
+	IResource getAffectedResource(IAdaptable element);
+}

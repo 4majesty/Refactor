@@ -1,0 +1,28 @@
+package com.successfactors.cdp.service.mentoring.jam;
+
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * API to fetch Jam SingleUseToken for logged-in userId
+ * 
+ * @author rsrigiri
+ * 
+ * SAP SuccessFactors
+*/
+public class GetJamSingleUseToken implements ServiceCommand<String> {
+
+  /** access token to be used for the API. 
+   * if this is null, then token will be generated for login user. **/
+  private String accessToken;
+
+  public GetJamSingleUseToken() {
+  }
+
+  public GetJamSingleUseToken(String accessToken) {
+    this.accessToken = accessToken;
+  }
+
+  public String getAccessToken() {
+    return accessToken;
+  }
+}

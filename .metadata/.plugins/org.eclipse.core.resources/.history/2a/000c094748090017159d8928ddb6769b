@@ -1,0 +1,41 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.List;
+import java.util.Map;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import com.successfactors.dashboard.util.DashboardUtils;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjPlanBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.bean.ObjTemplateBean.EnumValue;
+import com.successfactors.gm.bean.ObjTemplateBean.Field;
+import com.successfactors.gm.service.objective.GetObjListByPlanV5;
+import com.successfactors.gm.util.permission.DelegateObjectiveRulesEngine;
+import com.successfactors.gm.util.permission.GMRulesEngine;
+import com.successfactors.gm.util.permission.ObjectiveRulesEngineException;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.rbp.app.api.RBPFacade;
+import com.successfactors.rbp.app.api.TargetPopulationCriteria;
+import com.successfactors.rbp.app.collector.ContextualPermissionSpec;
+import com.successfactors.rbp.app.collector.PermissionSpec;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+
+public interface IDevGoalService {
+	Map<String, Field> getGoalFieldReadPermissionMap(String targetUserId, ObjBean obj, ObjTemplateBean goalPlan)
+			throws ServiceApplicationException;
+
+	Map<String, EnumValue> getStateFieldsMap(ObjTemplateBean goalPlan);
+
+	List<ObjBean> getDevGoalList(ObjTemplateBean goalPlan, String userId) throws ServiceApplicationException;
+
+	boolean hasGoalPlanPermission(ObjTemplateBean goalPlan, String userId);
+
+	boolean hasCDPAccessPermission();
+}

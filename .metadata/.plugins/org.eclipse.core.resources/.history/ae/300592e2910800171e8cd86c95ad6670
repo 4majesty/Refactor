@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IFocusOnSelectionAction {
+	boolean canActionBeAdded();
+
+	void run();
+}

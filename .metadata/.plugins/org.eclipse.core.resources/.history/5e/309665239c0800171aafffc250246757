@@ -1,0 +1,241 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+import java.io.Serializable;
+import java.util.List;
+
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+
+/**
+ * Program VO
+ * 
+ * @author I309618
+ * 
+ */
+public class ProgramVO implements Serializable {
+  private Long rowId;
+  private String externalCode;
+  private String name;
+  private String description;
+  private String mentorSignupDate;
+  private String menteeSignupDate;
+  private String matchingDate;
+  private String startDate;
+  private String endDate;
+  private ProgramStatusEnum status;
+  private ProgramMatchingTypeEnum matchingType = ProgramMatchingTypeEnum.SUPERVISED;
+  private Integer maximumOfMentee;
+  private Integer maximumOfMentor;
+  private String photoId;
+  private boolean needMentorApproval;
+  private boolean mentorshipClosureEnabled;
+  private boolean jamEnabled = false;
+  private String jamGroupId;
+  private List<ProgramMentorVO> mentors;
+  private List<ProgramMenteeVO> mentees;
+  private IProgramSignupTemplateVO signupTemplate;
+  private List<ProgramEmailTemplateVO> emailTemplates;
+  private List<String> owners;
+  private String jamGroupName;
+  private String jamGroupDescription;
+
+  public Long getRowId() {
+    return rowId;
+  }
+
+  public void setRowId(Long rowId) {
+    this.rowId = rowId;
+  }
+
+  public String getExternalCode() {
+    return externalCode;
+  }
+
+  public void setExternalCode(String externalCode) {
+    this.externalCode = externalCode;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public String getMentorSignupDate() {
+    return mentorSignupDate;
+  }
+
+  public void setMentorSignupDate(String mentorSignupDate) {
+    this.mentorSignupDate = mentorSignupDate;
+  }
+
+  public String getMenteeSignupDate() {
+    return menteeSignupDate;
+  }
+
+  public void setMenteeSignupDate(String menteeSignupDate) {
+    this.menteeSignupDate = menteeSignupDate;
+  }
+
+  public String getMatchingDate() {
+    return matchingDate;
+  }
+
+  public void setMatchingDate(String matchingDate) {
+    this.matchingDate = matchingDate;
+  }
+
+  public String getStartDate() {
+    return startDate;
+  }
+
+  public void setStartDate(String startDate) {
+    this.startDate = startDate;
+  }
+
+  public String getEndDate() {
+    return endDate;
+  }
+
+  public void setEndDate(String endDate) {
+    this.endDate = endDate;
+  }
+
+  public ProgramStatusEnum getStatus() {
+    return status;
+  }
+
+  public void setStatus(ProgramStatusEnum status) {
+    this.status = status;
+  }
+
+  public ProgramMatchingTypeEnum getMatchingType() {
+    return matchingType;
+  }
+
+  public void setMatchingType(ProgramMatchingTypeEnum matchingType) {
+    this.matchingType = matchingType;
+  }
+
+  public List<ProgramMentorVO> getMentors() {
+    return mentors;
+  }
+
+  public void setMentors(List<ProgramMentorVO> mentors) {
+    this.mentors = mentors;
+  }
+
+  public List<ProgramMenteeVO> getMentees() {
+    return mentees;
+  }
+
+  public void setMentees(List<ProgramMenteeVO> mentees) {
+    this.mentees = mentees;
+  }
+
+  public ProgramSignupTemplateVO getSignupTemplate() {
+    return signupTemplate;
+  }
+
+  public void setSignupTemplate(ProgramSignupTemplateVO signupTemplate) {
+    this.signupTemplate = signupTemplate;
+  }
+
+  public List<ProgramEmailTemplateVO> getEmailTemplates() {
+    return emailTemplates;
+  }
+
+  public void setEmailTemplates(List<ProgramEmailTemplateVO> emailTemplates) {
+    this.emailTemplates = emailTemplates;
+  }
+
+  public Integer getMaximumOfMentee() {
+    return maximumOfMentee;
+  }
+
+  public void setMaximumOfMentee(Integer maximumOfMentee) {
+    this.maximumOfMentee = maximumOfMentee;
+  }
+
+  public Integer getMaximumOfMentor() {
+    return maximumOfMentor;
+  }
+
+  public void setMaximumOfMentor(Integer maximumOfMentor) {
+    this.maximumOfMentor = maximumOfMentor;
+  }
+
+  public String getPhotoId() {
+    return photoId;
+  }
+
+  public void setPhotoId(String photoId) {
+    this.photoId = photoId;
+  }
+
+  public boolean isNeedMentorApproval() {
+    return needMentorApproval;
+  }
+
+  public void setNeedMentorApproval(boolean needMentorApproval) {
+    this.needMentorApproval = needMentorApproval;
+  }
+
+  public List<String> getOwners() {
+    return owners;
+  }
+
+  public void setOwners(List<String> owners) {
+    this.owners = owners;
+  }
+
+  public boolean isMentorshipClosureEnabled() {
+    return mentorshipClosureEnabled;
+  }
+
+  public void setMentorshipClosureEnabled(boolean mentorshipClosureEnabled) {
+    this.mentorshipClosureEnabled = mentorshipClosureEnabled;
+  }
+
+  public boolean isJamEnabled() {
+    return jamEnabled;
+  }
+
+  public void setJamEnabled(boolean jamEnabled) {
+    this.jamEnabled = jamEnabled;
+  }
+
+  public String getJamGroupId() {
+    return jamGroupId;
+  }
+
+  public void setJamGroupId(String jamGroupId) {
+    this.jamGroupId = jamGroupId;
+  }
+
+  public String getJamGroupName() {
+    return jamGroupName;
+  }
+
+  public void setJamGroupName(String jamGroupName) {
+    this.jamGroupName = jamGroupName;
+  }
+
+  public String getJamGroupDescription() {
+    return jamGroupDescription;
+  }
+
+  public void setJamGroupDescription(String jamGroupDescription) {
+    this.jamGroupDescription = jamGroupDescription;
+  }
+}

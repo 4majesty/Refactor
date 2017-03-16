@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.model;
+
+import org.eclipse.team.core.mapping.ISynchronizationContext;
+import org.eclipse.core.resources.mapping.IModelProviderDescriptor;
+import org.eclipse.core.resources.mapping.ModelProvider;
+import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.compare.structuremergeviewer.ICompareInput;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.ui.refactoring.model.AbstractSynchronizationCompareAdapter;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavaSynchronizationCompareAdapter {
+	ICompareInput asCompareInput(final ISynchronizationContext context, final Object element);
+
+	ResourceMapping[] restore(final IMemento memento);
+
+	void save(final ResourceMapping[] mappings, final IMemento memento);
+}

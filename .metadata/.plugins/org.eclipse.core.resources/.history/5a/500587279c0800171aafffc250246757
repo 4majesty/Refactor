@@ -1,0 +1,56 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.service.mentoring.GetMatchedParticipants;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.sql.MDFCriteria;
+import com.successfactors.genericobject.api.sql.MDFResultSet;
+import com.successfactors.genericobject.api.sql.Projections;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+/**
+ * Service command to get matched mentee/mentor according to specified program ID and mentor/mentee user ID
+ * @author Keqin Liu
+ */
+@Service
+public class GetMatchedParticipantsImpl implements ServiceQueryImpl<List<MentoringProgramMatchedParticipant>, GetMatchedParticipants> {
+  /** MDF configuration provider */
+  @Inject
+  @In(create = true)
+  private ConfigurationProvider configurationProvider;
+  
+  /** Parameter bean */
+  @Inject
+  @In
+  private ParamBean params;
+  
+  @Override
+  public List<MentoringProgramMatchedParticipant> execute(GetMatchedParticipants cmd) throws ServiceApplicationException {
+    ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgramMatchedParticipant.class);
+    MDFCriteria search = new GOSQLGeneratorContext(def, params);
+    search.setProjection(Projections.all());
+    search.add(Restrictions.eq("programId", cmd.getProgramId()));
+    
+    if (cmd.getMentorIds().size() > 0) {
+      search.add(Restrictions.and(Restrictions.in("mentor", cmd.getMentorIds())));
+    } else if (cmd.getMenteeIds().size() > 0) {
+      search.add(Restrictions.and(Restrictions.in("mentee", cmd.getMenteeIds())));
+    }
+    
+    MDFResultSet resultSet = search.execute();
+    
+    return resultSet.getBeans();
+  }
+}

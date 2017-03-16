@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+
+public interface IJavaWorkingSetPageContentProvider {
+	boolean hasChildren(Object element);
+
+	Object[] getChildren(Object parentElement);
+}

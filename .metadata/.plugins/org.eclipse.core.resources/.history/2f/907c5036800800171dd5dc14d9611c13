@@ -1,0 +1,37 @@
+package com.successfactors.pmcommon.bean;
+
+import java.io.Serializable;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.BitSet;
+import com.successfactors.logging.api.Logger;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.legacy.bean.provisioning.IFeatureEnum;
+
+public interface IFeatureSet {
+	int getOldStyleBits();
+
+	void setOldStyleBits(int bits);
+
+	String getBitsString();
+
+	void setBitsString(String bitsString);
+
+	void add(FeatureEnum argEnum);
+
+	void remove(FeatureEnum argEnum);
+
+	void set(FeatureEnum feature, boolean b);
+
+	boolean contains(FeatureEnum argEnum);
+
+	Iterator iterator();
+
+	boolean equals(Object other);
+
+	String toString();
+
+	Object clone();
+}

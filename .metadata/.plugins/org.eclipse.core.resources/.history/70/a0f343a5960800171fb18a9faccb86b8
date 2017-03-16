@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.FieldNameProcessor;
+
+public interface IPromoteTempWizard {
+	void createControl(Composite parent);
+
+	void addDeclareStaticCheckbox(Composite result);
+
+	void setVisible(boolean visible);
+}

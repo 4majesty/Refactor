@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.text.spelling.engine;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IPersistentSpellDictionary {
+	boolean acceptsWords();
+
+	void addWord(final String word);
+}

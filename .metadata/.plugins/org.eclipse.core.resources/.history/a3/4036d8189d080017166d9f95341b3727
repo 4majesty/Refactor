@@ -1,0 +1,40 @@
+package com.successfactors.cdp.bean.mentoring.processor;
+
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.cdp.bean.mentoring.processor.IMentorshipProcessor;
+
+public interface IMentorshipProcessorTest {
+	void setUp();
+
+	void testInvalidStatus();
+
+	void testActiveParticipants();
+
+	void testCheckEmptyParticipant();
+
+	void testCheckInactiveParticipant();
+
+	void testInvalidStatus4ParticipantClosure();
+
+	void testClosureNotEnabled();
+
+	void testCheckParticipantClosure();
+}

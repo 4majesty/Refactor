@@ -1,0 +1,41 @@
+package org.eclipse.jdt.internal.ui.propertiesfileeditor;
+
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.ITextDoubleClickStrategy;
+import org.eclipse.jface.text.presentation.IPresentationReconciler;
+import org.eclipse.jface.text.reconciler.IReconciler;
+import org.eclipse.jface.text.source.IAnnotationHover;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
+import org.eclipse.jdt.internal.ui.text.HTMLAnnotationHover;
+import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
+import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
+import org.eclipse.jdt.internal.ui.text.java.PartitionDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.IAbstractJavaScanner;
+
+public interface IPropertiesFileSourceViewerConfiguration {
+	IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer);
+
+	ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType);
+
+	String[] getConfiguredContentTypes(ISourceViewer sourceViewer);
+
+	String getConfiguredDocumentPartitioning(ISourceViewer sourceViewer);
+
+	boolean affectsTextPresentation(PropertyChangeEvent event);
+
+	void handlePropertyChangeEvent(PropertyChangeEvent event);
+
+	IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer);
+
+	IAnnotationHover getOverviewRulerAnnotationHover(ISourceViewer sourceViewer);
+
+	IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer);
+
+	IReconciler getReconciler(ISourceViewer sourceViewer);
+
+	String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType);
+}

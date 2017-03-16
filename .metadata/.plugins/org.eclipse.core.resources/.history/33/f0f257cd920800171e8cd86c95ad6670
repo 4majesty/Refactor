@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IConfigureBuildPathAction {
+	String getDetailedDescription();
+
+	void run();
+}

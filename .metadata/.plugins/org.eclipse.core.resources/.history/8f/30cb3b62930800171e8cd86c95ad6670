@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.text.javadoc;
+
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
+import org.eclipse.jface.internal.text.html.SubstitutionTextReader;
+import org.eclipse.jdt.core.dom.TagElement;
+
+public interface IJavaDoc2HTMLTextReader {
+}

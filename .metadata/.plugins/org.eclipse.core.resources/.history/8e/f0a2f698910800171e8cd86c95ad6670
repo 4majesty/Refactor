@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
+import org.eclipse.jdt.internal.ui.text.JavaIndenter;
+
+public interface IIndentUtil {
+	boolean hasChanged();
+}

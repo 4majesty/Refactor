@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.jface.action.Action;
+
+public interface IGroupAction {
+	void run();
+
+	int getGrouping();
+}

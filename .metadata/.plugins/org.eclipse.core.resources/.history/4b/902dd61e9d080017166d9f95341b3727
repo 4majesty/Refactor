@@ -1,0 +1,17 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.user.bean.impl.UserBeanImpl;
+
+public interface ISaveProgramImplTest {
+	void setup();
+
+	void mergeProgram();
+
+	void updateSignupTemplateTest();
+
+	void testValidateParticipants();
+
+	void testInvalidParticipants();
+
+	void mergeEmailTemplateTest();
+}

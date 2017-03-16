@@ -1,0 +1,11 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Created by root on 12/13/16.
+ * @author C5250713
+ */
+public class ForwardUnsupervisedMentoringProgramStatus implements ServiceCommand<ForwardUnsupervisedMentoringProgramStatus> {
+
+}

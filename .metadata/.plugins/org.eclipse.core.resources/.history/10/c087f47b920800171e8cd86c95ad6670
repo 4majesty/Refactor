@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.compare.CompareUI;
+
+public interface IResizableDialog {
+	boolean close();
+}

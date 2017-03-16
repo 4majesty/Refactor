@@ -1,0 +1,25 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+
+public interface IAssistContext {
+	ICompilationUnit getCompilationUnit();
+
+	IEditorPart getEditor();
+
+	int getSelectionLength();
+
+	int getSelectionOffset();
+
+	CompilationUnit getASTRoot();
+
+	void setASTRoot(CompilationUnit root);
+
+	ASTNode getCoveringNode();
+
+	ASTNode getCoveredNode();
+}

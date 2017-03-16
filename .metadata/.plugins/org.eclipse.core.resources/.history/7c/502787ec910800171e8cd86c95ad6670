@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+
+public interface IPropertyAndPreferencePage {
+	void init(IWorkbench workbench);
+
+	IAdaptable getElement();
+
+	void setElement(IAdaptable element);
+
+	void applyData(Object data);
+}

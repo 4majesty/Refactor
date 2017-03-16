@@ -1,0 +1,52 @@
+package com.successfactors.cdp.service.mentoring.jam;
+
+import javax.validation.constraints.NotNull;
+
+import com.successfactors.cdp.bean.mentoring.jam.Group;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Create Jam Group API
+ * 
+ * @author rsrigiri
+ * 
+ * SAP SuccessFactors
+*/
+public class CreateJamGroup implements ServiceCommand<Group> {
+
+  @NotNull
+  /** Group Name **/
+  private String name;
+
+  /** Group Description **/
+  private String description;
+
+  /** access token to be used for the API. 
+   * if this is null, then token will be generated for login user. **/
+  private String accessToken;
+
+  public CreateJamGroup(String name, 
+      String description) {
+    this.name = name;
+    this.description = description;
+  }
+
+  public CreateJamGroup(String name, 
+      String description, String accessToken) {
+    this.name = name;
+    this.description = description;
+    this.accessToken = accessToken;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public String getAccessToken() {
+    return accessToken;
+  }
+}

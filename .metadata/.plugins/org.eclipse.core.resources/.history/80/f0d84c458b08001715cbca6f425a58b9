@@ -1,0 +1,26 @@
+package com.successfactors.sm.api.exception;
+
+/**
+ * Generic Succession Exception, throwed from Succession facade classes.
+ * 
+ * @author Derek Zhu
+ *
+ */
+public class SuccessionBusinessException extends Exception {
+
+  public SuccessionBusinessException() {
+    
+  }
+  
+  public SuccessionBusinessException(String errorMsg) {
+    super(errorMsg);
+  }
+  
+  public SuccessionBusinessException(Exception innerEx) {
+    super(innerEx);
+  }
+  
+  public SuccessionBusinessException(String error, Exception innerEx) {
+    super(error, innerEx);
+  }
+}

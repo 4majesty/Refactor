@@ -1,0 +1,53 @@
+/*
+ * $Id$
+ */
+package com.successfactors.cdp.test;
+
+import java.util.Locale;
+
+import org.hamcrest.Factory;
+import org.hamcrest.Matcher;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.annotations.BeforeMethod;
+
+import com.successfactors.platform.bean.ParamBean;
+
+/**
+ * Simple abstract class with some helper methods to 
+ * make it easier to test classes
+ */
+public abstract class AbstractMockeryTest {
+  protected Mockery context;
+
+  private ParamBean params;
+
+
+  @BeforeMethod(groups = { "checkin" })
+  final public void setUpMockery() throws Exception {
+    context = new Mockery();
+    context.setImposteriser(ClassImposteriser.INSTANCE);
+  }
+
+  final public ParamBean getDefaultParam() {
+    if (params == null) {
+      params = new ParamBean();
+      params.setCompanyId("ABCINC");
+      params.setUserId("user1");
+      params.setDateFormat("mm/dd/yyyy");
+      params.setLocale(Locale.ENGLISH);
+    }
+    return params;
+  }
+  
+  /**
+   * Use for JMock matcher instead of any()
+   * @param clazz
+   * @return
+   */
+  @Factory
+  public static <T> Matcher<T> aClass( Class<T> clazz ) {
+      return new ClassMatcher(clazz);
+  }
+}
+

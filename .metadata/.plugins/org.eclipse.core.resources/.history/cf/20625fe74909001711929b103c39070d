@@ -1,0 +1,27 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Service command to start matching
+ * @author Keqin Liu
+ */
+public class StartMatching implements ServiceCommand<Void> {
+  private String programId;
+  
+  /**
+   * Constructor
+   * @param programId Program ID
+   */
+  public StartMatching(String programId) {
+    this.programId = programId;
+  }
+
+  /**
+   * Get program ID
+   * @return Program ID
+   */
+  public String getProgramId() {
+    return programId;
+  }
+}

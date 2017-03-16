@@ -1,0 +1,229 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.ajaxservice.annotation.AjaxMethod;
+import com.successfactors.ajaxservice.annotation.AjaxService;
+import com.successfactors.cdp.bean.CareerWorkSheetSuggestedRolesFilterSettingBean;
+import com.successfactors.cdp.bean.CareerWorkSheetSuggestedRolesFlagEnum;
+import com.successfactors.cdp.bean.SuggestedRolesFilterSettingBean;
+import com.successfactors.cdp.bean.SuggestedRolesSettingBean;
+import com.successfactors.cdp.service.GetSuggestedRolesFilterFlags;
+import com.successfactors.cdp.service.GetSuggestedRolesWeight;
+import com.successfactors.cdp.service.SetSuggestedRolesFilterFlags;
+import com.successfactors.cdp.service.SetSuggestedRolesWeight;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.ui.controller.AjaxServiceStatus;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+
+import javax.inject.Inject;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+@AjaxService
+@Name("cdpAdminController")
+@javax.inject.Named("cdpAdminController")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+public class CDPAdminController implements Serializable{
+  @Inject
+  @In
+  private transient ServiceCommandHandler scaHandler;
+  
+  private static final long serialVersionUID = 1L;
+  /** logger. */
+  private static Logger logger = LogManager.getLogger();
+  /**
+   * ParamBean in session.
+   */
+  @Inject
+  @In(value = "params")
+  private ParamBean params;
+  
+  @Inject
+  @In(value=PermissionUtils.PERMISSION_LIST_BEAN)
+  private PermissionListBean permList;
+  
+  /** SFMessages. */
+  @Inject
+  @In(create = true, value = "v10msgs")
+  private IMessageBundle msgs;
+  
+  @AjaxMethod
+  public JSONObjectOutput getSuggestedRolesWeightSetting(){
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+        getAlgorithmSettings(output);
+        getFilterSettings(output);
+      
+    } catch (ServiceApplicationException e) {
+      logger.error("getSuggestedRolesWeightSetting error:" + e);
+    }
+    
+    return output;
+  }
+  
+  private void getFilterSettings(JSONObjectOutput output) throws ServiceApplicationException {
+      List<CareerWorkSheetSuggestedRolesFilterSettingBean> flagList = scaHandler.execute(new GetSuggestedRolesFilterFlags());
+      
+      //judge if some of the filter settings do not exist in DB, then add the missing ones to list to be shown on UI, 
+      //this is to make sure that no matter how many individual filter settings are saved in DB, all the flags defined
+      //in the Enum should be shown on UI.
+      for (CareerWorkSheetSuggestedRolesFlagEnum flagEnum : CareerWorkSheetSuggestedRolesFlagEnum.values()) {
+        boolean isFlagEnumSavedInDB = false;
+        for (CareerWorkSheetSuggestedRolesFilterSettingBean filterSettingBean : flagList) {
+          if (filterSettingBean.getFlagEnum() == flagEnum) {
+            isFlagEnumSavedInDB = true;
+            break;
+          }
+        }
+        if (!isFlagEnumSavedInDB) {
+          CareerWorkSheetSuggestedRolesFilterSettingBean filterSettingBean = new CareerWorkSheetSuggestedRolesFilterSettingBean();
+          filterSettingBean.setEnabled(false);
+          filterSettingBean.setFlagEnum(flagEnum);
+          flagList.add(filterSettingBean);
+        }
+      }
+      
+      List<SuggestedRolesFilterSettingBean> voList = new ArrayList<SuggestedRolesFilterSettingBean>();
+      for (CareerWorkSheetSuggestedRolesFilterSettingBean filterSettingBean : flagList) {
+          if (filterSettingBean.getFlagEnum() == CareerWorkSheetSuggestedRolesFlagEnum.RELEVANT_INDUSTRY
+             && !isJDM20Enabled()//Relevant Industry is only enabled when JDM2.0 is enabled for the current company
+             ) {
+              continue;
+          }
+          String filerLabelOnSuggestedRolesPage = msgs.getString("DEVELOPMENT_CWS_V12_SUGGESTED_ROLES_FILTER_" + filterSettingBean.getFlagEnum().name());
+          String filerFlagLabelOnManageSuggestedRolesPage = msgs.format("ADMIN_CDP_CONFIGURE_SUGGESTED_ROLES_ENABLE_FILTER_X", new String[]{filerLabelOnSuggestedRolesPage});
+          boolean isFlagEnabled = filterSettingBean.isEnabled();
+          voList.add(new SuggestedRolesFilterSettingBean(filterSettingBean.getFlagEnum().name(), filerFlagLabelOnManageSuggestedRolesPage, isFlagEnabled));
+      }
+      output.put("suggestedRolesGeneralSetting", voList);
+      
+  }
+  
+  private boolean isJDM20Enabled() {
+      return params.getCompanyBean().isFeatureEnabledForCompany(FeatureEnum.JDM_NG);
+  }
+  
+  private void getAlgorithmSettings(JSONObjectOutput output) throws ServiceApplicationException {
+      Map<String, SuggestedRolesSettingBean> settingBeans = scaHandler.execute(new GetSuggestedRolesWeight());
+      for(SuggestedRolesSettingBean bean : settingBeans.values()) {
+        String strKey = "ADMIN_CDP_CONFIGURE_SUGGESTED_ROLES_" + bean.getWeightKey().toUpperCase();
+        bean.setDisplayName(msgs.getString(strKey));
+      }
+      //msgs.getString(key)
+      output.put("suggestedRolesWeightSetting", settingBeans.values());
+      output.put("hasManageSuggestedRolePerm", true);
+  }
+  
+  @AjaxMethod
+  public AjaxServiceStatus setSuggestedRolesWeightSetting(List<SuggestedRolesSettingBean> weightSettingBeans, List<SuggestedRolesFilterSettingBean> filterSettingBeans) {
+    AjaxServiceStatus serviceStatus = new AjaxServiceStatus();
+    setWeightSettingBeans(weightSettingBeans, serviceStatus);
+    setFilterSettingBeans(filterSettingBeans, serviceStatus);
+    return serviceStatus;
+  }
+  
+  private void setFilterSettingBeans(List<SuggestedRolesFilterSettingBean> filterSettingBeans, AjaxServiceStatus serviceStatus) {
+        try {
+            scaHandler.execute(new SetSuggestedRolesFilterFlags(filterSettingBeans));
+            serviceStatus.setOKFlag(true);
+        } catch (ServiceApplicationException e) {
+            serviceStatus.setOKFlag(false);
+            serviceStatus.setStatusMsg("An error occurred while saving filter settings.");
+            logger.error("setFilterSettingBeans error:" + e);
+        }
+  }
+  
+  private void setWeightSettingBeans(List<SuggestedRolesSettingBean> weightSettingBeans, AjaxServiceStatus serviceStatus) {
+      try {
+          if(!isManageSuggestedRolesPermitted()) {
+            serviceStatus.setOKFlag(false);
+            serviceStatus.setStatusMsg("No Permission");
+          } else {
+            // check if the total sum of weight settings is 100.00
+            BigDecimal sum = new BigDecimal(0);
+            if(weightSettingBeans != null) {
+              for(SuggestedRolesSettingBean bean : weightSettingBeans) {
+                if(bean != null && bean.isEnabled()) {
+                  sum = sum.add(new BigDecimal(Double.toString(bean.getWeightValue())));
+                }
+              }
+            }
+            if(sum.doubleValue() == 100.00) {
+              SetSuggestedRolesWeight cmd = new SetSuggestedRolesWeight();
+              cmd.setSettingBeans(new HashSet(weightSettingBeans));
+              cmd = scaHandler.execute(cmd);
+              
+              serviceStatus.setOKFlag(true);
+            } else {
+              serviceStatus.setOKFlag(false);
+              serviceStatus.setStatusMsg("Sum is not 100");
+            }
+          }
+        } catch (ServiceApplicationException e) {
+          serviceStatus.setOKFlag(false);
+          logger.error("setWeightSettingBeans error:" + e);
+        }
+  }
+  
+  /**
+   * Check if user has permission to Manage Suggested Roles
+   * @return
+   */
+  public boolean isManageSuggestedRolesPermitted() {
+    if(permList == null || params == null) {
+      return false;
+    }
+    
+    boolean generalAdminPermission =
+        permList.hasPermission(PermissionBean.ADMIN, PermissionBean.GENERAL_ADMIN, 0);
+    boolean isIDPPermitted = (permList.hasPermission(PermissionBean.ADMIN, PermissionBean.DEVELOPMENT_ADMIN, 0) || generalAdminPermission);
+    boolean manageSuggestedRolesPermission = 
+        permList.hasPermission(PermissionBean.DEVELOPMENT_ADMIN, PermissionBean.MANAGE_SUGGESTED_ROLES_ADMIN, 0);
+    
+    if((isIDPPermitted || manageSuggestedRolesPermission) && params.isFeatureExist(FeatureEnum.CAREER_WORKSHEET_V12)) {
+      return true;
+    }
+    
+    return false;
+  }
+  
+  /**
+   * Check if user has permission to Manage Learning Administrator and Educational Representative
+   * @return
+   */
+  public boolean isManageLearningAdminPermitted() {
+    if(permList == null || params == null) {
+      return false;
+    }
+    
+    boolean isTranscriptFeatureEnable = params.isFeatureExist(FeatureEnum.TRANSCRIPT);
+    boolean generalAdminPermission =
+        permList.hasPermission(PermissionBean.ADMIN, PermissionBean.GENERAL_ADMIN, 0);
+    boolean isIDPPermitted = (permList.hasPermission(PermissionBean.ADMIN, PermissionBean.DEVELOPMENT_ADMIN, 0) || generalAdminPermission);
+    boolean isCDPImportUserRelPermitted = permList.hasPermission(PermissionBean.DEVELOPMENT_ADMIN, PermissionBean.TRANSCRIPT_IMPORT_USER_REL_DEVELOPMENT_ADMIN, 0);
+    
+    if (isTranscriptFeatureEnable && (isIDPPermitted || isCDPImportUserRelPermitted)) {
+      return true;
+    }
+    
+    return false;
+  }
+}

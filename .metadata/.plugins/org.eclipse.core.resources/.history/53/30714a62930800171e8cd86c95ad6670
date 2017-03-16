@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.text.javadoc;
+
+import org.eclipse.jdt.core.dom.TagElement;
+
+public interface IJavaDoc2HTMLTextReader {
+}

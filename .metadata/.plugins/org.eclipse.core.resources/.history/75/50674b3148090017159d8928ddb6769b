@@ -1,0 +1,306 @@
+package com.successfactors.cdp.service.impl;
+
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.bean.UserReadinessVO;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean;
+import com.successfactors.cdp.service.GetRecommendedSuccessors;
+import com.successfactors.cdp.service.GetRoleReadiness;
+import com.successfactors.competency.bean.CompetencyBean;
+import com.successfactors.competency.dao.CompetencyDAO;
+import com.successfactors.competency.util.type.CompetencyTypeEnum;
+import com.successfactors.gm.api.dao.ObjDAO;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.service.objective.GetDefaultTemplate;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.dao.FeedbackDAO;
+import com.successfactors.legacy.service.GetSysConfig;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.pmcommon.dao.FormDAO;
+import com.successfactors.rbp.app.api.RBPFacade;
+import com.successfactors.rbp.app.api.TargetPopulationCriteria;
+import com.successfactors.rbp.app.collector.ContextualPermissionSpec;
+import com.successfactors.rbp.app.collector.PermissionSpec;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.UserInfoBean;
+import com.successfactors.user.bean.util.UserFormatUtils;
+import com.successfactors.user.dao.UserDAO;
+import javax.inject.Inject;
+
+@Service
+public class GetRecommendedSuccessorsImpl implements ServiceCommandImpl<GetRecommendedSuccessors, GetRecommendedSuccessors>{
+  @Inject
+  @In
+  ParamBean params;
+  @Inject
+  @In
+  Connection dbConnection;
+  
+  private LocalContextSCAHandler legacyHandler = LocalContextSCAHandler.create();
+  @Inject
+  @In
+  private transient ServiceCommandHandler scaHandler;
+  
+  @Inject
+  @In(value=PermissionUtils.PERMISSION_LIST_BEAN)
+  private PermissionListBean permList;
+  
+  /** RBP instance. */
+  @Inject
+  @In(value = RBPFacade.RBP_FACADE_NAME, create = true)
+  protected RBPFacade rbp;
+  
+  private CompetencyDAO competencyDAO = DAOFactory.getDAOFactory().getCompetencyDAO();;
+  private ObjDAO objectiveDAO = (ObjDAO)DAOFactory.getDAOFactory().getObjDAO();
+  private FeedbackDAO feedbackDAO = DAOFactory.getDAOFactory().getFeedbackDAO();
+  private FormDAO formDAO = DAOFactory.getDAOFactory().getFormDAO();
+  private UserDAO userDAO = DAOFactory.getDAOFactory().getUserDAO();
+  
+  private static Logger logger = LogManager.getLogger();
+  
+  boolean needDebug = false;
+  private StringBuffer debugSB = new StringBuffer();
+  
+  private static final int DEFAULT_TOP_RATING_USER_SIZE = 50;
+  private static final Double DEFAULT_DOUBLE_VALUE=0.0;
+  
+  @Inject
+  @In(create = true, value = "v10msgs")
+  private Messages v10msgs;
+  
+  @Override
+  public GetRecommendedSuccessors execute(GetRecommendedSuccessors cmd)
+      throws ServiceApplicationException {
+    long roleId = cmd.getRoleId();
+    Set<String> excludedUserIds = cmd.getExcludedUserIds();
+    int maxReturnSize = cmd.getMaxReturnSize();
+    
+    List<UserReadinessVO> userReadinessList = new ArrayList<UserReadinessVO>();
+    List<UserReadinessVO> tmpUserReadinessList = new ArrayList<UserReadinessVO>();
+    
+    // check feature and permission
+    boolean recommendedSuccessorsPermitted =
+        permList.hasPermission(PermissionBean.CDP_ACCESS, PermissionBean.CDP_SCM_RECOMMENDED_SUCCESSORS_ACCESS, 0);
+    boolean cwsEnabled = params.isFeatureExist(FeatureEnum.CAREER_WORKSHEET) || params.isFeatureExist(FeatureEnum.CAREER_WORKSHEET_V12);
+    
+    needDebug = isTroubleShootingEnabled();
+    
+    if(needDebug) {
+      debugSB.append("Trouble Shooting For Recommended Successors\r\n");
+      debugSB.append("Role ID:" + roleId + "\r\n");
+    }
+    if(recommendedSuccessorsPermitted && cwsEnabled) {
+      // Get default CWS template
+      ObjTemplateBean planBean = legacyHandler.execute(params, new GetDefaultTemplate(ObjPlanTypeEnum.CAREER_WORKSHEET));
+      logger.debug("Load default career worksheet plan:" + planBean.getObjPlanId());
+      
+      if(planBean != null) {
+        Set<String> includedUserIds = this.getIncludedUserIds(excludedUserIds, planBean);
+        
+        // Get role competencies
+        Set<Long> compIdSet = getCompetencyIdSet(planBean, roleId);
+        if(compIdSet != null && compIdSet.size() > 0) {
+          
+          if(!compIdSet.isEmpty() && includedUserIds != null && !includedUserIds.isEmpty()){
+            String formIds = planBean.getCWSRatingFilterFormIds(params.getLocale().toString());
+            int topUserSize = DEFAULT_TOP_RATING_USER_SIZE > maxReturnSize ? DEFAULT_TOP_RATING_USER_SIZE : maxReturnSize;
+            List<String> topUserIdList = feedbackDAO.getTopRatingUserIds(params.getCompanySchema(), dbConnection, includedUserIds, compIdSet, roleId, formIds, topUserSize);
+            
+            if(needDebug) {
+              debugSB.append("topUserIdList: ");
+              for(String uid : topUserIdList) {
+                debugSB.append(uid + " ");
+              }
+              debugSB.append("\r\n");
+            }
+            
+            if(topUserIdList != null && topUserIdList.size() > 0) {
+              for(String userId : topUserIdList) {
+                GetRoleReadiness rrcmd = new GetRoleReadiness(userId, roleId);
+                rrcmd = scaHandler.execute(rrcmd);
+                
+                UserReadinessVO vo = new UserReadinessVO();
+                vo.setDisplayReadiness(rrcmd.isDisplay());
+                vo.setReadiness(rrcmd.getReadiness());
+                
+                vo.setUserId(userId);
+                vo.setRoleId(roleId);
+                
+                tmpUserReadinessList.add(vo);
+              }
+              
+              Collections.sort(tmpUserReadinessList, Collections.reverseOrder());
+              
+              if(needDebug) {
+                debugSB.append("tmpUserReadinessList: ");
+                for(UserReadinessVO vo : tmpUserReadinessList) {
+                  debugSB.append(vo.getUserId() + "-" + vo.getReadiness() + " ");
+                }
+                debugSB.append("\r\n");
+              }
+              
+              for(int i = 0; i<(tmpUserReadinessList.size() < maxReturnSize ? tmpUserReadinessList.size():maxReturnSize); i++) {
+                userReadinessList.add(tmpUserReadinessList.get(i));
+              }
+              
+              processUserList(userReadinessList);
+
+            }
+          }
+        }
+      }
+    }
+    
+    if(needDebug){
+      logger.info(debugSB);
+    }
+    cmd.setUserReadinessList(userReadinessList);
+    return cmd;
+  }
+
+  
+  private Set<Long> getCompetencyIdSet(ObjTemplateBean planBean, long roleId) {
+    Set<Long> compIdSet = null;
+    CareerWorksheetBean.CareerBehaviorBean careerBehaviorBean = planBean.getCareerBehaviorBean();
+    boolean includeSubcompetencies = true;
+    if(careerBehaviorBean != null){
+      includeSubcompetencies = careerBehaviorBean.isUseInReadiness();
+    }
+    List<CompetencyBean> comps = competencyDAO.getCompetencyListByRoleId(params.getCompanySchema(), dbConnection, roleId, false, includeSubcompetencies, 
+        params.getLocale(), CompetencyTypeEnum.TYPE_COMPETENCY.getName(), false);
+    
+    if(needDebug) {
+      debugSB.append("CompIdSet: ");
+    }
+    if(comps != null && comps.size() > 0) {
+      compIdSet = new HashSet<Long>();
+      for(CompetencyBean comp : comps) {
+        compIdSet.add(comp.getCompetencyId());
+        
+        if(needDebug) {
+          debugSB.append(comp.getCompetencyId() + " ");
+        }
+      }
+    }
+    if(needDebug) {
+      debugSB.append("\r\n");
+    }
+    return compIdSet;
+  }
+  
+  /**
+   * Set user info, sort the user readiness vo list and remove unreadable readiness value.
+   * @param userReadinessList
+   * @return
+   */
+  private List<UserReadinessVO> processUserList(List<UserReadinessVO> userReadinessList) {
+    if(userReadinessList != null && userReadinessList.size() > 0) {
+      String[] userIds = new String[userReadinessList.size()];
+      int i = 0;
+      for(UserReadinessVO vo : userReadinessList) {
+        userIds[i++] = vo.getUserId();
+      }
+      
+      Map<String, UserBean> userBeanMap = userDAO.findUsersByIdInBatch(params.getCompanySchema(), dbConnection, userIds, true);
+      
+      // set user name & title
+      for(UserReadinessVO vo : userReadinessList) {
+        String uid = vo.getUserId();
+        if(userBeanMap.containsKey(uid)) {
+          UserBean user = userBeanMap.get(uid);
+          user.setUserInfoRecords(userDAO.getUserInfoRecords(params.getCompanySchema(),
+              dbConnection, user.getUserId()));
+          String uname = UserFormatUtils.formatFullName(v10msgs, user);
+          vo.setUserName(uname);
+          if(user.getUserInfoRecords() != null && !user.getUserInfoRecords().isEmpty()) {
+            vo.setUserTitle(user.getUserInfoRecords().getProperty(UserInfoBean.TITLE));
+          }
+        }
+      }
+      
+      // Sort user readiness list by readiness & user name.
+      Collections.sort(userReadinessList, Collections.reverseOrder());
+      
+      // remove unreadable user readiness value
+      for(UserReadinessVO vo : userReadinessList) {
+        if(!vo.isDisplayReadiness()) {
+          vo.setReadiness(DEFAULT_DOUBLE_VALUE);
+        }
+      }
+      
+      if(needDebug) {
+        debugSB.append("userReadinessList: ");
+        for(UserReadinessVO vo : userReadinessList) {
+          debugSB.append(vo.getUserId() + "-" + vo.getReadiness() + "-" + vo.isDisplayReadiness() + " ");
+        }
+        debugSB.append("\r\n");
+      }
+    }
+    
+    return userReadinessList;
+  }
+  
+  private Set<String> getIncludedUserIds(Set<String> excludedUserIds, ObjTemplateBean planBean) {
+    // Get Template target population
+    PermissionSpec permSpec = new ContextualPermissionSpec<Long>(null, PermissionBean.TGM, PermissionBean.TGM_TEMPLATE_VIEW, planBean.getObjPlanId(), Long.class);
+    TargetPopulationCriteria criteria = new TargetPopulationCriteria(false, false);
+    Set<String> templateTargetPopulation = rbp.getTargetPopulation(params.getUserId(), permSpec, criteria);
+    
+    // Get recommanded successores role target population
+    permSpec = new PermissionSpec(null, PermissionBean.CDP_ACCESS, PermissionBean.CDP_SCM_RECOMMENDED_SUCCESSORS_ACCESS);
+    Set<String> roleTargetPopulation = rbp.getTargetPopulation(params.getUserId(), permSpec, criteria);
+    
+    // get same user ids in target populations
+    Set<String> includedUserIds = new HashSet<String>();
+    for(String s : templateTargetPopulation) {
+      if(roleTargetPopulation.contains(s)) {
+        includedUserIds.add(s);
+      }
+    }
+    
+    if(excludedUserIds != null && excludedUserIds.size() > 0) {
+      includedUserIds.removeAll(excludedUserIds);
+    }
+    
+    if(needDebug && includedUserIds != null) {
+      debugSB.append("target population size: " + includedUserIds.size() + "\r\n");
+    }
+    
+    return includedUserIds;
+  }
+
+  private boolean isTroubleShootingEnabled(){
+    boolean enableLogForTroubleShooting = false;
+    try{
+      GetSysConfig cmd = new GetSysConfig(SystemBean.ENABLE_LOG_FOR_TROUBLE_SHOOTING_KEY,
+          SystemBean.ENABLE_LOG_FOR_TROUBLE_SHOOTING_TYPE);
+      enableLogForTroubleShooting = scaHandler.execute(cmd) != null;
+    }catch(ServiceApplicationException e){
+      logger.error("check enable log for trouble shooting failed");
+      enableLogForTroubleShooting=false;
+    }
+    return enableLogForTroubleShooting;
+  }
+}

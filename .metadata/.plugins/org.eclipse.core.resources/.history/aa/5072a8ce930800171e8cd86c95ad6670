@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jdt.internal.corext.buildpath.IBuildpathModifierListener;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IBuildpathModifierAction {
+	String getDetailedDescription();
+
+	void selectionChanged(final SelectionChangedEvent event);
+
+	void addBuildpathModifierListener(IBuildpathModifierListener listener);
+
+	void removeBuildpathModifierListener(IBuildpathModifierListener listener);
+}

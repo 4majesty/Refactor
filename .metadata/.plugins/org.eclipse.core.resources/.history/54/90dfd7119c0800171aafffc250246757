@@ -1,0 +1,48 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import java.util.Date;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+
+public interface IMentoringProgramActivity {
+	Date getLastModifiedDate();
+
+	void setLastModifiedDate(Date lastModifiedDate);
+
+	String getCreatedBy();
+
+	void setCreatedBy(String createdBy);
+
+	Long getRowId();
+
+	void setRowId(Long rowId);
+
+	String getExternalId();
+
+	void setExternalId(String externalId);
+
+	Long getInternalId();
+
+	void setInternalId(Long internalId);
+
+	String getName();
+
+	void setName(String name);
+
+	String getDescription();
+
+	void setDescription(String description);
+
+	Date getDueDate();
+
+	void setDueDate(Date dueDate);
+
+	MentoringProgramMentor getMentor();
+
+	void setMentor(MentoringProgramMentor mentor);
+
+	MentoringProgramMentee getMentee();
+
+	void setMentee(MentoringProgramMentee mentee);
+}

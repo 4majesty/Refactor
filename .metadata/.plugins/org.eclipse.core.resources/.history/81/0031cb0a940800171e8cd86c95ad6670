@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import org.eclipse.osgi.util.NLS;
+
+public interface IJavadocExportMessages {
+}

@@ -1,0 +1,133 @@
+package com.successfactors.successstore.service;
+
+import java.util.List;
+
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.pmcommon.bean.FeatureSet;
+import com.successfactors.sca.ServiceQuery;
+import com.successfactors.successstore.bean.eo.ContentLibDataEO;
+
+
+public class GetContentListByType implements ServiceQuery<List<ContentLibDataEO>> {
+  
+  /**
+   * id of the Content
+   * */
+  private String type;
+  
+  /** company Edition **/
+  private int companyEdition = CompanyBean.STATUS_COMPANY_EDITION_TYPE_PE;
+  
+  /** feature set **/
+  private IFeatureSet featureSet = null;
+  
+  
+  /** companyCheck **/
+  private boolean companyCheck = Boolean.FALSE;
+  
+  
+  /** filter content based on publishOn expiryOn values **/
+  private boolean releaseCheck = Boolean.TRUE;
+  
+  
+  /** indicates to fectch all contents irrespective of its status **/
+  private boolean includeAllStatus = Boolean.FALSE;
+  
+
+  /**
+   * getType
+   * @return the type
+   */
+  public String getType() {
+    return type;
+  }
+
+  /**
+   * setType
+   * @param type the type to set
+   */
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  /**
+   * getCompanyEdition
+   * @return the companyEdition
+   */
+  public int getCompanyEdition() {
+    return companyEdition;
+  }
+
+  /**
+   * setCompanyEdition
+   * @param companyEdition the companyEdition to set
+   */
+  public void setCompanyEdition(int companyEdition) {
+    this.companyEdition = companyEdition;
+  }
+
+  /**
+   * getFeatureSet
+   * @return the featureSet
+   */
+  public FeatureSet getFeatureSet() {
+    return featureSet;
+  }
+
+  /**
+   * featureSet
+   * @param featureSet the featureSet to set
+   */
+  public void setFeatureSet(FeatureSet featureSet) {
+    this.featureSet = featureSet;
+  }
+
+  /**
+   * isCompanyCheck
+   * @return the companyCheck
+   */
+  public boolean isCompanyCheck() {
+    return companyCheck;
+  }
+
+  /**
+   * companyCheck
+   * @param companyCheck the companyCheck to set
+   */
+  public void setCompanyCheck(boolean companyCheck) {
+    this.companyCheck = companyCheck;
+  }
+
+  /**isReleaseCheck
+   * @return the releaseCheck
+   */
+  public boolean isReleaseCheck() {
+    return releaseCheck;
+  }
+
+  /**setReleaseCheck
+   * @param releaseCheck the releaseCheck to set
+   */
+  public void setReleaseCheck(boolean releaseCheck) {
+    this.releaseCheck = releaseCheck;
+  }
+
+  /**isIncludeAllStatus
+   * @return the includeAllStatus
+   */
+  public boolean isIncludeAllStatus() {
+    return includeAllStatus;
+  }
+
+  /**setIncludeAllStatus
+   * @param includeAllStatus the includeAllStatus to set
+   */
+  public void setIncludeAllStatus(boolean includeAllStatus) {
+    this.includeAllStatus = includeAllStatus;
+  }
+  
+  
+  
+  
+ 
+}

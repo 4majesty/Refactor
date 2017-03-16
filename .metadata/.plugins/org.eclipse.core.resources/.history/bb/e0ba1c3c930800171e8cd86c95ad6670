@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface ICodeAssistFavoritesPreferencePage {
+	void createControl(Composite parent);
+
+	void dispose();
+
+	boolean performOk();
+
+	void performApply();
+}

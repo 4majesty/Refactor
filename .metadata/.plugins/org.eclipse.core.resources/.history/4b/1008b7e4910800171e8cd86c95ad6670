@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.jarimport;
+
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.jface.wizard.IWizard;
+
+public interface IRefactoringLocationControl {
+	Combo getControl();
+
+	String getText();
+
+	void loadHistory();
+
+	void saveHistory();
+
+	void setEnabled(final boolean enabled);
+
+	void setText(final String text);
+}

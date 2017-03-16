@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
+
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
+public interface IRawBindingVariable {
+}

@@ -1,0 +1,50 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.IMarkerResolutionGenerator;
+import org.eclipse.ui.IMarkerResolutionGenerator2;
+import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.MarkerUtilities;
+import org.eclipse.jdt.core.CorrectionEngine;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.cleanup.ICleanUp;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.fix.IMultiFix;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+
+public interface ICorrectionMarkerResolutionGenerator {
+	String getLabel();
+
+	void run(IMarker marker);
+
+	void run(IMarker[] markers, IProgressMonitor monitor);
+
+	String getDescription();
+
+	Image getImage();
+
+	IMarker[] findOtherMarkers(IMarker[] markers);
+
+	boolean hasResolutions(IMarker marker);
+
+	IMarkerResolution[] getResolutions(IMarker marker);
+}

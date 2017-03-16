@@ -1,0 +1,8 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+
+public interface IAddMentoringJamAdminsImplTest {
+	void setUp();
+}

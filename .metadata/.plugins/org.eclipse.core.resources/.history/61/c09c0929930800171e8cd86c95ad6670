@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.search.ui.text.Match;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.JavaCore;
+
+public interface ISearchResultUpdater {
+	void elementChanged(ElementChangedEvent event);
+
+	void queryAdded(ISearchQuery query);
+
+	void queryRemoved(ISearchQuery query);
+
+	void queryStarting(ISearchQuery query);
+
+	void queryFinished(ISearchQuery query);
+}

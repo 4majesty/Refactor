@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.LineChangeHover;
+import org.eclipse.ui.editors.text.EditorsUI;
+
+public interface IJavaChangeHover {
+	IInformationControlCreator getHoverControlCreator();
+
+	IInformationControlCreator getInformationPresenterControlCreator();
+}

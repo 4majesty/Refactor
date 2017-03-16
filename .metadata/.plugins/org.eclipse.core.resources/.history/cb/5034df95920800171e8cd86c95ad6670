@@ -1,0 +1,107 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
+import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetComparator;
+
+public interface IJavaSearchScopeFactory {
+	IWorkingSet[] queryWorkingSets();
+
+	IJavaSearchScope createJavaSearchScope(IWorkingSet[] workingSets, boolean includeJRE);
+
+	IJavaSearchScope createJavaSearchScope(IWorkingSet[] workingSets, int includeMask);
+
+	IJavaSearchScope createJavaSearchScope(IWorkingSet workingSet, boolean includeJRE);
+
+	IJavaSearchScope createJavaSearchScope(IWorkingSet workingSet, int includeMask);
+
+	IJavaSearchScope createJavaSearchScope(IResource[] resources, boolean includeJRE);
+
+	IJavaSearchScope createJavaSearchScope(IResource[] resources, int includeMask);
+
+	IJavaSearchScope createJavaSearchScope(ISelection selection, boolean includeJRE);
+
+	IJavaSearchScope createJavaSearchScope(ISelection selection, int includeMask);
+
+	IJavaSearchScope createJavaProjectSearchScope(String[] projectNames, boolean includeJRE);
+
+	IJavaSearchScope createJavaProjectSearchScope(String[] projectNames, int includeMask);
+
+	IJavaSearchScope createJavaProjectSearchScope(IJavaProject project, boolean includeJRE);
+
+	IJavaSearchScope createJavaProjectSearchScope(IJavaProject project, int includeMask);
+
+	IJavaSearchScope createJavaProjectSearchScope(IEditorInput editorInput, boolean includeJRE);
+
+	IJavaSearchScope createJavaProjectSearchScope(IEditorInput editorInput, int includeMask);
+
+	String getWorkspaceScopeDescription(boolean includeJRE);
+
+	String getWorkspaceScopeDescription(int includeMask);
+
+	String getProjectScopeDescription(String[] projectNames, int includeMask);
+
+	String getProjectScopeDescription(IJavaProject project, boolean includeJRE);
+
+	String getProjectScopeDescription(IEditorInput editorInput, boolean includeJRE);
+
+	String getHierarchyScopeDescription(IType type);
+
+	String getSelectionScopeDescription(IJavaElement[] javaElements, int includeMask);
+
+	String getSelectionScopeDescription(IJavaElement[] javaElements, boolean includeJRE);
+
+	String getWorkingSetScopeDescription(IWorkingSet[] workingSets, int includeMask);
+
+	String getWorkingSetScopeDescription(IWorkingSet[] workingSets, boolean includeJRE);
+
+	IProject[] getProjects(IJavaSearchScope scope);
+
+	IJavaElement[] getJavaElements(ISelection selection);
+
+	IJavaSearchScope createJavaSearchScope(IJavaElement[] javaElements, boolean includeJRE);
+
+	IJavaSearchScope createJavaSearchScope(IJavaElement[] javaElements, int includeMask);
+
+	IJavaSearchScope createWorkspaceScope(boolean includeJRE);
+
+	IJavaSearchScope createWorkspaceScope(int includeMask);
+
+	boolean isInsideJRE(IJavaElement element);
+}

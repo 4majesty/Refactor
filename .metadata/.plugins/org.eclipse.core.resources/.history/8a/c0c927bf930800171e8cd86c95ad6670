@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
+
+public interface IJavaCompareUtilities {
+}

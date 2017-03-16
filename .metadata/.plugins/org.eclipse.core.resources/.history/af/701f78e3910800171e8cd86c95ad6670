@@ -1,0 +1,27 @@
+package org.eclipse.jdt.internal.ui.jarpackager;
+
+import java.util.zip.ZipFile;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.ui.jarpackager.IManifestProvider;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.ui.jarpackager.JarWriter3;
+import org.eclipse.jdt.ui.jarpackager.IJarWriter3;
+
+public interface IPlainJarBuilder {
+	String getId();
+
+	IManifestProvider getManifestProvider();
+
+	void open(JarPackageData jarPackage, Shell displayShell, MultiStatus statusMsg) throws CoreException;
+
+	void writeFile(IFile resource, IPath destinationPath) throws CoreException;
+
+	void writeArchive(ZipFile archiveRoot, IProgressMonitor progressMonitor);
+
+	void close();
+}

@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.jarpackagerfat;
+
+import java.io.InputStream;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IFatJarPackagerUtil {
+}

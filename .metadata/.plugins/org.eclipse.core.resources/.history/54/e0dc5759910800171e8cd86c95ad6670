@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.search.IQueryParticipant;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ISearchParticipantDescriptor {
+	String getID();
+
+	void disable();
+
+	boolean isEnabled();
+}

@@ -1,0 +1,361 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.ajaxservice.annotation.AjaxMethod;
+import com.successfactors.ajaxservice.annotation.AjaxService;
+import com.successfactors.cdp.ui.util.CWSV12ViewConstants;
+import com.successfactors.dashboard.util.DashboardUtils;
+import com.successfactors.gm.api.bean.IEnumValue;
+import com.successfactors.gm.api.bean.IField;
+import com.successfactors.gm.api.bean.IPermission;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjBeanWrap;
+import com.successfactors.gm.bean.ObjPlanBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.service.objective.GetDefaultTemplate;
+import com.successfactors.gm.service.objective.GetObjListByPlanV5;
+import com.successfactors.gm.util.permission.DelegateObjectiveRulesEngine;
+import com.successfactors.gm.util.permission.GMRulesEngine;
+import com.successfactors.gm.util.permission.ObjectiveRulesEngineException;
+import com.successfactors.gm.util.permission.TGMPermissionUtils;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.util.JSONUtils;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.rbp.app.api.RBPFacade;
+import com.successfactors.rbp.app.api.TargetPopulationCriteria;
+import com.successfactors.rbp.app.collector.ContextualPermissionSpec;
+import com.successfactors.rbp.app.collector.PermissionSpec;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import java.io.Serializable;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Controller for CDP development goal
+ * @author I309618
+ *
+ */
+@AjaxService
+@Name("cdpDevGoalController")
+@javax.inject.Named("cdpDevGoalController")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+public class CDPDevGoalController  implements Serializable{
+  @Inject
+  @In
+  private transient ServiceCommandHandler scaHandler;
+  @Inject
+  @In(create=true)
+  protected EJBList ejbListAdapter;
+  
+  private static final long serialVersionUID = 1L;
+  /** logger. */
+  private static Logger logger = LogManager.getLogger();
+  /**
+   * ParamBean in session.
+   */
+  @Inject
+  @In(value = "params")
+  private ParamBean params;
+  
+  @Inject
+  @In(value=PermissionUtils.PERMISSION_LIST_BEAN)
+  private PermissionListBean permList;
+  
+  /** SFMessages. */
+  @Inject
+  @In(create = true, value = "v10msgs")
+  private IMessageBundle msgs;
+  
+  /** RBP instance. */
+  @Inject
+  @In(value = RBPFacade.RBP_FACADE_NAME, create = true)
+  protected RBPFacade rbp;
+  
+  
+  
+  /**
+   * Get user goals of default template
+   * @param selectedUserId
+   * @return
+   */
+  @AjaxMethod
+  public String getDefaultDevGoalList(String selectedUserId) {
+    JSONObjectOutput errorOutput = new JSONObjectOutput();
+    try {
+      // Get default template
+      ObjTemplateBean goalPlan = scaHandler.execute(new GetDefaultTemplate(ObjPlanTypeEnum.DEVELOPMENT));
+      if(goalPlan != null && goalPlan.getObjPlanId() > 0) {
+        return JSONUtils.toJSON(getDevGoalListByPlan(selectedUserId, goalPlan));
+      }
+    } catch (ServiceApplicationException e) {
+      logger.error("getDevGoalList error:" + e);
+      errorOutput.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      errorOutput.put(CWSV12ViewConstants.JSON_KEY_MESSAGE, msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    }
+    return JSONUtils.toJSON(errorOutput);
+  }
+  
+  /**
+   * Get development goal list by goal plan
+   * @param selectedUserId
+   * @param goalPlan
+   * @return
+   */
+  private JSONObjectOutput getDevGoalListByPlan(String selectedUserId, ObjTemplateBean goalPlan) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    JSONArrayOutput objectiveListJSON = new JSONArrayOutput();
+    JSONObjectOutput permissionOutput = new JSONObjectOutput();
+    
+    boolean cdpEnabled = params.isFeatureExist(FeatureEnum.DEVELOPMENT_PLAN_V12) || params.isFeatureExist(FeatureEnum.IDP);
+    boolean hasCdpAccess = permList.hasPermission(PermissionBean.CDP_ACCESS,
+        PermissionBean.VIEW_CDP, 0);
+    if(cdpEnabled && hasCdpAccess) {
+      try {
+        // exclude deleted goals
+        List<Integer> excludedStatus = new ArrayList();
+        excludedStatus.add(ObjBean.STATUS_DELETED);
+         
+        // check template target population
+        PermissionSpec permSpec = new ContextualPermissionSpec<Long>(null, PermissionBean.TGM, PermissionBean.TGM_TEMPLATE_VIEW, goalPlan.getObjPlanId(), Long.class);
+        TargetPopulationCriteria criteria = new TargetPopulationCriteria(false, false);
+        Set<String> targetPopulation = rbp.getTargetPopulation(params.getUserId(), permSpec, criteria);
+        if(targetPopulation != null && !targetPopulation.contains(selectedUserId)) {
+          output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+          output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE, msgs.getString("DEVELOPMENT_CDP_NO_PERMISSION_TO_ACCESS"));
+          
+          return output;
+        }
+        
+        ObjPlanBean objPlan = scaHandler.execute(new GetObjListByPlanV5(goalPlan.getObjPlanId(), selectedUserId, false,
+            true, false, false, false, false, true, -1, -1,excludedStatus, false, false));
+
+        ObjBean objBean = new ObjBean(-1, -1, ObjBean.TYPE_DEV,null, selectedUserId,
+            null,null, null,null, null,-1, null,null, -1, null, null, null, null, null);
+        GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine.getRulesEngine((HttpServletRequest)null, params, ejbListAdapter,
+            params.getUserId(), goalPlan, null, selectedUserId);
+        //get goal plan permisison
+        permissionOutput = getGoalPlanPerms(goalPlan, selectedUserId, objBean, rulesEngine);
+        
+        Map objList = objPlan.getObjList();
+        if(objList != null && objList.size() > 0) {
+          Iterator ite = objList.values().iterator();
+          List<ObjBean> objBeanList = new ArrayList<ObjBean>();
+          while(ite.hasNext()) {
+            List objVector = (List) ite.next();
+            objBeanList.addAll(objVector);
+          }
+          
+          ObjBean firstObjBean = (ObjBean)objBeanList.get(0);
+          Map<String, IField> goalFieldsPermSet = getGoalFieldReadPermissionMap(selectedUserId, firstObjBean, rulesEngine, goalPlan);
+          
+          //get state Fields with label and style
+          Map<String, IEnumValue> stateFieldValues = null;
+          if(stateFieldValues == null){
+            List<ObjTemplateBean> templates = new ArrayList<ObjTemplateBean>();
+            templates.add(goalPlan);
+            stateFieldValues = new LinkedHashMap<String, IEnumValue>();
+            DashboardUtils.getStateFields(
+              templates, params.getLocale(), (LinkedHashMap<String, IEnumValue>)stateFieldValues);
+          }
+          if(stateFieldValues == null){
+            List<ObjTemplateBean> templates = new ArrayList<ObjTemplateBean>();
+            templates.add(goalPlan);
+            stateFieldValues = new LinkedHashMap<String, IEnumValue>();
+            DashboardUtils.getStateFields(
+              templates, params.getLocale(), (LinkedHashMap<String, IEnumValue>)stateFieldValues);
+          }
+          
+          objectiveListJSON = this.getObjectivesJSON(rulesEngine,
+              objBeanList, stateFieldValues, params.getLocale(), goalFieldsPermSet, goalPlan);
+        }
+        
+        output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+        output.put("goals", objectiveListJSON);
+        output.put("permission", permissionOutput);
+        output.put("planId", goalPlan.getObjPlanId());
+      } catch (ServiceApplicationException e) {
+        logger.error("getDevGoalList error:" + e);
+        output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+        output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE, msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+      } catch (RemoteException e) {
+        logger.error("getDevGoalList error:" + e);
+        output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+        output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE, msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+      }
+    } else {
+      logger.error("CDPDevGoalController getDevGoalList error: CDP is not enabled");
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE, msgs.getString("DEVELOPMENT_CDP_NO_PERMISSION_TO_ACCESS"));
+    }
+    return output;
+  }
+  
+  /**
+   * Get all fields configured in template and check read permission
+   * @param targetUserId
+   * @param obj
+   * @param rulesEngine
+   * @param goalPlan
+   * @return
+   * @throws RemoteException
+   */
+  private Map<String, IField> getGoalFieldReadPermissionMap(String targetUserId, ObjBean obj,
+      GMRulesEngine rulesEngine, ObjTemplateBean goalPlan) throws RemoteException{
+      // use singleton to save performance for goal fields permission of competenies and behaviors
+      Map<String, IField> goalFieldsPermSet = new LinkedHashMap<String, IField>();
+      
+      for (Iterator fld = goalPlan.getFields().iterator(); fld.hasNext();) {
+        IField field = (IField) fld.next();
+        String fieldId = field.getId();
+        try{
+          if(rulesEngine.hasReadPermission(targetUserId, field, obj)){
+            goalFieldsPermSet.put(fieldId, field);
+          }
+        }catch(ObjectiveRulesEngineException e){
+          logger.error("exception caught when check read permission" +
+          " for field "+fieldId, e);
+          throw new RemoteException("Failed to check read permission for field "+fieldId);
+        }
+      }
+      
+      return goalFieldsPermSet;
+    }
+  
+  /**
+   * Parse goal list to JSON
+   * @param objBeanList
+   * @param stateFieldValues
+   * @param locale
+   * @param goalFieldsPermSet
+   * @param goalPlan
+   * @return
+   */
+  private JSONArrayOutput getObjectivesJSON(GMRulesEngine rulesEngine, List<ObjBean> objBeanList,
+      Map<String, IEnumValue> stateFieldValues, 
+      Locale locale, Map<String, IField> goalFieldsPermSet, ObjTemplateBean goalPlan){
+      JSONArrayOutput objArray = new JSONArrayOutput();
+      JSONObjectOutput fieldOutput;
+      
+      if(null!=objBeanList){
+          for(ObjBean obj:objBeanList){
+            try {
+              if (!rulesEngine.hasReadPermission(obj)) {
+                continue;
+              }
+            } catch (ObjectiveRulesEngineException e) {
+              logger.error("exception caught when check read permission for objBean ", e);
+            }
+            
+            JSONObjectOutput objOutput = new JSONObjectOutput();
+            
+            objOutput.put("id", obj.getObjId());
+            objOutput.put("category", obj.getObjCategory());
+            
+            JSONArrayOutput fieldArray = new JSONArrayOutput();
+            if(goalFieldsPermSet != null && goalFieldsPermSet.size() > 0) {
+              Set<String> fieldKeys = goalFieldsPermSet.keySet();
+              
+              // name and state fields for UI to quick access
+              if(fieldKeys.contains(IField.ID_NAME)){
+                objOutput.put(IField.ID_NAME, StringUtils.notNull(obj.getObjName()));
+              }
+              if(fieldKeys.contains(IField.ID_STATE)){
+                IEnumValue enumValue =
+                     stateFieldValues.get(obj.getProperty(ObjBean.STATE));
+                String stateStr = (enumValue == null)?"":enumValue.getLabel().getString(locale);
+                String stateStyle = (enumValue == null)?"":enumValue.getStyle();
+                objOutput.put(IField.ID_STATE, StringUtils.notNull(stateStr));
+                objOutput.put("stateStyle", StringUtils.notNull(stateStyle));
+              }
+              
+              // parse all fields to json
+              for (Iterator keys = fieldKeys.iterator(); keys.hasNext();) {
+                String key = (String)keys.next();
+                IField field = goalFieldsPermSet.get(key);
+                
+                fieldOutput = new JSONObjectOutput();
+                fieldOutput.put("fieldId", key);
+                fieldOutput.put("label", field.getLabel().getString(locale));
+                switch(key) {
+                  case IField.ID_STATE:
+                    IEnumValue enumValue =
+                       stateFieldValues.get(obj.getProperty(key));
+                    String stateStr = "";
+                    String stateStyle = "";
+                    if (enumValue != null)
+                    {
+                      stateStr = enumValue.getLabel().getString(locale);
+                      stateStyle = enumValue.getStyle();
+                    }
+                    
+                    JSONObjectOutput stateJson = new JSONObjectOutput();
+                    stateJson.put("label", StringUtils.notNull(stateStr));
+                    stateJson.put("style", StringUtils.notNull(stateStyle));
+                    fieldOutput.put("value", stateJson);
+                    fieldArray.add(fieldOutput);
+                    break;
+                  default :
+                    fieldOutput.put("value", field.getValue(new ObjBeanWrap(obj)));
+                    fieldArray.add(fieldOutput);
+                    break;
+                }
+              }
+            }
+            
+            objOutput.put("fields", fieldArray);
+            
+            objArray.add(objOutput);
+          }
+      }
+      
+      return objArray;
+    }
+  
+  private JSONObjectOutput getGoalPlanPerms(ObjTemplateBean planBean, 
+        String userId, ObjBean objBean, GMRulesEngine rulesEngine) throws RemoteException{
+    JSONObjectOutput perms = new JSONObjectOutput();
+    
+    try {
+      //CDP-667 Add/Edit Permission restricted to Managers/Admins on Career Worksheet
+      if(rulesEngine.hasPermission(userId, IPermission.CREATE, objBean)){
+        perms.put("ADD", true);
+      }
+      // call TGM util class since this will need to check write permissions for each fields
+      if(TGMPermissionUtils.hasWritePermission(rulesEngine, params.getUserId(), objBean, planBean, userId)){
+        perms.put("WRITE", true);
+      }
+      if(rulesEngine.hasPermission(userId, IPermission.DELETE, objBean)){
+        perms.put("DELETE", true);
+      }
+    } catch (ObjectiveRulesEngineException e) {
+      logger.error("Unable to check create permission for the default CDP templateId:"+planBean.getObjPlanId(), e);
+    }
+    return perms;
+  }
+}

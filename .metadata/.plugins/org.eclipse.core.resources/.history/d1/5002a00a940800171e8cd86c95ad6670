@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.model;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.core.resources.mapping.ResourceMappingContext;
+import org.eclipse.core.resources.mapping.ResourceTraversal;
+
+public interface IJavaResourceMapping {
+	Object getModelObject();
+
+	String getModelProviderId();
+
+	IProject[] getProjects();
+
+	ResourceTraversal[] getTraversals(final ResourceMappingContext context, final IProgressMonitor monitor);
+}

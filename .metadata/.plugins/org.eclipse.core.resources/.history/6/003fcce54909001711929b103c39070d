@@ -1,0 +1,31 @@
+package com.successfactors.cdp.service.mentoring.jam;
+
+import java.util.Collection;
+
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Command to trigger Jam group invite job
+ * 
+ * @author rsrigiri
+ *
+*/
+public class ScheduleProgramJamGroupInviteJob implements ServiceCommand<Void> {
+
+  private String programId;
+
+  private Collection<String> participants;
+
+  public ScheduleProgramJamGroupInviteJob(String programId, Collection<String> participants) {
+    this.programId = programId;
+    this.participants = participants;
+  }
+
+  public String getProgramId() {
+    return programId;
+  }
+
+  public Collection<String> getParticipants() {
+    return participants;
+  }
+}

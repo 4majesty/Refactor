@@ -1,0 +1,15 @@
+package com.successfactors.cdp.bean;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+public interface IDevPlanPortletRowVO {
+	String getObjCategory();
+
+	void setObjCategory(String objCategory);
+
+	List<Map<String, Object>> getColumns();
+
+	void setColumns(List<Map<String, Object>> columns);
+}

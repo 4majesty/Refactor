@@ -1,0 +1,615 @@
+// ###Modified by SCAConverter on 2014-06-16 PST###
+/**
+ *  * $Id: PermissionConfigAdditionalChecker.java 1182480 2017-02-22 12:15:42Z D067076 $
+ */
+package com.successfactors.rbp.app.collector.impl;
+
+import com.successfactors.applicationcontext.api.ApplicationContext;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.service.GetSysConfig;
+import com.successfactors.legacy.service.ejb.SysConfig;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.positionmanagement.api.PositionManagementSettingsHelper;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.security.util.SecurityUtils;
+import com.successfactors.showme.service.IsShowMeEnabled;
+import com.successfactors.smartsuite.util.PicklistMigrationUtils;
+import com.successfactors.varpay.api.util.VarpayUtilsFacade;
+import com.successfactors.xi.util.SeamEnvUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 
+ * This class is an application-wide component designed to help module owners to introduce additional checks for a 
+ * permission to be effective. While the effectivities of most permissions can be determined by interogating the 
+ * feature set, the effectivities of some permissions require fetch of data from SYSCONFIG and other places.
+ * This class provides a hook for such additional checks.
+ *  
+ */
+public class PermissionConfigAdditionalChecker {
+
+  /**
+   * Logger.
+   */
+  private static final Logger log = LogManager.getLogger();
+
+  /**
+   * A mapping between strategy and its associated name. The name should be referred by permission-config.xml.
+   */
+  private Map<String, PermissionCheckingStrategy> strategyMap = new HashMap<String, PermissionCheckingStrategy>();
+
+  /**
+   * Sysconfig ejb for feature checks defined in the SYS_CONFIG table.
+   */
+  private SysConfig sysConfigService;
+
+  /**
+   * param bean.
+   */
+  private ParamBean params;
+
+  /**
+   * Constructor.
+   */
+  public PermissionConfigAdditionalChecker() {
+    init();
+  }
+  
+  /**
+   * Init.
+   */  
+  public void init() {
+    addCheckingStrategy("exampleStragety", new ExamplePermissionCheckingStrategy());
+    addCheckingStrategy("proxyCheck", new SysConfigPermissionCheckingStrategy(
+        SystemBean.PROXY_KEY, SystemBean.PROXY_TYPE));
+    addCheckingStrategy("createNote", new SysConfigPermissionCheckingStrategy(
+        SystemBean.NOTE_KEY, SystemBean.NOTE_TYPE));
+    addCheckingStrategy("secondaryLogin", new SysConfigPermissionCheckingStrategy(
+        SystemBean.SECONDARY_LOGIN_KEY, SystemBean.SECONDARY_LOGIN_TYPE));
+    addCheckingStrategy("showMeEnabledCheck", new ShowMeEnabledCheckingStrategy());
+    addCheckingStrategy("interstitialEnabledCheck", new InterstitialEnabledCheckingStrategy());
+    addCheckingStrategy("platformSearchCheck", new PlatformSearchCheckingStrategy());
+    addCheckingStrategy("outlookCheck", new SysConfigPermissionCheckingStrategy(
+        SystemBean.OUTLOOK_INTEGRATION_KEY, SystemBean.OUTLOOK_INTEGRATION_TYPE));
+    // (And) strategy which will check both Sysconfig strategy and company edition strategy
+    List<Integer> compEditionsForComprehensiveTemp = new ArrayList<Integer>();
+    compEditionsForComprehensiveTemp.add(CompanyBean.STATUS_COMPANY_EDITION_TYPE_ENTERPRISE);
+    compEditionsForComprehensiveTemp.add(CompanyBean.STATUS_COMPANY_EDITION_TYPE_SPRAC);
+    addCheckingStrategy("comprehensiveTemplateConfig",
+        new CompanyEditionCheckingStrategy(compEditionsForComprehensiveTemp));
+
+    // Initiate Onboarding permission should be available if ONBOARDING is disabled and ONBOARDING_2 is enabled
+    // This is a change for 1702. Ticket RCM-35223 raised for proper fix
+    addCheckingStrategy("rcmOnboardingIntegrationOtherCheck", 
+    new Or(new SysConfigPermissionCheckingStrategy(
+        SystemBean.RCM_BIZX_ONBOARDING_INTEGRATION, SystemBean.RECRUITING_TYPE), new FeatureCheckStrategy(
+        FeatureEnum.ENABLE_ONBOARDING_SETTINGS), new FeatureCheckStrategy(FeatureEnum.ONBOARDING_2_APPLICATION)));
+    addCheckingStrategy("positionGridOtherCheck", new SMNominationMethodCheckingStrategy());
+    addCheckingStrategy("talentPoolNominationsOtherCheck", new SMNewMDFPoolBasedSuccessionPlanningCheckingStrategy());
+    addCheckingStrategy("rcmFADVIntegrationCheck", new SysConfigPermissionCheckingStrategy(
+        SystemBean.RCM_FADV_APPLICANT_BG_CHECK_INTEGRATION, SystemBean.RECRUITING_TYPE));
+    addCheckingStrategy("rcmOtherIntegrationCheck", new SysConfigPermissionCheckingStrategy(
+            SystemBean.RCM_OTHER_APPLICANT_BG_CHECK_VENDOR_INTEGRATION, SystemBean.RECRUITING_TYPE));
+    
+    addCheckingStrategy("importJobRoleTagsOtherCheck", new Or(new And(new SysConfigPermissionCheckingStrategy(
+        SystemBean.RECRUITING_JOB_REQUISITION_USE_JOB_PROFILES, SystemBean.RECRUITING_TYPE), new FeatureCheckStrategy(
+        FeatureEnum.JDM_NG)), new FeatureCheckStrategy(FeatureEnum.COMPETENCY_LIBRARY_MANAGEMENT)));
+    addCheckingStrategy("rcmJobMarketingCheck", new SysConfigPermissionCheckingStrategy(
+            SystemBean.RMK_JOB_MARKETING, SystemBean.RECRUITING_TYPE));  
+    addCheckingStrategy("rcmCRMCheck",
+        new SysConfigPermissionCheckingStrategy(SystemBean.RCM_ENABLE_CRM, SystemBean.RECRUITING_TYPE));
+    addCheckingStrategy("rcmJobReqJobCodeMappingOtherCheck", new SysConfigPermissionCheckingStrategy(
+            SystemBean.RCM_JOBCODE, SystemBean.RECRUITING_TYPE));
+    //addition check for showing OData RCMApplication Export feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmJobAppCheck", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));
+  //addition check for showing OData RCMApplication Create feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmJobAppCheckCreate", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));
+  //addition check for showing OData RCMApplication Update feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmJobAppCheckUpdate", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));
+    
+    //addition check for showing OData RCMApplicationAudit feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmJobAppAuditCheck", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));
+
+    //addition check for showing OData RCMCandidate Export feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmCandCheck", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));
+  //addition check for showing OData RCMCandidate Create feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmCandCheckCreate", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));
+    //addition check for showing OData RCMCandidate Update feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmCandCheckUpdate", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));    
+    //addition check for showing OData JOB REQUISION Export feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmJobReqCheck", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));
+    //addition check for showing OData JOB REQUISION Create feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmJobReqCheckCreate", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));
+    //addition check for showing OData JOB REQUISION Update feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmJobReqCheckUpdate", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));
+    
+    //addition check for showing OData OFFER APPROVAL Export feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmOfferApprovalCheckExport", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API))); 
+    //addition check for showing OData OFFER APPROVAL Create feature in AdminTools->RecruitingPermissions          
+    addCheckingStrategy("oDataRcmOfferApprovalCheckCreate", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));          
+    //addition check for showing OData OFFER APPROVAL Update feature in AdminTools->RecruitingPermissions              
+    addCheckingStrategy("oDataRcmOfferApprovalCheckUpdate", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API))); 
+    
+    //addition check for showing OData OFFER LETTER Export feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmOfferLetterCheckExport", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API))); 
+    //addition check for showing OData OFFER LETTER Create feature in AdminTools->RecruitingPermissions          
+    addCheckingStrategy("oDataRcmOfferLetterCheckCreate", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));          
+    
+    
+  //addition check for showing OData InterviewCentral Create/Update feature in AdminTools->RecruitingPermissions
+    addCheckingStrategy("oDataRcmInterviewCentralPermCheck", new And(new DisableFeatureCheckStrategy(FeatureEnum.DISABLE_ODATA_API)));
+
+    addCheckingStrategy("rcmESignatureCheck", new SysConfigPermissionCheckingStrategy(
+        SystemBean.RECRUITING_ONLINE_OFFER_E_SIGN_ENABLED, SystemBean.RECRUITING_TYPE));
+    
+    addCheckingStrategy("rcmBGIOtherCheck", 
+        new Or(new SysConfigPermissionCheckingStrategy(
+            SystemBean.RCM_FADV_APPLICANT_BG_CHECK_INTEGRATION, SystemBean.RECRUITING_TYPE), new FeatureCheckStrategy(
+            FeatureEnum.ENABLE_BGI_SETTINGS), new SysConfigPermissionCheckingStrategy(
+                    SystemBean.RCM_OTHER_APPLICANT_BG_CHECK_VENDOR_INTEGRATION, SystemBean.RECRUITING_TYPE)));
+    addCheckingStrategy("rcmInterviewSchedulingCheck", new  SysConfigPermissionCheckingStrategy
+                                         (SystemBean.RECRUITING_INTERVIEW_SCHEDULING, SystemBean.RECRUITING_TYPE));
+    addCheckingStrategy("careerSiteBuilderCheck", new  SysConfigPermissionCheckingStrategy
+        (SystemBean.RMK_CAREER_SITE_BUILDER, SystemBean.RECRUITING_TYPE));
+    addCheckingStrategy("compVarpayPermMigrationCheck", new CompVarPayMigrationPermissionCheckingStrategy());
+    addCheckingStrategy("compVarpayPermNotMigratedCheck", new CompVarPayNotMigratedPermissionCheckingStrategy());
+    addCheckingStrategy("positionv12OrgChartOtherCheck", new PositionV12OrgChartUsedCheckingStrategy());
+    addCheckingStrategy("positionRCMIntegrationOtherCheck", new PositionRCMIntegrationUsedCheckingStrategy());
+    addCheckingStrategy("positionFGIntegrationOtherCheck", new PositionFGIntegrationUsedCheckingStrategy());
+    addCheckingStrategy("instSyncLegacyPicklistMigration", new InstSyncLegacyPicklistMigration());
+    addCheckingStrategy("smApprovalPermVisiblityCheck", new SMApprovalPermCheckingStrategy());
+    addCheckingStrategy("reportCenterPemissionCheck", new ReportCenterPermCheckingStrategy());
+  }
+
+  /**
+   * Add a checking strategy.
+   * @param strategyName strategy name.
+   * @param strategy strategy
+   */
+  private void addCheckingStrategy(String strategyName, PermissionCheckingStrategy strategy) {
+    if (strategyMap.containsKey(strategyName)) {
+      final String errMsg = String.format("Permission checking strategyMap item [%s] already exists.", strategyName); 
+      log.error(errMsg);
+      throw new IllegalArgumentException(errMsg);
+    } else {
+      strategyMap.put(strategyName, strategy);
+    }
+  }
+
+  /**
+   * Interface for strategy.
+   */
+  private interface PermissionCheckingStrategy {
+    boolean determine();
+  }
+
+  /**
+   * An example strategy - always returns false.
+   */
+  private class ExamplePermissionCheckingStrategy implements PermissionCheckingStrategy {
+    public boolean determine() {
+      return false;
+    }
+  }
+
+  /**
+   * Generic SysConfig feature check.
+   */
+  private class SysConfigPermissionCheckingStrategy implements PermissionCheckingStrategy {
+    /**
+     * Don't use it by yourself! Only for Legacy!
+     */
+    private LocalContextSCAHandler legacyHandler = LocalContextSCAHandler.create();
+
+    /**
+     * sys_config key.
+     */
+    private String key;
+
+    /**
+     * sys_config type.
+     */
+    private String type;
+
+    /**
+     * private constructor.
+     * @param key of sys_config
+     * @param type of sys_config
+     */
+    private SysConfigPermissionCheckingStrategy(String key, String type){
+      this.key = key;
+      this.type = type;
+    };
+    
+    public boolean determine() {
+      try {
+        return (null != legacyHandler.execute(params, new GetSysConfig(key, type)));
+// catch (SysConfigEJBException e) {
+// log.error(\"PermissionConfigAdditionalCheck: Unable to determine proxy mgmt
+// setting.\",e);
+// }
+// catch (RemoteException e) {
+// log.error(\"PermissionConfigAdditionalCheck: RemoteException occurred while
+// determining proxy mgmt setting.\",e);
+// }
+      } catch (ServiceApplicationException e) {
+        log.error("PermissionConfigAdditionalCheck: RemoteException occurred while determining proxy mgmt setting.", e);
+      }
+      
+      return false;
+    }
+  }
+  /**
+   * Check to see if MDF Position is selected as a succession nomination method in provisioning 
+   */
+  private class SMNominationMethodCheckingStrategy implements PermissionCheckingStrategy {
+    public boolean determine(){
+      try {
+        GetSysConfig obj=new GetSysConfig(SystemBean.ENFORCE_SM_PERMISSION_KEY, SystemBean.ENFORCE_SM_PERMISSION_TYPE);
+        ServiceCommandHandler scaHandler=ServiceCommandHandlerFactory.getSCAHandler();
+        SystemBean nominationMethod = scaHandler.execute(obj);
+        if(nominationMethod != null && nominationMethod.getSysLong() == SystemBean.NOMINATION_BY_EC_POSITION){
+          return true;
+        }  
+      }
+      catch(ServiceApplicationException e){
+        log.error("PermissionConfigAdditionalCheck: ServiceApplicationException occurred"+
+                  " while determining sm nomination method .", e); 
+      }
+      return false;
+    }
+  }
+  
+  /**
+   * Check to see if New MDF Pool-based Succession Planning is selected in provisioning
+   */
+  private class SMNewMDFPoolBasedSuccessionPlanningCheckingStrategy implements PermissionCheckingStrategy {
+
+    @Override
+    public boolean determine() {
+      try {
+        GetSysConfig obj=new GetSysConfig(SystemBean.ENABLE_NEW_POOL_BASED_SUCCESSION_PLANNING_KEY, SystemBean.ENABLE_NEW_POOL_BASED_SUCCESSION_PLANNING_TYPE);
+        ServiceCommandHandler scaHandler=ServiceCommandHandlerFactory.getSCAHandler();
+        SystemBean systemBean = scaHandler.execute(obj);
+        if (systemBean != null) {
+          log.info("SMNewMDFPoolBasedSuccessionPlanningCheckingStrategy return true");
+          return true;
+        }
+      }
+      catch(ServiceApplicationException e){
+        log.error("PermissionConfigAdditionalCheck: ServiceApplicationException occurred"+
+                  " while determining sm nomination method .", e); 
+      }
+      log.info("SMNewMDFPoolBasedSuccessionPlanningCheckingStrategy return false");
+      return false;
+    }
+    
+  }
+  
+  /**
+   * Check to see if platform search is selected in provisioning 
+   */
+  private class PlatformSearchCheckingStrategy implements PermissionCheckingStrategy {  
+    @Override
+    public boolean determine() {
+      
+       boolean isEnabled=false;    
+       try{
+         //Platform Search Enabled
+         ServiceCommandHandler scaHandler=ServiceCommandHandlerFactory.getSCAHandler();
+         SystemBean sb1=scaHandler.execute(new GetSysConfig(SystemBean.LIVE_PROFILE_SEARCH, SystemBean.LIVE_PROFILE_TYPE));    
+         if(null!=sb1){
+              isEnabled=true;
+         }     
+       }catch (ServiceApplicationException e) {
+          isEnabled=false;
+          log.error("Fail to get system config data due to", e);
+       }    
+         return isEnabled;
+    }
+  }
+
+  private class PositionV12OrgChartUsedCheckingStrategy implements PermissionCheckingStrategy {
+
+    @Override
+    public boolean determine() {
+      PositionManagementSettingsHelper posSettingsHelper = (PositionManagementSettingsHelper)
+          SeamEnvUtils.getInstance(PositionManagementSettingsHelper.NAME, true);
+      return posSettingsHelper.isV12PosOrgChartUsed();
+    }
+    
+  }
+  
+  private class PositionRCMIntegrationUsedCheckingStrategy implements PermissionCheckingStrategy {
+
+    @Override
+    public boolean determine() {
+      PositionManagementSettingsHelper posSettingsHelper = (PositionManagementSettingsHelper)
+          SeamEnvUtils.getInstance(PositionManagementSettingsHelper.NAME, true);
+      return posSettingsHelper.isRCMIntegrationUsed();
+    }
+    
+  }
+
+  /**
+   * to check if the Position-Fieldglass integration has been enabled in
+   * Position Management Settings
+   * 
+   * @author I300313
+   *
+   */
+  private class PositionFGIntegrationUsedCheckingStrategy
+      implements PermissionCheckingStrategy {
+
+    @Override
+    public boolean determine() {
+      PositionManagementSettingsHelper posSettingsHelper = (PositionManagementSettingsHelper) SeamEnvUtils
+          .getInstance(PositionManagementSettingsHelper.NAME, true);
+      return posSettingsHelper.isFGIntegrationUsed();
+    }
+
+  }
+ 
+  /**
+   * to check if Interstitial is JVM or provisioned enabled via company settings
+   * 
+   * @author syao
+   */
+  private class InterstitialEnabledCheckingStrategy implements PermissionCheckingStrategy {
+
+    /**
+     * the method returns true if Interstitial is provisioned enabled or JVM
+     * enabled.
+     * 
+     * return boolean true/false
+     */
+    public boolean determine() {
+      // TODO Auto-generated method stub
+      return SecurityUtils.isRedirectInterstitialRequired();
+    }
+
+  }
+  
+  /**
+   * to check if ShowMe is provisioned and enabled via company settings
+   */
+  private class ShowMeEnabledCheckingStrategy implements PermissionCheckingStrategy {    
+    /**
+     * the method returns true if ShowMe is provisioned and enabled
+     * @return boolean
+     */
+    public boolean determine() {
+      ServiceCommandHandler scaHandler = ServiceCommandHandlerFactory.getSCAHandler();
+      try {
+        return scaHandler.execute(new IsShowMeEnabled(true));
+      } catch (ServiceApplicationException e) {
+        log.error("Unable to check if show me is enabled", e);
+        return false;
+      }
+    }
+  }
+  
+  /**
+   * to check if ShowMe is provisioned and enabled via company settings
+   */
+  private class Or implements PermissionCheckingStrategy {
+    
+    /**Strategies*/
+    private PermissionCheckingStrategy[] strategies;
+    
+    public Or(PermissionCheckingStrategy... strategies) {
+      this.strategies = strategies;
+    }
+    
+    /**
+     * the method returns true if ShowMe is provisioned and enabled
+     * @return boolean
+     */
+    public boolean determine() {
+      for(PermissionCheckingStrategy strategy: strategies) {
+        if(strategy.determine()) {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+  
+  /**
+   * to check if all the passed in strategies meet their conditions to display the permission
+   */
+  private class And implements PermissionCheckingStrategy {
+    
+    /**Strategies*/
+    private PermissionCheckingStrategy[] strategies;
+    
+    public And(PermissionCheckingStrategy... strategies) {
+      this.strategies = strategies;
+    }
+    
+    /**
+     * the method returns true only if all strategies are true
+     * @return boolean
+     */
+    public boolean determine() {
+      for(PermissionCheckingStrategy strategy: strategies) {
+        if(!strategy.determine()) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+  
+  /**
+   * to check if company edition from company settings is same as passed in edition
+   */
+  private class CompanyEditionCheckingStrategy implements PermissionCheckingStrategy {    
+    /**company edition  */
+    private List companyEditions;
+    
+    public CompanyEditionCheckingStrategy(List companyEditions) {
+      this.companyEditions = companyEditions;
+    }
+    
+    /**
+     * the method returns true if company edition in the company settings matches the passed company edition
+     * @return boolean
+     */
+    public boolean determine() {
+      CompanyBean compBean = params.getCompanyBean();
+      if(companyEditions.contains(compBean.getCompanyEdition())){
+        return true;
+      }
+      return false;
+    }
+     
+  }
+  
+  /**
+   * to check if ShowMe is provisioned and enabled via company settings
+   */
+  private class FeatureCheckStrategy implements PermissionCheckingStrategy {
+    
+    /**FeatureEnum  */
+    private FeatureEnum featureEnum;
+    
+    public FeatureCheckStrategy(FeatureEnum featureEnum) {
+      this.featureEnum = featureEnum;
+    }
+    
+    /**
+     * the method returns true if ShowMe is provisioned and enabled
+     * @return boolean
+     */
+    public boolean determine() {
+      return params.getCompanyBean().isFeatureExist(featureEnum);
+    }
+  }
+  
+  /**
+   * to check not condition enabled via company settings
+   */
+  private class DisableFeatureCheckStrategy implements PermissionCheckingStrategy {
+    
+    /**FeatureEnum  */
+    private FeatureEnum featureEnum;
+    
+    public DisableFeatureCheckStrategy(FeatureEnum featureEnum) {
+      this.featureEnum = featureEnum;
+    }
+    
+    /**
+     * the method returns true if ShowMe is provisioned and enabled
+     * @return boolean
+     */
+    public boolean determine() {
+      return !(params.getCompanyBean().isFeatureExist(featureEnum));
+    }
+  }
+    
+  /**
+   * Execute a strategy and returns a boolean indicating if a permission is effective for a company.
+   * @param strategyName a strategy name.
+   * @return a boolean indicating if a permission is effective.
+   */
+  public boolean performCheck(String strategyName) {
+    PermissionCheckingStrategy strategy = strategyMap.get( strategyName);
+    if (strategy == null) {
+      log.warn(String.format("Unable to get the permission checking strategy: [%s]. Return false.",  
+          strategyName));
+      return false;
+    }
+    return strategy.determine();
+  }
+
+  public void setSysConfigService(SysConfig sysConfigService) {
+    this.sysConfigService = sysConfigService;
+  }
+
+  public void setParams(ParamBean params) {
+    this.params = params;
+  }
+
+  /**
+   * Checking strategy to check if migration for comp & varpay permission is done. If done show permissions in UI.
+   * @return a boolean , true if permissions are migrated, false otherwise.
+   */
+  private class CompVarPayMigrationPermissionCheckingStrategy implements PermissionCheckingStrategy {
+    public boolean determine() {
+      VarpayUtilsFacade varpayUtil = ApplicationContext.get(VarpayUtilsFacade.class);
+      return varpayUtil.isCompVarPayPermissionsMigrated();
+    }
+  }
+  
+  /**
+   * Checking strategy to check if migration for comp & varpay permission is done. If done show permissions in UI.
+   * @return a boolean , true if permissions are migrated, false otherwise.
+   */
+  private class CompVarPayNotMigratedPermissionCheckingStrategy implements PermissionCheckingStrategy {
+    public boolean determine() {
+      VarpayUtilsFacade varpayUtil = ApplicationContext.get(VarpayUtilsFacade.class);
+      return !varpayUtil.isCompVarPayPermissionsMigrated();
+    }
+  }
+  
+  private class InstSyncLegacyPicklistMigration implements PermissionCheckingStrategy {
+
+    @Override
+    public boolean determine() {
+      return !PicklistMigrationUtils.hasMigratedToMDF();
+    }
+  }
+  
+  /**
+   * Check to see whether Succession Approval permission should be visible 
+   */
+  private class SMApprovalPermCheckingStrategy implements PermissionCheckingStrategy {
+    public boolean determine(){
+      try {
+        GetSysConfig obj=new GetSysConfig(
+            SystemBean.ENABLE_FORMLESS_NOMINATION_APPROVAL_WF_KEY,
+            SystemBean.ENABLE_FORMLESS_NOMINATION_APPROVAL_WF_TYPE);
+        ServiceCommandHandler scaHandler=ServiceCommandHandlerFactory.getSCAHandler();
+        SystemBean sysBean = scaHandler.execute(obj);  
+        return (sysBean != null);
+      }
+      catch(ServiceApplicationException e){
+        log.error("PermissionConfigAdditionalCheck: ServiceApplicationException occurred"+
+                  " while determining sm nomination method .", e); 
+      }
+      return false;
+    }
+  }
+  
+  private class ReportCenterPermCheckingStrategy implements PermissionCheckingStrategy {
+    public boolean determine(){
+      try {
+        GetSysConfig obj=new GetSysConfig(
+            SystemBean.REPORT_CENTER_PERM_KEY,
+            SystemBean.REPORT_CENTER_PERM_TYPE_APPLICATION);
+        ServiceCommandHandler scaHandler=ServiceCommandHandlerFactory.getSCAHandler();
+        SystemBean sysBean = scaHandler.execute(obj); 
+        long enabled = (sysBean == null) ? 0 : sysBean.getSysLong();
+        return (enabled == 1);   
+      }
+      catch(ServiceApplicationException e){
+        log.error("PermissionConfigAdditionalCheck: ServiceApplicationException occurred"+
+                  " while determining report center permission .", e); 
+      }
+      return false;
+    }
+  }
+
+}

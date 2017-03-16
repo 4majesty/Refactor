@@ -1,0 +1,55 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import java.util.List;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jface.action.LegacyActionTools;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ICompletionProposalCategory {
+	String getId();
+
+	String getName();
+
+	String getDisplayName();
+
+	ImageDescriptor getImageDescriptor();
+
+	void setSeparateCommand(boolean enabled);
+
+	boolean isSeparateCommand();
+
+	void setIncluded(boolean included);
+
+	boolean isIncluded();
+
+	boolean isEnabled();
+
+	void setEnabled(boolean isEnabled);
+
+	boolean hasComputers();
+
+	boolean hasComputers(String partition);
+
+	int getSortOrder();
+
+	void setSortOrder(int sortOrder);
+
+	List computeCompletionProposals(ContentAssistInvocationContext context, String partition, SubProgressMonitor monitor);
+
+	List computeContextInformation(ContentAssistInvocationContext context, String partition, SubProgressMonitor monitor);
+
+	String getErrorMessage();
+
+	void sessionStarted();
+
+	void sessionEnded();
+}

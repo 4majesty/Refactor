@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.text.folding;
+
+import org.eclipse.osgi.util.NLS;
+
+public interface IFoldingMessages {
+}

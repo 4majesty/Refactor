@@ -1,0 +1,211 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.service.UpdateMentorUnavailableEndDate;
+import com.successfactors.cdp.service.util.mentoring.MentoringConstants;
+import com.successfactors.cdp.service.util.mentoring.MentoringDateUtils;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailContent;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailTokenEnum;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailUtils;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.sql.MDFCriteria;
+import com.successfactors.genericobject.api.sql.MDFResultSet;
+import com.successfactors.genericobject.api.sql.Projections;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.MailInvalidAddressException;
+import com.successfactors.platform.bean.MailSendException;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.util.UserFormatUtils;
+import com.successfactors.user.service.FindUserById;
+import org.jboss.seam.annotations.In;
+
+import javax.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+/**
+ * Created by frank on 11/15/16.
+ */
+@Service
+public class UpdateMentorUnavailableEndDateImpl implements ServiceCommandImpl<Void, UpdateMentorUnavailableEndDate> {
+    private static Logger logger = LogManager.getLogger();
+
+    @Inject
+    @In
+    private ServiceCommandHandler scaHandler;
+
+    @Inject
+    @In
+    private ParamBean params;
+
+    @Inject
+    @In(create = true)
+    private ConfigurationProvider configurationProvider;
+
+    @Inject
+    @In(create = true, value = "v10msgs")
+    private Messages messages;
+
+    @Inject
+    @In(create = true)
+    private IMentoringEmailUtils mentoringEmailUtils;
+
+    @Inject
+    @In(create = true)
+    private MentoringServiceBase mentoringServiceBase;
+
+    @Override
+    public Void execute(UpdateMentorUnavailableEndDate cmd) throws ServiceApplicationException {
+        MentoringProgramMentor mentoringProgramMentor = getMentorByExternalId(cmd.getMentorId());
+        MentoringProgram program = mentoringServiceBase.getProgramById(cmd.getProgramId());
+        UpdateMentorUnavailableEndDate.UnavailableEndDataChangeType changeType = getUnavailableEndDateChangeType(mentoringProgramMentor,
+                cmd.getUnavailableEndDate());
+        if (changeType != UpdateMentorUnavailableEndDate.UnavailableEndDataChangeType.NO_CHANGE) {
+            saveUnavailableEndDate(program, cmd.getMentorId(), cmd.getUnavailableEndDate());
+            mentoringProgramMentor.setUnavailableEndDate(cmd.getUnavailableEndDate());
+            notifyMentor(program, mentoringProgramMentor, changeType);
+        }
+        return null;
+    }
+
+    private void notifyMentor(MentoringProgram mentoringProgram,
+                              MentoringProgramMentor mentoringProgramMentor,
+                              UpdateMentorUnavailableEndDate.UnavailableEndDataChangeType changeType)
+            throws ServiceApplicationException {
+        Map<MentoringEmailTokenEnum, String> tokenMap = getEmailTokenMap(mentoringProgram, mentoringProgramMentor);
+        UserBean emailSender = mentoringEmailUtils.getDummyEmailSender();
+        UserBean emailRecipient = getUserBeanByUserId(mentoringProgramMentor.getUser());
+        MentoringEmailContent emailContent = getEmailContent(changeType, emailRecipient.getUserLocale());
+        try {
+            mentoringEmailUtils.sendEmail(emailContent, tokenMap, emailSender, emailRecipient);
+        } catch (ServiceApplicationException | MailInvalidAddressException | MailSendException e) {
+            logger.error("UpdateMentorUnavailableEndDateImpl.notifyMentor error occurs", e.getMessage());
+        }
+    }
+
+    private void saveUnavailableEndDate(MentoringProgram program, String mentorId, Date updatedUnavailableEndDate) throws ServiceApplicationException {
+        for (MentoringProgramMentor mentor : program.getMentors()) {
+            if (mentor.getExternalId().equals(mentorId)) {
+                if (updatedUnavailableEndDate == null) {
+                    mentor.setUnavailableEndDate(null);
+                } else {
+                    mentor.setUnavailableEndDate(updatedUnavailableEndDate);
+                }
+                scaHandler.execute(new SaveBean(MentoringProgram.class, program));
+                break;
+            }
+        }
+    }
+
+    private MentoringProgramMentor getMentorByExternalId(String mentorExternalId) throws ServiceApplicationException {
+        ObjectDefinition mentoringProgramMentorObjectDefinition = configurationProvider.getObjectDefinition(MentoringProgramMentor.class);
+        MDFCriteria criteria = new GOSQLGeneratorContext(mentoringProgramMentorObjectDefinition, params);
+        criteria.setProjection(Projections.all()).add(Restrictions.eq("externalId", mentorExternalId));
+        MDFResultSet resultSet = (MDFResultSet) criteria.execute();
+        List<MentoringProgramMentor> mentorList = resultSet.getBeans();
+        return mentorList.get(0);
+    }
+
+    private UserBean getUserBeanByUserId(String userId) {
+        UserBean userBean = null;
+        FindUserById getUserById = new FindUserById(userId, true);
+        try {
+            userBean = scaHandler.execute(getUserById);
+        } catch (ServiceApplicationException e) {
+            logger.error("UpdateMentorUnavailableEndDateImpl getUserBeanByUserId(...) error occurs", e);
+        }
+        return userBean;
+    }
+
+    private Map<MentoringEmailTokenEnum, String> getEmailTokenMap(MentoringProgram mentoringProgram,
+                                                                  MentoringProgramMentor programMentor) {
+        Map<MentoringEmailTokenEnum, String> tokenMap = new HashMap<MentoringEmailTokenEnum, String>();
+        FindUserById cmd = new FindUserById(programMentor.getUser(), true);
+        try {
+            UserBean mentorUserBean = scaHandler.execute(cmd);
+            String programLink = mentoringEmailUtils.generateUrlToken(mentoringProgram, mentorUserBean, mentoringProgram.getName());
+            if (programMentor.getUnavailableEndDate() != null) {
+                tokenMap.put(MentoringEmailTokenEnum.MENTOR_UNAVAILABLE_END_DATE,
+                        MentoringDateUtils.formatDate(
+                                programMentor.getUnavailableEndDate(),
+                                MentoringConstants.DEFAULT_DATE_FORMAT)
+                );
+            }
+            tokenMap.put(MentoringEmailTokenEnum.MENTOR_NAME, UserFormatUtils.formatFullName(messages.getString("User_Display_Name"), mentorUserBean.getFullNameBean()));
+            tokenMap.put(MentoringEmailTokenEnum.PROGRAM_NAME, programLink);
+            tokenMap.put(MentoringEmailTokenEnum.PLAIN_PROGRAM_NAME, mentoringProgram.getName());
+        } catch (ServiceApplicationException|NoSuchAlgorithmException|UnsupportedEncodingException e) {
+            logger.error("UpdateMentorUnavailableEndDateImpl getEmailTokenMap(...) error occurs", e);
+        }
+        return tokenMap;
+    }
+
+    private MentoringEmailContent getEmailContent(UpdateMentorUnavailableEndDate.UnavailableEndDataChangeType changeType, Locale locale) {
+        MentoringEmailContent content = new MentoringEmailContent();
+        switch (changeType) {
+            case DISABLED:
+                content.setBody(mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTORING_UNSET_MENTOR_UNAVAILABLE_END_DATE_BODY", locale));
+                content.setSubject(mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTORING_UNSET_MENTOR_UNAVAILABLE_END_DATE_SUBJECT", locale));
+                break;
+            case ENABLED:
+            case CHANGED:
+                content.setBody(mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTORING_SET_MENTOR_UNAVAILABLE_END_DATE_BODY", locale));
+                content.setSubject(mentoringServiceBase.getMessageByLocale("DEVELOPMENT_MENTORING_SET_MENTOR_UNAVAILABLE_END_DATE_SUBJECT", locale));
+                break;
+
+        }
+        return content;
+    }
+
+
+    /*
+     * original date                new date                return
+     *      null                        null                NO_CHANGE
+     *      null                        A                   ENABLED
+     *      A                           null                DISABLED
+     *      A                           B                   CHANGED
+     *      A                           A                   NO_CHANGE
+     *
+     */
+    private UpdateMentorUnavailableEndDate.UnavailableEndDataChangeType getUnavailableEndDateChangeType(MentoringProgramMentor mentor,
+                                                                                                        Date updatedDate)
+            throws ServiceApplicationException {
+        UpdateMentorUnavailableEndDate.UnavailableEndDataChangeType changeType = UpdateMentorUnavailableEndDate.UnavailableEndDataChangeType.NO_CHANGE;
+        Date originalEndDate = mentor.getUnavailableEndDate();
+        Date updatedUnavailableEndDate = updatedDate;
+
+        if (originalEndDate == null && updatedUnavailableEndDate == null) {
+            changeType = UpdateMentorUnavailableEndDate.UnavailableEndDataChangeType.NO_CHANGE;
+        } else if (originalEndDate != null && updatedUnavailableEndDate != null) {
+            if (originalEndDate.equals(updatedUnavailableEndDate)) {
+                changeType = UpdateMentorUnavailableEndDate.UnavailableEndDataChangeType.NO_CHANGE;
+            } else {
+                changeType = UpdateMentorUnavailableEndDate.UnavailableEndDataChangeType.CHANGED;
+            }
+        } else if (originalEndDate == null && updatedUnavailableEndDate != null) {
+            changeType = UpdateMentorUnavailableEndDate.UnavailableEndDataChangeType.ENABLED;
+        } else if (originalEndDate != null && updatedUnavailableEndDate == null) {
+            changeType = UpdateMentorUnavailableEndDate.UnavailableEndDataChangeType.DISABLED;
+        }
+        return changeType;
+    }
+
+}

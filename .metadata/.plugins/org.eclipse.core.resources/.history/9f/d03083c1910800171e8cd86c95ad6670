@@ -1,0 +1,33 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import java.util.List;
+import java.util.Set;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ICompletionProposalComputerDescriptor {
+	String getId();
+
+	String getName();
+
+	Set getPartitions();
+
+	IJavaCompletionProposalComputer createComputer();
+
+	List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor);
+
+	List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor);
+
+	void sessionStarted();
+
+	void sessionEnded();
+
+	String getErrorMessage();
+}

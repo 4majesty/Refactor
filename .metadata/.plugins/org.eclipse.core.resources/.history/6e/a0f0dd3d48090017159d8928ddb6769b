@@ -1,0 +1,11 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.service.mentoring.GetStandardElementValue;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.user.service.FetchAllUserInfoValues;
+import com.successfactors.user.service.FindUserById;
+import com.successfactors.user.service.GetAllJobCodes;
+
+public interface IGetStandardElementValueImpl {
+	GetStandardElementValue execute(GetStandardElementValue cmd) throws ServiceApplicationException;
+}

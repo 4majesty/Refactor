@@ -1,0 +1,26 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.text.rules.ICharacterScanner;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
+
+public interface IJavaCommentScanner {
+	boolean isWordStart(char c);
+
+	boolean isWordPart(char c);
+
+	void clearWords();
+
+	void addTaskTags(String value);
+
+	void addWord(String word, IToken token);
+
+	IToken evaluate(ICharacterScanner scanner, CombinedWordRule.CharacterBuffer word);
+
+	void setCaseSensitive(boolean caseSensitive);
+
+	boolean affectsBehavior(PropertyChangeEvent event);
+
+	void adaptToPreferenceChange(PropertyChangeEvent event);
+}

@@ -1,0 +1,15 @@
+package com.successfactors.cdp.service.scheduledjob;
+
+import static com.successfactors.jobscheduler.ScheduledJobAttr.AttrType.PROVISIONING_SUPPORT;
+import static com.successfactors.jobscheduler.ScheduledJobAttr.AttrType.CUSTOMER_VISIBLE;
+import com.successfactors.jobscheduler.IScheduledJob;
+import com.successfactors.jobscheduler.ScheduledJobAttr;
+import com.successfactors.jobscheduler.ScheduledJobTypeSupport;
+
+public interface IMentoringProgramJamGroupInviteJobType {
+	String getJobTypeName();
+
+	String getJobTypeLabelKey();
+
+	Class<? extends IScheduledJob> getJobClass();
+}

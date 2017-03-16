@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IHelpAction {
+	void run();
+}

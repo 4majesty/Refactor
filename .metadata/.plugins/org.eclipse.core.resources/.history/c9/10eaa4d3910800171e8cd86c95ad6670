@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+import org.eclipse.jdt.internal.ui.dnd.ViewerInputDropAdapter;
+
+public interface ICallHierarchyTransferDropAdapter {
+}

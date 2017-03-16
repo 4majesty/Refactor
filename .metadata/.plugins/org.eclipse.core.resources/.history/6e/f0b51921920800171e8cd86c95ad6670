@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.ui.actions.OpenAction;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+
+public interface IOpenDeclarationAction {
+	boolean canActionBeAdded();
+
+	ISelection getSelection();
+
+	Object getElementToOpen(Object object);
+}

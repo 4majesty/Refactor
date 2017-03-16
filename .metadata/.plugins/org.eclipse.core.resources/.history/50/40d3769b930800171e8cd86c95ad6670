@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+
+public interface ITaskMarkerProposal {
+}

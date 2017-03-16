@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.jface.viewers.IDecoration;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.JavaCore;
+
+public interface IAbstractJavaElementLabelDecorator {
+	void elementChanged(ElementChangedEvent event);
+
+	void addListener(ILabelProviderListener listener);
+
+	void dispose();
+
+	boolean isLabelProperty(Object element, String property);
+
+	void removeListener(ILabelProviderListener listener);
+
+	void decorate(Object element, IDecoration decoration);
+}

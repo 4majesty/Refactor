@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import java.util.List;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IAddSourceFolderWizard {
+	void addPages();
+
+	List getInsertedElements();
+
+	List getRemovedElements();
+
+	List getModifiedElements();
+
+	boolean performFinish();
+
+	void cancel();
+}

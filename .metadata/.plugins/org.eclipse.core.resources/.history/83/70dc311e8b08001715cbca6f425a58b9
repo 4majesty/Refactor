@@ -1,0 +1,7 @@
+package com.successfactors.arb.bean;
+
+import java.util.concurrent.ConcurrentHashMap;
+import com.successfactors.arb.exception.AnalyticsRuntimeException;
+
+public interface IReflectiveInvoker {
+}

@@ -1,0 +1,32 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IOpenTypeAction {
+	void run();
+
+	void runWithEvent(Event e);
+
+	void run(IAction action);
+
+	void dispose();
+
+	void init(IWorkbenchWindow window);
+
+	void selectionChanged(IAction action, ISelection selection);
+
+	void runWithEvent(IAction action, Event event);
+
+	void init(IAction action);
+}

@@ -1,0 +1,20 @@
+package com.successfactors.rbp.integration.grc.xml.binding;
+
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+public interface IFieldPermission {
+	FieldId getFieldId();
+
+	void setFieldId(FieldId value);
+
+	FieldAction getFieldAction();
+
+	void setFieldAction(FieldAction value);
+
+	PermissionItem getPermissionItem();
+
+	void setPermissionItem(PermissionItem value);
+}

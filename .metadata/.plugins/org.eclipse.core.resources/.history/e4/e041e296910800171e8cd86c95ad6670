@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.jdt.internal.ui.text.correction.QuickAssistLightBulbUpdater.AssistAnnotation;
+
+public interface IJavaSelectAnnotationRulerAction {
+	void run();
+
+	void runWithEvent(Event event);
+
+	void update();
+}

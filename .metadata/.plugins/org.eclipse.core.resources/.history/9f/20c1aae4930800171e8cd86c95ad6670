@@ -1,0 +1,16 @@
+package org.eclipse.jdt.ui;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavaElementContentProvider {
+	void dispose();
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+
+	void elementChanged(final ElementChangedEvent event);
+}

@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.IWorkingSetPage;
+
+public interface IAbstractWorkingSetWizardPage {
+	boolean select(Viewer viewer, Object parentElement, Object element);
+
+	void createControl(Composite parent);
+
+	IWorkingSet getSelection();
+
+	void setSelection(IWorkingSet workingSet);
+
+	void finish();
+}

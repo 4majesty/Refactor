@@ -1,0 +1,63 @@
+package org.eclipse.jdt.internal.corext.refactoring;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+
+public interface IParameterInfo {
+	int getOldIndex();
+
+	boolean isDeleted();
+
+	void markAsDeleted();
+
+	boolean isAdded();
+
+	boolean isTypeNameChanged();
+
+	boolean isRenamed();
+
+	boolean isVarargChanged();
+
+	IVariableBinding getOldBinding();
+
+	String getOldTypeName();
+
+	String getNewTypeName();
+
+	void setNewTypeName(String type);
+
+	ITypeBinding getNewTypeBinding();
+
+	void setNewTypeBinding(ITypeBinding typeBinding);
+
+	boolean isOldVarargs();
+
+	boolean isNewVarargs();
+
+	String getOldName();
+
+	String getNewName();
+
+	void setNewName(String newName);
+
+	String getDefaultValue();
+
+	void setDefaultValue(String value);
+
+	String toString();
+
+	ITypeBinding getOldTypeBinding();
+
+	boolean isCreateField();
+
+	void setCreateField(boolean createField);
+
+	void setOldBinding(IVariableBinding binding);
+
+	void setInlined(boolean inlined);
+
+	boolean isInlined();
+
+	boolean isResolve();
+}

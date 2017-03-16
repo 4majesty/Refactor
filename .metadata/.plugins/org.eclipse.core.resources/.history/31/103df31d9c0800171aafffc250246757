@@ -1,0 +1,127 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.cdp.service.mentoring.jam.GetJamGoToGroupURL;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupInviteFailureEmail;
+import com.successfactors.cdp.service.mentoring.jam.util.JamUtil;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailUtils;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.service.FindUsersByIds;
+
+@Service
+public class SendJamGroupInviteFailureEmailImpl implements ServiceCommandImpl<Void, SendJamGroupInviteFailureEmail> {
+
+  /** logger. */
+  private static Logger log = LogManager.getLogger();
+
+  @Inject
+  @In(create=true)
+  private IMentoringEmailUtils mentoringEmailUtils;
+  
+  @Inject
+  @In(create=true)
+  private MentoringServiceBase mentoringServiceBase;
+
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+
+  @Inject
+  @In
+  /**param bean*/
+  private ParamBean params;
+
+  @Override
+  public Void execute(SendJamGroupInviteFailureEmail cmd) throws ServiceApplicationException {
+    MentoringProgram program = getProgram(cmd.getProgramId());
+
+    Collection<UserBean> failedUsers = getUserBeanByIds(cmd.getFailedUsers());
+    Collection<UserBean> recipients = getRecipients(program);
+
+    String programName = mentoringEmailUtils.escapleHtmlTag(program.getName());
+
+    for(UserBean recipient : recipients) {
+      Messages msgs = mentoringServiceBase.getMessageBundleByLocale(recipient.getUserLocale()); // get recipient locale specific v10 messages
+
+      String subject = getSubject(msgs, programName);
+      String goToGroupAliasURL = getGoToGroupAliasUrl(program.getJamGroupId(), msgs);
+      String nameStr = MentoringUtils.getCommaSeperatedFullNameString(failedUsers, msgs);
+      String body = getBody(msgs, programName, nameStr, goToGroupAliasURL);
+
+      mentoringEmailUtils.sendEmail(subject, body, new UserBean[] {recipient}, msgs);
+    }
+
+    return null;
+  }
+
+  private MentoringProgram getProgram(String programId) throws ServiceApplicationException {
+      return mentoringServiceBase.getProgramById(programId);
+  }
+
+  private String getSubject(IMessageBundle msgs, String programName) {
+    return msgs.format("DEVELOPMENT_MENTORING_JAM_GROUP_INVITE_FAILURE_EMAIL_SUBJECT", new Object[] {programName});
+  }
+
+  private String getBody(IMessageBundle msgs, String programName, String nameList, String goToGroupAliasURL) {
+    return msgs.format("DEVELOPMENT_MENTORING_JAM_GROUP_INVITE_FAILURE_EMAIL_BODY", new Object[] {nameList, programName, goToGroupAliasURL});
+  }
+
+  private Collection<UserBean> getUserBeanByIds(Collection<String> userIdList) throws ServiceApplicationException {
+    return scaHandler.execute(new FindUsersByIds(new ArrayList<String>(userIdList)));
+  }
+
+  private Collection<UserBean> getRecipients(MentoringProgram program) throws ServiceApplicationException {
+    Collection<String> recipientUserIds = new ArrayList<String>();
+
+    recipientUserIds.add(program.getCreatedBy()); // program creator may not be in the owner list
+    List<MentoringProgramOwner> owners = program.getOwners();
+
+    if(owners != null) {
+      for(MentoringProgramOwner owner : owners) {
+        recipientUserIds.add(owner.getUser());
+      }
+    }
+
+    Collection<UserBean> recipients = getUserBeanByIds(recipientUserIds);
+
+    return filterInvalidUsers(recipients); // return only valid users
+  }
+
+  private Collection<UserBean> filterInvalidUsers(Collection<UserBean> users) {
+    Collection<UserBean> validUsers = new ArrayList<UserBean>();
+
+    if (users != null) {
+      for (UserBean user : users) {
+        if(user != null && user.isValidUser()) {
+          validUsers.add(user);
+        }
+      }
+    }
+
+    return validUsers;
+  }
+
+  private String getGoToGroupAliasUrl(String groupId, IMessageBundle msgs) throws ServiceApplicationException {
+    return JamUtil.getGoToJamGroupAliasUrl(scaHandler.execute(new GetJamGoToGroupURL(groupId)), msgs);
+  }
+}

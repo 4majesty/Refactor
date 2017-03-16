@@ -1,0 +1,18 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IOpenSuperImplementationAction {
+	void selectionChanged(ITextSelection selection);
+
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(ITextSelection selection);
+
+	void run(IStructuredSelection selection);
+
+	void run(IMethod method);
+}

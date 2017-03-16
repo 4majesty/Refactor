@@ -1,0 +1,38 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import java.util.List;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
+import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.model.BaseWorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
+
+public interface ICreateMultipleSourceFoldersDialog {
+	Object getParent(Object element);
+
+	Object[] getChildren(Object element);
+
+	int open();
+
+	List getInsertedElements();
+
+	List getRemovedElements();
+
+	List getModifiedElements();
+
+	IPath getOutputLocation();
+}

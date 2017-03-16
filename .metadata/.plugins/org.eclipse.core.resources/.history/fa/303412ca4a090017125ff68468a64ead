@@ -1,0 +1,32 @@
+package com.successfactors.cdp.bean;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+
+import org.testng.annotations.Test;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
+public class CareerWorksheetSuggestedRoleVOSerializationTest {
+
+  @Test (groups={"checkin"})
+  public void testSerialization() throws IOException, ClassNotFoundException,
+  IllegalAccessException, InstantiationException{
+    CareerWorksheetSuggestedRoleVO clazz = CareerWorksheetSuggestedRoleVO.class.newInstance();
+    //Serialization
+    ByteOutputStream bos = new ByteOutputStream();
+    ObjectOutputStream os = new ObjectOutputStream(bos);
+    os.writeObject(clazz);
+    //De-serialization
+    ByteArrayInputStream bin = new ByteArrayInputStream(bos.toByteArray());
+    ObjectInputStream in = new ObjectInputStream(bin);
+    in.readObject();
+    // close stream
+    os.close();
+    in.close();
+  }
+}

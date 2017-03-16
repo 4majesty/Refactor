@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.jface.action.Action;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface ISortByDefiningTypeAction {
+	void run();
+}

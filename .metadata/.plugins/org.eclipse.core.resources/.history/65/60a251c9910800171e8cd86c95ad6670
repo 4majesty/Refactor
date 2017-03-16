@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+
+public interface IIncludeToBuildpathAction {
+	String getDetailedDescription();
+
+	void run();
+}

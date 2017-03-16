@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
+
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
+public interface ITypeEnvironment {
+	boolean equals(Object other);
+
+	int hashCode();
+
+	TType create(ITypeBinding binding);
+
+	TType[] create(ITypeBinding[] bindings);
+
+	TType getJavaLangObject();
+
+	ArrayType createArrayType(TType elementType, int dimensions);
+}

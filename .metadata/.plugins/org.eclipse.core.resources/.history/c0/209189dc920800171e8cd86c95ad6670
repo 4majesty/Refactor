@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+
+public interface INewJavaProjectPreferencePage {
+	void init(IWorkbench workbench);
+
+	void createControl(Composite parent);
+
+	boolean performOk();
+}

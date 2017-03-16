@@ -1,0 +1,56 @@
+package com.successfactors.cdp.service.mentoring.jam.util;
+
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+
+/**
+ * Jam utility class
+ * 
+ * @author rsrigiri
+ * 
+ * SAP SuccessFactors
+*/
+public class JamUtil {
+
+  /** logger. */
+  private static Logger log = LogManager.getLogger();
+
+  /**
+   * Returns Jam group Alias URL containing a group hyperlink
+   * 
+   * @param goToGroupURL
+   * @param msgs
+   * 
+   * @return String
+   */
+  public static String getGoToJamGroupAliasUrl(String goToGroupURL, IMessageBundle msgs) {
+    StringBuilder strBuilder = new StringBuilder();
+
+    strBuilder.append("<a href=\"")
+       .append(goToGroupURL)
+       .append("\">") 
+       .append(msgs.getString("DEVELOPMENT_MENTORING_JAM_GROUP_INVITE_EMAIL_ALIAS_URL_TEXT"))
+       .append("</a>");
+
+    return strBuilder.toString();
+  }
+
+  /**
+   * Returns Jam Go To Group URL
+   * 
+   * @param baseURL
+   * @param groupId
+   * 
+   * @return String - go to group URL
+   */
+  public static String getGoToGroupUrl(String baseURL, String groupId) {
+    StringBuilder strBuilder = new StringBuilder();
+
+    strBuilder.append(baseURL)
+              .append(JamConstants.GO_TO_GROUP_URL)
+              .append(groupId);
+
+    return strBuilder.toString();
+  }
+}

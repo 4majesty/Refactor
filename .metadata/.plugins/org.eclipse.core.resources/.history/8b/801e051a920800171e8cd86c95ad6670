@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import java.util.List;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.ui.texteditor.HippieProposalProcessor;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
+
+public interface IHippieProposalComputer {
+	List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor);
+
+	List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor);
+
+	String getErrorMessage();
+
+	void sessionStarted();
+
+	void sessionEnded();
+}

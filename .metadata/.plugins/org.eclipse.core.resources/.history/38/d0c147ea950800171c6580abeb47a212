@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.corext.refactoring.rename;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IRenameNonVirtualMethodProcessor {
+	boolean isApplicable();
+
+	String getDelegateUpdatingTitle(boolean plural);
+}

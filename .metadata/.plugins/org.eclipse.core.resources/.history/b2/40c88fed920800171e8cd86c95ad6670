@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.dnd.ViewerInputDropAdapter;
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+
+public interface ITypeHierarchyTransferDropAdapter {
+}

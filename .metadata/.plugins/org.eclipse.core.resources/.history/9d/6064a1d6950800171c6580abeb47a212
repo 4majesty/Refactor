@@ -1,0 +1,196 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.AssertStatement;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EmptyStatement;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.SynchronizedStatement;
+import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
+
+public interface IConstraintCollector {
+	void clear();
+
+	ITypeConstraint[] getConstraints();
+
+	boolean visit(AnonymousClassDeclaration node);
+
+	boolean visit(ArrayAccess node);
+
+	boolean visit(ArrayCreation node);
+
+	boolean visit(ArrayInitializer node);
+
+	boolean visit(ArrayType node);
+
+	boolean visit(AssertStatement node);
+
+	boolean visit(Assignment node);
+
+	boolean visit(Block node);
+
+	boolean visit(BooleanLiteral node);
+
+	boolean visit(BreakStatement node);
+
+	boolean visit(CastExpression node);
+
+	boolean visit(CatchClause node);
+
+	boolean visit(CharacterLiteral node);
+
+	boolean visit(ClassInstanceCreation node);
+
+	boolean visit(CompilationUnit node);
+
+	boolean visit(ConditionalExpression node);
+
+	boolean visit(ConstructorInvocation node);
+
+	boolean visit(ContinueStatement node);
+
+	boolean visit(DoStatement node);
+
+	boolean visit(EmptyStatement node);
+
+	boolean visit(ExpressionStatement node);
+
+	boolean visit(FieldAccess node);
+
+	boolean visit(FieldDeclaration node);
+
+	boolean visit(ForStatement node);
+
+	boolean visit(IfStatement node);
+
+	boolean visit(ImportDeclaration node);
+
+	boolean visit(InfixExpression node);
+
+	boolean visit(Initializer node);
+
+	boolean visit(InstanceofExpression node);
+
+	boolean visit(Javadoc node);
+
+	boolean visit(LabeledStatement node);
+
+	boolean visit(MethodDeclaration node);
+
+	boolean visit(MethodInvocation node);
+
+	boolean visit(NullLiteral node);
+
+	boolean visit(NumberLiteral node);
+
+	boolean visit(PackageDeclaration node);
+
+	boolean visit(ParenthesizedExpression node);
+
+	boolean visit(PostfixExpression node);
+
+	boolean visit(PrefixExpression node);
+
+	boolean visit(PrimitiveType node);
+
+	boolean visit(QualifiedName node);
+
+	boolean visit(ReturnStatement node);
+
+	boolean visit(SimpleName node);
+
+	boolean visit(SimpleType node);
+
+	boolean visit(SingleVariableDeclaration node);
+
+	boolean visit(StringLiteral node);
+
+	boolean visit(SuperConstructorInvocation node);
+
+	boolean visit(SuperFieldAccess node);
+
+	boolean visit(SuperMethodInvocation node);
+
+	boolean visit(SwitchCase node);
+
+	boolean visit(SwitchStatement node);
+
+	boolean visit(SynchronizedStatement node);
+
+	boolean visit(ThisExpression node);
+
+	boolean visit(ThrowStatement node);
+
+	boolean visit(TryStatement node);
+
+	boolean visit(TypeDeclaration node);
+
+	boolean visit(TypeDeclarationStatement node);
+
+	boolean visit(TypeLiteral node);
+
+	boolean visit(VariableDeclarationExpression node);
+
+	boolean visit(VariableDeclarationFragment node);
+
+	boolean visit(VariableDeclarationStatement node);
+
+	boolean visit(WhileStatement node);
+}

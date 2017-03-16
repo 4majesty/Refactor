@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.forms.widgets.SharedScrolledComposite;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IScrolledPageContent {
+	void adaptChild(Control childControl);
+
+	Composite getBody();
+}

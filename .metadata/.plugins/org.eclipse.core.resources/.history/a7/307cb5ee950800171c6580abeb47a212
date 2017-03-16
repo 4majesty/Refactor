@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
+public interface IWildcardType {
+	TType getBound();
+
+	TType[] getSubTypes();
+
+	boolean doEquals(TType type);
+
+	int hashCode();
+}

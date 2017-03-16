@@ -1,0 +1,48 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Service command to save a program entity.
+ * @author I309618
+ */
+public class SaveProgram implements ServiceCommand<SaveProgram> {
+  private IMentoringProgram program;
+  private String jamGroupName;
+  private String jamDescription;
+
+  /**
+   * Get program entity
+   * @return
+   */
+  public MentoringProgram getProgram() {
+    return program;
+  }
+
+  /**
+   * Set program entity
+   * @param program
+   */
+  public void setProgram(MentoringProgram program) {
+    this.program = program;
+  }
+
+  public String getJamGroupName() {
+    return jamGroupName;
+  }
+
+  public void setJamGroupName(String jamGroupName) {
+    this.jamGroupName = jamGroupName;
+  }
+
+  public String getJamDescription() {
+    return jamDescription;
+  }
+
+  public void setJamDescription(String jamDescription) {
+    this.jamDescription = jamDescription;
+  }
+  
+  
+}

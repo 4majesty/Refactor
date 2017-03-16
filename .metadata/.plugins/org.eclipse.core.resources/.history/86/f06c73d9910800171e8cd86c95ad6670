@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+
+public interface IMethodWrapperWorkbenchAdapter {
+	MethodWrapper getMethodWrapper();
+
+	Object[] getChildren(Object o);
+
+	ImageDescriptor getImageDescriptor(Object object);
+
+	String getLabel(Object o);
+
+	Object getParent(Object o);
+
+	boolean equals(Object obj);
+
+	int hashCode();
+}

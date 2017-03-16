@@ -1,0 +1,44 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.search.ui.ISearchPageContainer;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+public interface IJavaSearchPage {
+	void setJavaElement(IJavaElement javaElement);
+
+	boolean isCaseSensitive();
+
+	IJavaElement getJavaElement();
+
+	int getLimitTo();
+
+	String getPattern();
+
+	int getScope();
+
+	int getSearchFor();
+
+	IWorkingSet[] getWorkingSets();
+
+	int getIncludeMask();
+
+	int getMatchLocations();
+
+	void store(IDialogSettings settings);
+
+	boolean performAction();
+
+	void setVisible(boolean visible);
+
+	boolean isValid();
+
+	void createControl(Composite parent);
+
+	void dispose();
+
+	void setContainer(ISearchPageContainer container);
+}

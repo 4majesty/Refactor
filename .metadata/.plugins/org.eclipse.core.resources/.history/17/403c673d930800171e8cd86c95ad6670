@@ -1,0 +1,23 @@
+package org.eclipse.jdt.ui.wizards;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFieldGroup;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ISelectionButtonDialogFieldGroup;
+
+public interface INewClassWizardPage {
+	void init(IStructuredSelection selection);
+
+	void createControl(Composite parent);
+
+	void setVisible(boolean visible);
+
+	boolean isCreateMain();
+
+	boolean isCreateConstructors();
+
+	boolean isCreateInherited();
+
+	void setMethodStubSelection(boolean createMain, boolean createConstructors, boolean createInherited, boolean canBeModified);
+}

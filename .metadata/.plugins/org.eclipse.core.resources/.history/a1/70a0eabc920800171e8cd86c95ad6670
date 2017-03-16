@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.util;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+
+public interface ITypeNameMatchLabelProvider {
+	String getText(Object element);
+
+	Image getImage(Object element);
+}

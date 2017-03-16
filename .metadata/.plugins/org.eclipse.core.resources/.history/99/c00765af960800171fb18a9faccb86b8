@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls.search;
+
+import org.eclipse.core.runtime.Assert;
+
+public interface IProperties {
+	Object put(Object arg0, Object arg1);
+}

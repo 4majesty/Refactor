@@ -1,0 +1,61 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupForm;
+import com.successfactors.cdp.service.util.mentoring.SignupFormStatusEnum;
+import com.successfactors.sca.ServiceQuery;
+
+/**
+ * Service command to get mentor/mentee sign up form according to specified program ID, mentor/mentee ID and status
+ * @author Keqin Liu
+ * @param <T>
+ */
+public class GetMentoringSignupForm<T extends MentoringProgramSignupForm> implements ServiceQuery<T> {
+  private String programId;
+
+  private List<SignupFormStatusEnum> status = new ArrayList<SignupFormStatusEnum>();
+
+  private String participantId;
+  
+  private Class<? extends MentoringProgramSignupForm> clasz;
+
+  public String getProgramId() {
+    return programId;
+  }
+
+  public void setProgramId(String programId) {
+    this.programId = programId;
+  }
+
+  public List<SignupFormStatusEnum> getStatus() {
+    return status;
+  }
+
+  public void setStatus(List<SignupFormStatusEnum> status) {
+    this.status = status;
+  }
+  
+  public void setStatus(SignupFormStatusEnum... types) {
+    for (SignupFormStatusEnum type : types) {
+      this.status.add(type);
+    }
+  }
+
+  public String getParticipantId() {
+    return participantId;
+  }
+
+  public void setParticipantId(String participantId) {
+    this.participantId = participantId;
+  }
+
+  public Class<? extends MentoringProgramSignupForm> getClasz() {
+    return clasz;
+  }
+
+  public void setClasz(Class<? extends MentoringProgramSignupForm> clasz) {
+    this.clasz = clasz;
+  }
+}

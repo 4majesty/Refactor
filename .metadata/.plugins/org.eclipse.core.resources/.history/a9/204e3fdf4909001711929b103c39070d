@@ -1,0 +1,13 @@
+package com.successfactors.cdp.service;
+
+import com.successfactors.sca.ServiceQuery;
+
+public interface IGetCareerWorksheetSuggestedRoles {
+	long getTemplateId();
+
+	void setTemplateId(long templateId);
+
+	String getUserId();
+
+	void setUserId(String userId);
+}

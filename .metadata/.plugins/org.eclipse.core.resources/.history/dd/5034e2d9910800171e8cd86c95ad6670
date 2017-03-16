@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.util;
+
+import org.eclipse.jdt.internal.corext.util.Resources;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+
+public interface IElementValidator {
+}

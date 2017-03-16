@@ -1,0 +1,27 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import java.util.Iterator;
+import java.util.Map;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+
+public interface IPackageExplorerLabelProvider {
+	StyledString getStyledText(Object element);
+
+	String getText(Object element);
+
+	Image getImage(Object element);
+
+	void setIsFlatLayout(boolean state);
+
+	void dispose();
+}

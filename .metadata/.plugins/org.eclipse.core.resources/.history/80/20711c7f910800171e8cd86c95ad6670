@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IJavaElementLine {
+	void setFlags(int flags);
+
+	int getFlags();
+
+	ITypeRoot getJavaElement();
+
+	int getLine();
+
+	String getLineContents();
+
+	int getLineStartOffset();
+}

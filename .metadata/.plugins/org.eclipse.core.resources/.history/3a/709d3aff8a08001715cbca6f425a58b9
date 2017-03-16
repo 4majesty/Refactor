@@ -1,0 +1,9 @@
+package com.successfactors.platform.api;
+
+import com.successfactors.sca.ServiceCommand;
+
+public interface IGetPersonIdByUsersSysId {
+	String getUsersSysId();
+
+	boolean isGetByPersonIdExternal();
+}

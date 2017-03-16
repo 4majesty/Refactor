@@ -1,0 +1,236 @@
+/*
+ * $Id: SFCodeTemplate31.xml 67218 2009-03-18 19:07:17Z svn $
+ */
+package com.successfactors.crossinstancereport.service.client;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.platform.bean.CompanyBean;
+
+public enum ReportTypeEnum {
+  
+  /**
+   * GUIDEDTOURREPORT for guided tour usage report
+   */
+  GUIDEDTOURREPORT("guidedTourReport" , "Guided_Tour_Report.xml" , "Guided_Tour_Report",
+      CompanyBean.STATUS_TRIAL , null),
+  
+  /**
+   * SETUPWIZARDREPORT for setup wizard report
+   */
+  SETUPWIZARDREPORT("setUpWizardReport" , "SetUp_Wizard_Report.xml" , "SetUp_Wizard_Report" ,
+      -1 ,FeatureEnum.ENABLE_SETUP_WIZARD),
+   
+  /**
+   * Upgrade center Report
+   */
+  UPGRADECENTERREPORT("upgradeCenterReport" , "Upgrade_Center_Report.xml" , "Upgrade_Center_Report" ,
+      -1 ,null),
+  
+  /**
+   * Upgrade center Report
+   */
+  SUCCESSIONUSAGEREPORT("successionUsageReport" , "Succession_Usage_Report.xml" , "Succession_Usage_Report" ,
+      -1 ,null),
+
+  /**
+   * Calibration Report
+   */
+  CALIBRATIONREPORT("calibrationUsageReport" , "Calibration_Usage_Report.xml" , "Calibration_Usage_Report" ,
+      -1 ,null),
+
+  /**
+   * Calibration Report
+   */
+  CALIBRATIONTEMPLATEREPORT("calibrationTemplateReport" , "Calibration_Template_Report.xml" ,
+      "Calibration_Template_Report" , -1 ,null),
+
+  /**
+   * Presentations Usage Report
+   */
+  PRESENTATIONSUSAGEREPORT("presentationsUsageReport" , "Presentations_Usage_Report.xml" , "Presentations_Usage_Report" ,
+      -1 ,FeatureEnum.TALENT_REVIEW),
+
+  /**
+   * Presentations Permission Report
+   */
+  PRESENTATIONSPERMISSIONREPORT("presentationsPermissionReport" , "Presentations_Permission_Report.xml" , "Presentations_Permission_Report" ,
+      -1 ,null),
+  
+  /**
+   * Presentations Permission Report
+   */
+  TALENT_USAGE_REPORTS("talentUsageReport" , "Talent_Usage_Report.xml" , "Talent_Pillar_Customer_Report" ,
+      -1 ,null),
+
+  /**
+   * EC / EP Usage Report
+  */
+  EC_EP_USAGE_REPORTS("ecepUsageReport" , "EC_EP_Usage_Report.xml" , "EC_EP_Usage_Report" ,
+      -1 ,null),
+  /**
+   *  Instance Synchronization Reports   
+   */
+  INSTSYNCREPORT("instSyncReport" , "Instance_Sync_Report.xml" , "Inst_Sync_Report",
+              -1 , null),
+  
+  /**
+   * Execution Manager Report
+   */
+  EXECMANAGERREPORT("execManagerReport" , "Exec_Manager_Report.xml" , "Exec_Manager_Report",
+      -1 , null),
+  
+  /**
+   * RCM usage reports
+   */
+  RCMUSAGEREPORT("rcmUsageReport" , "RCM_Usage_Report.xml" , "RCM_Usage_Report" ,
+      -1 ,FeatureEnum.RECRUITING_V2),
+
+  /**
+   * Mentoring Usage Report
+   */
+  MENTORING_USAGE_REPORT("mentoringUsageReport" , "Mentoring_Usage_Report.xml" , "Mentoring_Usage_Report" ,
+      -1 ,FeatureEnum.CDP_MENTORING);
+
+  /**
+   * Standard field map for id to enum
+   */
+  private static Map<String, ReportTypeEnum> reportTypeMap = new HashMap<String, ReportTypeEnum>();
+  
+  /**
+   * Id of the report
+   */
+  private String reportTypeId;
+  
+  /**
+   * RDF file name for the report
+   */
+  private String fileName;
+  
+  /**
+   * Company status
+   */
+  private int companyStatus;
+  
+  /**
+   * reqFeature
+   */
+  private IFeatureEnum feature;
+
+  /**
+   * Report Name
+   */
+  private String reportName;
+  
+  static {
+    for(ReportTypeEnum reportType: ReportTypeEnum.values()) {
+      if(reportType.reportTypeId != null){
+        reportTypeMap.put(reportType.reportTypeId, reportType);
+      }
+      
+    }
+  }
+  private ReportTypeEnum(String id, String fileName , String reportName , int companyStatus ,
+      FeatureEnum requiredFeature) {
+    this.reportTypeId = id;
+    this.fileName = fileName;
+    this.reportName = reportName;
+    this.companyStatus = companyStatus;
+    this.feature = requiredFeature;
+  }
+  
+  /**
+   * get enum field by report id.
+   *
+   * @param reportTypeId
+   *            String
+   * @return ReportTypeEnum
+   */
+  public static ReportTypeEnum getStandardFieldEnum(String reportTypeId) {
+    return Collections.unmodifiableMap(reportTypeMap).get(reportTypeId);
+  }
+
+  /**
+   * getFileName
+   * @return the fileName
+   */
+  public String getFileName() {
+    return fileName;
+  }
+
+  /**
+   * setFileName
+   * @param fileName the fileName to set
+   */
+  public void setFileName(String fileName) {
+    this.fileName = fileName;
+  }
+
+  /**
+   * getReportTypeId
+   * @return the reportTypeId
+   */
+  public String getReportTypeId() {
+    return reportTypeId;
+  }
+
+  /**
+   * setReportTypeId
+   * @param reportTypeId the reportTypeId to set
+   */
+  public void setReportTypeId(String reportTypeId) {
+    this.reportTypeId = reportTypeId;
+  }
+
+  /**
+   * getReportName
+   * @return the reportName
+   */
+  public String getReportName() {
+    return reportName;
+  }
+
+  /**
+   * setReportName
+   * @param reportName the reportName to set
+   */
+  public void setReportName(String reportName) {
+    this.reportName = reportName;
+  }
+
+  /**
+   * getCompanyStatus
+   * @return the companyStatus
+   */
+  public int getCompanyStatus() {
+    return companyStatus;
+  }
+
+  /**
+   * setCompanyStatus
+   * @param companyStatus the companyStatus to set
+   */
+  public void setCompanyStatus(int companyStatus) {
+    this.companyStatus = companyStatus;
+  }
+
+  /**
+   * getFeature
+   * @return the feature
+   */
+  public FeatureEnum getFeature() {
+    return feature;
+  }
+
+  /**
+   * setFeature
+   * @param feature the feature to set
+   */
+  public void setFeature(FeatureEnum feature) {
+    this.feature = feature;
+  }
+
+}

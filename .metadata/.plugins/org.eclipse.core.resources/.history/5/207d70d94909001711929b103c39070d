@@ -1,0 +1,34 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.Collection;
+
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupInviteFailureEmail;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceSystemException;
+
+/**
+ * Abstract Jam group invite Observer
+ * 
+ * @author rsrigiri
+ *
+ */
+public abstract class AbstractJamGroupInviteObserver {
+
+  /** logger */
+  private static final Logger log = LogManager.getLogger(); 
+
+  protected void sendFailureEmail(String programId, Collection<String> participants) {
+    try {
+      getSCAHandler().execute(new SendJamGroupInviteFailureEmail(programId, participants));
+    } catch (ServiceApplicationException e) {
+      log.error("Exception occured while sending jam group invite failure email.",e);
+    } catch (ServiceSystemException e) {
+      log.error("Exception occured while sending jam group invite failure email.",e);
+    }
+  }
+
+  protected abstract ServiceCommandHandler getSCAHandler();
+}

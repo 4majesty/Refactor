@@ -1,0 +1,27 @@
+package com.successfactors.arb.bean;
+
+/**
+ * Factory class to instantiate StringPairVO
+ * 
+ * @author I073141
+ * @since b1508
+ */
+public class StringPairVOFactory {
+
+    /**
+     * Get StringPairVO instance
+     * 
+     * @return IStringPairVO
+     */
+    public static IStringPair getStringPairVO() {
+        return (IStringPair) ReflectiveInvoker.invoke("com.successfactors.arb.bean.StringPairVO", "get");
+    }
+
+    /**
+     * Private constructor
+     */
+    private StringPairVOFactory() {
+        // Empty block
+    }
+
+}

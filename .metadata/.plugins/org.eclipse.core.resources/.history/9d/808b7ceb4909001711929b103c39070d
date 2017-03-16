@@ -1,0 +1,13 @@
+package com.successfactors.cdp.service;
+
+import java.util.List;
+
+import com.successfactors.cdp.bean.CareerWorkSheetSuggestedRolesFilterSettingBean;
+import com.successfactors.sca.ServiceQuery;
+
+public class GetSuggestedRolesFilterFlags implements ServiceQuery<List<CareerWorkSheetSuggestedRolesFilterSettingBean>>{
+    
+    public GetSuggestedRolesFilterFlags() {
+        super();
+    }
+}

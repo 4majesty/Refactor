@@ -1,0 +1,133 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+import javax.persistence.Column;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+public interface IMentoringProgram {
+	String getExternalId();
+
+	void setExternalId(String externalCode);
+
+	Long getInternalId();
+
+	void setInternalId(Long internalId);
+
+	String getName();
+
+	void setName(String name);
+
+	String getDescription();
+
+	void setDescription(String description);
+
+	MentoringProgramSignupTemplate getSignupFormTemplate();
+
+	ProgramMatchingTypeEnum getMatchingType();
+
+	void setMatchingType(ProgramMatchingTypeEnum matchingType);
+
+	Date getMentorSignupDate();
+
+	void setMentorSignupDate(Date mentorSignupDate);
+
+	Date getMenteeSignupDate();
+
+	void setMenteeSignupDate(Date menteeSignupDate);
+
+	Date getMatchingDate();
+
+	void setMatchingDate(Date matchingDate);
+
+	Date getStartDate();
+
+	void setStartDate(Date startDate);
+
+	Date getEndDate();
+
+	void setEndDate(Date endDate);
+
+	void setSignupFormTemplate(MentoringProgramSignupTemplate signupFormTemplate);
+
+	ProgramStatusEnum getStatus();
+
+	void setStatus(ProgramStatusEnum status);
+
+	List<MentoringProgramMentor> getMentors();
+
+	void setMentors(List<MentoringProgramMentor> mentors);
+
+	List<MentoringProgramMentee> getMentees();
+
+	void setMentees(List<MentoringProgramMentee> mentees);
+
+	List<MentoringProgramEmailTemplate> getEmailTemplates();
+
+	void setEmailTemplates(List<MentoringProgramEmailTemplate> emailTemplates);
+
+	Long getRowId();
+
+	void setRowId(Long rowId);
+
+	Date getCompletedDate();
+
+	void setCompletedDate(Date completedDate);
+
+	Integer getMaximumOfMentee();
+
+	void setMaximumOfMentee(Integer maximumOfMentee);
+
+	Integer getMaximumOfMentor();
+
+	void setMaximumOfMentor(Integer maximumOfMentor);
+
+	String getPhotoId();
+
+	void setPhotoId(String photoId);
+
+	boolean isNeedMentorApproval();
+
+	void setNeedMentorApproval(boolean needMentorApproval);
+
+	List<MentoringProgramOwner> getOwners();
+
+	void setOwners(List<MentoringProgramOwner> owners);
+
+	boolean isMentorshipClosureEnabled();
+
+	void setMentorshipClosureEnabled(boolean mentorshipClosureEnabled);
+
+	boolean isJamEnabled();
+
+	void setJamEnabled(boolean jamEnabled);
+
+	String getJamGroupId();
+
+	void setJamGroupId(String jamGroupId);
+
+	Date getActualStartDate();
+
+	void setActualStartDate(Date actualStartDate);
+
+	Date getActualMentorSignupDate();
+
+	void setActualMentorSignupDate(Date actualMentorSignupDate);
+
+	Date getActualMenteeSignupDate();
+
+	void setActualMenteeSignupDate(Date actualMenteeSignupDate);
+
+	Date getActualMatchingDate();
+
+	void setActualMatchingDate(Date actualMatchingDate);
+}

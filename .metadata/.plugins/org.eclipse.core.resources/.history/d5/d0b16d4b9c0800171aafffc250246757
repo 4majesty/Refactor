@@ -1,0 +1,31 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import java.util.List;
+import com.successfactors.genericobject.api.model.APISubVersion;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.api.model.Type;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+
+public interface IMentoringProgramSignupTemplate {
+	int getRowId();
+
+	void setRowId(int rowId);
+
+	String getExternalId();
+
+	void setExternalId(String externalCode);
+
+	Long getInternalId();
+
+	void setInternalId(Long internalId);
+
+	List<MentoringProgramSignupTemplateSection> getSections();
+
+	void setSections(List<MentoringProgramSignupTemplateSection> sections);
+}

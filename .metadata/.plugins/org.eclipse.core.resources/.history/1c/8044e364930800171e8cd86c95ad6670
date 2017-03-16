@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
+
+public interface ILocationCopyAction {
+	void run();
+}

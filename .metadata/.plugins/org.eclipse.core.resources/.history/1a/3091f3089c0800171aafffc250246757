@@ -1,0 +1,52 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertTrue;
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.service.mentoring.jam.GetJamBaseURL;
+import com.successfactors.cdp.service.mentoring.jam.GetJamGoToGroupURL;
+import com.successfactors.cdp.service.mentoring.jam.util.JamConstants;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+
+public class GetJamGoToGroupURLImplTest {
+
+  @Mock
+  private ServiceCommandHandler mockSCAHandler;
+
+  @InjectMocks
+  private IGetJamGoToGroupURLImpl service;
+
+  private static final String JAM_BASE_URL = "http://test.sapjam.com";
+
+  private static final String MOCK_GROUP_ID = "2";
+
+  @BeforeMethod(groups = { "checkin" })
+  public void setup() {
+    service = new GetJamGoToGroupURLImpl();
+    MockitoAnnotations.initMocks(this);
+  }
+
+  @AfterMethod
+  public void tearDown() {
+    service = null;
+  }
+
+  @Test(groups = { "checkin" })
+  public void testGoToGroupURL() throws ServiceApplicationException {
+    when(mockSCAHandler.execute(isA(GetJamBaseURL.class))).thenReturn(JAM_BASE_URL);
+
+    String goToGroupURL = service.execute(new GetJamGoToGroupURL(MOCK_GROUP_ID));
+
+    assertTrue(goToGroupURL != null);
+    assertTrue((JAM_BASE_URL + JamConstants.GO_TO_GROUP_URL + MOCK_GROUP_ID).equals(goToGroupURL));
+  }
+}

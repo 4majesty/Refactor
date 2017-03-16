@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls.search;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+
+public interface IFileEntry {
+	IFile getPropertiesFile();
+
+	String getMessage();
+
+	String toString();
+
+	Object getAdapter(Class adapter);
+}

@@ -1,0 +1,304 @@
+/*
+ * $Id: FB2SimpleActionServlet.java 686064 2014-12-08 04:48:38Z szhang1 $
+ */
+
+package com.successfactors.legacy.ui.servlet;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.apache.commons.beanutils.ConstructorUtils;
+import com.successfactors.logging.api.Logger;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.ui.servlet.util.ServletUtils;
+import com.successfactors.platform.ui.servlet.BoilerPlateServlet;
+import com.successfactors.platform.ui.servlet.FB2Interface;
+import com.successfactors.platform.ui.servlet.FeatureNoticeServlet;
+import com.successfactors.platform.ui.servlet.FB2.FB2Context;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.pmcommon.util.Log;
+import com.successfactors.logging.api.LogManager;
+
+/**
+ *
+ * A generic servlet that can create on FB2 object or map to several different
+ * ones based on action. This servlet can be configured in the web.xml
+ * with init-params.
+ * 
+ * The following properties exist:
+ * useFbJsp - (optional and false by default)Indicates that this servlet should redirect to the jsp page 
+ * returned by the FB2 object(which can be the one found by action or the default one).
+ * 
+ * entryJSP - (required if useFbJsp is false) The starting jsp that will be redirected to.
+ * actionMap - (optional)XML tree describing the action id to FB class mappings.
+ * It has the following structure:
+ * <actions>
+ *   <action id="action id" class="fb2 class"/>
+ *    ... one or more action nodes ...
+ * </actions>
+ * 
+ * defaultFB2Class - (required)Name of the default FB2 class to use when no action 
+ * is specified.
+ * 
+ * requiredFeature - (optional) checks if the specified feature is enabled
+ * before allowing a request. 
+ * 
+ * Here is an example entry in the /www/metadata/servlet.xml:
+ * 
+ *    <servlet>
+      <servlet-name>blah</servlet-name>
+      <servlet-class>com.successfactors.legacy.ui.servlet.FB2SimpleActionServlet</servlet-class>
+      <init-param>
+         <param-name>entryJSP</param-name>
+         <param-value>/jsp/blah/main.jsp</param-value>
+      </init-param>
+      <init-param>
+         <param-name>useFBJspPage</param-name>
+         <param-value>false</param-value>
+      </init-param>
+      <init-param>
+         <param-name>requiredFeature</param-name>
+         <param-value>Legal Scan</param-value>
+      </init-param>
+      <init-param>
+         <param-name>actionMap</param-name>
+         <param-value>
+<![CDATA[
+<actions>
+   <action id="blah" class="com.successfactors.pmcommon.ui.servlet.simpleformtemplateeditor.FBFormController"/>
+   <action id="foo" class="blah.class"/>
+</actions>
+]]>
+         </param-value>
+      </init-param>
+      <init-param>
+         <param-name>defaultFB2Class</param-name>
+         <param-value>com.successfactors.pmcommon.ui.servlet.simpleformtemplateeditor.FBFormController</param-value>
+      </init-param>
+
+        <load-on-startup>100</load-on-startup>
+   </servlet>
+
+ * 
+ * 
+ */
+public class FB2SimpleActionServlet extends BoilerPlateServlet {
+  
+  public static final String REQ_FEATURE_PROP= "requiredFeature";
+  public static final String DEFAULT_FB2_PROP="defaultFB2Class";
+  public static final String USE_FB_JSP_PAGE ="useFBJspPage";
+  
+  public static final String ENTRY_JSP_PROP="entryJSP";
+  public static final String ACTION_MAP_PROP="actionMap";
+  
+  public static final Logger log = LogManager.getLogger();
+  
+  private Map actionClassMappings = null;
+  
+  private FeatureEnum feature;
+  private String defaultFBClass;
+  
+  private String prefix;
+  
+  private String actionParam;
+  
+  private String jspEntryPage;
+  
+  private boolean useFBJsp = false;
+  
+  
+  /**
+   * Method init
+   *
+   * @param    servletConfig       a  ServletConfig
+   *
+   * @throws   ServletException
+   *
+   */
+  public void init(ServletConfig servletConfig)
+    throws ServletException
+  {
+    super.init(servletConfig);
+
+    
+    StringBuffer errs = new StringBuffer();
+    
+    
+    defaultFBClass =ServletUtils.getRequiredConfigProp(servletConfig, DEFAULT_FB2_PROP, errs); 
+       
+    String tmp = servletConfig.getInitParameter(REQ_FEATURE_PROP);
+    if (!StringUtils.isEmpty(tmp)) {
+      feature = FeatureEnum.forProduct(tmp);
+    }
+    
+    
+    prefix = servletConfig.getServletName();
+    actionParam = prefix +"_action";
+    
+    
+    
+    String useFbJspStr = servletConfig.getInitParameter(USE_FB_JSP_PAGE);
+    useFBJsp = StringUtils.getBoolean(useFbJspStr);
+    
+    if (!useFBJsp)
+       jspEntryPage = ServletUtils.getRequiredConfigProp(servletConfig, ENTRY_JSP_PROP,errs);
+    
+    
+    
+    String mapStr = servletConfig.getInitParameter(ACTION_MAP_PROP);
+
+    // if any required properties are missing then throw exception.
+    if (errs.length() > 0)
+      throw new ServletException(errs.toString());
+    
+    if (!StringUtils.isEmpty(mapStr)) {
+      actionClassMappings = new HashMap();
+      ActionParser ap = new ActionParser(actionClassMappings);
+    
+      try {
+        ap.parse(mapStr);
+      } catch (Exception e) {
+        throw new ServletException("Failed to parse action mappings xml: " + e.getMessage(), e);
+      }
+      
+    }
+    
+  }
+  
+  public String getActionParamName()
+  {
+    return actionParam;
+  }
+  
+  
+  protected void continueProcess(
+    HttpServletRequest request,
+    HttpServletResponse response,
+    HttpSession session,
+    ParamBean params,
+    PermissionListBean permListBean,
+    Log logger,
+    EJBList ejbList)
+    throws ServletException, IOException
+  {
+    
+    
+    
+    // feature enforcement if configured
+    if (feature != null) {
+      if (featureEnforcementRedirect(session, response, feature,
+                                   FeatureNoticeServlet.violationUrl(feature),true))
+         return;
+    }
+
+    RequestDispatcher rd = null;
+    
+    FB2Interface fbI = null;
+
+      try {
+        FB2Context context = new FB2Context(request, response, this.getServletContext(), params, ejbList, null);
+        
+        String urlPrefix = request.getRequestURI() + "?" + BoilerPlateServlet.PARAM_COMPANYID + "=" + params.getCompanyId() + "&";
+        String fbId = request.getParameter(actionParam);
+        
+        Object parameters[] = new Object[3];
+        parameters[0] = context;
+        parameters[1] = "";
+        parameters[2] = urlPrefix;
+        
+        String clazz = null;
+        
+        if (!StringUtils.isEmpty(fbId))
+          clazz = (String)this.actionClassMappings.get(fbId);
+        
+        if ( !StringUtils.isEmpty(clazz)) {
+          
+          Class c = Class.forName(clazz);
+          
+          fbI = (FB2Interface) ConstructorUtils.invokeConstructor(c, parameters);
+
+        }
+        else if (!StringUtils.isEmpty(defaultFBClass)){
+          Class c = Class.forName(defaultFBClass);
+          fbI = (FB2Interface) ConstructorUtils.invokeConstructor(c, parameters);
+        } else {
+          String error = "Either an action request parameter [" + actionParam+"] must be passed in or a default FB2 class must be defined.";
+          log.error(error);
+          throw new ServletException("Either an action request parameter [" + actionParam+"] must be passed in or a default FB2 class must be defined.");
+        }
+                
+        fbI.process();
+        
+      } catch (Exception e) {
+        log.error("Exception caught: ", e);
+        // Assume the functional block Java class has already set the
+        // eventCode in "request".
+        rd = getServletConfig().getServletContext().getRequestDispatcher("/message");
+        rd.forward(request, response);
+        return;
+      }
+      request.setAttribute("fb", fbI);
+      
+      String destJsp = null;
+      if ( useFBJsp)
+        destJsp = fbI.renderBodyURL();
+      else
+        destJsp = jspEntryPage;
+      
+      rd = getServletConfig().getServletContext().getRequestDispatcher(destJsp);
+      rd.forward(request, response);
+      return;
+  }
+    
+  private class ActionParser extends DefaultHandler {
+      
+      private Map actions;
+      
+      public ActionParser(Map actions)
+      {
+        this.actions = actions;
+      }
+      
+      public void parse(String xml ) throws SAXException, IOException, ParserConfigurationException {
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        SAXParser xmlReader = factory.newSAXParser();
+        InputSource is = new InputSource();
+        is.setCharacterStream(new StringReader(xml));
+        xmlReader.parse(is, this);
+      }
+      
+
+      public void startElement(String uri, String localName, String qName, Attributes attrs) {
+        if (qName.equals("action")) {          
+          actions.put(attrs.getValue("id"), attrs.getValue("class"));
+        }
+      }
+
+    }
+    
+    
+}
+    
+  
+
+

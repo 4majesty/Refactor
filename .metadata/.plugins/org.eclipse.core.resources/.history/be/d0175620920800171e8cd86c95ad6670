@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jdt.ui.text.IColorManagerExtension;
+
+public interface IAbstractJavaScanner {
+	void initialize();
+
+	IToken nextToken();
+
+	boolean affectsBehavior(PropertyChangeEvent event);
+
+	void adaptToPreferenceChange(PropertyChangeEvent event);
+}

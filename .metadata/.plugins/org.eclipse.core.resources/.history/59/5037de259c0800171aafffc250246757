@@ -1,0 +1,7 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.sca.ServiceSystemException;
+
+public interface ISupervisedMatchJamGroupInviteObserver {
+	void onMatchSuccess(final ConfirmMatchingResult cmd);
+}

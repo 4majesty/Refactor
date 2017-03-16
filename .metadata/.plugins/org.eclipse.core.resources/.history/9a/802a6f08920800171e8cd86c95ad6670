@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.jface.resource.ImageDescriptor;
+
+public interface IImageImageDescriptor {
+	ImageData getImageData();
+
+	boolean equals(Object obj);
+
+	int hashCode();
+}

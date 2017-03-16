@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.dialogs;
+
+import org.eclipse.jface.dialogs.IMessageProvider;
+
+public interface IStatusUtil {
+}

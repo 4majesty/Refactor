@@ -1,0 +1,29 @@
+package com.successfactors.cdp.service.scheduledjob;
+
+import static com.successfactors.jobscheduler.ScheduledJobAttr.AttrType.PROVISIONING_SUPPORT;
+import static com.successfactors.jobscheduler.ScheduledJobAttr.AttrType.CUSTOMER_VISIBLE;
+
+import com.successfactors.jobscheduler.IScheduledJob;
+import com.successfactors.jobscheduler.ScheduledJobAttr;
+import com.successfactors.jobscheduler.ScheduledJobTypeSupport;
+
+@ScheduledJobAttr({PROVISIONING_SUPPORT, CUSTOMER_VISIBLE})
+public class MentoringProgramJamGroupInviteJobType extends ScheduledJobTypeSupport {
+  
+    public final static String NAME = "mentoringProgramJamGroupInvite";
+
+    @Override
+    public String getJobTypeName() {
+        return NAME;
+    }
+
+    @Override
+    public String getJobTypeLabelKey() {
+        return "DEVELOPMENT_MENTORING_PROGRAM_JAM_GROUP_INVITE_JOB";
+    }
+
+    @Override
+    public Class<? extends IScheduledJob> getJobClass() {
+        return MentoringProgramJamGroupInviteJob.class;
+    }
+}

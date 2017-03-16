@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.propertiesfileeditor;
+
+import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
+
+public interface IPropertyValueScanner {
+	boolean isWordStart(char c);
+
+	boolean isWordPart(char c);
+}

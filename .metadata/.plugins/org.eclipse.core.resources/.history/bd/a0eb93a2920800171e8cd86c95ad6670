@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ISmartTypingPreferencePage {
+}

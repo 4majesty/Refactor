@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
+
+public interface IFilteredElementTreeSelectionDialog {
+	void setPattern(String patternString);
+
+	boolean isElementVisible(Viewer viewer, Object element);
+
+	void setInitialFilter(String initialFilter);
+}

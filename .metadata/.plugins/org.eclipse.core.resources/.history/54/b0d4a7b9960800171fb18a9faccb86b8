@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls.search;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface INLSSearchQuery {
+	IStatus run(IProgressMonitor monitor);
+
+	String getLabel();
+
+	String getResultLabel(int nMatches);
+
+	boolean canRerun();
+
+	boolean canRunInBackground();
+
+	ISearchResult getSearchResult();
+}

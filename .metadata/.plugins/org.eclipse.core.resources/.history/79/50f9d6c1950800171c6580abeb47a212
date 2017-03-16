@@ -1,0 +1,39 @@
+package org.eclipse.jdt.internal.corext.refactoring.util;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.SynchronizedStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+
+public interface IStatementAnalyzer {
+	RefactoringStatus getStatus();
+
+	void endVisit(CompilationUnit node);
+
+	void endVisit(DoStatement node);
+
+	void endVisit(ForStatement node);
+
+	void endVisit(SwitchStatement node);
+
+	void endVisit(SynchronizedStatement node);
+
+	void endVisit(TryStatement node);
+
+	void endVisit(WhileStatement node);
+}

@@ -1,0 +1,45 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls.search;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
+import org.eclipse.jface.text.Position;
+import org.eclipse.search.ui.text.Match;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
+import org.eclipse.jdt.internal.ui.util.IStringMatcher;
+
+public interface INLSSearchResultRequestor {
+	void beginReporting();
+
+	void acceptSearchMatch(SearchMatch match) throws CoreException;
+
+	void reportUnusedPropertyNames(IProgressMonitor pm);
+
+	boolean hasPropertyKey(String key);
+
+	boolean isUsedPropertyKey(String key);
+}

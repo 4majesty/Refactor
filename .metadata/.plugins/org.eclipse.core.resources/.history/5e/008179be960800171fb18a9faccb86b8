@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+
+public interface ITextInputWizardPage {
+	String getInitialValue();
+
+	void dispose();
+
+	void setVisible(boolean visible);
+}

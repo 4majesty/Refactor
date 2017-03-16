@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.corext.refactoring;
+
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringActions;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
+
+public interface IRefactoringAvailabilityTester {
+}

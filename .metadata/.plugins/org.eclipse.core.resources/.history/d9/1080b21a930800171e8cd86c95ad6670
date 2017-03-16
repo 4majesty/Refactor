@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.contentassist.IContextInformationPresenter;
+import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
+
+public interface IJavaParameterListValidator {
+	void install(IContextInformation info, ITextViewer viewer, int documentPosition);
+
+	boolean isContextInformationValid(int position);
+
+	boolean updatePresentation(int position, TextPresentation presentation);
+}

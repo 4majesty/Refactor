@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
+
+public interface IBasicJavaEditorActionContributor {
+	void init(IActionBars bars, IWorkbenchPage page);
+
+	void contributeToMenu(IMenuManager menu);
+
+	void setActiveEditor(IEditorPart part);
+
+	void dispose();
+}

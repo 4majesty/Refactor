@@ -1,0 +1,30 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.List;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.sca.ServiceQuery;
+
+public interface IGetMentoringRequest {
+	String getProgramId();
+
+	void setProgramId(String programId);
+
+	List<MentorRequestStatusEnum> getStatus();
+
+	void setStatus(List<MentorRequestStatusEnum> status);
+
+	void setStatus(MentorRequestStatusEnum... types);
+
+	List<String> getMentorIds();
+
+	void setMentorIds(List<String> mentorIds);
+
+	void setMentorIds(String... ids);
+
+	List<String> getMenteeIds();
+
+	void setMenteeIds(List<String> menteeIds);
+
+	void setMenteeIds(String... ids);
+}

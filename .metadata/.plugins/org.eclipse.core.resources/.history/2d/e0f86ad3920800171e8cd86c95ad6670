@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+
+public interface ITypeMismatchSubProcessor {
+}

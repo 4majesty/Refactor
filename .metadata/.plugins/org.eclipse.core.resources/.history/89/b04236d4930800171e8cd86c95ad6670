@@ -1,0 +1,47 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.views.framelist.FrameAction;
+import org.eclipse.ui.views.framelist.FrameList;
+import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
+import org.eclipse.jdt.ui.actions.NavigateActionGroup;
+import org.eclipse.jdt.ui.actions.OpenProjectAction;
+import org.eclipse.jdt.ui.actions.ProjectActionGroup;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.jdt.internal.ui.actions.CollapseAllAction;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
+import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup;
+import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
+import org.eclipse.jdt.ui.actions.INavigateActionGroup;
+import org.eclipse.jdt.internal.ui.actions.ISelectAllAction;
+import org.eclipse.jdt.internal.ui.actions.ICollapseAllAction;
+import org.eclipse.jdt.ui.actions.IRefactorActionGroup;
+import org.eclipse.jdt.ui.actions.IProjectActionGroup;
+import org.eclipse.jdt.ui.actions.ICustomFiltersActionGroup;
+
+public interface IPackageExplorerActionGroup {
+	void dispose();
+
+	void fillActionBars(IActionBars actionBars);
+
+	void updateToolBar(IToolBarManager toolBar);
+
+	void fillContextMenu(IMenuManager menu);
+
+	FrameAction getUpAction();
+
+	FrameAction getBackAction();
+
+	FrameAction getForwardAction();
+
+	ViewActionGroup getWorkingSetActionGroup();
+
+	CustomFiltersActionGroup getCustomFilterActionGroup();
+
+	FrameList getFrameList();
+}

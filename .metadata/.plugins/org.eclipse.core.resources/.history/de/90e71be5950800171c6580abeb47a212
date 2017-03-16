@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.corext.refactoring.reorg;
+
+import java.util.Map;
+
+public interface ICreateTargetExecutionLog {
+	Object getCreatedElement(Object selection);
+
+	Object[] getCreatedElements();
+
+	Object[] getSelectedElements();
+
+	void markAsCreated(Object selection, Object element);
+}

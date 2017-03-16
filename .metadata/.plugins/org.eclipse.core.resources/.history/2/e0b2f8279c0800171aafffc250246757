@@ -1,0 +1,14 @@
+package com.successfactors.cdp.service.impl;
+
+import org.jboss.seam.annotations.In;
+import com.successfactors.cdp.api.dao.SuggestedRolesSettingDAO;
+import com.successfactors.cdp.service.SetSuggestedRolesFilterFlags;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+public interface ISetSuggestedRolesFilterFlagsImpl {
+	Void execute(SetSuggestedRolesFilterFlags cmd) throws ServiceApplicationException;
+}

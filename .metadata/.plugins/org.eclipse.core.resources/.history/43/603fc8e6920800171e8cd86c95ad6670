@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaEditor;
+
+public interface ICopyQualifiedNameAction {
+	void selectionChanged(IStructuredSelection selection);
+
+	void selectionChanged(ITextSelection selection);
+
+	void run();
+}

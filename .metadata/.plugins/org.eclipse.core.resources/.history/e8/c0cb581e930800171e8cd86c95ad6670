@@ -1,0 +1,14 @@
+package org.eclipse.jdt.ui.text.java;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+
+public interface IAbstractProposalSorter {
+	void beginSorting(ContentAssistInvocationContext context);
+
+	int compare(ICompletionProposal p1, ICompletionProposal p2);
+
+	void endSorting();
+
+	int compare(Object o1, Object o2);
+}

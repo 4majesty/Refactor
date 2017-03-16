@@ -1,0 +1,26 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.jface.preference.ColorSelector;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+public interface IJavaEditorAppearanceConfigurationBlock {
+	Control createControl(Composite parent);
+
+	void initialize();
+
+	void performDefaults();
+}

@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+public interface IIntroduceIndirectionInputPage {
+	void createControl(Composite parent);
+
+	IWizardPage getNextPage();
+}

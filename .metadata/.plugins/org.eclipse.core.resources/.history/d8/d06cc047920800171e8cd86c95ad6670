@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IClasspathContainerSelectionPage {
+	String getText(Object element);
+
+	void createControl(Composite parent);
+
+	ClasspathContainerDescriptor getSelected();
+
+	ClasspathContainerDescriptor[] getContainers();
+
+	boolean canFlipToNextPage();
+
+	void setVisible(boolean visible);
+}

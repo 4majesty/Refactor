@@ -1,0 +1,10 @@
+package org.eclipse.jdt.ui;
+
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
+
+public interface IJavaElementLabels {
+}

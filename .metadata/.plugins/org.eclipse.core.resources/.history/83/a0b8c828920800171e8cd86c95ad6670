@@ -1,0 +1,29 @@
+package org.eclipse.jdt.ui.refactoring;
+
+import java.lang.reflect.InvocationTargetException;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
+import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameSelectionState;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter;
+
+public interface IRenameSupport {
+	IStatus preCheck();
+
+	void openDialog(Shell parent) throws CoreException;
+
+	boolean openDialog(Shell parent, boolean showPreviewOnly) throws CoreException;
+
+	void perform(Shell parent, IRunnableContext context) throws InterruptedException, InvocationTargetException;
+}

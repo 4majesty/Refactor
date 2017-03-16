@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import java.net.URL;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IJavadocLocationDialog {
+	URL getResult();
+}

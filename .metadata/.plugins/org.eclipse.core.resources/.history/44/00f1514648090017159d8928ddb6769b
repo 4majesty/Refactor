@@ -1,0 +1,24 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import org.apache.http.message.BasicNameValuePair;
+import org.jboss.seam.annotations.In;
+import com.successfactors.cdp.service.mentoring.jam.MakeJamGroupAdminByMemberId;
+import com.successfactors.cdp.service.mentoring.jam.exception.JamAuthenticationException;
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.cdp.service.mentoring.jam.util.MakeGroupAdminConstants;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sfutil.UrlUtils;
+
+public interface IMakeJamGroupAdminByMemberIdImpl {
+	Boolean execute(MakeJamGroupAdminByMemberId cmd) throws ServiceApplicationException;
+
+	ServiceCommandHandler getSCAHandler();
+
+	ParamBean getParams();
+}

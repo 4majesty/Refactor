@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+public interface IBasicElementLabels {
+}

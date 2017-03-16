@@ -1,0 +1,11 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IFindStringsToExternalizeAction {
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(final IStructuredSelection selection);
+}

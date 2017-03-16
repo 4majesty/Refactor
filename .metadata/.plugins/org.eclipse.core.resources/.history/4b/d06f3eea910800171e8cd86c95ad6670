@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.fix;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+
+public interface IControlStatementsCleanUp {
+	CleanUpRequirements getRequirements();
+
+	ICleanUpFix createFix(CleanUpContext context) throws CoreException;
+
+	String[] getStepDescriptions();
+
+	String getPreview();
+}

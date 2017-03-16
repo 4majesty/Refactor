@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls;
+
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringDialogField;
+
+public interface IRenameKeysDialog {
+}

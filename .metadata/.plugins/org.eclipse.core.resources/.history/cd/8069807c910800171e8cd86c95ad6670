@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.dnd;
+
+import org.eclipse.jface.util.TransferDropTargetListener;
+import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
+
+public interface IJdtViewerDropSupport {
+	void addDropTargetListener(TransferDropTargetListener listener);
+
+	void start();
+
+	void setFeedbackEnabled(boolean enabled);
+}

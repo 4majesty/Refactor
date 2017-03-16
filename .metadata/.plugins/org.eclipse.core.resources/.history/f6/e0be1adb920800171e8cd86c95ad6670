@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.preferences.cleanup;
+
+import java.util.Map;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage;
+import org.eclipse.jdt.internal.ui.preferences.formatter.IJavaPreview;
+
+public interface ICleanUpTabPage {
+	void setOptionsKind(int kind);
+
+	void setWorkingValues(Map workingValues);
+
+	boolean isSaveAction();
+
+	int getCleanUpCount();
+
+	int getSelectedCleanUpCount();
+}

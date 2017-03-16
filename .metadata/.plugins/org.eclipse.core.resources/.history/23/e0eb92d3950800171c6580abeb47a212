@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.corext.refactoring.scripting;
+
+import java.util.Map;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
+
+public interface IInlineConstantRefactoringContribution {
+	Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException;
+
+	RefactoringDescriptor createDescriptor();
+
+	RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags);
+}

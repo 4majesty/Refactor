@@ -1,0 +1,19 @@
+package com.successfactors.cdp.service.mentoring.jam.util;
+
+import static org.testng.Assert.assertTrue;
+
+import org.testng.annotations.Test;
+
+public class JamUtilImplTest {
+
+  private static final String MOCK_GROUP_ID = "1";
+
+  private static final String JAM_BASE_URL = "http://test.sapjam.com";
+
+  @Test(groups = { "checkin" })
+  public void testGoToGroupUrl() {
+    String goToGroupUrl = JamUtil.getGoToGroupUrl(JAM_BASE_URL, MOCK_GROUP_ID);
+
+    assertTrue((JAM_BASE_URL + JamConstants.GO_TO_GROUP_URL + MOCK_GROUP_ID).equals(goToGroupUrl));
+  }
+}

@@ -1,0 +1,243 @@
+package com.successfactors.cdp.ui.controller;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.MentoringConstants;
+import com.successfactors.cdp.service.util.mentoring.MentoringDateUtils;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentee;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.ui.controller.mentoring.MentoringProgramController;
+import com.successfactors.cdp.ui.util.mentoring.MentoringProgramViewConstants;
+import com.successfactors.competency.service.GetRolesByJobCode;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.user.service.FindUserById;
+import com.successfactors.xi.ui.messages.SFMessages;
+
+public class MentoringProgramControllerTest {
+  private IMentoringProgramController controller;
+
+  private ParamBean params;
+
+  private SFMessages msgs;
+
+  /** service command handler */
+  protected ServiceCommandHandler scaHandler;
+  
+  /** service command handler */
+  protected ServiceCommandHandler scaHandler2;
+
+  /** service command handler */
+  private LocalContextSCAHandler localHandler;
+
+  private Mockery context;
+
+  
+  
+  @BeforeMethod(groups={"checkin"})
+  public void setUp() throws Exception {
+    controller = new MentoringProgramController();
+    ParamBean mockParamBean = new ParamBean();
+    context = new Mockery();
+    context.setImposteriser(ClassImposteriser.INSTANCE);
+    mockParamBean.setUserId("cgrant");
+    msgs = context.mock(SFMessages.class);
+    scaHandler = mock(ServiceCommandHandler.class);
+    scaHandler2 = mock(ServiceCommandHandler.class);
+    TestUtils.setField(controller, "scaHandler", scaHandler);
+    TestUtils.setField(controller, "params", params);
+    TestUtils.setField(controller, "msgs", msgs);
+  }
+
+  private List<MentoringProgramMentee> mockMeteeList() {
+    List<MentoringProgramMentee> mentees = new ArrayList<MentoringProgramMentee>();
+    MentoringProgramMentee mentee1 = new MentoringProgramMentee();
+    mentee1.setUser("admin3");
+    mentees.add(mentee1);
+    return mentees;
+  }
+
+  private List<MentoringProgramMentor> mockMentorList() {
+    List<MentoringProgramMentor> mentors = new ArrayList<MentoringProgramMentor>();
+    MentoringProgramMentor mentor1 = new MentoringProgramMentor();
+    mentor1.setUser("admin1");
+    mentors.add(mentor1);
+    return mentors;
+
+  }
+
+  private MentoringProgramMentorRequest mockMentorRequestBean(String userId)
+      throws ParseException {
+    SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = fmt.parse("2016-11-11");
+    MentoringProgramMentorRequest mentorRequestBean = new MentoringProgramMentorRequest();
+    mentorRequestBean.setMentee("abc");
+    mentorRequestBean.setMentor(userId);
+    mentorRequestBean.setProgramId("1234");
+    mentorRequestBean.setMentoringRequestStatus(MentorRequestStatusEnum.ACCEPTED);
+    mentorRequestBean.setAcceptDate(date);
+    return mentorRequestBean;
+
+  }
+  
+  private MentoringProgram mockMentoringProgram(){
+    MentoringProgram program = new MentoringProgram();
+    
+    program.setDescription("Mentoring Program Description");
+    program.setExternalId("1234");
+    program.setMatchingType(ProgramMatchingTypeEnum.UNSUPERVISED);
+    program.setMentees(mockMeteeList());
+    program.setMentors(mockMentorList());
+    program.setName("First Mentoring Program");
+    program.setStatus(ProgramStatusEnum.CONFIRMED);
+    program.setStartDate(new Date("2016/01/01"));
+    program.setEndDate(new Date("2016/12/31"));
+    
+    return program;
+  }
+  
+  private Map<String, String> mockExpectedResult(){
+    Map<String, String> result = new HashMap<String, String>();
+    result.put("userId", "admin1");
+    result.put("userName", "");
+    result.put("since", "11/11/2016");
+    result.put("title", "Arthitecture");
+    result.put("oneOneMeeting", "1/1/2016 00:00:00");
+    result.put("actionPlan", "Null");
+    
+    return result;
+  }
+
+  @Test(groups={"checkin"})
+ public void testgenerateCardInfo() {
+    try {
+      String userId = "abc";
+      MentoringProgramMentorRequest request = mockMentorRequestBean(userId);
+      MentoringProgram program = mockMentoringProgram();
+      boolean isMentor = true;
+      
+      Class[] parameterTypes = new Class[3];
+      parameterTypes[0] = Object.class;
+      parameterTypes[1] = MentoringProgram.class;
+      parameterTypes[2] = Boolean.class;
+      
+      UserBean rtnUserBean = new UserBeanImpl();
+      rtnUserBean.setUserId(userId);
+      rtnUserBean.setUserJobCode("jobCode");
+      
+      Vector roles = new Vector();
+      RoleBean role = new RoleBean();
+      role.setRoleName("Arthitecture");
+      roles.add(role);
+      
+      Method method = controller.getClass().getDeclaredMethods()[3]; //controller.getClass().getDeclaredMethod("generateCardInfo", parameterTypes);
+      method.setAccessible(true);
+      
+      when(scaHandler.execute(any(FindUserById.class))).thenReturn(rtnUserBean);
+      when(scaHandler2.execute(any(GetRolesByJobCode.class))).thenReturn(roles);    
+
+      Object[] args = {request, program, isMentor};
+      Object rtnVal = method.invoke(controller, args);
+      
+      Map<String, String> result = (Map<String, String>)rtnVal;
+            
+      Assert.assertEquals(result, mockExpectedResult());
+    } catch (ParseException e) {
+      e.printStackTrace();
+    } catch (SecurityException e) {
+      e.printStackTrace();
+    } catch (IllegalAccessException e) {
+      e.printStackTrace();
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+    } catch (InvocationTargetException e) {
+      e.printStackTrace();
+    } catch (ServiceApplicationException e) {
+      e.printStackTrace();
+    }
+
+  }
+  
+  @Test(groups={"checkin"})
+  public void testGetLastDay(){
+    MentoringProgram program = new MentoringProgram();
+    program.setMenteeSignupDate(new Date("2016/1/1"));
+    program.setMatchingDate(new Date("2016/2/28"));
+    
+    Method targetMethod = null;
+    for(Method method : controller.getClass().getDeclaredMethods()){
+      if(method.getName().toUpperCase().equals("GETLASTDAY")){
+        targetMethod = method;
+      }
+    }
+    if(targetMethod!=null){
+      targetMethod.setAccessible(true);
+      try {
+        Object rtnVal = targetMethod.invoke(controller, program, MentoringProgramViewConstants.MENTEE);
+        Date finalDate = (Date) rtnVal;
+        Assert.assertEquals(finalDate.getTime(), new Date("2016/2/27").getTime());
+      } catch (IllegalAccessException | IllegalArgumentException
+          | InvocationTargetException e) {        
+        e.printStackTrace();
+      }
+    }
+  }
+
+
+  @Test(groups={"checkin"})
+  public void testGetMentoringProgramCompletedDate() {
+    // mock program
+    MentoringProgram program = new MentoringProgram();
+    Date programCompletedDate = new Date();
+    program.setCompletedDate(programCompletedDate);
+    program.setStatus(ProgramStatusEnum.COMPLETED);
+
+    // mock expectation
+    String expectationDate = MentoringDateUtils.formatDate(programCompletedDate, MentoringConstants.DEFAULT_DATE_FORMAT);
+
+    // execute method
+    String targetMethodName = "getMentoringProgramCompletedDate";
+    for(Method m : controller.getClass().getDeclaredMethods()){
+      if(targetMethodName.toUpperCase().equals(m.getName().toUpperCase())){
+        try{
+          m.setAccessible(true);
+          Object[] args = new Object[]{program};
+          Object result = m.invoke(controller,args);
+          Assert.assertEquals(expectationDate,(String)result);
+        }catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e){
+          e.printStackTrace();
+        }
+      }
+    }
+  }
+}

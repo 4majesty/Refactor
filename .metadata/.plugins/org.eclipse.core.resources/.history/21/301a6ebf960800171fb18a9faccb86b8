@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
+public interface IMessageWizardPage {
+	void createControl(Composite parent);
+}

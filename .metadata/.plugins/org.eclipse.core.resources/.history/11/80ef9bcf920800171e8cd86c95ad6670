@@ -1,0 +1,21 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.NewProjectAction;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IAbstractOpenWizardAction {
+	void run();
+
+	void setSelection(IStructuredSelection selection);
+
+	void setShell(Shell shell);
+
+	IJavaElement getCreatedElement();
+}

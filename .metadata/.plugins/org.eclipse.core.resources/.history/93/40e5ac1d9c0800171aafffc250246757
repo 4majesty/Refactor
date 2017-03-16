@@ -1,0 +1,37 @@
+package com.successfactors.cdp.service.util.mentoring.email;
+
+import static org.testng.Assert.*;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+
+public class MentoringEmailUtilsTest {
+  private IMentoringEmailUtils service;
+  
+  @BeforeMethod(groups = { "checkin" })
+  public void setup() {
+    service = new MentoringEmailUtils();
+  }
+
+  @Test(groups = { "checkin" })
+  public void excludeInvalidRecipient() {
+    List<UserBean> list = new LinkedList();
+    list.add(createUser(true));
+    list.add(createUser(true));
+    list.add(createUser(false));
+    
+    List<UserBean> result = service.excludeInvalidRecipient(list);
+    assertEquals(result.size(), 2, "on invalid user should have been removed");
+  }
+
+  private UserBean createUser(boolean valid) {
+    UserBeanImpl bean = new UserBeanImpl();
+    bean.setUserIsValid(valid? UserBean.FLAG_VALID_USER : UserBean.FLAG_INVALID_USER);
+    return bean;
+  }
+}

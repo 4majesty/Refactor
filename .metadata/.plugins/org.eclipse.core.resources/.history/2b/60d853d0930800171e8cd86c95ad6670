@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.text.template.contentassist;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.ProposalPosition;
+
+public interface IVariablePosition {
+	boolean equals(Object o);
+
+	int hashCode();
+
+	ICompletionProposal[] getChoices();
+
+	MultiVariable getVariable();
+}

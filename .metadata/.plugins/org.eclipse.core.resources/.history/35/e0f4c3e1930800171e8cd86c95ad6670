@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
+import org.eclipse.jdt.ui.actions.SurroundWithTryCatchAction;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitEditor;
+import org.eclipse.jdt.ui.actions.ISurroundWithTryCatchAction;
+
+public interface ISurroundWithActionGroup {
+	void fillActionBars(IActionBars actionBar);
+
+	void fillContextMenu(IMenuManager menu);
+}

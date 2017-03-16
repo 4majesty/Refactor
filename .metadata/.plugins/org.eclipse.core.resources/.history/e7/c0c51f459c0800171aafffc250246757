@@ -1,0 +1,9 @@
+package com.successfactors.cdp.service.upgrade.impl;
+
+import com.successfactors.cdp.service.upgrade.InitSuggestedRolesWeight;
+import com.successfactors.sca.ServiceApplicationException;
+import javax.inject.Inject;
+
+public interface IInitSuggestedRolesWeightImpl {
+	Void execute(InitSuggestedRolesWeight cmd) throws ServiceApplicationException;
+}

@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.debug.ui.console.IConsole;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavadocConsoleLineTracker {
+	void linkEntered();
+
+	void linkExited();
+
+	void linkActivated();
+
+	void init(IConsole console);
+
+	void lineAppended(IRegion line);
+
+	void dispose();
+}

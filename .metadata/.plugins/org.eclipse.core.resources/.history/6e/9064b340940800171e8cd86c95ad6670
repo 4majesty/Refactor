@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+
+public interface ILocalHistoryActionGroup {
+	void fillContextMenu(IMenuManager menu);
+}

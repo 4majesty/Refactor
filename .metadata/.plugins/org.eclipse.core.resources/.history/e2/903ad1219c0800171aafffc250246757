@@ -1,0 +1,24 @@
+/*
+ * $Id$
+ */
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.sca.ServiceQuery;
+
+/**
+ * SCA to fetch Mentoring Program for a given Id
+ * 
+ * @author rsrigiri
+ */
+public class GetProgramById implements ServiceQuery<MentoringProgram> {
+  private String programId;
+
+  public GetProgramById(String programId) {
+    this.programId = programId;
+  }
+
+  public String getProgramId() {
+    return programId;
+  }
+}

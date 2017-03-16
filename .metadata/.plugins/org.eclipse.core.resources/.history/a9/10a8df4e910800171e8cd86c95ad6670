@@ -1,0 +1,15 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
+
+public interface IOpenNewInterfaceWizardAction {
+	void setConfiguredWizardPage(NewInterfaceWizardPage page);
+
+	void setOpenEditorOnFinish(boolean openEditorOnFinish);
+}

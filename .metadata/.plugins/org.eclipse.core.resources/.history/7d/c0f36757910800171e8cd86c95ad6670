@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.model;
+
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
+
+public interface IJavaModelAdapterFactory {
+	Object getAdapter(final Object adaptable, final Class adapter);
+
+	Class[] getAdapterList();
+}

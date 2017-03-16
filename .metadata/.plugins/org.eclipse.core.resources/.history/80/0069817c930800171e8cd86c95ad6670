@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavaElementLinks {
+	String getElementName(IJavaElement element);
+}

@@ -1,0 +1,145 @@
+package com.successfactors.cdp.service.impl;
+
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.bean.CareerWorksheetScoreCriteriaBean;
+import com.successfactors.cdp.bean.SuggestedRolesSettingBean;
+import com.successfactors.cdp.bean.SuggestedRolesSubItemBean;
+import com.successfactors.cdp.api.dao.SuggestedRolesSettingDAO;
+import com.successfactors.cdp.service.GetSuggestedRolesWeight;
+import com.successfactors.competency.bean.CompetencySearchSpecBean;
+import com.successfactors.competency.dao.CompetencyDAO;
+import com.successfactors.db.dao.DAOException;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.legacy.bean.SearchResultBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+import javax.inject.Inject;
+
+@Service
+public class GetSuggestedRolesWeightImpl implements ServiceQueryImpl<Map<String, SuggestedRolesSettingBean>, GetSuggestedRolesWeight> {
+
+  @Inject
+  @In
+  ParamBean params;
+  
+  @Inject
+  @In
+  Connection dbConnection;
+  
+  private static Logger logger = LogManager.getLogger();
+  
+  private SuggestedRolesSettingDAO settingDAO = DAOFactory.getDAOFactory().getSuggestedRolesSettingDAO();
+  
+  private CompetencyDAO compDAO = DAOFactory.getDAOFactory().getCompetencyDAO();
+  
+  @Override
+  public Map<String, SuggestedRolesSettingBean> execute(GetSuggestedRolesWeight cmd)
+      throws ServiceApplicationException {
+    try {
+      String companySchema = params.getCompanySchema();
+      Locale locale = params.getLocale();
+      Map<String, SuggestedRolesSettingBean> settingMap = 
+          settingDAO.getSuggestedRolesSetting(companySchema, locale.toString(), dbConnection);
+      
+      if(settingMap != null && settingMap.keySet().contains(CareerWorksheetScoreCriteriaBean.COMPETENCY)) {
+        SuggestedRolesSettingBean compWeight = settingMap.get(CareerWorksheetScoreCriteriaBean.COMPETENCY);
+        boolean compEnabled = compWeight.isEnabled();
+        
+        CompetencySearchSpecBean criteria = new CompetencySearchSpecBean();
+        criteria.setFilter(CompetencySearchSpecBean.FILTER_COMPETENCIES);
+        criteria.setLocale(locale);
+        SearchResultBean result = compDAO.getCompetencyLibraryNames(companySchema, dbConnection, criteria);
+        List allLibraryNames = result.getResultList();
+        
+        // CompetencyDAO returns the final competency libraries stored in DB.
+        // It may different with the existing library setting for suggested roles.
+        // Since the default value for library is enabled, need merge the result.
+        // 1. If library is in weight setting but not in competency table, remove it from weight
+        // 2. If library is in competency table but not in weight setting, add it to weight with enabled=true
+        Map<String, SuggestedRolesSubItemBean> finalSubItems = new HashMap<String, SuggestedRolesSubItemBean>();
+        if (allLibraryNames != null && allLibraryNames.size() > 0) {
+          Map<String, SuggestedRolesSubItemBean> subItemMap = compWeight.getSubItems();
+          
+          // remove the enabled item from subItem setting of library, since the default value is true.
+          if(subItemMap != null && subItemMap.size() > 0) {
+            for (SuggestedRolesSubItemBean libItem : subItemMap.values()) {
+              Set<SuggestedRolesSubItemBean> subItemSet = libItem.getSubItems();
+              if (subItemSet!=null && subItemSet.size()>0) {
+                Iterator<SuggestedRolesSubItemBean> ite = subItemSet.iterator();
+                while(ite.hasNext()) {
+                  if(ite.next().isEnabled()) {
+                    ite.remove();
+                  }
+                }
+              }
+            }
+          }
+          
+          // merge result
+          for(Object lName : allLibraryNames) {
+            //start
+            //record whether the library is enabled, by default, it should be true
+            boolean libEnabled = compEnabled;
+            Set<SuggestedRolesSubItemBean> subItemSet = new LinkedHashSet<SuggestedRolesSubItemBean>();
+            //Note: The sub item of competency is library and the sub item of library is category. 
+            //      It's a stupid code extensibility design... 
+            //      But for now just assume that only the competency will have sub items. 
+            //1. If the library is stored in compWeight, then use the DB data to set the enable value
+            //2. If the library is not contained in compWeight, set it as default true
+            if (libEnabled && subItemMap != null && subItemMap.containsKey((String)lName)) {
+              libEnabled = subItemMap.get((String)lName).isEnabled();
+              subItemSet = subItemMap.get((String)lName).getSubItems();
+            }
+            SuggestedRolesSubItemBean libraryBean = new SuggestedRolesSubItemBean(CareerWorksheetScoreCriteriaBean.COMPETENCY, 
+                (String)lName, libEnabled);
+            List categorieslList = compDAO.getCompetencyCategories(companySchema, dbConnection, (String)lName, locale);
+            
+            for (Object cName : categorieslList) {
+              if (libraryBean.getSubItems() == null) {
+                libraryBean.setSubItems(new LinkedHashSet<SuggestedRolesSubItemBean>());
+              }
+              boolean catEnabled = libEnabled;
+              if(catEnabled && subItemSet != null && subItemSet.size() > 0) {
+                Iterator<SuggestedRolesSubItemBean> ite = subItemSet.iterator();
+                while(ite.hasNext()) {
+                  SuggestedRolesSubItemBean item = ite.next();
+                  if(item.getItemKey().equals(cName)) {
+                    catEnabled = item.isEnabled();
+                    ite.remove();
+                    break;
+                  }
+                }
+              }
+              libraryBean.getSubItems().add(new SuggestedRolesSubItemBean((String)lName, (String)cName, catEnabled));
+            }
+            finalSubItems.put((String)lName, libraryBean);
+            
+            //For the sub item of
+            //end
+          }
+          compWeight.setSubItems(finalSubItems);
+        } else {
+          compWeight.setSubItems(null);
+        }
+      }
+      return settingMap;
+    } catch (DAOException de) {
+      throw new ServiceApplicationException(de);
+    }
+  }
+
+}

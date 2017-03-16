@@ -1,0 +1,252 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import static com.successfactors.unittest.TestUtils.setField;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jmock.Expectations;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.cdp.service.mentoring.jam.JamGroupInviteBySyncIds;
+import com.successfactors.cdp.service.mentoring.jam.MakeJamGroupAdminByUserId;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailUtils;
+import com.successfactors.cdp.test.AbstractMockeryTest;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.cdp.service.util.mentoring.email.IMentoringEmailUtils;
+
+public class AddMentoringJamAdminsImplTest extends AbstractMockeryTest {
+  private static final String USERID_INVALID = "userMentor2Invalid";
+  private IAddMentoringJamAdminsImpl service;
+
+  private ParamBean params;
+
+  private ServiceCommandHandler scaHandler;
+
+  private IMessageBundle msgs;
+
+  private IMentoringEmailUtils mentoringEmailUtils;
+
+  private MentoringServiceBase mentoringServiceBase;
+
+  @BeforeMethod(groups = { "checkin" })
+  public void setUp() throws Exception {
+    this.service = new AddMentoringJamAdminsImpl();
+    this.params = getDefaultParam();
+    this.scaHandler = context.mock(ServiceCommandHandler.class);
+    this.msgs = context.mock(IMessageBundle.class);
+    this.mentoringEmailUtils = context.mock(MentoringEmailUtils.class);
+    this.mentoringServiceBase = context.mock(MentoringServiceBase.class);
+    setField(service, "params", this.params);
+    setField(service, "scaHandler", this.scaHandler);
+    setField(service, "msgs", this.msgs);
+    setField(service, "mentoringEmailUtils", this.mentoringEmailUtils);
+    setField(service, "mentoringServiceBase", this.mentoringServiceBase);
+  }
+  
+/* TODO - tests to be revisited as the implementation is changed
+  @Test(groups = { "checkin" })
+  public void testCreateUserListWithInvalid() throws ServiceApplicationException {
+    context.checking(new Expectations() {
+      {
+        one(mentoringServiceBase).getUsernameMapByIds(with(aClass(List.class)));
+        will(returnValue(createUserBeanMapWithOneInvalid()));
+      }
+    });
+    MentoringProgram program = createMentoringProgram();
+    Map<String, UserBean> result = service.createUserList(program);
+    
+    assertNotNull(result);
+    assertEquals(result.size(), 2);
+    assertNull(result.get(USERID_INVALID), "The invalid user is not part of the returned data");
+
+    context.assertIsSatisfied();
+  }
+  
+  @Test(groups = { "checkin" })
+  public void testCreateUserListWithNoOwners() throws ServiceApplicationException {
+    context.checking(new Expectations() {
+      {
+        one(mentoringServiceBase).getUsernameMapByIds(with(aClass(List.class)));
+        will(returnValue(createUserBeanMapWithOneInvalid()));
+      }
+    });
+    MentoringProgram program = createMentoringProgram();
+    program.setOwners(null);
+    Map<String, UserBean> result = service.createUserList(program);
+    
+    assertNotNull(result);
+    assertNotNull(result.get(getDefaultParam().getUserId()));
+    assertNotNull(result.get(program.getCreatedBy()));
+
+    context.assertIsSatisfied();
+  }
+  
+
+  @Test(groups = { "checkin" })
+  public void testAddUsersAsAdminNoFails() throws ServiceApplicationException {
+    final Map<String, UserBean> users = createUserBeanMapWithOneInvalid();
+    users.put("userNull", null); //another invalid
+    final int size = users.size() - 2; //two are invalid
+
+    context.checking(new Expectations() {
+      {
+        exactly(size).of(scaHandler).execute(with(aClass(MakeJamGroupAdminByUserId.class)));
+      }
+    });
+    MentoringProgram program = createMentoringProgram();
+    String authToken = "test";
+    Map<String, UserBean> result = service.addUsersAsAdmin(program, users, authToken);
+    assertNotNull(result);
+    assertTrue(result.isEmpty(), "Expected to remove invalid entries");
+    context.assertIsSatisfied();
+  }
+  
+  @Test(groups = { "checkin" })
+  public void testAddUsersAsAdminAllFail() throws ServiceApplicationException {
+    final Map<String, UserBean> users = createUserBeanMapWithOneInvalid();
+    final int size = users.size() - 1 ; //one is invalid
+
+    context.checking(new Expectations() {
+      {
+        allowing(scaHandler).execute(with(aClass(MakeJamGroupAdminByUserId.class)));
+        will(throwException(new ServiceApplicationException("Failed Jam")));
+      }
+    });
+    MentoringProgram program = createMentoringProgram();
+    String authToken = "test";
+    Map<String, UserBean> result = service.addUsersAsAdmin(program, users, authToken);
+    assertNotNull(result);
+    assertEquals(result.size(), size, "All should have failed!"); 
+    
+    context.assertIsSatisfied();
+  }
+
+  @Test(groups = { "checkin" })
+  public void testInviteMembers() throws ServiceApplicationException {
+    final Map<String, UserBean> users = createUserBeanMapWithOneInvalid();
+
+    context.checking(new Expectations() {
+      {
+        allowing(scaHandler).execute(with(aClass(JamGroupInviteBySyncIds.class)));
+      }
+    });
+    MentoringProgram program = createMentoringProgram();
+    String authToken = "test";
+    service.inviteMembers(program, users, authToken);
+    
+    context.assertIsSatisfied();  
+  }
+  
+  @Test(groups = { "checkin" })
+  public void testInviteMembersFail() throws ServiceApplicationException{
+    final Map<String, UserBean> users = createUserBeanMapWithOneInvalid();
+
+    context.checking(new Expectations() {
+      {
+        allowing(scaHandler).execute(with(aClass(JamGroupInviteBySyncIds.class)));
+        will(throwException(new ServiceApplicationException("Failed Jam")));
+      }
+    });
+    MentoringProgram program = createMentoringProgram();
+    String authToken = "test";
+    try {
+      service.inviteMembers(program, users, authToken);
+      fail("Should have failed Jam api");
+    } catch (ServiceApplicationException sae) {
+    }
+  }
+
+  @Test(groups = { "checkin" })
+  public void testSendEmailWithNoRecipient() throws ServiceApplicationException {
+    context.checking(new Expectations() {
+      {
+      }
+    });
+    MentoringProgram program = createMentoringProgram();
+    Map failedUsers = createUserBeanMapWithOneInvalid();
+    service.sendEmailFailure(program, null, failedUsers);
+    context.assertIsSatisfied();
+  }
+  
+  @Test(groups = { "checkin" })
+  public void testSendEmailWithNoFailedUsers() throws ServiceApplicationException {
+    context.checking(new Expectations() {
+      {
+      }
+    });
+    MentoringProgram program = createMentoringProgram();
+    UserBean recipient = new UserBeanImpl();
+    Map failedUsers = new HashMap();
+    service.sendEmailFailure(program, recipient, failedUsers);
+    context.assertIsSatisfied();
+  }
+
+  @Test(groups = { "checkin" })
+  public void testCreateNameList() throws ServiceApplicationException {
+    Map<String, UserBean> users = new HashMap<String, UserBean>();
+    users.put("id", createBean("id", "First Last", true));
+    users.put("id2", createBean("id2", "Second Name", true));
+    String name = service.createNameList(users);
+    
+    assertEquals(name, "First Last, Second Name");
+  }
+  
+  @Test(groups = { "checkin" })
+  public void testCreateNameListEmpty() throws ServiceApplicationException {
+    Map users = null;
+    String names = service.createNameList(users);
+    
+    assertNotNull(names);
+    
+    users = new HashMap();
+    names = service.createNameList(users);
+    
+    assertNotNull(names);
+  }
+  */
+
+  private MentoringProgram createMentoringProgram() {
+    MentoringProgram program = new MentoringProgram();
+    program.setCreatedBy("userOwner1");
+    
+    List<MentoringProgramOwner> owners = new ArrayList<MentoringProgramOwner>();
+    owners.add(new MentoringProgramOwner(USERID_INVALID));
+    owners.add(new MentoringProgramOwner("user3"));
+    program.setOwners(owners);
+    return program;
+  }
+  
+  private Map createUserBeanMapWithOneInvalid() {
+    Map<String, UserBean> map = new HashMap<String, UserBean>();
+    map.put(getDefaultParam().getUserId(), createBean(getDefaultParam().getUserId(), "Test1", true));
+    map.put("userOwner1", createBean("userOwner1", "Test Owner", true));
+    map.put(USERID_INVALID, createBean(USERID_INVALID, "User invalid", false));
+    return map;
+  }
+  
+  private UserBean createBean(String id, String fullname, boolean valid) {
+    UserBeanImpl bean = new UserBeanImpl();
+    bean.setUserId(getDefaultParam().getUserId());
+    bean.setFullName(fullname);
+    bean.setUserIsValid(valid? "true" : "false");
+    return  bean;
+  }
+
+}

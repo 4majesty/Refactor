@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jdt.ui.text.java.AbstractProposalSorter;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
+
+public interface IAlphabeticSorter {
+	int compare(ICompletionProposal p1, ICompletionProposal p2);
+}

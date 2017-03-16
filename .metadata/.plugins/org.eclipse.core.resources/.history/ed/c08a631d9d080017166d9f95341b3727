@@ -1,0 +1,10 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.competency.bean.FamilyBean;
+import com.successfactors.cdp.service.impl.IGetCareerWorksheetSuggestedRolesImpl;
+
+public interface IGetCareerWorksheetSuggestedRolesImplTest {
+	void setup();
+
+	void testGetLeadingFromRoles();
+}

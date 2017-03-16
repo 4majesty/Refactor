@@ -1,0 +1,23 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.Map;
+import org.jmock.Expectations;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.cdp.service.mentoring.jam.JamGroupInviteBySyncIds;
+import com.successfactors.cdp.service.mentoring.jam.MakeJamGroupAdminByUserId;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailUtils;
+import com.successfactors.cdp.test.AbstractMockeryTest;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+
+public interface IAddMentoringJamAdminsImplTest {
+	void setUp();
+}

@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import java.net.URL;
+import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IImagesOnFileSystemRegistry {
+	URL getImageURL(IJavaElement element);
+
+	URL getImageURL(ImageDescriptor descriptor);
+
+	void dispose();
+}

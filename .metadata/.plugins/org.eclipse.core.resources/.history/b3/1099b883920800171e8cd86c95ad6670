@@ -1,0 +1,28 @@
+package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
+
+import org.eclipse.swt.events.MenuDetectListener;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.ui.forms.FormColors;
+
+public interface IBreadcrumbViewer {
+	void setToolTipLabelProvider(ILabelProvider toolTipLabelProvider);
+
+	Control getControl();
+
+	void reveal(Object element);
+
+	void setFocus();
+
+	boolean isDropDownOpen();
+
+	Shell getDropDownShell();
+
+	ISelectionProvider getDropDownSelectionProvider();
+
+	void addMenuDetectListener(MenuDetectListener listener);
+
+	void removeMenuDetectListener(MenuDetectListener listener);
+}

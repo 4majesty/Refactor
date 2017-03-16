@@ -1,0 +1,35 @@
+package org.eclipse.jdt.internal.ui.filters;
+
+import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.jface.util.SafeRunnable;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.ui.IPluginContribution;
+import org.eclipse.ui.activities.WorkbenchActivityHelper;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.JavaUI;
+
+public interface IFilterDescriptor {
+	ViewerFilter createViewerFilter();
+
+	String getId();
+
+	String getName();
+
+	String getPattern();
+
+	String getTargetId();
+
+	String getDescription();
+
+	boolean isPatternFilter();
+
+	boolean isCustomFilter();
+
+	boolean isEnabled();
+
+	int compareTo(Object o);
+
+	String getLocalId();
+
+	String getPluginId();
+}

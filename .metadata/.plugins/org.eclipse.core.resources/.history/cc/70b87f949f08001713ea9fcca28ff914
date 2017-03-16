@@ -1,0 +1,21 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.cdp.bean.SuggestedRolesFilterSettingBean;
+import com.successfactors.cdp.bean.SuggestedRolesSettingBean;
+import com.successfactors.legacy.ui.controller.AjaxServiceStatus;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+public interface ICDPAdminController {
+	JSONObjectOutput getSuggestedRolesWeightSetting();
+
+	AjaxServiceStatus setSuggestedRolesWeightSetting(List<SuggestedRolesSettingBean> weightSettingBeans,
+			List<SuggestedRolesFilterSettingBean> filterSettingBeans);
+
+	boolean isManageSuggestedRolesPermitted();
+
+	boolean isManageLearningAdminPermitted();
+}

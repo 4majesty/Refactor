@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.action.Action;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface IToggleCallModeAction {
+	int getMode();
+
+	void run();
+}

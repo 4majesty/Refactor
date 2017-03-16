@@ -1,0 +1,61 @@
+package com.successfactors.cdp.service.util.mentoring.email;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.email.util.EmailTemplate;
+import com.successfactors.legacy.service.ejb.SysConfig;
+import com.successfactors.legacy.util.Mailbox;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.FullNameBean;
+import com.successfactors.platform.bean.MailDispatcherFactory;
+import com.successfactors.platform.bean.MailInvalidAddressException;
+import com.successfactors.platform.bean.MailMessage;
+import com.successfactors.platform.bean.MailSendException;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.platform.util.mail.CommonEmailHelper;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.systemprop.service.ejb.SysConfigEJBException;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.user.bean.util.UserFormatUtils;
+import com.successfactors.user.service.FindUserById;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import javax.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.rmi.RemoteException;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+
+public interface IMentoringEmailUtils {
+	void sendEmail(String subject, String body, UserBean sender, UserBean[] recipients, Messages msgs)
+			throws ServiceApplicationException;
+
+	void sendEmail(String subject, String body, UserBean[] recipients, Messages msgs)
+			throws ServiceApplicationException;
+
+	void sendEmail(String subject, String body, Map<String, String> tokenMap, UserBean sender, UserBean[] recipients,
+			Messages msgs) throws ServiceApplicationException;
+
+	void sendEmail(MentoringEmailContent emailContent, Map<MentoringEmailTokenEnum, String> tokenMap, UserBean sender,
+			UserBean... recipients) throws ServiceApplicationException, MailInvalidAddressException, MailSendException;
+
+	String escapleHtmlTag(String value);
+
+	String generateUrlToken(MentoringProgram program, UserBean recipient, String label)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException;
+
+	String generateMenteeListToken(List<UserBean> mentees);
+
+	UserBean getDummyEmailSender();
+}

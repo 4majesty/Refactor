@@ -1,0 +1,231 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMenteeSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramParticipant;
+import com.successfactors.cdp.service.mentoring.GetUserActiveProgram;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormStatusEnum;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.sql.MDFCriteria;
+import com.successfactors.genericobject.api.sql.MDFResultSet;
+import com.successfactors.genericobject.api.sql.Projections;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+import org.jboss.seam.annotations.In;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * get user's active mentoring programs
+ * @author I320903
+ *
+ */
+@Service
+public class GetUserActiveProgramImpl  implements ServiceQueryImpl<GetUserActiveProgram, GetUserActiveProgram> {
+
+    /** params */
+    @Inject
+    @In
+    ParamBean params;
+
+    /** configurationProvider */
+    @Inject
+    @In(create = true)
+    private ConfigurationProvider configurationProvider;
+    
+    /** SCA. */
+    @Inject
+    @In
+    private ServiceCommandHandler scaHandler;
+    
+    private static Logger logger = LogManager.getLogger();
+    
+    @Override
+    public GetUserActiveProgram execute(GetUserActiveProgram cmd)
+            throws ServiceApplicationException {
+        GetUserActiveProgram output = new GetUserActiveProgram();
+        List<MentoringProgram> programList = new ArrayList<MentoringProgram>();
+        
+        if(!params.getCompanyBean().isFeatureExist(FeatureEnum.GENERIC_OBJECTS)){
+            logger.info("GetUserActiveProgram feature GENERIC_OBJECTS is disabled");
+            output.setResult(programList);
+            return output;
+        }
+        logger.info("GetUserActiveProgram feature GENERIC_OBJECTS is enabled");
+        Set<String> programIds = new HashSet<String>();
+        String userId = params.getUserId();       
+        
+        //check whether user has draft or accepted signup form. If true, keep programId into list
+        programIds = getProgramAsMentor(userId);
+        programIds.addAll(getProgramAsMentee(userId));
+        logger.info("GetUserActiveProgram querying valid signup form finished, "+programIds.size()+" programs' signup form is draft or accepted");
+        
+        //if no valid program, directly return
+        if(programIds.isEmpty()){
+            output.setResult(programList);
+            return output;
+        }
+        
+        //check whether remain programs are ACTIVE or COMPLETED
+        programList = filterValidProgram(userId, programIds);
+        
+        output.setResult(programList);
+        logger.info("GetUserActiveProgram querying finished successfully, "+programList.size()+" program(s) satisfy all requirement of showing mentoring tab");
+        return output;
+    }
+
+    /**
+     * check whether user has draft or accepted mentor signup form
+     * @return
+     */
+    private Set<String> getProgramAsMentor(String userId){
+        Set<String> output = new HashSet<String>();
+        ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgramMentorSignupForm.class);
+        MDFCriteria search = new GOSQLGeneratorContext(def, params);
+        search.setProjection(Projections.all());
+        search.add(
+                Restrictions.and(
+                        Restrictions.eq("user", userId), 
+                        Restrictions.or(
+                                Restrictions.eq("status", SignupFormStatusEnum.DRAFT),
+                                Restrictions.eq("status", SignupFormStatusEnum.ACCEPTED)
+                        )
+                )
+        );
+        MDFResultSet resultSet;
+        try {
+            resultSet = search.execute();
+            if(resultSet.getResultRows() != null && resultSet.getResultRows().size() > 0){
+                for(Object signupForm : resultSet.getBeans()){
+                    String programId = ((MentoringProgramMentorSignupForm)signupForm).getProgramId();
+                    output.add(programId);
+                }
+            }else{
+                return output;
+            }
+        } catch (ServiceApplicationException e) {
+            logger.error("getProgramAsMentor error occurs when querying mentor signup form", e);
+            return new HashSet<String>();
+        }
+        return output;
+    }
+    
+    /**
+     * check whether user has draft or accepted mentee signup form
+     * @return
+     */
+    private Set<String> getProgramAsMentee(String userId){
+        Set<String> output = new HashSet<String>();
+        ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgramMenteeSignupForm.class);
+        MDFCriteria search = new GOSQLGeneratorContext(def, params);
+        search.setProjection(Projections.all());
+        search.add(
+                Restrictions.and(
+                        Restrictions.eq("user", userId), 
+                        Restrictions.or(
+                                Restrictions.eq("status", SignupFormStatusEnum.DRAFT),
+                                Restrictions.eq("status", SignupFormStatusEnum.ACCEPTED)
+                        )
+                )
+        );
+        MDFResultSet resultSet;
+        try {
+            resultSet = search.execute();
+            if(resultSet.getResultRows() != null && resultSet.getResultRows().size() > 0){
+                for(Object signupForm : resultSet.getBeans()){
+                    String programId = ((MentoringProgramMenteeSignupForm)signupForm).getProgramId();
+                    output.add(programId);
+                }
+            }else{
+                return output;
+            }
+        } catch (ServiceApplicationException e) {
+            logger.error("getProgramAsMentee error occurs when querying mentee signup form", e);
+            return new HashSet<String>();
+        }
+        return output;
+    }
+    
+    /**
+     * get valid program
+     * @param userId
+     * @param programIds
+     * @return
+     */
+    private List<MentoringProgram> filterValidProgram(String userId, Set<String> programIds){
+        List<MentoringProgram> programList = new ArrayList<MentoringProgram>();
+        ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgram.class);
+        MDFCriteria search = new GOSQLGeneratorContext(def, params);
+        search.setProjection(Projections.all());
+        search.add(
+                Restrictions.and(
+                        Restrictions.not(Restrictions.eq("matchingType", ProgramMatchingTypeEnum.OPEN_ENDED)),
+                        Restrictions.in("externalId", programIds),
+                        Restrictions.or(
+                            Restrictions.eq("status", ProgramStatusEnum.MENTOR_SIGNUP),
+                            Restrictions.eq("status", ProgramStatusEnum.MENTEE_SIGNUP),
+                            Restrictions.eq("status", ProgramStatusEnum.MATCHING),
+                            Restrictions.eq("status", ProgramStatusEnum.MATCHED),
+                            Restrictions.eq("status", ProgramStatusEnum.MENTOR_APPROVAL),
+                            Restrictions.eq("status", ProgramStatusEnum.INPROGRESS),
+                            Restrictions.eq("status", ProgramStatusEnum.COMPLETED)
+                        )
+                )
+        );
+        MDFResultSet resultSet;
+        try {
+            resultSet = search.execute();
+            if(resultSet.getResultRows() != null && resultSet.getResultRows().size() > 0){
+                for(Object program : resultSet.getBeans()){
+                    MentoringProgram p = ((MentoringProgram)program);
+                    if(programIds.contains(p.getExternalId())){
+                        //check whether user is member of a program
+                        if(isMemberOfProgram(p.getMentees(), userId) || isMemberOfProgram(p.getMentors(), userId)){
+                            programList.add(p);
+                        }
+                    }
+                }
+            }
+        } catch (ServiceApplicationException e) {
+            logger.error("filterValidProgram error occurs when querying valid program", e);
+            return new ArrayList<MentoringProgram>();
+        }
+        return programList;
+    }
+    
+    /**
+     * check whether target user is member of program 
+     * @param participants
+     * @param targetUserId
+     * @return
+     */
+    private boolean isMemberOfProgram(List participants, String targetUserId){
+        boolean result = false;
+        
+        for(Object user : participants){
+            MentoringProgramParticipant item = (MentoringProgramParticipant) user;
+            if(item.getUser().equals(targetUserId)){
+                result = true;
+                break;
+            }
+        }
+        
+        return result;
+    }
+}

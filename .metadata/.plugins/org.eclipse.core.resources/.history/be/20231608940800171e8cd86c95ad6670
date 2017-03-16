@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import java.util.List;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.ITemplateEngine;
+
+public interface IAbstractTemplateCompletionProposalComputer {
+	List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor);
+
+	List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor);
+
+	String getErrorMessage();
+
+	void sessionStarted();
+
+	void sessionEnded();
+}

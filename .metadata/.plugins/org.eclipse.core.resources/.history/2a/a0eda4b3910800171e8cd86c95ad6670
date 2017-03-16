@@ -1,0 +1,8 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IOpenJavaPerspectiveAction {
+	void run();
+}

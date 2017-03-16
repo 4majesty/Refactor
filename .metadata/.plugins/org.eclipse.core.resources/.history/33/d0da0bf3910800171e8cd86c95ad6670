@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jface.text.rules.IWordDetector;
+
+public interface IJavaWordDetector {
+	boolean isWordStart(char c);
+
+	boolean isWordPart(char c);
+}

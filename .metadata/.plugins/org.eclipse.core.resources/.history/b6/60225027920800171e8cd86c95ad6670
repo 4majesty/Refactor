@@ -1,0 +1,79 @@
+package org.eclipse.jdt.internal.ui.jarpackager;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ITreeViewerListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeExpansionEvent;
+import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.viewers.ViewerFilter;
+
+public interface ICheckboxTreeAndListGroup {
+	void aboutToOpen();
+
+	void addCheckStateListener(ICheckStateListener listener);
+
+	void checkStateChanged(final CheckStateChangedEvent event);
+
+	void expandAll();
+
+	Iterator getAllCheckedListItems();
+
+	Set getAllCheckedTreeItems();
+
+	int getCheckedElementCount();
+
+	Table getTable();
+
+	Tree getTree();
+
+	void addTreeFilter(ViewerFilter filter);
+
+	void addListFilter(ViewerFilter filter);
+
+	void initialCheckListItem(Object element);
+
+	void initialCheckTreeItem(Object element);
+
+	void removeCheckStateListener(ICheckStateListener listener);
+
+	void selectionChanged(final SelectionChangedEvent event);
+
+	void setAllSelections(final boolean selection);
+
+	void setListProviders(IStructuredContentProvider contentProvider, ILabelProvider labelProvider);
+
+	void setListComparator(ViewerComparator comparator);
+
+	void setRoot(Object newRoot);
+
+	void setTreeProviders(ITreeContentProvider contentProvider, ILabelProvider labelProvider);
+
+	void setTreeComparator(ViewerComparator sorter);
+
+	void treeCollapsed(TreeExpansionEvent event);
+
+	void treeExpanded(TreeExpansionEvent event);
+
+	void updateSelections(final Map items);
+
+	Set getWhiteCheckedTreeItems();
+
+	boolean isTreeItemGreyChecked(Object object);
+
+	void expandTreeToLevel(Object object, int level);
+
+	void setTreeSelection(ISelection selection);
+}

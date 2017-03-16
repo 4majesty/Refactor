@@ -1,0 +1,9 @@
+package com.successfactors.cdp.service.util.mentoring.email;
+
+import com.successfactors.cdp.service.util.mentoring.email.IMentoringEmailUtils;
+
+public interface IMentoringEmailUtilsTest {
+	void setup();
+
+	void excludeInvalidRecipient();
+}

@@ -1,0 +1,34 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import java.util.List;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.Widget;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.ui.IWorkingCopyProvider;
+import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
+
+public interface IProblemTreeViewer {
+	void doUpdateItem(Widget item);
+
+	void addFilter(ViewerFilter filter);
+
+	void removeFilter(ViewerFilter filter);
+
+	void setFilters(ViewerFilter[] filters);
+
+	void resetFilters();
+
+	boolean isExpandable(Object parent);
+
+	boolean hasFilteredChildren(Object parent);
+
+	boolean isFiltered(Object object, Object parent);
+}

@@ -1,0 +1,28 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.cdp.service.mentoring.jam.util.CreateGroupConstants;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.unittest.TestUtils;
+
+public interface ICreateJamGroupImplTest {
+	ParamBean getDefaultParam();
+
+	void setUp();
+
+	void testSuccessResponse();
+
+	void testwithAccessToken();
+
+	void testDuplicateGroup();
+
+	void testAuthFailure();
+
+	void testServiceUnavailable();
+
+	void testRequestBodyNotNull();
+
+	void testRequestBodyDefaultTemplate();
+}

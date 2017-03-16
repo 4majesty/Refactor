@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
+
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaEditor;
+
+public interface IStructureSelectionAction {
+	void run();
+
+	ISourceRange getNewSelectionRange(ISourceRange oldSourceRange, ITypeRoot typeRoot);
+}

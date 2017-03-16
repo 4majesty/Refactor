@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.wizards;
+
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.ui.wizards.INewTypeWizardPage;
+
+public interface ISuperInterfaceSelectionDialog {
+}

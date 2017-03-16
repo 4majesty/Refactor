@@ -1,0 +1,26 @@
+package com.successfactors.cdp.bean;
+
+import org.testng.annotations.Test;
+
+import com.successfactors.unittest.AbstractComparableTest;
+
+@Test(groups = "compare")
+public class AutoCompleteRoleSearchVOComparableTest extends AbstractComparableTest<AutoCompleteRoleSearchVO> {
+
+    public AutoCompleteRoleSearchVOComparableTest() {
+        super();
+        a = new AutoCompleteRoleSearchVO();
+        a.setRoleName("b");
+        a.setFamilyName("b");
+        a.setRoleId(1);
+        
+        b = new AutoCompleteRoleSearchVO();
+        b.setRoleName("c");
+        b.setFamilyName("a");
+        
+        c = new AutoCompleteRoleSearchVO();
+        c.setRoleName("b");
+        c.setFamilyName("b");
+        c.setRoleId(1);
+    }
+}

@@ -1,0 +1,13 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.service.mentoring.ConfirmMatchingResult;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.user.bean.UserBean;
+
+public interface IConfirmMatchingResultImpl {
+	ConfirmMatchingResult execute(ConfirmMatchingResult cmd) throws ServiceApplicationException;
+}

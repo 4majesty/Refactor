@@ -1,0 +1,9 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.cdp.service.mentoring.jam.GetJamGoToGroupURL;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.config.Service;
+
+public interface IGetJamGoToGroupURLImpl {
+	String execute(GetJamGoToGroupURL cmd) throws ServiceApplicationException;
+}

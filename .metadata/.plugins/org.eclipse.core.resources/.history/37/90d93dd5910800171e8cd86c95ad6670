@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IFolderSelectionDialog {
+	void selectionChanged(SelectionChangedEvent event);
+}

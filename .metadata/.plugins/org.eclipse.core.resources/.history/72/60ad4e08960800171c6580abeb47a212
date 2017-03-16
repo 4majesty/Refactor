@@ -1,0 +1,93 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
+
+import java.util.Map;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
+public interface ITType {
+	TypeEnvironment getEnvironment();
+
+	String getBindingKey();
+
+	int getModifiers();
+
+	int getKind();
+
+	boolean isJavaLangObject();
+
+	boolean isJavaLangCloneable();
+
+	boolean isJavaIoSerializable();
+
+	boolean isNullType();
+
+	boolean isVoidType();
+
+	boolean isPrimitiveType();
+
+	boolean isArrayType();
+
+	boolean isHierarchyType();
+
+	boolean isStandardType();
+
+	boolean isRawType();
+
+	boolean isParameterizedType();
+
+	boolean isGenericType();
+
+	boolean isTypeVariable();
+
+	boolean isCaptureType();
+
+	boolean isWildcardType();
+
+	boolean isUnboundWildcardType();
+
+	boolean isExtendsWildcardType();
+
+	boolean isSuperWildcardType();
+
+	boolean isClass();
+
+	boolean isInterface();
+
+	boolean isEnum();
+
+	boolean isAnnotation();
+
+	boolean isTopLevel();
+
+	boolean isNested();
+
+	boolean isMember();
+
+	boolean isLocal();
+
+	boolean isAnonymous();
+
+	TType getSuperclass();
+
+	TType[] getInterfaces();
+
+	boolean isEqualTo(ITypeBinding binding);
+
+	boolean equals(Object other);
+
+	int hashCode();
+
+	TType getErasure();
+
+	TType getTypeDeclaration();
+
+	TType[] getSubTypes();
+
+	boolean canAssignTo(TType lhs);
+
+	String getName();
+
+	String getPrettySignature();
+
+	String toString();
+}

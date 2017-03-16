@@ -1,0 +1,34 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import java.text.CharacterIterator;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
+public interface IDocumentCharacterIterator {
+	char first();
+
+	char last();
+
+	char current();
+
+	char next();
+
+	char previous();
+
+	char setIndex(int position);
+
+	int getBeginIndex();
+
+	int getEndIndex();
+
+	int getIndex();
+
+	Object clone();
+
+	int length();
+
+	char charAt(int index);
+
+	CharSequence subSequence(int start, int end);
+}

@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import java.util.Collection;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor;
+import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+
+public interface IClasspathFixProcessorDescriptor {
+	String getID();
+
+	Collection getOverridenIds();
+
+	IStatus checkSyntax();
+
+	boolean matches(IJavaProject javaProject);
+
+	ClasspathFixProcessor getProcessor(IJavaProject project);
+}

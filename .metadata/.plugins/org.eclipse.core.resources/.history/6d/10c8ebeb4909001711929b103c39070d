@@ -1,0 +1,375 @@
+// ###Modified by SCAConverter on 2014-06-25 PST###
+// ###Modified by SCAConverter on 2014-06-09 PST###
+// ###Modified by SCAConverter on 2014-04-01 PST###
+/*
+ * $Id: GetDevPlanListImpl.java 1084842 2016-09-22 08:28:06Z I321222 $
+ */
+package com.successfactors.cdp.service.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.BackgroundElement;
+
+import com.successfactors.cdp.service.GetDevPlanList;
+import com.successfactors.datamodel.api.DataModelFacade;
+import com.successfactors.edu.api.EmployeeProfileFacade;
+import com.successfactors.edu.api.bean.EmployeeBackgroundBean;
+import com.successfactors.empfile.util.scorecard.EmployeeDevelopmentObjectivesPortletHelper;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjPlanBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.bean.ObjTemplateBean.ObjCategory;
+import com.successfactors.gm.service.objective.GetDefaultTemplateId;
+import com.successfactors.gm.service.objective.GetObjListByPlanV4;
+import com.successfactors.gm.service.objective.GetPermittedActiveTemplates;
+import com.successfactors.gm.util.permission.DelegateObjectiveRulesEngine;
+import com.successfactors.gm.util.permission.GMRulesEngine;
+import com.successfactors.gm.util.permission.ObjectiveRulesEngineException;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.legacy.util.type.ProfileInfoCategoryEnum;
+import com.successfactors.legacy.util.type.ProfileInfoSourceEnum;
+import com.successfactors.legacy.util.type.ProfileInfoTypeEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.user.bean.preference.PreferenceBean;
+import com.successfactors.user.service.preference.GetPreferenceBean;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+
+/**
+ * implementation of SCA GetDevPlanList
+ * @author ytian
+ * Success Factors
+ */
+@Service
+public class GetDevPlanListImpl implements
+ServiceCommandImpl<GetDevPlanList, GetDevPlanList> {
+
+  /**
+   * sca handler
+   */
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+
+  /**
+   * Don't use it by yourself! Only for Legacy!
+   */
+  private transient LocalContextSCAHandler legacyHandler = LocalContextSCAHandler.create();
+
+  /** id for saving plan pref key. */
+  public static final String SELECT_PLAN_PREF_KEY = "scorecard_spId";
+
+  /** ParamBean. */
+  @Inject
+  @In
+  private ParamBean params;
+  
+  @Inject
+  @In(value = EmployeeProfileFacade.NAME, create = true)
+  private EmployeeProfileFacade employeeProfileFacade;
+
+  @Inject
+  @In(value = DataModelFacade.NAME, create = true)
+  private DataModelFacade dataModelFacade;
+  
+  /** ejbList. */
+  @Inject
+  @In(create=true)
+  private EJBList ejbListAdapter;
+  /** obj template list*/
+  private List<ObjTemplateBean> objTemplateList;
+  /** columnList. */
+  private List<ObjTemplateBean.Column> columnList;
+  /** obj bean list*/
+  private List<ObjBean> bgObjList;
+  /** total objective count*/
+  private int totalCount;
+  /**selectedObjPlan*/
+  private ObjTemplateBean selectedTemplate;
+  /** cat id and localized name map*/
+  private Map<String, String> catIdNameMap;
+  /** cat id list*/
+  private List<String> catIdList;
+  /** log. */
+  private static Logger logger = LogManager.getLogger();
+  
+  
+  /** execute method for this SCA
+   * @param cmd SCA command
+   * @return cmd Command
+   * @throws ServiceApplicationException .
+   */
+  @SuppressWarnings("unchecked")
+  public GetDevPlanList execute(GetDevPlanList cmd) throws ServiceApplicationException {
+    
+    String selectedUserId = cmd.getSelectedUserId();
+    loadAllTemplates(selectedUserId);
+    // selectedTemplate will not be null, either the selected one or the default one
+    loadSelectedObjTemplate(cmd.getSelectedPlanId());
+    // CDP-3230 If there is no development plan for this user, return empty data.
+    if(selectedTemplate != null) {
+      int goalsPerPage = 0;
+      if(cmd.isNeedPagination()) {
+        goalsPerPage = selectedTemplate.getPagerMaxObjsPerPage();
+      }
+      boolean isSwitchedEnabled = selectedTemplate.isDevelopmentScorecardShowAllGoalsEnabled();
+      loadObjPlanList(selectedTemplate, selectedUserId, isSwitchedEnabled,cmd.isPrint(),
+          cmd.getPageNum(), goalsPerPage);
+  
+      saveSelectedPlanId();
+      
+      cmd.setSelectedPlanId(selectedTemplate.getObjPlanId());
+    }
+    cmd.setSelectedTemplateBean(selectedTemplate);
+    cmd.setObjTemplateList(objTemplateList);
+    cmd.setColumnList(columnList);
+    cmd.setObjBeanList(bgObjList);
+    cmd.setObjTotalCount(totalCount);
+    cmd.setCatIdList(catIdList);
+    cmd.setCatIdNameMap(catIdNameMap);
+    return cmd;
+  }
+  
+  private void loadAllTemplates(String selectedUserId) throws ServiceApplicationException{
+    {
+      // load all permitted objective plan list
+      this.objTemplateList = scaHandler.execute(new GetPermittedActiveTemplates(ObjPlanTypeEnum.DEVELOPMENT, selectedUserId));
+      if(null == this.objTemplateList || this.objTemplateList.isEmpty()){
+        logger.warn("No permitted objective plan list loaded!");
+        return ;
+      }
+    }
+  }
+  
+  private void loadSelectedObjTemplate(Long selectedPlanId) throws ServiceApplicationException{
+    // if it is the first loaded in the UI, get the stored preferred key.
+    Long planId = selectedPlanId;
+    if(planId == null){
+      planId = this.getPrefSelectedPlanId();
+    }
+    long defaultPlanId = -1;
+    {
+      // if preferred key doesn't exist, get the default plan id.
+      defaultPlanId = scaHandler.execute(new GetDefaultTemplateId(ObjPlanTypeEnum.DEVELOPMENT));
+    }
+    // reset selected plan
+    ObjTemplateBean defaultTemplate = null;
+    for(ObjTemplateBean templateBean:this.objTemplateList){
+      if(planId !=null && templateBean.getObjPlanId() == planId){
+        this.selectedTemplate = templateBean;
+        break;
+      }else if(templateBean.getObjPlanId() == defaultPlanId){
+        defaultTemplate = templateBean;
+      }
+    }
+    if(this.selectedTemplate == null){
+      this.selectedTemplate = defaultTemplate;
+    }
+  }
+  
+  private void loadColumnList(ObjPlanBean planBean, GMRulesEngine ruleEngine){
+    Map<Long, GMRulesEngine> ruleEngineMap = new HashMap<Long, GMRulesEngine>();
+    ObjTemplateBean objTemplateBean = planBean.getObjTemplateBean();
+    ruleEngineMap.put(objTemplateBean.getObjPlanId(), ruleEngine);
+    columnList = EmployeeDevelopmentObjectivesPortletHelper.getColumnList(objTemplateBean,
+        planBean, ruleEngineMap);
+  }
+
+  
+  private void loadObjIdListFromBackground(Set<Long> bgObjIdList,
+      String selectedUserId) throws ServiceApplicationException{
+    try {
+      SuccessionDataModelBean dataModel = dataModelFacade.getDataModel();
+      BackgroundElement bgElement = dataModel.lookupBackgroundElementById(
+          EmployeeDevelopmentObjectivesPortletHelper.SYS_DEVELOPMENT_OBJECTIVES);
+      if(null!=bgElement){
+        List<EmployeeBackgroundBean> bgSection = employeeProfileFacade.getBackgroundsByType(selectedUserId, bgElement, 0);
+        if (null!=bgSection) {
+          String value;
+          for (EmployeeBackgroundBean bgBean : bgSection ) {
+            if(bgBean.getFields() != null){
+              value = (String)bgBean.getFields().get(
+                  EmployeeDevelopmentObjectivesPortletHelper.TITLE_DEVELOPMENT_OBJECTIVES);
+              if(null!=value){
+                long objId = Long.parseLong(value);
+                if(!bgObjIdList.contains(objId)){
+                  bgObjIdList.add(objId);
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (ServiceApplicationException e) {
+      logger.error("Unable to find data model with background element " +
+          EmployeeDevelopmentObjectivesPortletHelper.SYS_DEVELOPMENT_OBJECTIVES, e);
+      throw e;
+    }
+  }
+
+  private void loadObjPlanList(ObjTemplateBean objTemplateBean, String selectedUserId, boolean isSwitchedEnabled,
+      boolean isPrint, int pageNum, int goalsPerPage)  throws ServiceApplicationException{
+    try {
+      // rulesEngine would not be null.
+      GMRulesEngine ruleEngine = DelegateObjectiveRulesEngine.getRulesEngine(null, params, ejbListAdapter,
+          params.getUserId(), objTemplateBean, null, selectedUserId);
+      long planId = objTemplateBean.getObjPlanId();
+      // We really don't want tasks??? (second boolean argument)
+      ObjPlanBean selectedPlanBean = scaHandler.execute(new GetObjListByPlanV4(planId, selectedUserId, false, true, false, false, false, false,
+              true, -1, -1, null));
+      // objPlan will not be null, so no need NPE check
+      selectedPlanBean.setObjTemplateBean(objTemplateBean);
+      // load column headers
+      this.loadColumnList(selectedPlanBean, ruleEngine);
+      // if no goals , don't need pagination or filter.
+      Map<String, List<ObjBean>> objMap = (Map<String, List<ObjBean>>)selectedPlanBean.getObjList();
+      if(objMap == null || objMap.isEmpty()){
+        return ;
+      }
+      int curIndex = 0;
+      int startIndex = -1;
+      int endIndex = -1;
+      Set<Long> bgObjIdList = new HashSet<Long>();
+      // if switched turned on, check template if need pagination; Otherwise, result in objective list from bg list
+      if(isSwitchedEnabled){
+        if(goalsPerPage>0 && !isPrint){
+          startIndex = (pageNum-1) * goalsPerPage;
+          endIndex = startIndex + goalsPerPage-1;
+        }
+      }else{
+        loadObjIdListFromBackground(bgObjIdList, selectedUserId);
+      }
+      // get objective list by category whose order is configured in the template.
+      loadObjCategories(objTemplateBean);
+      Map<String, ObjCategory> catNameMap = objTemplateBean.getCategoryNameList();
+      bgObjList = new ArrayList<ObjBean>();
+      catIdNameMap = new HashMap<String, String>();
+      // to keep order, we loop by catId rather than objMap
+      if(catIdList!=null && !catIdList.isEmpty()){
+        for(String objCatId : catIdList) {
+          List<ObjBean> objBeanList = (List<ObjBean>)objMap.get(objCatId);
+          if(objBeanList == null || objBeanList.isEmpty()){
+            continue;
+          }
+          if(catNameMap!=null){
+            ObjCategory objCategory = catNameMap.get(objCatId);
+            if(null!=objCategory){
+              String catName = objCategory.getName().getString(params.getLocale());
+              if(catName == null){
+                catName = objCategory.getName().getDefaultString();
+              }
+              catIdNameMap.put(objCatId, catName);
+            }
+          }
+          this.addObjBean(objBeanList, bgObjIdList, ruleEngine,
+              isSwitchedEnabled, startIndex, curIndex, endIndex, goalsPerPage, isPrint);
+        // end objective list by category
+        }
+      }else{
+        // if no category set, fetch all
+        for(Map.Entry<String, List<ObjBean>> entry:objMap.entrySet()){
+          List<ObjBean> objBeanList = entry.getValue();
+          if(null == objBeanList || objBeanList.isEmpty()){
+            continue;
+          }
+          this.addObjBean(objBeanList, bgObjIdList, ruleEngine, isSwitchedEnabled,
+              startIndex, curIndex, endIndex, goalsPerPage, isPrint);
+        }
+      }
+    } catch (ObjectiveRulesEngineException e) {
+      logger.error("Exception loading objective plan list", e);
+      throw new ServiceApplicationException(e);
+    }
+  }
+
+  private void addObjBean(List<ObjBean> objBeanList, Set<Long> bgObjIdList,
+      GMRulesEngine ruleEngine, boolean isSwitchedEnabled, int startIndex, int curIndex, int endIndex,
+      int goalsPerPage, boolean isPrint) throws ObjectiveRulesEngineException{
+    int tmpIdx = curIndex;
+    for (ObjBean objBean : objBeanList) {
+      if (ruleEngine.hasReadPermission(objBean)) {
+        if(isSwitchedEnabled){
+          // need pagination if goalsPerPage>0
+          if(goalsPerPage>0 && !isPrint){
+            if(tmpIdx>=startIndex && tmpIdx<=endIndex){
+              bgObjList.add(objBean);
+            }
+          }else{
+            bgObjList.add(objBean);
+          }
+          tmpIdx++;
+        }else if(bgObjIdList.contains(objBean.getObjId())){
+          bgObjList.add(objBean);
+        }
+        totalCount++;
+      }
+    }
+  }
+  
+  private List<String> loadObjCategories(ObjTemplateBean objTemplateBean){
+    catIdList = objTemplateBean.getObjPlanCategoryList();
+    if(null==catIdList || catIdList.isEmpty()){
+      catIdList = new ArrayList<String>();
+      if(null!=objTemplateBean.getDefaultCategory()){
+        catIdList.add(objTemplateBean.getDefaultCategory());
+      }
+    }
+    return catIdList;
+  }
+
+  private Long getPrefSelectedPlanId()  throws ServiceApplicationException{
+    Long selectedPlanId = null;
+    PreferenceBean preferenceBean = new PreferenceBean();
+    preferenceBean.setCategory(ProfileInfoCategoryEnum.CDP_DEV_OBJECTIVES_SCORECARD_DISPLAY_OPTIONS_FILTER);
+    preferenceBean.setSource(ProfileInfoSourceEnum.CDP_DEV_OBJECTIVES_SCORECARD_DISPLAY_OPTIONS_PREF);
+    preferenceBean.setType(ProfileInfoTypeEnum.STRING);
+    preferenceBean.setKey(SELECT_PLAN_PREF_KEY);
+    try{
+      preferenceBean = legacyHandler.execute(params, new GetPreferenceBean(preferenceBean));
+      if(SELECT_PLAN_PREF_KEY.equals(preferenceBean.getKey())){
+        selectedPlanId = Long.valueOf(preferenceBean.getValue());
+      }
+    } catch(NumberFormatException e){
+      logger.error("parse selected plan error");
+      selectedPlanId = null;
+    }
+    return selectedPlanId;
+  }
+
+
+  private void saveSelectedPlanId() throws ServiceApplicationException{
+    PreferenceBean preferenceBean = new PreferenceBean();
+    preferenceBean.setCategory(ProfileInfoCategoryEnum.CDP_DEV_OBJECTIVES_SCORECARD_DISPLAY_OPTIONS_FILTER);
+    preferenceBean.setSource(ProfileInfoSourceEnum.CDP_DEV_OBJECTIVES_SCORECARD_DISPLAY_OPTIONS_PREF);
+    preferenceBean.setType(ProfileInfoTypeEnum.STRING);
+    preferenceBean.setKey(SELECT_PLAN_PREF_KEY);
+    long selectedPlanId = this.selectedTemplate.getObjPlanId();
+    preferenceBean.setValue(String.valueOf(selectedPlanId));
+    try{
+      List<PreferenceBean> prefList = new ArrayList<PreferenceBean>(1);
+      prefList.add(preferenceBean);
+      legacyHandler.execute(params, new UpdatePreferenceBeans(prefList));
+    } catch (ServiceApplicationException e) {
+      logger.error("Can't store preference value " + selectedPlanId, e);
+      throw e;
+    }
+  }
+
+}

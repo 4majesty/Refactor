@@ -1,0 +1,28 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.cdp.service.GetDevPlanList;
+import com.successfactors.gm.service.objective.GetObjListByPlanV4;
+import com.successfactors.gm.service.objective.GetPermittedActiveTemplates;
+import com.successfactors.gm.util.permission.DelegateObjectiveRulesEngine;
+import com.successfactors.gm.util.permission.GMRulesEngine;
+import com.successfactors.gm.util.permission.ObjectiveRulesEngineException;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.legacy.util.type.ProfileInfoCategoryEnum;
+import com.successfactors.legacy.util.type.ProfileInfoSourceEnum;
+import com.successfactors.legacy.util.type.ProfileInfoTypeEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.user.bean.preference.PreferenceBean;
+import com.successfactors.user.service.preference.GetPreferenceBean;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+
+public interface IGetDevPlanListImpl {
+	GetDevPlanList execute(GetDevPlanList cmd) throws ServiceApplicationException;
+}

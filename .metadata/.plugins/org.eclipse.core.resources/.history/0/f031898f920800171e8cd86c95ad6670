@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.preferences.INativeLibrariesConfigurationBlock;
+
+public interface INativeLibrariesDialog {
+	String getNativeLibraryPath();
+}

@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+
+public interface IConstraintVariable2 {
+	Object getData(String name);
+
+	TypeEquivalenceSet getTypeEquivalenceSet();
+
+	TType getType();
+
+	ITypeSet getTypeEstimate();
+
+	void setData(String name, Object data);
+
+	void setTypeEquivalenceSet(TypeEquivalenceSet set);
+
+	String toString();
+}

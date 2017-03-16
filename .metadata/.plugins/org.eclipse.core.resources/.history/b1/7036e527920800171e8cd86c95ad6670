@@ -1,0 +1,18 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IOpenProjectAction {
+	void resourceChanged(IResourceChangeEvent event);
+
+	void selectionChanged(ISelection selection);
+
+	void run(ISelection selection);
+
+	void run(IStructuredSelection selection);
+}

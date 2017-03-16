@@ -1,0 +1,36 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.forms.widgets.FormText;
+import org.eclipse.ui.part.ISetSelectionTarget;
+import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
+import org.eclipse.jdt.internal.corext.buildpath.IBuildpathModifierListener;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IBuildpathModifierAction {
+	String getDetailedDescription();
+
+	void selectionChanged(final SelectionChangedEvent event);
+
+	void addBuildpathModifierListener(IBuildpathModifierListener listener);
+
+	void removeBuildpathModifierListener(IBuildpathModifierListener listener);
+}

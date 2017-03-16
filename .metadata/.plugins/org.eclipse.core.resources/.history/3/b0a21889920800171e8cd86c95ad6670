@@ -1,0 +1,46 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.actions.AddBookmarkAction;
+import org.eclipse.ui.handlers.IHandlerActivation;
+import org.eclipse.ui.handlers.IHandlerService;
+import org.eclipse.ui.ide.IDEActionFactory;
+import org.eclipse.ui.part.Page;
+import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
+import org.eclipse.jdt.internal.ui.actions.AllCleanUpsAction;
+import org.eclipse.jdt.internal.ui.actions.FindBrokenNLSKeysAction;
+import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuCreator;
+import org.eclipse.jdt.internal.ui.actions.MultiSortMembersAction;
+import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.actions.IFindBrokenNLSKeysAction;
+import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.actions.IMultiSortMembersAction;
+import org.eclipse.jdt.internal.ui.actions.IAddTaskAction;
+import org.eclipse.jdt.internal.ui.javaeditor.IAddImportOnSelectionAction;
+import org.eclipse.jdt.internal.ui.actions.IAllCleanUpsAction;
+
+public interface IGenerateActionGroup {
+	void editorStateChanged();
+
+	void fillActionBars(IActionBars actionBar);
+
+	void fillContextMenu(IMenuManager menu);
+
+	void dispose();
+}

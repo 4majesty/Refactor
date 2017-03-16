@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jface.text.source.VerticalRulerEvent;
+import org.eclipse.jdt.internal.ui.text.correction.QuickAssistLightBulbUpdater.AssistAnnotation;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaExpandHover;
+
+public interface IJavaSelectMarkerRulerAction2 {
+	void annotationDefaultSelected(VerticalRulerEvent event);
+}

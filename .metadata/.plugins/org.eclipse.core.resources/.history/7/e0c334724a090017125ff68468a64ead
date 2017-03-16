@@ -1,0 +1,313 @@
+package com.successfactors.cdp.ui.util.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramEmailTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentee;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplateSection;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramEmailTemplateVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramMenteeVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramMentorVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramParticipantVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupTemplateSectionVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupTemplateVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramVO;
+import com.successfactors.cdp.service.util.mentoring.MentoringConstants;
+import com.successfactors.cdp.service.util.mentoring.MentoringDateUtils;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramParticipantTypeEnum;
+import com.successfactors.genericobject.bean.model.impl.GOLocalizedData;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import org.apache.commons.lang.StringUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Util for program entity and vo conversion
+ * @author I309618
+ *
+ */
+public class MentoringProgramBeanUtil {
+  
+  private static Logger logger = LogManager.getLogger();
+  
+  /**
+   * Convert Program MDF Entity to ProgramVO
+   * @param program
+   * @return
+   */
+  public ProgramVO getProgramVO(MentoringProgram program) {
+    ProgramVO vo = new ProgramVO();
+    SimpleDateFormat sdf = new SimpleDateFormat(MentoringConstants.DEFAULT_DATE_FORMAT);
+    vo.setRowId(program.getRowId());
+    vo.setName(program.getName());
+    vo.setDescription(program.getDescription());
+    vo.setStatus(program.getStatus());
+    vo.setMentorSignupDate(sdf.format(program.getMentorSignupDate()));
+    vo.setMenteeSignupDate(sdf.format(program.getMenteeSignupDate()));
+    vo.setMatchingDate(sdf.format(program.getMatchingDate()));
+    vo.setStartDate(sdf.format(program.getStartDate()));
+    vo.setEndDate(sdf.format(program.getEndDate()));
+    vo.setMaximumOfMentee(program.getMaximumOfMentee());
+    vo.setMaximumOfMentor(program.getMaximumOfMentor());
+    vo.setMatchingType(program.getMatchingType());
+    vo.setPhotoId(program.getPhotoId());
+    vo.setNeedMentorApproval(program.isNeedMentorApproval());
+    vo.setMentorshipClosureEnabled(program.isMentorshipClosureEnabled());
+    vo.setJamEnabled(program.isJamEnabled());
+    vo.setJamGroupId(program.getJamGroupId());
+
+    if(program.getMentors() != null && program.getMentors().size() > 0) {
+      List<ProgramMentorVO> mvos = new ArrayList<ProgramMentorVO>();
+      for(MentoringProgramMentor m : program.getMentors()) {
+        ProgramMentorVO mvo;
+        try {
+          mvo = getProgramParticipantVO(ProgramMentorVO.class, m);
+          if(mvo != null) {
+            mvos.add(mvo);
+          }
+        } catch (InstantiationException | IllegalAccessException e) {
+          logger.error("Fail to convert Program Entity to VO " + e);
+        }
+      }
+      vo.setMentors(mvos);
+    }
+    
+    if(program.getMentees() != null && program.getMentees().size() > 0) {
+      List<ProgramMenteeVO> mvos = new ArrayList<ProgramMenteeVO>();
+      for(MentoringProgramMentee m : program.getMentees()) {
+        ProgramMenteeVO mvo;
+        try {
+          mvo = getProgramParticipantVO(ProgramMenteeVO.class, m);
+          if(mvo != null) {
+            mvos.add(mvo);
+          }
+        } catch (InstantiationException | IllegalAccessException e) {
+          logger.error("Fail to convert Program Entity to VO " + e);
+        }
+      }
+      vo.setMentees(mvos);
+    }
+
+    if(program.getOwners() != null && !program.getOwners().isEmpty()) {
+      List<String> owners = new ArrayList<>();
+      for(MentoringProgramOwner owner : program.getOwners()){
+        owners.add(owner.getUser());
+      }
+      vo.setOwners(owners);
+    }
+    
+    return vo;
+  }
+  
+  /**
+   * @param c
+   * @param participant
+   * @return
+   * @throws InstantiationException
+   * @throws IllegalAccessException
+   */
+  private <T extends ProgramParticipantVO> T getProgramParticipantVO(Class<T> c, MentoringProgramParticipant participant) 
+      throws InstantiationException, IllegalAccessException {
+
+    if(participant == null) {
+      return null;
+    }
+    
+    T vo = c.newInstance();
+    vo.setRowId(participant.getRowId());
+    vo.setType(participant.getType());
+    vo.setUserId(participant.getUser());
+    vo.setUserName(participant.getUser());    
+    return vo;
+    
+  }
+  
+  /**
+   * @param clazz
+   * @param pvoList
+   * @return
+   * @throws InstantiationException
+   * @throws IllegalAccessException
+   */
+  private <T extends MentoringProgramParticipant> List<T> getProgramParticipantList(Class<T> clazz, List<? extends ProgramParticipantVO> pvoList) {
+    List<T> resultList = new ArrayList<T>();
+    for (ProgramParticipantVO pvo : pvoList) {
+      T participant = null;
+      try {
+        participant = clazz.newInstance();
+        participant.setUser(pvo.getUserId());
+        if (clazz == MentoringProgramMentor.class) {
+          participant.setType(ProgramParticipantTypeEnum.MENTOR);
+        } else if (clazz == MentoringProgramMentee.class) {
+          participant.setType(ProgramParticipantTypeEnum.MENTEE);
+        }
+        resultList.add(participant);
+      } catch (InstantiationException|IllegalAccessException e) {
+        logger.error("Fail to convert ProgramParticipantVO to Entity", e);
+      }
+    }
+    return resultList;
+  }
+  
+  /**
+   * Merge ProgramVO into Program MDF Entity
+   * @param p
+   * @param programVO
+   * @return
+   */
+  public MentoringProgram getProgram(MentoringProgram p, ProgramVO programVO, String locale) throws ServiceApplicationException{
+    MentoringProgram mentoringProgram = (p == null) ? new MentoringProgram() : p;
+    if (programVO.getMatchingType() != ProgramMatchingTypeEnum.OPEN_ENDED) {
+      mentoringProgram.setMentorSignupDate(MentoringDateUtils.convertStringToDate(programVO.getMentorSignupDate()));
+      mentoringProgram.setMenteeSignupDate(MentoringDateUtils.convertStringToDate(programVO.getMenteeSignupDate()));
+      mentoringProgram.setMatchingDate(MentoringDateUtils.convertStringToDate(programVO.getMatchingDate()));
+      mentoringProgram.setStartDate(MentoringDateUtils.convertStringToDate(programVO.getStartDate()));
+      mentoringProgram.setEndDate(MentoringDateUtils.convertStringToDate(programVO.getEndDate()));
+      if (programVO.getMentors() != null && programVO.getMentors().size() > 0) {
+        List<MentoringProgramMentor> mentorList = getProgramParticipantList(MentoringProgramMentor.class, programVO.getMentors());
+        mentoringProgram.setMentors(mentorList);
+      } else {
+        mentoringProgram.setMentors(new ArrayList<MentoringProgramMentor>());
+      }
+      if (programVO.getMentees() != null && programVO.getMentees().size() > 0) {
+        List<MentoringProgramMentee> menteeList = getProgramParticipantList(MentoringProgramMentee.class, programVO.getMentees());
+        mentoringProgram.setMentees(menteeList);
+      } else {
+        mentoringProgram.setMentees(new ArrayList<MentoringProgramMentee>());
+      }
+      if (programVO.getEmailTemplates() != null) {
+        List<MentoringProgramEmailTemplate> emailTemplateList = new ArrayList<MentoringProgramEmailTemplate>();
+        for (ProgramEmailTemplateVO emailTemplateVO : programVO.getEmailTemplates()) {
+          emailTemplateList.add(getProgramEmailTemplate(emailTemplateVO));
+        }
+        mentoringProgram.setEmailTemplates(emailTemplateList);
+      }
+    }
+    mentoringProgram.setName(programVO.getName());
+    mentoringProgram.setDescription(programVO.getDescription());
+    mentoringProgram.setStatus(programVO.getStatus());
+    mentoringProgram.setMatchingType(programVO.getMatchingType());
+    mentoringProgram.setPhotoId(programVO.getPhotoId());
+    //TODO hard code now and will get from UI later
+    mentoringProgram.setMaximumOfMentee(programVO.getMaximumOfMentee());
+    mentoringProgram.setMaximumOfMentor(programVO.getMaximumOfMentor());
+    mentoringProgram.setNeedMentorApproval(programVO.isNeedMentorApproval());
+    mentoringProgram.setMentorshipClosureEnabled(programVO.isMentorshipClosureEnabled());
+    mentoringProgram.setJamEnabled(programVO.isJamEnabled());
+    if (programVO.getSignupTemplate() != null) {
+      ProgramSignupTemplateVO programSignupTemplateVO = programVO.getSignupTemplate();
+      MentoringProgramSignupTemplate mentoringProgramSignupTemplate = new MentoringProgramSignupTemplate();
+      List<ProgramSignupTemplateSectionVO> voSections = programSignupTemplateVO.getSections();
+      List<MentoringProgramSignupTemplateSection> signupFormTemplateSectionList = new ArrayList<MentoringProgramSignupTemplateSection>();
+      for (ProgramSignupTemplateSectionVO templateSectionVO : voSections) {
+        MentoringProgramSignupTemplateSection item = getProgramSignupTemplateSection(templateSectionVO, locale);
+        signupFormTemplateSectionList.add(item);
+      }
+      mentoringProgramSignupTemplate.setSections(signupFormTemplateSectionList);
+      mentoringProgram.setSignupFormTemplate(mentoringProgramSignupTemplate);
+    }
+    if (programVO.getOwners() != null) {
+      List<MentoringProgramOwner> owners = new ArrayList<>();
+      for (String userId : programVO.getOwners()) {
+        owners.add(getProgramOwner(userId));
+      }
+      mentoringProgram.setOwners(owners);
+    }
+    return mentoringProgram;
+  }
+  
+  public MentoringProgram getMentoringProgramFromOverview(MentoringProgram p, ProgramVO pvo, String locale) throws ServiceApplicationException{
+    MentoringProgram program = (p == null) ? new MentoringProgram() : p;
+    program.setName(pvo.getName());
+    program.setDescription(pvo.getDescription());    
+    program.setMentorSignupDate(MentoringDateUtils.convertStringToDate(pvo.getMentorSignupDate()));
+    program.setMenteeSignupDate(MentoringDateUtils.convertStringToDate(pvo.getMenteeSignupDate()));
+    program.setMatchingDate(MentoringDateUtils.convertStringToDate(pvo.getMatchingDate()));
+    program.setStartDate(MentoringDateUtils.convertStringToDate(pvo.getStartDate()));
+    program.setEndDate(MentoringDateUtils.convertStringToDate(pvo.getEndDate()));
+    program.setMatchingType(pvo.getMatchingType());
+    program.setPhotoId(pvo.getPhotoId());
+    program.setMaximumOfMentee(pvo.getMaximumOfMentee());
+    program.setMaximumOfMentor(pvo.getMaximumOfMentor());
+    program.setNeedMentorApproval(pvo.isNeedMentorApproval());
+    program.setMentorshipClosureEnabled(pvo.isMentorshipClosureEnabled());
+    program.setJamEnabled(pvo.isJamEnabled());
+
+    //merge owner
+    if(pvo.getOwners() != null){
+      List<MentoringProgramOwner> owners = new ArrayList<>();
+      for(String userId: pvo.getOwners()){
+        owners.add(getProgramOwner(userId));
+      }
+      program.setOwners(owners);
+    }
+    //if mentor list is empty, it means user select no mentor, so destList should be empty
+    if(pvo.getMentors() != null && pvo.getMentors().size() > 0) {
+      List<MentoringProgramMentor> mentorList = getProgramParticipantList(MentoringProgramMentor.class, pvo.getMentors());
+      program.setMentors(mentorList);
+    }else{
+      program.setMentors(new ArrayList<MentoringProgramMentor>());
+    }
+    
+    //if mentee list is empty, it means user select no mentee, so destList should be empty
+    if(pvo.getMentees() != null && pvo.getMentees().size() > 0) {
+      List<MentoringProgramMentee> plist = getProgramParticipantList(MentoringProgramMentee.class, pvo.getMentees());
+      program.setMentees(plist);
+    }else{
+      program.setMentees(new ArrayList<MentoringProgramMentee>());
+    }
+    return program;
+  }
+  
+  /**
+   * @param voSection
+   * @return
+   */
+  private MentoringProgramSignupTemplateSection getProgramSignupTemplateSection(ProgramSignupTemplateSectionVO voSection, String locale){
+      MentoringProgramSignupTemplateSection psts = new MentoringProgramSignupTemplateSection();
+      psts.setMenteeVisible(StringUtils.isNotEmpty(voSection.getMenteeQuestion()));
+      psts.setMentorVisible(StringUtils.isNotEmpty(voSection.getMentorQuestion()));
+      psts.setSectionId(MentoringUtils.addIdentityForFreeTextSection(voSection.getSectionId()));
+      psts.setCategory(voSection.getCategory()); 
+      psts.setDisplayType(voSection.getDisplayType());
+      if (StringUtils.isNotEmpty(voSection.getMentorQuestion())) {
+          GOLocalizedData mentorQuestion = new GOLocalizedData();
+          mentorQuestion.setFieldVsValue(locale, voSection.getMentorQuestion());
+          psts.setMentorQuestion(mentorQuestion);
+      }
+      if (StringUtils.isNotEmpty(voSection.getMenteeQuestion())) {
+          GOLocalizedData menteeQuestion = new GOLocalizedData();
+          menteeQuestion.setFieldVsValue(locale, voSection.getMenteeQuestion());
+          psts.setMenteeQuestion(menteeQuestion);
+      }
+      return psts;
+  }
+  
+  /**
+   * @param voEmail
+   * @return
+   */
+  private MentoringProgramEmailTemplate getProgramEmailTemplate(ProgramEmailTemplateVO voEmail){
+      MentoringProgramEmailTemplate pet = new MentoringProgramEmailTemplate();
+      pet.setEmailContent(voEmail.getEmailContent());
+      pet.setEmailSubject(voEmail.getEmailSubject());
+      pet.setEmailType(voEmail.getEmailType());
+      
+      return pet;
+  }
+  
+  private MentoringProgramOwner getProgramOwner(String userId) {
+    MentoringProgramOwner owner = new MentoringProgramOwner();
+    owner.setUser(userId);
+    return owner;
+  }
+}

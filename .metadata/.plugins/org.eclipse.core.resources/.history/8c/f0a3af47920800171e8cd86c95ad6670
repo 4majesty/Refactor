@@ -1,0 +1,26 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IClasspathContainerSelectionPage {
+	String getText(Object element);
+
+	void createControl(Composite parent);
+
+	ClasspathContainerDescriptor getSelected();
+
+	ClasspathContainerDescriptor[] getContainers();
+
+	boolean canFlipToNextPage();
+
+	void setVisible(boolean visible);
+}

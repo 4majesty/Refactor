@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+
+public interface IJavadocProblemsConfigurationBlock {
+}

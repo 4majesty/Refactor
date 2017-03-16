@@ -1,0 +1,36 @@
+package org.eclipse.jdt.internal.corext.refactoring.code;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
+
+public interface IParameterData {
+	String getName();
+
+	ITypeBinding getTypeBinding();
+
+	void addReference(ASTNode node);
+
+	List references();
+
+	void setAccessMode(int mode);
+
+	boolean isUnused();
+
+	boolean isReadOnly();
+
+	boolean isWrite();
+
+	int getSimplifiedAccessMode();
+
+	int getNumberOfAccesses();
+
+	boolean needsEvaluation();
+
+	void setOperatorPrecedence(int newValue);
+
+	int getOperatorPrecedence();
+}

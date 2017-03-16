@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonDialogField;
+
+public interface IOutputLocationDialog {
+	void dialogFieldChanged(DialogField field);
+
+	void changeControlPressed(DialogField field);
+
+	IPath getOutputLocation();
+}

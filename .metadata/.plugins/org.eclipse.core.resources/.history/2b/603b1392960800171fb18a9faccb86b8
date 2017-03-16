@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ltk.ui.refactoring.ChangePreviewViewerInput;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
+import org.eclipse.jdt.internal.ui.util.ViewerPane;
+
+public interface ICreateTextFileChangePreviewViewer {
+	void setImageDescriptor(ImageDescriptor imageDescriptor);
+
+	void setText(String text);
+
+	void createControl(Composite parent);
+
+	Control getControl();
+
+	void refresh();
+
+	void setInput(ChangePreviewViewerInput input);
+}

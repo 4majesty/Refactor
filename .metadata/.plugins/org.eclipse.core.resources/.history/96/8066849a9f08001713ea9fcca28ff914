@@ -1,0 +1,516 @@
+package com.successfactors.cdp.ui.util;
+
+import java.text.DecimalFormat;
+import java.text.FieldPosition;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.StandardElementEnum;
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.bean.CareerWorksheetSuggestedRoleVO;
+import com.successfactors.cdp.bean.idp.CareerWorkSheetTemplateBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerBehaviorBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerEntryBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerRoleBean;
+import com.successfactors.cdp.bean.idp.ReadinessMeterInfoBean;
+import com.successfactors.cdp.util.CareerWorksheetUtils;
+import com.successfactors.edu.api.bean.EmployeeProfileBean;
+import com.successfactors.empdir.bean.EmployeeVO;
+import com.successfactors.empfile.rules.SuccessionRulesEngine;
+import com.successfactors.gm.api.bean.IEnumValue;
+import com.successfactors.gm.api.bean.IField;
+import com.successfactors.gm.api.bean.IPermission;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.util.permission.GMRulesEngine;
+import com.successfactors.gm.util.permission.ObjectiveRulesEngineException;
+import com.successfactors.jdm.bean.RoleMapBean;
+import com.successfactors.legacy.bean.FeedbackBean;
+import com.successfactors.legacy.bean.ScaleBean;
+import com.successfactors.legacy.bean.vo.listFramework.ListRowVOInterface;
+import com.successfactors.legacy.util.exception.SuccessionRulesEngineException;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.util.HtmlUtils;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.pmcommon.util.ClientDateFormat;
+import com.successfactors.sfutil.util.math.MathUtil;
+import com.successfactors.user.bean.UserBean;
+/***
+ * CWSV12 View Helper
+ * @author haixunlu
+ *
+ */
+public class CWSV12ViewHelper {
+  /** logger. */
+  private static Logger logger = LogManager.getLogger();
+
+  /***
+   * constructor
+   */
+  private CWSV12ViewHelper(){
+  
+  }
+
+  private static Object getUserValue(StandardElementEnum elem, Properties userInfoRecords,
+      String userId, UserBean user, SuccessionRulesEngine successionRulesEngine){
+    Object value = null;
+    try{
+      boolean canRead = successionRulesEngine.canRead(userId, elem);
+      if(canRead){
+        if(null!=userInfoRecords.getProperty(elem.getUserInfoKey())){
+          value = userInfoRecords.get(elem.getUserInfoKey());
+        }else{
+          if(StandardElementEnum.DEPARTMENT == elem && StringUtils.isBlank((String)value)){
+            value = user.getUserDepartment();
+          }
+        }
+      }
+    }catch(SuccessionRulesEngineException e){
+      return null;
+    }
+    return value;
+  }
+
+  /***
+   * get user json data
+   * @param profile .
+   * @param successionRulesEngine .
+   * @param selectedUserId .
+   * @param user .
+   * @param currentTimeInPosition .
+   * @param v10msgs .
+   * @return output
+   */
+  public static JSONObjectOutput getUserJSON(EmployeeProfileBean profile,
+      SuccessionRulesEngine successionRulesEngine, String selectedUserId, UserBean user,
+      String currentTimeInPosition, Messages v10msgs) {
+    JSONObjectOutput output = new JSONObjectOutput();
+
+    output.put("id", user.getFullNameBean().getUserId());
+    output.put("name", user.getFullNameBean().getUsername());
+    output.put("fn", user.getFullNameBean().getFirstName());
+    output.put("mi", user.getFullNameBean().getMi());
+    output.put("ln", user.getFullNameBean().getLastName());
+    Properties userInfoRecords = profile.getUser().getUserInfoRecords();
+    String department = (String)getUserValue(StandardElementEnum.DEPARTMENT,
+    userInfoRecords, selectedUserId, profile.getUser(), successionRulesEngine);
+    String city = (String)getUserValue(StandardElementEnum.CITY, userInfoRecords, selectedUserId,
+        profile.getUser(), successionRulesEngine);
+    String state = (String)getUserValue(StandardElementEnum.STATE, 
+        userInfoRecords, selectedUserId,profile.getUser(), successionRulesEngine);
+
+    output.put("department", StringUtils.notNull(department));
+    output.put("city", StringUtils.notNull(city));
+    output.put("state", StringUtils.notNull(state));
+    if(!StringUtils.isBlank(currentTimeInPosition) && !v10msgs.getString("NA").equals(currentTimeInPosition)){
+      output.put("currentTimeInPosition", currentTimeInPosition);
+    }
+    return output;
+  }
+
+  /***
+   * get scale json
+   * @param ratingScaleBeans .
+   * @param reverseOrder .
+   * @return .
+   */
+  public static JSONObjectOutput getScaleJSON(List ratingScaleBeans, boolean reverseOrder){
+      JSONObjectOutput scaleOutput = new JSONObjectOutput();
+      double scaleMin = MathUtil.round(
+        ((ScaleBean) ratingScaleBeans.get(0)).getScaleValue(), CWSV12ViewConstants.GAP_GRPAH_DECIMAL);
+      double scaleMax = MathUtil.round(((ScaleBean) ratingScaleBeans.get(ratingScaleBeans.size()-1)).getScaleValue(),
+        CWSV12ViewConstants.GAP_GRPAH_DECIMAL);
+      double scaleBase = scaleMin;
+      double nextScale = MathUtil.round(((ScaleBean) ratingScaleBeans.get(1)).getScaleValue(), 
+        CWSV12ViewConstants.GAP_GRPAH_DECIMAL);
+      double scaleStep = MathUtil.round(nextScale - scaleBase, CWSV12ViewConstants.GAP_GRPAH_DECIMAL);
+      scaleOutput.put("scaleMin", scaleMin);
+      scaleOutput.put("scaleMax", scaleMax);
+      scaleOutput.put("scaleStep", scaleStep);
+      if(reverseOrder){// in case js undefined
+        scaleOutput.put("companyScale", reverseOrder);
+      }
+      return scaleOutput;
+  }
+  
+  /***
+   * get shared roles JSON object for each competency
+   * @param roleMapList .
+   * @return .
+   */
+  public static JSONArrayOutput getSharedRolesJSON(List<RoleMapBean> roleMapList){
+    // shareRoleArray
+    JSONArrayOutput sharedRoleArray = new JSONArrayOutput();
+    if(null!=roleMapList && !roleMapList.isEmpty()){
+      for(RoleMapBean roleMap:roleMapList){
+        JSONObjectOutput o = new JSONObjectOutput();
+        o.put(CWSV12ViewConstants.JSON_KEY_ID, roleMap.getRoleId());
+        o.put(CWSV12ViewConstants.JSON_KEY_NAME, roleMap.getRoleName());
+        sharedRoleArray.add(o);
+      }
+    }
+    return sharedRoleArray;
+    
+  }
+  
+  /**
+   * get employee JSON output for employee list popup
+   * @param rowList 
+   * @return Employee list
+   */
+  public static JSONArrayOutput getEmployeeListJSON(List<ListRowVOInterface> rowList){
+    JSONArrayOutput employeesArrayVO = new JSONArrayOutput();
+    for(ListRowVOInterface row:rowList){
+      JSONObjectOutput o = new JSONObjectOutput();
+      EmployeeVO vo = (EmployeeVO)row;
+      o.put("userId", vo.getUserBean().getUserId());// use userId to get photos component
+      o.put("fn",vo.getUserBean().getFullNameBean().getFirstName());
+      o.put("mi",vo.getUserBean().getFullNameBean().getMi());
+      o.put("ln", vo.getUserBean().getFullNameBean().getLastName());
+      employeesArrayVO.add(o);
+    }
+    return employeesArrayVO;
+  }
+  
+  /**
+   * get role details
+   * @return . 
+   */
+  public static JSONObjectOutput getRoleMoreDetailsJSON(){
+    JSONObjectOutput output = new JSONObjectOutput();
+    
+    return output;
+  }
+  
+  /**
+   * Get single plan output
+   * @param plan 
+   * @param rulesEngine 
+   * @param objBean 
+   * @param selectedUserId 
+   * @param locale 
+   * @return JSONObjectOutput 
+   * @throws ObjectiveRulesEngineException 
+   */
+  public static JSONObjectOutput getPlanJSON(ObjTemplateBean plan, GMRulesEngine rulesEngine, ObjBean objBean, 
+    String selectedUserId, Locale locale, boolean isJPBEnabled) throws ObjectiveRulesEngineException{
+      JSONObjectOutput planOutput = new JSONObjectOutput();
+      planOutput.put(CWSV12ViewConstants.JSON_KEY_ID, plan.getObjPlanId());
+      planOutput.put(CWSV12ViewConstants.JSON_KEY_NAME, HtmlUtils.escapeContent(plan.getObjPlanName(locale)));
+      JSONObjectOutput permOutput = new JSONObjectOutput();
+      if(rulesEngine.hasPermission(selectedUserId, IPermission.DELETE, objBean)){
+        permOutput.put("remove", true);
+      }
+      if(rulesEngine.hasPermission(selectedUserId, IPermission.CREATE, objBean)){
+        permOutput.put("create", true);
+        long maxPerCategory = plan.getMaxPerCategory();
+        if(maxPerCategory!=-1){
+          planOutput.put("maxRoleCount", maxPerCategory);
+        }
+      }
+      planOutput.put("permission", permOutput);
+      IField readinessField = plan.getField(CareerWorkSheetTemplateBean.FIELD_READINESS_METER);
+      if(null!=readinessField && rulesEngine.hasReadPermission(selectedUserId,readinessField, null)){
+        planOutput.put("showReadiness", true);
+      }
+      CareerBehaviorBean behaviorBean = plan.getCareerBehaviorBean();
+      // by default, hidebehavior=false
+      boolean hideBehavior = behaviorBean!=null && behaviorBean.isHideBehaviors();
+      if(!hideBehavior){
+        planOutput.put("useBehaviors", true);
+      }
+      // show dev goal image block if user has read permission
+      IField devGoalsField = plan.getField(CareerWorkSheetTemplateBean.FIELD_DEVELOPMENT_GOALS);
+      if(null!=devGoalsField && rulesEngine.hasReadPermission(selectedUserId, devGoalsField, objBean)){
+        planOutput.put("showGoals", true);
+      }
+      
+      planOutput.put("isJPBprofileEnabled", !plan.isJPBProfileInCWSDisabled() && isJPBEnabled);           
+      
+      planOutput.put("isReadinessShownInNewWinEnabled", !plan.isShowReadinessInNewWindowDisabled());
+
+      return planOutput;
+  }
+  
+  /**
+   * get objective list JSON
+   * @param objBeanList 
+   * @param v10msgs 
+   * @param stateFieldValues 
+   * @param userId 
+   * @param locale 
+   * @param goalFieldsPermSet 
+   * @return Object list JSON
+   */
+  public static JSONArrayOutput getObjectivesJSON(List<ObjBean> objBeanList, Messages v10msgs,
+    Map<String, IEnumValue> stateFieldValues, String userId, 
+    Locale locale, Set<String> goalFieldsPermSet){
+    JSONArrayOutput objArray = new JSONArrayOutput();
+    
+    if(null!=objBeanList){
+        for(ObjBean obj:objBeanList){
+          JSONObjectOutput objOutput = new JSONObjectOutput();
+          objOutput.put(CWSV12ViewConstants.JSON_KEY_ID, obj.getObjId());
+          // check read permission
+          if(goalFieldsPermSet.contains(IField.ID_NAME)){
+            objOutput.put(CWSV12ViewConstants.JSON_KEY_NAME, StringUtils.notNull(obj.getObjName()));
+          }
+          if(goalFieldsPermSet.contains(IField.ID_PERCENTDONE)){
+            DecimalFormat format = new DecimalFormat("0.0");
+            StringBuffer percentComplete = new StringBuffer();
+            format.format(obj.getObjPercentDone(), percentComplete, new FieldPosition(0));
+            objOutput.put(CWSV12ViewConstants.JSON_KEY_PERCENT, percentComplete+"%");
+          }
+          if(goalFieldsPermSet.contains(IField.ID_STATE)){
+            String state = obj.getProperty(ObjBean.STATE);
+            IEnumValue enumValue =
+               stateFieldValues.get(state);
+            String stateStr = "";
+            // need check NPE!!!
+            String stateStyle = "";
+            if (enumValue != null)
+            {
+              stateStr = enumValue.getLabel().getString(locale);
+              stateStyle = enumValue.getStyle();
+            }
+            JSONObjectOutput stateJson = new JSONObjectOutput();
+            stateJson.put(CWSV12ViewConstants.JSON_KEY_LABEL, StringUtils.notNull(stateStr));
+            stateJson.put(CWSV12ViewConstants.JSON_KEY_STYLE, StringUtils.notNull(stateStyle));
+            objOutput.put("state", stateJson);
+          }
+          if(goalFieldsPermSet.contains(IField.ID_DUE)){
+            String dateFormat = v10msgs.getString("FLD_DATEFORMAT");
+            objOutput.put("due", ClientDateFormat.simpleformat(
+                obj.getObjDue(), dateFormat, locale));
+          }
+          objArray.add(objOutput);
+        }
+    }
+    
+    return objArray;
+  }
+  /**
+   * get role list JSON object
+   * @param roleList 
+   * @param objTemplateBean 
+   * @param careerWorksheetBean 
+   * @param useCompanyScale 
+   * @param displayRedinessMeter 
+   * @return JSONArrayOutput
+   */
+  public static JSONArrayOutput getRolesJSON(List<CareerRoleBean> roleList, ObjTemplateBean objTemplateBean,
+    CareerWorksheetBean careerWorksheetBean, boolean useCompanyScale, boolean displayRedinessMeter,
+    Long defaultRole){
+      JSONArrayOutput arrayOutput = new JSONArrayOutput();
+      
+      IField lastRatingField = objTemplateBean.getField(CareerWorkSheetTemplateBean.FIELD_LAST_RATING);
+      IField expectedRatingField = objTemplateBean.getField(CareerWorkSheetTemplateBean.FIELD_GAP_GRAPH);
+
+      boolean isHideBehaviors = false;
+      boolean isHideBehaviorRatings = false;
+      boolean isUseBehaviorInReadiness = true;
+      CareerBehaviorBean careerBehaviorBean = objTemplateBean.getCareerBehaviorBean();
+      if (careerBehaviorBean != null) {
+        isHideBehaviors = careerBehaviorBean.isHideBehaviors();
+        isHideBehaviorRatings = careerBehaviorBean.isHideRatings();
+        isUseBehaviorInReadiness = careerBehaviorBean.isUseInReadiness();
+      }
+      for(CareerRoleBean roleBean: roleList){
+        JSONObjectOutput o = new JSONObjectOutput();
+        o.put(CWSV12ViewConstants.JSON_KEY_ID, roleBean.getRoleBean().getRoleId());
+        o.put(CWSV12ViewConstants.JSON_KEY_NAME,
+            roleBean.getRoleBean().getRoleName());
+        o.put(CWSV12ViewConstants.JSON_KEY_DESC, HtmlUtils.filterHtml(roleBean.getRoleBean().getRoleDesc()));
+        boolean isCurrentRole = roleBean.isCurrentRole();
+        if(!isCurrentRole && displayRedinessMeter){
+          int percentage = getReadinessMeter(lastRatingField,expectedRatingField, roleBean, useCompanyScale,
+            careerWorksheetBean, !isHideBehaviors&&!isHideBehaviorRatings && isUseBehaviorInReadiness);
+          if(percentage >=0 ){ //getCurrentlyRatedCompetencies <=0, treat it as N/A instead of 0
+            o.put(CWSV12ViewConstants.JSON_KEY_PERCENT, percentage);
+          }
+        }
+        o.put(CWSV12ViewConstants.JSON_KEY_CURRENT_ROLE, isCurrentRole);
+        if(!isCurrentRole){
+          o.put(CWSV12ViewConstants.JSON_KEY_DEFAULT_ROLE,
+            defaultRole!=null && roleBean.getRoleBean().getRoleId() == defaultRole);
+        }
+        arrayOutput.add(o);
+      }
+      return arrayOutput;
+  }
+  /***
+   * add readiness meter each role
+   * @param o
+   * @param displayRedinessMeter
+   * @param lastRatingField
+   * @param expectedRatingField
+   * @param roleBean
+   * @param useCompanyScale
+   * @param careerWorksheetBean
+   * @param includeBehavior
+   */
+  private static int getReadinessMeter(IField lastRatingField, IField expectedRatingField,
+      CareerRoleBean roleBean, boolean useCompanyScale,CareerWorksheetBean careerWorksheetBean, 
+      boolean includeBehavior){
+    ReadinessMeterInfoBean meterInfoBean = new ReadinessMeterInfoBean();
+    List entryList = roleBean.getEntryList();
+    long roleId = roleBean.getRoleBean().getRoleId();
+    if(entryList == null){
+      return -1;
+    }
+    int percent = 0;
+    int requiredCompetencies = 0;
+    for(Iterator it = entryList.iterator();it.hasNext();){
+      CareerEntryBean careerEntryBean = (CareerEntryBean)it.next();
+      CareerEntryBean mapEntryBean = (CareerEntryBean)careerWorksheetBean.
+          getEntryMap().get(careerEntryBean.getCompetencyId());
+      long compId = careerEntryBean.getCompetencyId();
+      double lastRating = lastRatingField!=null?
+        CareerWorksheetUtils.adjustLastRating(lastRatingField, careerEntryBean, mapEntryBean):0.0;
+      double expectedRating = expectedRatingField!=null?
+        CareerWorksheetUtils.getExpectedRating(lastRatingField,
+        careerWorksheetBean.getExpectedRating(roleId, compId)):0.0;
+      meterInfoBean.calculation(lastRating,expectedRating, useCompanyScale);// calculate filledCompetencies
+      if(FeedbackBean.TYPE_COMPETENCY== careerEntryBean.getCompetencyType()){
+        requiredCompetencies++;
+      }
+
+      if(includeBehavior){
+        // add behavior support
+        List subEntryList = careerEntryBean.getSubEntryList();
+        if(null!=subEntryList && !subEntryList.isEmpty()){
+          for(Iterator it2 = subEntryList.iterator();it2.hasNext();){
+            CareerEntryBean subEntry = (CareerEntryBean)it2.next();
+            CareerEntryBean mapSubEntry = careerWorksheetBean.getCareerEntryBean(subEntry.getCompetencyId());
+            long behaviorId = subEntry.getCompetencyId();
+            double behaviorLastRating = lastRatingField!=null?
+              CareerWorksheetUtils.adjustLastRating(lastRatingField, subEntry, mapSubEntry):0.0;
+            double behaviorExpectedRating = expectedRatingField!=null?
+              CareerWorksheetUtils.getExpectedRating(lastRatingField,
+                    careerWorksheetBean.getExpectedRating(roleId, behaviorId)):0.0;
+            // if behavior expected rating is not set, use competency's.
+            if(FeedbackBean.NOT_APPLICABLE == behaviorExpectedRating){
+              behaviorExpectedRating = expectedRating;
+            }
+            // calculation only support includeBehavior=true or competency
+            meterInfoBean.calculation(behaviorLastRating,behaviorExpectedRating, useCompanyScale);
+            requiredCompetencies++;
+          }
+        }
+      }
+      // end behavior support
+    }
+    
+    return CareerWorksheetUtils.getReadinessMeter(meterInfoBean, requiredCompetencies, -1);
+  }
+
+  /***
+   * 
+   * get Suggested Role VO List
+   * @param roleList all role list
+   * @return role vo list JSON String between start and end
+   */
+  public static JSONObjectOutput getSuggestedRoleVOList(
+      List<CareerWorksheetSuggestedRoleVO> roleList){
+    JSONObjectOutput output = new JSONObjectOutput();
+    if(roleList!=null && !roleList.isEmpty()){
+      Set<Long> familyIdSet = new HashSet<Long>();
+      Set<Long> competencyIdSet = new HashSet<Long>();
+      Set<String> industrySet = new HashSet<String>();
+      JSONArrayOutput roleArray = new JSONArrayOutput();
+      JSONArrayOutput familyArray = new JSONArrayOutput();
+      JSONArrayOutput competencyArray = new JSONArrayOutput();
+      JSONArrayOutput industryArray = new JSONArrayOutput();
+      for(CareerWorksheetSuggestedRoleVO vo:roleList){
+        // build role
+        JSONObjectOutput o = new JSONObjectOutput();
+        o.put(CWSV12ViewConstants.JSON_KEY_ID, vo.getRoleId());
+        o.put(CWSV12ViewConstants.JSON_KEY_NAME,StringUtils.notNull(vo.getRoleName()));
+        o.put(CWSV12ViewConstants.JSON_KEY_DESC,StringUtils.notNull(vo.getRoleDesc()));
+        o.put(CWSV12ViewConstants.JSON_KEY_FAMILY_ID,vo.getFamilyId());
+        if (vo.getCompetencies() != null) {
+          JSONArrayOutput competencyIdArray = new JSONArrayOutput();
+          for(Long competencyId : vo.getCompetencies().keySet()) {
+            competencyIdArray.add(competencyId);
+            if (!competencyIdSet.contains(competencyId)) {
+              competencyIdSet.add(competencyId);
+              JSONObjectOutput competencyJsonObject = new JSONObjectOutput();
+              competencyJsonObject.put(CWSV12ViewConstants.JSON_KEY_VALUE, competencyId);
+              competencyJsonObject.put(CWSV12ViewConstants.JSON_KEY_LABEL, vo.getCompetencies().get(competencyId));
+              competencyArray.add(competencyJsonObject);
+            }
+          }
+          o.put(CWSV12ViewConstants.JSON_KEY_COMPETENCY_IDS, competencyIdArray);
+        }
+        if (vo.getIndustries() != null) {
+          JSONArrayOutput industryArrayForSingleRole = new JSONArrayOutput();
+          for (String industry : vo.getIndustries()) {
+            if (!industrySet.contains(industry)) {
+              industrySet.add(industry);
+              industryArray.add(industry);
+            }
+            
+            industryArrayForSingleRole.add(industry);
+          }
+          o.put(CWSV12ViewConstants.JSON_KEY_INDUSTRIES, industryArrayForSingleRole);
+        }
+        roleArray.add(o);
+        // build family
+        if(!familyIdSet.contains(vo.getFamilyId())){
+          familyIdSet.add(vo.getFamilyId());
+          JSONObjectOutput o2 = new JSONObjectOutput();
+          o2.put(CWSV12ViewConstants.JSON_KEY_VALUE, vo.getFamilyId());
+          o2.put(CWSV12ViewConstants.JSON_KEY_LABEL,StringUtils.notNull(vo.getFamilyName()));
+          familyArray.add(o2);
+        }
+      }
+      JSONStringArrayComparator stringComparator = new JSONStringArrayComparator();
+      JSONObjectArrayComparator objectComparator = new JSONObjectArrayComparator(CWSV12ViewConstants.JSON_KEY_LABEL);
+      Collections.sort(familyArray, objectComparator);
+      Collections.sort(industryArray, stringComparator);
+      Collections.sort(competencyArray, objectComparator);
+      output.put(CWSV12ViewConstants.JSON_KEY_ROLE_LIST, roleArray);
+      output.put(CWSV12ViewConstants.JSON_KEY_ADDROLE_FAMILIES, familyArray);
+      output.put(CWSV12ViewConstants.JSON_KEY_COMPETENCY_LIST, competencyArray);
+      output.put(CWSV12ViewConstants.JSON_KEY_INDUSTRIES, industryArray);
+    }
+    return output;
+  }
+  
+  public static class JSONObjectArrayComparator implements Comparator<Object> {
+
+    private String key;
+    public JSONObjectArrayComparator(String key) {
+      this.key = key;
+    }
+    
+    @Override
+    public int compare(Object o1, Object o2) {
+        JSONObjectOutput object1 = (JSONObjectOutput)o1;
+        JSONObjectOutput object2 = (JSONObjectOutput)o2;
+        return ((String)(object1.get(key))).compareTo(((String)(object2.get(key))));
+    }
+    
+  }
+  
+  public static class JSONStringArrayComparator implements Comparator<Object> {
+    @Override
+    public int compare(Object o1, Object o2) {
+      String object1 = (String)o1;
+      String object2 = (String)o2;
+      return object1.compareTo(object2);
+    }
+  }  
+  
+}

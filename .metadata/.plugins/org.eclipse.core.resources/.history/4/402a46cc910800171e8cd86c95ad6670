@@ -1,0 +1,43 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.NotHandledException;
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ICompoundEditExitStrategy {
+	void mouseDoubleClick(MouseEvent e);
+
+	void mouseDown(MouseEvent e);
+
+	void mouseUp(MouseEvent e);
+
+	void focusGained(FocusEvent e);
+
+	void focusLost(FocusEvent e);
+
+	void notHandled(String commandId, NotHandledException exception);
+
+	void postExecuteFailure(String commandId, ExecutionException exception);
+
+	void postExecuteSuccess(String commandId, Object returnValue);
+
+	void preExecute(String commandId, ExecutionEvent event);
+
+	void verifyKey(VerifyEvent event);
+
+	void arm(ITextViewer viewer);
+
+	void disarm();
+
+	void addCompoundListener(ICompoundEditListener listener);
+
+	void removeCompoundListener(ICompoundEditListener listener);
+}

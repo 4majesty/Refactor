@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+
+public interface IJavadocLinkDialogLabelProvider {
+	String getText(Object element);
+
+	Image getImage(Object element);
+}

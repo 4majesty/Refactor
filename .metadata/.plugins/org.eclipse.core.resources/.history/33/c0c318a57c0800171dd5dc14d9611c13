@@ -1,0 +1,17 @@
+package com.successfactors.rbp.integration.grc.xml.binding;
+
+import javax.xml.bind.annotation.XmlType;
+
+public interface IReadWritePermission {
+	ReadPermission getReadPermission();
+
+	void setReadPermission(ReadPermission value);
+
+	WritePermission getWritePermission();
+
+	void setWritePermission(WritePermission value);
+
+	Message getMessage();
+
+	void setMessage(Message value);
+}

@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.compare.contentmergeviewer.ITokenComparator;
+import org.eclipse.compare.rangedifferencer.IRangeComparator;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+
+public interface IJavaTokenComparator {
+	ITokenComparator createTokenComparator(String text);
+
+	int getRangeCount();
+
+	int getTokenStart(int index);
+
+	int getTokenLength(int index);
+
+	boolean rangesEqual(int thisIndex, IRangeComparator other, int otherIndex);
+
+	boolean skipRangeComparison(int length, int maxLength, IRangeComparator other);
+}

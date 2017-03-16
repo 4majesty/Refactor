@@ -1,0 +1,72 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.sca.ServiceQuery;
+
+/**
+ * Service command to get mentoring requests according to program ID, mentor/mentee ID and status
+ * @author Keqin Liu
+ */
+public class GetMentoringRequest implements ServiceQuery<List<MentoringProgramMentorRequest>> {
+  private String programId;
+
+  private List<MentorRequestStatusEnum> status = new ArrayList<MentorRequestStatusEnum>();
+
+  private List<String> mentorIds = new ArrayList<String>();
+
+  private List<String> menteeIds = new ArrayList<String>();
+
+  public String getProgramId() {
+    return programId;
+  }
+
+  public void setProgramId(String programId) {
+    this.programId = programId;
+  }
+
+  public List<MentorRequestStatusEnum> getStatus() {
+    return status;
+  }
+
+  public void setStatus(List<MentorRequestStatusEnum> status) {
+    this.status = status;
+  }
+  
+  public void setStatus(MentorRequestStatusEnum... types) {
+    for (MentorRequestStatusEnum type : types) {
+      this.status.add(type);
+    }
+  }
+
+  public List<String> getMentorIds() {
+    return mentorIds;
+  }
+
+  public void setMentorIds(List<String> mentorIds) {
+    this.mentorIds = mentorIds;
+  }
+  
+  public void setMentorIds(String... ids) {
+    for (String id : ids) {
+      this.mentorIds.add(id);
+    }
+  }
+
+  public List<String> getMenteeIds() {
+    return menteeIds;
+  }
+
+  public void setMenteeIds(List<String> menteeIds) {
+    this.menteeIds = menteeIds;
+  }
+  
+  public void setMenteeIds(String... ids) {
+    for (String id : ids) {
+      this.menteeIds.add(id);
+    }
+  }
+}

@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.corext.refactoring.nls;
+
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+
+public interface IAccessorClassCreator {
+}

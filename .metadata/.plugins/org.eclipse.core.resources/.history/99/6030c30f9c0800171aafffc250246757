@@ -1,0 +1,34 @@
+package com.successfactors.cdp.service.impl;
+
+import java.util.List;
+import com.successfactors.cdp.bean.CareerWorksheetSuggestedRoleVO;
+import com.successfactors.cdp.service.GetCareerWorksheetSuggestedRoles;
+import com.successfactors.cdp.service.GetCompetencyAndRatingForRoles;
+import com.successfactors.cdp.service.GetSuggestedRolesWeight;
+import com.successfactors.cdp.util.CareerWorksheetUtils;
+import com.successfactors.competency.bean.FamilyBean;
+import com.successfactors.competency.dao.CompetencyDAO;
+import com.successfactors.db.dao.DAOException;
+import com.successfactors.gm.api.bean.IField;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.api.dao.ObjDAO;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.legacy.bean.FeedbackBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.service.GetSysConfig;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.dao.UserDAO;
+
+public interface IGetCareerWorksheetSuggestedRolesImpl {
+	List<CareerWorksheetSuggestedRoleVO> execute(GetCareerWorksheetSuggestedRoles cmd)
+			throws ServiceApplicationException;
+}

@@ -1,0 +1,9 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+
+public interface IMentoringProgramMentee {
+	MentoringProgramMenteeSignupForm getSignupForm();
+
+	void setSignupForm(MentoringProgramMenteeSignupForm signupForm);
+}

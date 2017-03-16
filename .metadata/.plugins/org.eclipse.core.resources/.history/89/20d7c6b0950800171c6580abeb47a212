@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ISuperTypeRefactoringProcessor {
+	boolean isInstanceOf();
+
+	boolean isReplace();
+
+	void setInstanceOf(final boolean rewrite);
+
+	void setReplace(final boolean replace);
+}

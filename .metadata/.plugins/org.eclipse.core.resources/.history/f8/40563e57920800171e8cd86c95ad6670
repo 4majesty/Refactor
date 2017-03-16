@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.javaeditor.saveparticipant;
+
+import org.eclipse.osgi.util.NLS;
+
+public interface ISaveParticipantMessages {
+}

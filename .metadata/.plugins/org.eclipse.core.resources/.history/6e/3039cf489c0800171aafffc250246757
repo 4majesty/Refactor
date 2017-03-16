@@ -1,0 +1,10 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupInviteFailureEmail;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.user.service.FindUsersByIds;
+import com.successfactors.cdp.service.util.mentoring.email.IMentoringEmailUtils;
+
+public interface ISendJamGroupInviteFailureEmailImpl {
+	Void execute(SendJamGroupInviteFailureEmail cmd) throws ServiceApplicationException;
+}

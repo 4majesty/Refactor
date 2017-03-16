@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import java.util.Iterator;
+import java.util.List;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+public interface IRemoveWorkingSetElementAction {
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(IStructuredSelection selection);
+}

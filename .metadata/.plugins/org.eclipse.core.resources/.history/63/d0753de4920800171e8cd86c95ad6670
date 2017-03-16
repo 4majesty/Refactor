@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.dnd;
+
+import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+
+public interface IJdtViewerDragSupport {
+	void start();
+}

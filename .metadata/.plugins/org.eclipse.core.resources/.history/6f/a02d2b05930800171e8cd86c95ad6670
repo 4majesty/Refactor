@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IProposalSorterRegistry {
+	ProposalSorterHandle getCurrentSorter();
+
+	ProposalSorterHandle[] getSorters();
+
+	void select(ProposalSorterHandle handle);
+}

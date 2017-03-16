@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+
+public interface IExpandWithConstructorsDialog {
+}

@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.model;
+
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.core.refactoring.model.AbstractRefactoringDescriptorResourceMapping;
+
+public interface IJavaRefactoringDescriptorResourceMapping {
+	String getModelProviderId();
+}

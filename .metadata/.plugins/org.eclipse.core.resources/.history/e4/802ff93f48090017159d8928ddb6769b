@@ -1,0 +1,18 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+/**
+ * Mentor VO
+ * @author I309618
+ *
+ */
+public class ProgramMentorVO extends ProgramParticipantVO {
+    private String unavailableEndDate;
+
+    public String getUnavailableEndDate() {
+        return unavailableEndDate;
+    }
+
+    public void setUnavailableEndDate(String unavailableEndDate) {
+        this.unavailableEndDate = unavailableEndDate;
+    }
+}

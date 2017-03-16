@@ -1,0 +1,67 @@
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
+
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedModeUI;
+import org.eclipse.jface.text.link.LinkedPosition;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizardPage;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.ui.refactoring.RenameSupport;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.refactoring.DelegateUIHelper;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal.DeleteBlockingExitPolicy;
+import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitEditor;
+
+public interface IRenameLinkedMode {
+	boolean ownsFocusShell();
+
+	boolean isOriginator(DocumentEvent event, IRegion subjectRegion);
+
+	void left(LinkedModeModel model, int flags);
+
+	void resume(LinkedModeModel model, int flags);
+
+	void suspend(LinkedModeModel model);
+
+	ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length);
+
+	void start();
+
+	void cancel();
+
+	void startFullDialog();
+
+	boolean isCaretInLinkedPosition();
+
+	LinkedPosition getCurrentLinkedPosition();
+
+	boolean isEnabled();
+
+	boolean isOriginalName();
+}

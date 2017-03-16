@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
+
+public interface ITemplateCompletionProposalComputer {
+}

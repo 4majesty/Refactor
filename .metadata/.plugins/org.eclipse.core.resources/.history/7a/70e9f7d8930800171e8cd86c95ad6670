@@ -1,0 +1,28 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.corext.buildpath.IBuildpathModifierListener;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.util.ViewerPane;
+
+public interface IDialogPackageExplorerActionGroup {
+	void dispose();
+
+	void addBuildpathModifierListener(IBuildpathModifierListener listener);
+
+	void removeBuildpathModifierListener(IBuildpathModifierListener listener);
+
+	ToolBarManager createLeftToolBarManager(ViewerPane pane);
+
+	ToolBarManager createLeftToolBar(ViewerPane pane);
+
+	void fillContextMenu(IMenuManager menu);
+
+	BuildpathModifierAction[] getHintTextGroupActions();
+
+	EditOutputFolderAction getEditOutputFolderAction();
+
+	ResetAllAction getResetAllAction();
+}

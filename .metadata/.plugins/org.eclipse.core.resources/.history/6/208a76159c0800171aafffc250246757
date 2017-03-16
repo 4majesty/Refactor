@@ -1,0 +1,24 @@
+package com.successfactors.cdp.service.mentoring.jam;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Command to send an email for jam group photo api failure
+ * 
+ * @author rsrigiri
+ * 
+ * SAP SuccessFactors
+*/
+public class SendJamGroupPhotoFailureEmail implements ServiceCommand<Void> {
+
+  private MentoringProgram program;
+
+  public MentoringProgram getProgram() {
+    return program;
+  }
+
+  public SendJamGroupPhotoFailureEmail(MentoringProgram program) {
+    this.program = program;
+  }
+}

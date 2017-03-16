@@ -1,0 +1,17 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.service.mentoring.jam.GetJamBaseURL;
+import com.successfactors.cdp.service.mentoring.jam.GetJamGoToGroupURL;
+import com.successfactors.cdp.service.mentoring.jam.util.JamConstants;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+
+public interface IGetJamGoToGroupURLImplTest {
+	void setup();
+
+	void tearDown();
+
+	void testGoToGroupURL();
+}

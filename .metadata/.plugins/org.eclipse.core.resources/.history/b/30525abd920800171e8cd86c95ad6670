@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IImportOrganizePreferencePage {
+	void createControl(Composite parent);
+
+	void dispose();
+
+	boolean performOk();
+
+	void performApply();
+
+	void setElement(IAdaptable element);
+}

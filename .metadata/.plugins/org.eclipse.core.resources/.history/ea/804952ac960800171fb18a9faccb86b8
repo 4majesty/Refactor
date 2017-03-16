@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.refactoring.contentassist;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.ui.contentassist.ContentAssistHandler;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+
+public interface IControlContentAssistHelper {
+}

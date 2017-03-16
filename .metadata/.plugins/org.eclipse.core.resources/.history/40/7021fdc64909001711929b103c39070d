@@ -1,0 +1,56 @@
+package com.successfactors.cdp.service;
+
+import java.util.List;
+import java.util.Map;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+
+public interface IGetDevPlanList {
+	ObjTemplateBean getSelectedTemplateBean();
+
+	void setSelectedTemplateBean(ObjTemplateBean selectedTemplateBean);
+
+	List<ObjTemplateBean.Column> getColumnList();
+
+	void setColumnList(List<ObjTemplateBean.Column> columnList);
+
+	String getSelectedUserId();
+
+	void setSelectedUserId(String selectedUserId);
+
+	Long getSelectedPlanId();
+
+	void setSelectedPlanId(Long selectedPlanId);
+
+	int getPageNum();
+
+	void setPageNum(int pageNum);
+
+	boolean isPrint();
+
+	void setPrint(boolean print);
+
+	int getObjTotalCount();
+
+	void setObjTotalCount(int objTotalCount);
+
+	List<ObjBean> getObjBeanList();
+
+	void setObjBeanList(List<ObjBean> objBeanList);
+
+	List<ObjTemplateBean> getObjTemplateList();
+
+	void setObjTemplateList(List<ObjTemplateBean> objTemplateList);
+
+	List<String> getCatIdList();
+
+	void setCatIdList(List<String> catIdList);
+
+	Map<String, String> getCatIdNameMap();
+
+	void setCatIdNameMap(Map<String, String> catIdNameMap);
+
+	boolean isNeedPagination();
+
+	void setNeedPagination(boolean needPagination);
+}

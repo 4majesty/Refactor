@@ -1,0 +1,27 @@
+package com.successfactors.cdp.ui.util.mentoring;
+
+/**
+ * Constants for mentoring program view
+ * @author I309618
+ *
+ */
+public class MentoringProgramViewConstants {
+  /** SELECT_MENTOR_PROGRAM_PREF_KEY */
+  public static final String SELECTED_MENTORING_PROGRAM_PREF_KEY = "cdp_mentoring_" + "select_mentoring_program";
+  
+  public static final String JSON_KEY_SUCCESS = "success";
+  
+  public static final String PERMISSION_CHECK_SUCCESS = "permission_check";
+  
+  public static final String MENTOR = "mentor";
+  
+  public static final String MENTEE = "mentee";
+  
+  public static final String ERROR_MESSAGE = "errorMessage";
+  
+  public static final String SECTION_DISPLAY_TYPE = "sectionDisplayType";
+  
+  private MentoringProgramViewConstants(){
+    
+  }
+}

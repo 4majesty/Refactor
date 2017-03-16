@@ -1,0 +1,150 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import javax.persistence.Column;
+
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.cdp.service.util.mentoring.ProgramEmailTypeEnum;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+import com.successfactors.genericobject.api.model.Visibility;
+
+@MDFEntity(effectiveDating = EffectiveDating.FROM_PARENT, apiVisibility = APIVisibility.EDITABLE)
+public class MentoringProgramEmailTemplate extends AuditFields{
+
+    // System Fields
+    /** External Code. */
+    @Column(name = GENERIC_OBJECT_T.EXTERNAL_CODE, nullable = false)
+    @Field(visibility = Visibility.READ_ONLY, dataType = DataType.AUTO_NUMBER)
+    protected String externalId;
+
+    /** Internal Id. */
+    @Column(name = GENERIC_OBJECT_T.INTERNAL_ID)
+    @Field(visibility = Visibility.NOT_VISIBLE)
+    protected Long internalId;
+
+    /** Row ID **/
+    @Column(name = GENERIC_OBJECT_T.ROW_ID)
+    @Field(visibility = Visibility.NOT_VISIBLE)
+    private Long rowId;
+
+    // Business Fields
+    /**
+     * For now, there are two types: MENTOR_SIGN_UP and MENTEE_SIGN_UP
+     */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD1, nullable = true)
+    @Field(visibility = Visibility.EDITABLE, dataType = DataType.STRING)
+    private ProgramEmailTypeEnum emailType;
+    
+    /** emailSubject email title**/
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD2, nullable = true)
+    @Field(visibility = Visibility.EDITABLE, dataType = DataType.STRING, maxLength = GENERIC_OBJECT_T.CUSTOM_FIELD100_LEN)
+    private String emailSubject;
+    /** emailConetent **/
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD3, nullable = true)
+    @Field(visibility = Visibility.EDITABLE, dataType = DataType.STRING, maxLength = GENERIC_OBJECT_T.CUSTOM_FIELD100_LEN)
+    private String emailContent;
+
+
+    // Access Methods
+    /**
+     * getExternalId
+     * @return externalCode
+     */
+    public String getExternalId() {
+        return externalId;
+    }
+    
+    /**
+     * setExternalId
+     * @param externalCode setExternalCode
+     */
+    public void setExternalId(String externalCode) {
+        this.externalId = externalCode;
+    }
+    
+    /**
+     * getInternalId
+     * @return internalId
+     */
+    public Long getInternalId() {
+        return internalId;
+    }
+    
+    /**
+     * setInternalId
+     * @param internalId internalId
+     */
+    public void setInternalId(Long internalId) {
+        this.internalId = internalId;
+    }
+    
+    /**
+     * getRowId
+     * @return rowId
+     */
+    public Long getRowId() {
+        return rowId;
+    }
+    
+    /**
+     * setRowId
+     * @param rowId rowId
+     */
+    public void setRowId(Long rowId) {
+        this.rowId = rowId;
+    }
+    
+    /**
+     * ProgramEmailTypeEnum
+     * @return emailType
+     */
+    public ProgramEmailTypeEnum getEmailType() {
+        return emailType;
+    }
+
+    /**
+     * setEmailType
+     * @param emailType emailType
+     */
+    public void setEmailType(ProgramEmailTypeEnum emailType) {
+        this.emailType = emailType;
+    }
+    
+    /**
+     * getEmailSubject
+     * @return emailSubject
+     */
+    public String getEmailSubject() {
+        return emailSubject;
+    }
+    
+    /**
+     * setEmailSubject
+     * @param emailSubject emailtitle
+     */
+    public void setEmailSubject(String emailSubject) {
+        this.emailSubject = emailSubject;
+    }
+   
+    /**
+     * getEmailContent
+     * @return emailConetent
+     */
+    public String getEmailContent() {
+        return emailContent;
+    }
+
+    /**
+     * setEmailContent
+     * @param emailContent emailContent
+     */
+    public void setEmailContent(String emailContent) {
+        this.emailContent = emailContent;
+    }
+    
+
+}

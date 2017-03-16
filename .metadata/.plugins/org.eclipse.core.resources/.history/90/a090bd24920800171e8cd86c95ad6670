@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.jdt.core.search.TypeNameMatch;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
+
+public interface IAddImportOnSelectionAction {
+	int compare(Object o1, Object o2);
+
+	void update();
+
+	void run();
+
+	TypeNameMatch chooseImport(TypeNameMatch[] results, String containerName);
+
+	ISchedulingRule getScheduleRule();
+}

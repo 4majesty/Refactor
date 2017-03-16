@@ -1,0 +1,11 @@
+package com.successfactors.cdp.ui.controller;
+
+public interface IMentoringProgramControllerTest {
+	void setUp();
+
+	void testgenerateCardInfo();
+
+	void testGetLastDay();
+
+	void testGetMentoringProgramCompletedDate();
+}

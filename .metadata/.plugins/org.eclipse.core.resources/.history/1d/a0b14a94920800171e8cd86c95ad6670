@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
+
+public interface INewMethodCorrectionProposal {
+}

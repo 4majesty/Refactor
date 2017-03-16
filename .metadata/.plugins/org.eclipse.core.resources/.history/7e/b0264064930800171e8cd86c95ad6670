@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.filters;
+
+import org.eclipse.osgi.util.NLS;
+
+public interface IFilterMessages {
+}

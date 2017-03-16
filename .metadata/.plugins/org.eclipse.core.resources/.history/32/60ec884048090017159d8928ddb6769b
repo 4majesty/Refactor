@@ -1,0 +1,16 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.cdp.bean.mentoring.jam.JamFeedWidgetInfo;
+import com.successfactors.cdp.service.mentoring.jam.GetJamFeedWidgetInfo;
+import com.successfactors.cdp.service.mentoring.jam.util.JamUtil;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+public interface IGetJamFeedWidgetInfoImpl {
+	JamFeedWidgetInfo execute(GetJamFeedWidgetInfo cmd) throws ServiceApplicationException;
+}

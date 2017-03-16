@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.ui.preferences.formatter.CodeFormatterConfigurationBlock;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileConfigurationBlock;
+
+public interface ICodeFormatterPreferencePage {
+	void createControl(Composite parent);
+}

@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ICompilationUnitAnnotationModelEvent {
+	void annotationAdded(Annotation annotation);
+
+	void annotationRemoved(Annotation annotation);
+
+	void annotationRemoved(Annotation annotation, Position position);
+
+	void annotationChanged(Annotation annotation);
+
+	boolean includesProblemMarkerAnnotationChanges();
+
+	IResource getUnderlyingResource();
+}

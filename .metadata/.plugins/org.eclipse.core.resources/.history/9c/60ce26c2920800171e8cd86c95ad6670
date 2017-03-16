@@ -1,0 +1,35 @@
+package org.eclipse.jdt.internal.ui.dialogs;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+
+public interface IGenerateHashCodeEqualsDialog {
+	void dispose();
+
+	Object[] getChildren(Object parentElement);
+
+	Object[] getElements(Object inputElement);
+
+	Object getParent(Object element);
+
+	boolean hasChildren(Object element);
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+
+	IStatus validate(Object[] selection);
+
+	boolean close();
+
+	boolean isUseInstanceOf();
+
+	void setUseInstanceOf(boolean use);
+
+	boolean isUseBlocks();
+
+	void setUseBlocks(boolean useBlocks);
+}

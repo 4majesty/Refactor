@@ -1,0 +1,10 @@
+package com.successfactors.legacy.api.servlet.acme;
+
+import com.successfactors.legacy.util.EnumeratedType;
+import com.successfactors.i18n.service.IMessageBundle;
+
+public interface IAcmeFrameStateEnum {
+	String getLabel(IMessageBundle messages);
+
+	void setLabel(String label);
+}

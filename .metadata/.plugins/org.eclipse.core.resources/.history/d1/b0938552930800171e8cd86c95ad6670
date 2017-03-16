@@ -1,0 +1,13 @@
+package org.eclipse.jdt.ui.jarpackager;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IJarWriter2 {
+	void close();
+
+	void write(IFile resource, IPath destinationPath) throws CoreException;
+}

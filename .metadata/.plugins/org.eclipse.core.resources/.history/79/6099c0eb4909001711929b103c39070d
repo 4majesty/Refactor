@@ -1,0 +1,17 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.cdp.bean.mentoring.jam.Group;
+import com.successfactors.cdp.service.mentoring.jam.GetJamGroup;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+public interface IGetJamGroupImpl {
+	Group execute(GetJamGroup cmd) throws ServiceApplicationException;
+
+	ServiceCommandHandler getSCAHandler();
+
+	ParamBean getParams();
+}

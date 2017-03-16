@@ -1,0 +1,11 @@
+package org.eclipse.jdt.ui.text.java;
+
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.templates.TemplateProposal;
+import org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal;
+
+public interface ICompletionProposalComparator {
+	void setOrderAlphabetically(boolean orderAlphabetically);
+
+	int compare(Object o1, Object o2);
+}

@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import java.io.IOException;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
+public interface IJavaCodeReader {
+	int getOffset();
+
+	void configureForwardReader(IDocument document, int offset, int length, boolean skipComments, boolean skipStrings) throws IOException;
+
+	void configureBackwardReader(IDocument document, int offset, boolean skipComments, boolean skipStrings) throws IOException;
+
+	void close();
+
+	int read();
+}

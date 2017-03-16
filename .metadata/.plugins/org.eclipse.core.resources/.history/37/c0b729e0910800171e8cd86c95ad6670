@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import com.ibm.icu.text.MessageFormat;
+
+public interface IFoldingMessages {
+}

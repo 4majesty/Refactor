@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.text.template.preferences;
+
+import org.eclipse.osgi.util.NLS;
+
+public interface ITemplatePreferencesMessages {
+}

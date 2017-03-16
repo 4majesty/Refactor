@@ -1,0 +1,20 @@
+package org.eclipse.jdt.ui;
+
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface IJavaElementImageDescriptor {
+	void setAdornments(int adornments);
+
+	int getAdronments();
+
+	void setImageSize(Point size);
+
+	Point getImageSize();
+
+	boolean equals(Object object);
+
+	int hashCode();
+}

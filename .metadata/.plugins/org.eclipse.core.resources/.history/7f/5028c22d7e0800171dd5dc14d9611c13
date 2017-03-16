@@ -1,0 +1,42 @@
+package com.successfactors.legacy.bean.provisioning;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import com.successfactors.legacy.bean.FeatureReadinessEnum;
+import com.successfactors.pmcommon.bean.FeatureSet;
+
+public interface IFeatureEnum {
+	int getId();
+
+	String getProduct();
+
+	String getConstantName();
+
+	String getMessageKey();
+
+	String getKey();
+
+	int hashCode();
+
+	FeatureReadinessEnum getReadiness();
+
+	List getObsoletedFeatures();
+
+	boolean isObsolete();
+
+	FeatureEnum getObsoletedBy();
+
+	List getRequiredFeatures();
+
+	List getCompleteRequiredFeatureList();
+
+	boolean isVisible();
+
+	Object readResolve();
+}

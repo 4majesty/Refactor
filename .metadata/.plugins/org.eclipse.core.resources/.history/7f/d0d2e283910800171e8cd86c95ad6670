@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.osgi.util.TextProcessor;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+
+public interface IJavaCompletionProposal {
+	CharSequence getPrefixCompletionText(IDocument document, int completionOffset);
+}

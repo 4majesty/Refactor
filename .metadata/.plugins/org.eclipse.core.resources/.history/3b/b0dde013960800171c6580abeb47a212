@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.corext.refactoring;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
+public interface IReturnTypeInfo {
+	String getOldTypeName();
+
+	String getNewTypeName();
+
+	void setNewTypeName(String type);
+
+	ITypeBinding getNewTypeBinding();
+
+	void setNewTypeBinding(ITypeBinding typeBinding);
+
+	boolean isTypeNameChanged();
+
+	String toString();
+}

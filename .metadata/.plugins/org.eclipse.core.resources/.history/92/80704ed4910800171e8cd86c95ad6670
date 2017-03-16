@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+public interface IMultiOrganizeImportAction {
+}

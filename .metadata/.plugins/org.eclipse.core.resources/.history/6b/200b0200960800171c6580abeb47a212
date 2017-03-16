@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.corext.refactoring.nls;
+
+import java.util.List;
+import com.ibm.icu.text.Collator;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
+
+public interface INLSUtil {
+}

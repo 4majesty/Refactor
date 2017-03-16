@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
+
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface ICopyToClipboardAction {
+	void setAutoRepeatOnFailure(boolean autorepeatOnFailure);
+
+	void selectionChanged(IStructuredSelection selection);
+
+	void run(IStructuredSelection selection);
+
+	void copyToClipboard(Clipboard clipboard) throws CoreException;
+
+	boolean canEnable();
+}

@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import java.util.Map;
+import org.eclipse.core.commands.IParameterValues;
+
+public interface IContentAssistComputerParameter {
+	Map getParameterValues();
+}

@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+public interface ISimpleSelectionProvider {
+	ISelection getSelection();
+
+	void setSelection(ISelection selection);
+
+	void removeSelectionChangedListener(ISelectionChangedListener listener);
+
+	void addSelectionChangedListener(ISelectionChangedListener listener);
+}

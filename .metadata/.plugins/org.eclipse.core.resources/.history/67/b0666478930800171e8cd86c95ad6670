@@ -1,0 +1,115 @@
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import java.io.File;
+import java.util.List;
+import org.w3c.dom.Element;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstallType;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.dialogs.IStatusInfo;
+
+public interface IJavadocOptionsManager {
+	String[] getJavadocCommandHistory();
+
+	StatusInfo getWizardStatus();
+
+	IJavaElement[] getInitialElements();
+
+	IJavaElement[] getSourceElements();
+
+	String getAccess();
+
+	String getAntpath();
+
+	boolean isFromStandard();
+
+	String getDestination();
+
+	String getDocletPath();
+
+	String getDocletName();
+
+	String getStyleSheet();
+
+	String getOverview();
+
+	String getAdditionalParams();
+
+	String getVMParams();
+
+	IPath[] getClasspath();
+
+	IPath[] getSourcepath();
+
+	String getTitle();
+
+	boolean doOpenInBrowser();
+
+	String[] getHRefs();
+
+	boolean getBoolean(String flag);
+
+	IStatus getArgumentArray(List vmArgs, List toolArgs);
+
+	Element createXML(IJavaProject[] projects) throws CoreException;
+
+	File writeXML(Element javadocElement) throws CoreException;
+
+	void updateDialogSettings(IDialogSettings dialogSettings, IJavaProject[] checkedProjects);
+
+	void setJavadocCommandHistory(String[] javadocCommandHistory);
+
+	void setAccess(String access);
+
+	void setDestination(String destination);
+
+	void setDocletPath(String docletpath);
+
+	void setDocletName(String docletname);
+
+	void setStyleSheet(String stylesheet);
+
+	void setOverview(String overview);
+
+	void setAdditionalParams(String params);
+
+	void setVMParams(String params);
+
+	void setGeneralAntpath(String antpath);
+
+	void setClasspath(IPath[] classpath);
+
+	void setSourcepath(IPath[] sourcepath);
+
+	void setSelectedElements(IJavaElement[] elements);
+
+	void setFromStandard(boolean fromStandard);
+
+	void setTitle(String title);
+
+	void setOpenInBrowser(boolean openInBrowser);
+
+	void setHRefs(String[] hrefs);
+
+	void setBoolean(String flag, boolean value);
+
+	void setSource(String source);
+
+	String getSource();
+
+	RecentSettingsStore getRecentSettings();
+
+	void updateRecentSettings(IJavaProject project);
+}

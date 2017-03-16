@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+
+public interface IJavaBuildConfigurationBlock {
+	void dispose();
+}

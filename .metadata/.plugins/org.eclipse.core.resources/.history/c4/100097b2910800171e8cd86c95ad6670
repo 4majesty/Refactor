@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.ui.progress.IElementCollector;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IDeferredMethodWrapper {
+	boolean isConflicting(ISchedulingRule rule);
+
+	boolean contains(ISchedulingRule rule);
+
+	void fetchDeferredChildren(Object object, IElementCollector collector, IProgressMonitor monitor);
+
+	boolean isContainer();
+
+	ISchedulingRule getRule(Object o);
+
+	Object[] getChildren(Object o);
+}

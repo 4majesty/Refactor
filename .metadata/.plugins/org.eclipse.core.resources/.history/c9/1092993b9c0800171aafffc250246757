@@ -1,0 +1,13 @@
+package com.successfactors.cdp.app.mentoring.upgradecenter;
+
+import com.successfactors.upgradecenter.core.UpgradeDependencyResult;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import com.successfactors.logging.api.LogManager;
+
+public interface IMentoringProgramUndoUpgradeActionProcessor {
+	boolean undo();
+
+	UpgradeDependencyResult checkUndoDependencies();
+}

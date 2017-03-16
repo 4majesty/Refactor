@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.jarpackagerfat;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IFatJarAntExporter {
+	void run(MultiStatus status) throws CoreException;
+}

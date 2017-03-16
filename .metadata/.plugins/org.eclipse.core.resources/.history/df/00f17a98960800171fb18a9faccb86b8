@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.refactoring.sef;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
+public interface ISelfEncapsulateFieldWizard {
+}

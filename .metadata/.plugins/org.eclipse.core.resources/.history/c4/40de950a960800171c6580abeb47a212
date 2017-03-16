@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
+
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+
+public interface IExpressionVariable {
+	String toString();
+
+	CompilationUnitRange getCompilationUnitRange();
+
+	int getExpressionType();
+
+	IBinding getExpressionBinding();
+}

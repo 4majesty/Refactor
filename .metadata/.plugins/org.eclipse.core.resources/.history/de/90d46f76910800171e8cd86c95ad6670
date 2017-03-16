@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface ISelectAllAction {
+	void run();
+}

@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
+public interface IJavaIndenter {
+	StringBuffer getReferenceIndentation(int offset);
+
+	StringBuffer computeIndentation(int offset);
+
+	StringBuffer computeIndentation(int offset, boolean assumeOpeningBrace);
+
+	int findReferencePosition(int offset);
+
+	int findReferencePosition(int offset, int nextToken);
+
+	int findReferencePosition(int offset, boolean danglingElse, boolean matchBrace, boolean matchParen, boolean matchCase);
+}

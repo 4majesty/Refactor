@@ -1,0 +1,190 @@
+package org.eclipse.jdt.ui.jarpackager;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+
+public interface IJarPackageData {
+	boolean isCompressed();
+
+	void setCompress(boolean state);
+
+	boolean allowOverwrite();
+
+	void setOverwrite(boolean state);
+
+	boolean areClassFilesExported();
+
+	void setExportClassFiles(boolean state);
+
+	boolean areOutputFoldersExported();
+
+	void setExportOutputFolders(boolean state);
+
+	boolean areGeneratedFilesExported();
+
+	boolean areJavaFilesExported();
+
+	void setExportJavaFiles(boolean state);
+
+	boolean useSourceFolderHierarchy();
+
+	void setUseSourceFolderHierarchy(boolean state);
+
+	IPath getAbsoluteJarLocation();
+
+	IPath getJarLocation();
+
+	void setJarLocation(IPath jarLocation);
+
+	boolean isManifestGenerated();
+
+	void setGenerateManifest(boolean state);
+
+	boolean isManifestSaved();
+
+	void setSaveManifest(boolean state);
+
+	boolean isManifestReused();
+
+	void setReuseManifest(boolean state);
+
+	IPath getManifestLocation();
+
+	void setManifestLocation(IPath manifestLocation);
+
+	IFile getManifestFile();
+
+	String getManifestVersion();
+
+	void setManifestVersion(String manifestVersion);
+
+	boolean usesManifest();
+
+	void setUsesManifest(boolean state);
+
+	IManifestProvider getManifestProvider();
+
+	void setManifestProvider(IManifestProvider manifestProvider);
+
+	boolean isJarSealed();
+
+	void setSealJar(boolean sealJar);
+
+	void setPackagesToSeal(IPackageFragment[] packagesToSeal);
+
+	IPackageFragment[] getPackagesToSeal();
+
+	IPackageFragment[] getPackagesToUnseal();
+
+	void setPackagesToUnseal(IPackageFragment[] packagesToUnseal);
+
+	boolean isDescriptionSaved();
+
+	void setSaveDescription(boolean state);
+
+	IPath getDescriptionLocation();
+
+	void setDescriptionLocation(IPath descriptionLocation);
+
+	IFile getDescriptionFile();
+
+	IType getManifestMainClass();
+
+	void setManifestMainClass(IType manifestMainClass);
+
+	Object[] getElements();
+
+	void setElements(Object[] elements);
+
+	String getComment();
+
+	void setComment(String comment);
+
+	boolean logErrors();
+
+	void setLogErrors(boolean logErrors);
+
+	boolean logWarnings();
+
+	void setLogWarnings(boolean logWarnings);
+
+	boolean areErrorsExported();
+
+	void setExportErrors(boolean exportErrors);
+
+	boolean exportWarnings();
+
+	void setExportWarnings(boolean exportWarnings);
+
+	boolean isBuildingIfNeeded();
+
+	void setBuildIfNeeded(boolean buildIfNeeded);
+
+	IFile[] findClassfilesFor(IFile javaFile) throws CoreException;
+
+	JarWriter2 createJarWriter(Shell parent) throws CoreException;
+
+	JarWriter3 createJarWriter3(Shell parent) throws CoreException;
+
+	IJarBuilder createPlainJarBuilder();
+
+	IJarBuilder createFatJarBuilder();
+
+	IJarExportRunnable createJarExportRunnable(Shell parent);
+
+	IJarExportRunnable createJarExportRunnable(JarPackageData[] jarPackagesData, Shell parent);
+
+	IJarDescriptionWriter createJarDescriptionWriter(OutputStream outputStream);
+
+	IJarDescriptionWriter createJarDescriptionWriter(OutputStream outputStream, String encoding);
+
+	IJarDescriptionReader createJarDescriptionReader(InputStream inputStream);
+
+	boolean isValid();
+
+	boolean isManifestAccessible();
+
+	boolean isMainClassValid(IRunnableContext context);
+
+	boolean areDirectoryEntriesIncluded();
+
+	void setIncludeDirectoryEntries(boolean includeDirectoryEntries);
+
+	IProject[] getRefactoringProjects();
+
+	boolean isExportStructuralOnly();
+
+	boolean isRefactoringAware();
+
+	boolean isDeprecationAware();
+
+	void setRefactoringProjects(IProject[] projects);
+
+	void setRefactoringAware(boolean aware);
+
+	void setDeprecationAware(boolean aware);
+
+	void setRefactoringDescriptors(RefactoringDescriptorProxy[] descriptors);
+
+	RefactoringDescriptorProxy[] getRefactoringDescriptors();
+
+	void setExportStructuralOnly(boolean structural);
+
+	IJarBuilder getJarBuilder();
+
+	void setJarBuilder(IJarBuilder jarBuilder);
+
+	String getLaunchConfigurationName();
+
+	void setLaunchConfigurationName(String name);
+}

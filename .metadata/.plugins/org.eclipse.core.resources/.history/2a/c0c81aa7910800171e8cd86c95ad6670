@@ -1,0 +1,39 @@
+package org.eclipse.jdt.internal.ui.util;
+
+import java.util.List;
+import com.ibm.icu.text.BreakIterator;
+import org.eclipse.help.HelpSystem;
+import org.eclipse.help.IContext;
+import org.eclipse.help.IContext2;
+import org.eclipse.help.IHelpResource;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.internal.text.html.HTML2TextReader;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.JavadocContentAccess;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+
+public interface IJavadocHelpContext {
+	String getHref();
+
+	String getLabel();
+
+	IHelpResource[] getRelatedTopics();
+
+	String getText();
+
+	String getStyledText();
+
+	String getCategory(IHelpResource topic);
+
+	String getTitle();
+}

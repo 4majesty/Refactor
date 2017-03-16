@@ -1,0 +1,65 @@
+package com.successfactors.cdp.app.mentoring;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+
+public class MatchingAlgorithmContext implements IMatchingAlgorithmContext {
+	private IMentoringProgram program;
+	private ProgramMatchingTypeEnum matchingType;
+	private Map<String, Set<String>> mentoringProfiles = new HashMap<String, Set<String>>();
+	private String drivenUserId;
+	private boolean needLimitMenteeThreshold;
+
+	@Override
+	public MentoringProgram getProgram() {
+		return program;
+	}
+
+	@Override
+	public void setProgram(MentoringProgram program) {
+		this.program = program;
+	}
+
+	@Override
+	public Map<String, Set<String>> getMentoringProfiles() {
+		return mentoringProfiles;
+	}
+
+	@Override
+	public void setMentoringProfiles(Map<String, Set<String>> mentoringProfiles) {
+		this.mentoringProfiles = mentoringProfiles;
+	}
+
+	@Override
+	public String getDrivenUserId() {
+		return drivenUserId;
+	}
+
+	@Override
+	public void setDrivenUserId(String drivenUserId) {
+		this.drivenUserId = drivenUserId;
+	}
+
+	@Override
+	public ProgramMatchingTypeEnum getMatchingType() {
+		return matchingType;
+	}
+
+	@Override
+	public void setMatchingType(ProgramMatchingTypeEnum matchingType) {
+		this.matchingType = matchingType;
+	}
+
+	@Override
+	public boolean isNeedLimitMenteeThreshold() {
+		return needLimitMenteeThreshold;
+	}
+
+	@Override
+	public void setNeedLimitMenteeThreshold(boolean needLimitMenteeThreshold) {
+		this.needLimitMenteeThreshold = needLimitMenteeThreshold;
+	}
+}

@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerWizard;
+
+public interface IClasspathContainerPreferencePage {
+	void setElement(IAdaptable element);
+}

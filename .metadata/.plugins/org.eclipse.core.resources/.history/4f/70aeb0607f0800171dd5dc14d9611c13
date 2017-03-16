@@ -1,0 +1,25 @@
+package com.successfactors.dpcs.service;
+
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.sca.ServiceQuery;
+
+public class IsFeatureEnabled implements ServiceQuery<Boolean>{
+  /** Feature Enum */
+  private FeatureEnum feature;
+
+  public FeatureEnum getFeature() {
+    return feature;
+  }
+
+  public void setFeature(FeatureEnum feature) {
+    this.feature = feature;
+  }
+
+  /**
+   * constructor
+   * @param feature feature enum
+   */
+  public IsFeatureEnabled(FeatureEnum feature){
+    this.feature = feature;
+  }
+}

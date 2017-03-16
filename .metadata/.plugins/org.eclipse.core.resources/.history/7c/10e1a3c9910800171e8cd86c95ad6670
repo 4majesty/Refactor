@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.preferences.formatter;
+
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.formatter.FormattingContextProperties;
+import org.eclipse.jface.text.formatter.IContentFormatter;
+import org.eclipse.jface.text.formatter.IContentFormatterExtension;
+import org.eclipse.jface.text.formatter.IFormattingContext;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
+
+public interface ICompilationUnitPreview {
+	void setPreviewText(String previewText);
+}

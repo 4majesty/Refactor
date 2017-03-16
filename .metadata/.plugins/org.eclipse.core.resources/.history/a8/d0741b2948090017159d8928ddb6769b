@@ -1,0 +1,7 @@
+package com.successfactors.cdp.service.scheduledjob;
+
+import com.successfactors.sca.ServiceSystemException;
+
+public interface IMentoringProgramJamGroupInviteJob {
+	void executeJob();
+}

@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.propertiesfileeditor;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
+
+public interface IPropertiesFileEditorActionContributor {
+	void setActiveEditor(IEditorPart part);
+
+	void dispose();
+}

@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+public interface IPackagesViewFlatContentProvider {
+	void setRefreshLoggingEnabled(boolean enabled);
+
+	Object[] getChildren(Object parentElement);
+
+	Object[] getElements(Object inputElement);
+}

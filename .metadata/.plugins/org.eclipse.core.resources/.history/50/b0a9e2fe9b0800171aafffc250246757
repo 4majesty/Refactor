@@ -1,0 +1,140 @@
+/*
+ * $Id: GetDevPlanList.java 1058387 2016-08-17 08:50:39Z I321686 $
+ */
+package com.successfactors.cdp.service;
+
+import java.util.List;
+import java.util.Map;
+
+import com.successfactors.sca.ServiceCommand;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+
+/**
+ * SCA to get dev plan list
+ * @author ytian
+ * Success Factors
+ */
+public class GetDevPlanList  implements ServiceCommand<GetDevPlanList> {
+  /** user selected **/
+  private String selectedUserId;
+  /** plan id selected **/
+  private Long selectedPlanId = null;
+  /** selected Template Bean **/
+  private ObjTemplateBean selectedTemplateBean;
+  /** columns defined in template**/
+  private List<ObjTemplateBean.Column> columnList;
+  /** obj bean list*/
+  private List<ObjBean> objBeanList;
+  /** objective template list**/
+  private List<ObjTemplateBean> objTemplateList;
+  /** pagination page Number*/
+  private int pageNum;
+  /** fetch all objectives for print mode*/
+  private boolean print;
+  /** selected objectives count of selected plan */
+  private int objTotalCount;
+  /** ordered cat id list*/
+  private List<String> catIdList;
+  /**obj cat name map*/
+  private Map<String, String> catIdNameMap;
+  
+  private boolean needPagination = true;
+  
+  public ObjTemplateBean getSelectedTemplateBean() {
+    return selectedTemplateBean;
+  }
+
+  public void setSelectedTemplateBean(ObjTemplateBean selectedTemplateBean) {
+    this.selectedTemplateBean = selectedTemplateBean;
+  }
+
+  public List<ObjTemplateBean.Column> getColumnList() {
+    return columnList;
+  }
+
+  public void setColumnList(List<ObjTemplateBean.Column> columnList) {
+    this.columnList = columnList;
+  }
+
+  public String getSelectedUserId() {
+    return selectedUserId;
+  }
+
+  public void setSelectedUserId(String selectedUserId) {
+    this.selectedUserId = selectedUserId;
+  }
+
+  public Long getSelectedPlanId() {
+    return selectedPlanId;
+  }
+
+  public void setSelectedPlanId(Long selectedPlanId) {
+    this.selectedPlanId = selectedPlanId;
+  }
+
+  public int getPageNum() {
+    return pageNum;
+  }
+
+  public void setPageNum(int pageNum) {
+    this.pageNum = pageNum;
+  }
+
+  public boolean isPrint() {
+    return print;
+  }
+
+  public void setPrint(boolean print) {
+    this.print = print;
+  }
+
+  public int getObjTotalCount() {
+    return objTotalCount;
+  }
+
+  public void setObjTotalCount(int objTotalCount) {
+    this.objTotalCount = objTotalCount;
+  }
+
+  public List<ObjBean> getObjBeanList() {
+    return objBeanList;
+  }
+
+  public void setObjBeanList(List<ObjBean> objBeanList) {
+    this.objBeanList = objBeanList;
+  }
+
+  public List<ObjTemplateBean> getObjTemplateList() {
+    return objTemplateList;
+  }
+
+  public void setObjTemplateList(List<ObjTemplateBean> objTemplateList) {
+    this.objTemplateList = objTemplateList;
+  }
+
+  public List<String> getCatIdList() {
+    return catIdList;
+  }
+
+  public void setCatIdList(List<String> catIdList) {
+    this.catIdList = catIdList;
+  }
+
+  public Map<String, String> getCatIdNameMap() {
+    return catIdNameMap;
+  }
+
+  public void setCatIdNameMap(Map<String, String> catIdNameMap) {
+    this.catIdNameMap = catIdNameMap;
+  }
+
+  public boolean isNeedPagination() {
+    return needPagination;
+  }
+
+  public void setNeedPagination(boolean needPagination) {
+    this.needPagination = needPagination;
+  }
+  
+}

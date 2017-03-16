@@ -1,0 +1,25 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.ISaveParticipantPreferenceConfiguration;
+import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantDescriptor;
+import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantRegistry;
+
+public interface ISaveParticipantConfigurationBlock {
+	void run(ISaveParticipantPreferenceConfiguration block);
+
+	Control createControl(Composite parent);
+
+	void dispose();
+
+	void initialize();
+
+	void performDefaults();
+
+	void performOk();
+
+	void enableProjectSettings();
+
+	void disableProjectSettings();
+}

@@ -1,0 +1,34 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.service.mentoring.SendMentoringProgramClosureEmail;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailUtils;
+import com.successfactors.genericobject.api.bean.GenericObject;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.app.PrefetchFlags;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.proxy.GenericObjectToLazyBean;
+import com.successfactors.genericobject.service.LoadByObjectTypeExternalCode;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.MailInvalidAddressException;
+import com.successfactors.platform.bean.MailSendException;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import org.jboss.seam.annotations.In;
+import javax.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.successfactors.cdp.service.util.mentoring.email.IMentoringEmailUtils;
+
+public interface ISendMentoringProgramClosureEmailImpl {
+	Void execute(SendMentoringProgramClosureEmail cmd) throws ServiceApplicationException;
+}

@@ -1,0 +1,75 @@
+package com.successfactors.rbp.integration.grc.xml.binding;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+/** 
+ */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "", propOrder = { "allPermission", "otherPermissions", "message" })
+@XmlRootElement(name = "none-all-other-permission")
+public class NoneAllOtherPermission implements INoneAllOtherPermission {
+	@XmlElement(name = "all-permission", required = true)
+	protected AllPermission allPermission;
+	@XmlElement(name = "other-permissions", required = true)
+	protected OtherPermissions otherPermissions;
+	@XmlElement(required = true)
+	protected IMessage message;
+
+	/** 
+	* Gets the value of the allPermission property.
+	* @return possible object is {@link AllPermission }
+	*/
+	@Override
+	public AllPermission getAllPermission() {
+		return allPermission;
+	}
+
+	/** 
+	* Sets the value of the allPermission property.
+	* @param value allowed object is {@link AllPermission }
+	*/
+	@Override
+	public void setAllPermission(AllPermission value) {
+		this.allPermission = value;
+	}
+
+	/** 
+	* Gets the value of the otherPermissions property.
+	* @return possible object is {@link OtherPermissions }
+	*/
+	@Override
+	public OtherPermissions getOtherPermissions() {
+		return otherPermissions;
+	}
+
+	/** 
+	* Sets the value of the otherPermissions property.
+	* @param value allowed object is {@link OtherPermissions }
+	*/
+	@Override
+	public void setOtherPermissions(OtherPermissions value) {
+		this.otherPermissions = value;
+	}
+
+	/** 
+	* Gets the value of the message property.
+	* @return possible object is {@link Message }
+	*/
+	@Override
+	public Message getMessage() {
+		return message;
+	}
+
+	/** 
+	* Sets the value of the message property.
+	* @param value allowed object is {@link Message }
+	*/
+	@Override
+	public void setMessage(Message value) {
+		this.message = value;
+	}
+}

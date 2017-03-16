@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.model;
+
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+
+public interface IJavaModelContentProvider {
+	Object[] getChildren(final Object element);
+
+	boolean hasChildren(final Object element);
+}

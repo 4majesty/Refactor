@@ -1,0 +1,16 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
+public interface IProjectActionGroup {
+	void fillActionBars(IActionBars actionBars);
+
+	void fillContextMenu(IMenuManager menu);
+
+	OpenProjectAction getOpenProjectAction();
+
+	void dispose();
+}

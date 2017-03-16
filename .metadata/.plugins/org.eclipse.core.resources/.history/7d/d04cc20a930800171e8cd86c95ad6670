@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IJavaAddElementFromHistoryImpl {
+	void run(ISelection selection);
+}

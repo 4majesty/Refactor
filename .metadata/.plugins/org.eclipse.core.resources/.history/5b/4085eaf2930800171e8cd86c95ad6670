@@ -1,0 +1,88 @@
+package org.eclipse.jdt.internal.ui.text.java.hover;
+
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IInformationControlExtension;
+import org.eclipse.jface.text.IInformationControlExtension3;
+import org.eclipse.jface.text.IInformationControlExtension5;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
+
+public interface ISourceViewerInformationControl {
+	void setInput(Object input);
+
+	void setInformation(String content);
+
+	void setVisible(boolean visible);
+
+	void widgetDisposed(DisposeEvent event);
+
+	void dispose();
+
+	void setSize(int width, int height);
+
+	void setLocation(Point location);
+
+	void setSizeConstraints(int maxWidth, int maxHeight);
+
+	Point computeSizeHint();
+
+	void addDisposeListener(DisposeListener listener);
+
+	void removeDisposeListener(DisposeListener listener);
+
+	void setForegroundColor(Color foreground);
+
+	void setBackgroundColor(Color background);
+
+	boolean isFocusControl();
+
+	void setFocus();
+
+	void addFocusListener(FocusListener listener);
+
+	void removeFocusListener(FocusListener listener);
+
+	boolean hasContents();
+
+	Rectangle computeTrim();
+
+	Rectangle getBounds();
+
+	boolean restoresLocation();
+
+	boolean restoresSize();
+
+	IInformationControlCreator getInformationPresenterControlCreator();
+
+	boolean containsControl(Control control);
+
+	boolean isVisible();
+
+	Point computeSizeConstraints(int widthInChars, int heightInChars);
+}

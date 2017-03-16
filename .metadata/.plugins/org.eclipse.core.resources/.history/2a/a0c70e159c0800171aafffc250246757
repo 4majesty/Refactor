@@ -1,0 +1,27 @@
+/*
+ * $Id$
+ */
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.List;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Service Command to add owners as administrators to JAM group
+ * Returns failed users if any
+ * 
+ * @author ricardo.saito
+ */
+public class AddMentoringJamAdmins implements ServiceCommand<List<String>> {
+  private MentoringProgram program;
+
+  public AddMentoringJamAdmins(MentoringProgram program) {
+    this.program = program;
+  }
+
+  public MentoringProgram getProgram() {
+    return program;
+  }
+}

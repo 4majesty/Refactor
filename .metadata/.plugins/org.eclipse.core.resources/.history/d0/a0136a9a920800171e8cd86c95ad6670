@@ -1,0 +1,71 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import java.util.Iterator;
+import java.util.List;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.ui.INewWizard;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
+import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListDialogField;
+
+public interface ISourceContainerWorkbookPage {
+	void propertyChange(PropertyChangeEvent event);
+
+	void init(IJavaProject jproject);
+
+	Control getControl(Composite parent);
+
+	void customButtonPressed(TreeListDialogField field, int index);
+
+	void selectionChanged(TreeListDialogField field);
+
+	void doubleClicked(TreeListDialogField field);
+
+	void keyPressed(TreeListDialogField field, KeyEvent event);
+
+	Object[] getChildren(TreeListDialogField field, Object element);
+
+	Object getParent(TreeListDialogField field, Object element);
+
+	boolean hasChildren(TreeListDialogField field, Object element);
+
+	void dialogFieldChanged(DialogField field);
+
+	List getSelection();
+
+	void setSelection(List selElements, boolean expand);
+
+	boolean isEntryKind(int kind);
+
+	void setFocus();
+}

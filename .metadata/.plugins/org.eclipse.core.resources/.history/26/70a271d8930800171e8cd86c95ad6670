@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+public interface IJavaEditorAppearanceConfigurationBlock {
+	Control createControl(Composite parent);
+
+	void initialize();
+
+	void performDefaults();
+}

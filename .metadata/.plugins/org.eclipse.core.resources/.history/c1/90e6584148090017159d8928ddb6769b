@@ -1,0 +1,26 @@
+package com.successfactors.cdp.service.util.mentoring.email;
+
+/**
+ * Mentoring email content
+ * @author Frank Peng
+ */
+public class MentoringEmailContent {
+  private String subject;
+  private String body;
+  
+  public String getSubject() {
+    return subject;
+  }
+  
+  public void setSubject(String subject) {
+    this.subject = subject;
+  }
+  
+  public String getBody() {
+    return body;
+  }
+  
+  public void setBody(String body) {
+    this.body = body;
+  }
+}

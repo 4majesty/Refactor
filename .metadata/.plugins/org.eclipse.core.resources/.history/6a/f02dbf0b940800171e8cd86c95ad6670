@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer;
+
+public interface IStatusBarUpdater {
+	void selectionChanged(SelectionChangedEvent event);
+}

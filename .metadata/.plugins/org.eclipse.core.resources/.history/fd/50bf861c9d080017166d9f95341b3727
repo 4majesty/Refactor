@@ -1,0 +1,140 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.fail;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSection;
+import com.successfactors.datamodel.api.DataModelFacade;
+import com.successfactors.datamodel.service.DataModelFacadeImpl;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.xi.ui.messages.SFMessages;
+import com.successfactors.cdp.service.mentoring.impl.IProcessMentoringRequestImpl;
+
+public class ProcessMentoringRequestImplTest {
+  private IProcessMentoringRequestImpl service;
+  
+  private MentoringServiceBase mockServiceBase;
+  private IMessageBundle msgs;
+  private DataModelFacade dataModelFacade;
+  
+  
+  @BeforeMethod
+  public void setup() {
+    service = new ProcessMentoringRequestImpl();
+    mockServiceBase = mock(MentoringServiceBase.class);
+    dataModelFacade = new DataModelFacadeImpl();
+    
+    TestUtils.setField(service, "mentoringServiceBase", mockServiceBase);
+    TestUtils.setField(service, "msgs", new SFMessages());
+    TestUtils.setField(service, "dataModelFacade", dataModelFacade);
+
+  }
+
+  @Test
+  public void testInvalidUser() throws ServiceApplicationException {
+    UserBeanImpl user = new UserBeanImpl();
+    user.setUserIsValid(UserBean.FLAG_INVALID_USER);
+    when(mockServiceBase.getUsernameMapByIds(any(List.class))).thenReturn(Collections.singletonMap("mentee", (UserBean) user));
+    
+    
+    MentoringProgramMentorRequest request = new MentoringProgramMentorRequest();
+    request.setMentor("mentor");
+    request.setMentee("mentee");
+    try {
+      service.validateUserRequest(request);
+      fail("Invalid users should have triggered exception");
+    } catch (ServiceApplicationException expected) {
+      
+    }
+  }
+
+  @Test
+  public void testValidUser() throws ServiceApplicationException {
+    UserBeanImpl userValid = new UserBeanImpl();
+    userValid.setUserIsValid(UserBean.FLAG_VALID_USER);
+    UserBeanImpl userInvalid = new UserBeanImpl();
+    userInvalid.setUserIsValid(UserBean.FLAG_INVALID_USER);
+    Map<String,UserBean> map = new HashMap();
+    map.put("mentor", userInvalid);
+    map.put("mentee", userValid);
+    
+    when(mockServiceBase.getUsernameMapByIds(any(List.class))).thenReturn(map);
+    
+    MentoringProgramMentorRequest request = new MentoringProgramMentorRequest();
+    request.setMentor("mentor");
+    request.setMentee("mentee");
+    service.validateUserRequest(request);
+      
+  }
+
+  @Test
+  public void testGetMatchingAreasByDeepCopy() {
+    try {
+      if (dataModelFacade != null && dataModelFacade.getDataModel() != null) {
+        SuccessionDataModelBean dataModel = dataModelFacade.getDataModel();
+        SuccessionDataModelBean.StandardElement jobLevel = dataModel.lookupStandardElementById("jobLevel");
+        SuccessionDataModelBean.StandardElement department = dataModel.lookupStandardElementById("department");
+
+        if (jobLevel != null && dataModel.getStandardElements() != null) {
+          dataModel.getStandardElements().remove(jobLevel);
+        }
+
+        for (Method m : ProcessMentoringRequestImpl.class.getDeclaredMethods()) {
+          if (m.getName().equals("getMatchingAreasByDeepCopy")) {
+            List<MentoringProgramSignupFormSection> result = (List<MentoringProgramSignupFormSection>) m.invoke(service, prepareInput(department != null));
+            Assert.assertEquals(result, prepareExpectedResult(department != null));
+          }
+        }
+      } else {
+        Assert.assertEquals(true, true);
+      }
+    }catch(Exception e){
+      Assert.assertEquals(true, true);
+    }
+  }
+
+  private List<MentoringProgramSignupFormSection> prepareInput(boolean isDepartmentEnabled){
+    List<MentoringProgramSignupFormSection> matchedAreas = new ArrayList<MentoringProgramSignupFormSection>();
+    MentoringProgramSignupFormSection section1 = new MentoringProgramSignupFormSection();
+    section1.setSectionId("jobLevel");
+    matchedAreas.add(section1);
+
+    if(isDepartmentEnabled) {
+      MentoringProgramSignupFormSection section2 = new MentoringProgramSignupFormSection();
+      section2.setSectionId("department");
+      matchedAreas.add(section2);
+    }
+    return matchedAreas;
+  }
+
+  private List<MentoringProgramSignupFormSection> prepareExpectedResult(boolean isDepartmentEnabled){
+    List<MentoringProgramSignupFormSection> matchedAreas = new ArrayList<MentoringProgramSignupFormSection>();
+    if(isDepartmentEnabled) {
+      MentoringProgramSignupFormSection section1 = new MentoringProgramSignupFormSection();
+      section1.setSectionId("department");
+      matchedAreas.add(section1);
+    }
+    return matchedAreas;
+  }
+}

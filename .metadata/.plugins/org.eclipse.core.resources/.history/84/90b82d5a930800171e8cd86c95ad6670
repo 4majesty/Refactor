@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.source.LineChangeHover;
+import org.eclipse.ui.editors.text.EditorsUI;
+
+public interface IJavaChangeHover {
+	IInformationControlCreator getHoverControlCreator();
+
+	IInformationControlCreator getInformationPresenterControlCreator();
+}

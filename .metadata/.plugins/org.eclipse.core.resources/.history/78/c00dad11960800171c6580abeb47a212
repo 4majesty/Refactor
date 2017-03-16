@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.corext.refactoring.rename;
+
+import java.util.Set;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
+
+public interface IRefactoringScanner {
+	int getStartPosition();
+
+	boolean isQualified();
+
+	void scan(ICompilationUnit cu) throws JavaModelException;
+
+	void scan(String text);
+
+	Set getMatches();
+}

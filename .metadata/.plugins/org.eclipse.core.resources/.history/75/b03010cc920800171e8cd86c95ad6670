@@ -1,0 +1,10 @@
+package org.eclipse.jdt.ui.wizards;
+
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.EditVariableEntryDialog;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.JavadocLocationDialog;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.MultipleFolderSelectionDialog;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.NewVariableEntryDialog;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
+
+public interface IBuildPathDialogAccess {
+}

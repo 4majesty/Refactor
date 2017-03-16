@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.jface.action.Action;
+
+public interface ISortAction {
+	void run();
+
+	int getSortOrder();
+}

@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.jarimport;
+
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.wizard.IWizard;
+
+public interface IRefactoringLocationControl {
+	Combo getControl();
+
+	String getText();
+
+	void loadHistory();
+
+	void saveHistory();
+
+	void setEnabled(final boolean enabled);
+
+	void setText(final String text);
+}

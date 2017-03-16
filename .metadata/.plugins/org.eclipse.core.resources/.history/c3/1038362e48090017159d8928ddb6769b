@@ -1,0 +1,18 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.cdp.service.mentoring.jam.ScheduleProgramLaunchJamGroupActivityJob;
+import com.successfactors.cdp.service.util.mentoring.MentoringJobUtil;
+import com.successfactors.jobscheduler.JobSchedulerException;
+import com.successfactors.jobscheduler.bean.JobScheduleRequestEO;
+import com.successfactors.jobscheduler.service.JobScheduleFacade;
+import com.successfactors.legacy.util.Serializer;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+public interface IScheduleProgramLaunchJamGroupActivityJobImpl {
+	Void execute(ScheduleProgramLaunchJamGroupActivityJob cmd) throws ServiceApplicationException;
+}

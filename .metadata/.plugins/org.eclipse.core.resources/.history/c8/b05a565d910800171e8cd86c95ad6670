@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+public interface ITextSearchLabelProvider {
+	AbstractTextSearchViewPage getPage();
+}

@@ -1,0 +1,16 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.cdp.bean.mentoring.jam.Member;
+import com.successfactors.cdp.service.mentoring.jam.FindJamMemberBySyncId;
+import com.successfactors.cdp.service.mentoring.jam.MakeJamGroupAdminByMemberId;
+import com.successfactors.cdp.service.mentoring.jam.MakeJamGroupAdminByUserId;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+public interface IMakeJamGroupAdminByUserIdImpl {
+	Boolean execute(MakeJamGroupAdminByUserId cmd) throws ServiceApplicationException;
+}

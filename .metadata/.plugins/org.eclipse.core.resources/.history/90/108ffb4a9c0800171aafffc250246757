@@ -1,0 +1,14 @@
+package com.successfactors.cdp.bean;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public interface IDevPlanPortletObjRawData {
+	Map<String, Map<String, String>> getRawDataMap();
+
+	void setRawDataMap(Map<String, Map<String, String>> rawDataMap);
+
+	String getObjCategory();
+
+	void setObjCategory(String objCategory);
+}

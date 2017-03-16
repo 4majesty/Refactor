@@ -1,0 +1,11 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupAddAdminFailureEmail;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.service.FindUsersByIds;
+
+public interface ISendJamGroupAddAdminFailureEmailImpl {
+	Void execute(SendJamGroupAddAdminFailureEmail cmd) throws ServiceApplicationException;
+}

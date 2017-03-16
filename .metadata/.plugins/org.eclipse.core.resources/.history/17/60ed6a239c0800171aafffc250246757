@@ -1,0 +1,108 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+import java.io.Serializable;
+import java.util.List;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+
+public interface IProgramVO {
+	Long getRowId();
+
+	void setRowId(Long rowId);
+
+	String getExternalCode();
+
+	void setExternalCode(String externalCode);
+
+	String getName();
+
+	void setName(String name);
+
+	String getDescription();
+
+	void setDescription(String description);
+
+	String getMentorSignupDate();
+
+	void setMentorSignupDate(String mentorSignupDate);
+
+	String getMenteeSignupDate();
+
+	void setMenteeSignupDate(String menteeSignupDate);
+
+	String getMatchingDate();
+
+	void setMatchingDate(String matchingDate);
+
+	String getStartDate();
+
+	void setStartDate(String startDate);
+
+	String getEndDate();
+
+	void setEndDate(String endDate);
+
+	ProgramStatusEnum getStatus();
+
+	void setStatus(ProgramStatusEnum status);
+
+	ProgramMatchingTypeEnum getMatchingType();
+
+	void setMatchingType(ProgramMatchingTypeEnum matchingType);
+
+	List<ProgramMentorVO> getMentors();
+
+	void setMentors(List<ProgramMentorVO> mentors);
+
+	List<ProgramMenteeVO> getMentees();
+
+	void setMentees(List<ProgramMenteeVO> mentees);
+
+	ProgramSignupTemplateVO getSignupTemplate();
+
+	void setSignupTemplate(ProgramSignupTemplateVO signupTemplate);
+
+	List<ProgramEmailTemplateVO> getEmailTemplates();
+
+	void setEmailTemplates(List<ProgramEmailTemplateVO> emailTemplates);
+
+	Integer getMaximumOfMentee();
+
+	void setMaximumOfMentee(Integer maximumOfMentee);
+
+	Integer getMaximumOfMentor();
+
+	void setMaximumOfMentor(Integer maximumOfMentor);
+
+	String getPhotoId();
+
+	void setPhotoId(String photoId);
+
+	boolean isNeedMentorApproval();
+
+	void setNeedMentorApproval(boolean needMentorApproval);
+
+	List<String> getOwners();
+
+	void setOwners(List<String> owners);
+
+	boolean isMentorshipClosureEnabled();
+
+	void setMentorshipClosureEnabled(boolean mentorshipClosureEnabled);
+
+	boolean isJamEnabled();
+
+	void setJamEnabled(boolean jamEnabled);
+
+	String getJamGroupId();
+
+	void setJamGroupId(String jamGroupId);
+
+	String getJamGroupName();
+
+	void setJamGroupName(String jamGroupName);
+
+	String getJamGroupDescription();
+
+	void setJamGroupDescription(String jamGroupDescription);
+}

@@ -1,0 +1,29 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure;
+
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+
+public interface IImportRemover {
+	IBinding[] getImportsToRemove();
+
+	boolean hasRemovedNodes();
+
+	void registerAddedImport(String typeName);
+
+	void registerAddedImports(Type newTypeNode);
+
+	void registerAddedStaticImport(String qualifier, String member, boolean field);
+
+	void registerAddedStaticImport(IBinding binding);
+
+	void registerRemovedNode(ASTNode removed);
+
+	void applyRemoves(ImportRewrite importRewrite);
+
+	void registerInlinedStaticImport(ImportDeclaration importDecl);
+}

@@ -1,0 +1,4 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+public interface IProgramMenteeVO {
+}

@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
+public interface IClasspathAttributeConfigurationDescriptors {
+	ClasspathAttributeConfiguration getInstance();
+
+	String getKey();
+
+	boolean containsKey(String attributeKey);
+
+	ClasspathAttributeConfiguration get(final String attributeKey);
+}

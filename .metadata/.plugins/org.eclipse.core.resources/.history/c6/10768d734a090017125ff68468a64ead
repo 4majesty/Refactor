@@ -1,0 +1,2232 @@
+// ###Modified by SCAConverter on 2014-08-29 PST###
+// ###Modified by SCAConverter on 2014-08-27 PST###
+// ###Modified by SCAConverter on 2014-08-26 PST###
+// ###Modified by SCAConverter on 2014-07-08 PST###
+// ###Modified by SCAConverter on 2014-06-27 PST###
+// ###Modified by SCAConverter on 2014-03-21 PST###
+package com.successfactors.cdp.ui.controller;
+
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.faces.context.FacesContext;
+import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.RequestParameter;
+import org.jboss.seam.annotations.Scope;
+
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.BackgroundElement;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.DataField;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.FieldNameEnum;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.StandardElement;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.StandardElementEnum;
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.ajaxservice.annotation.AjaxMethod;
+import com.successfactors.ajaxservice.annotation.AjaxService;
+import com.successfactors.appsec.ui.SecTokenUtils;
+import com.successfactors.cdp.app.helper.CareerPathV2Helper;
+import com.successfactors.cdp.bean.AutoCompleteRoleSearchVO;
+import com.successfactors.cdp.bean.CareerWorkSheetSuggestedRolesFilterSettingBean;
+import com.successfactors.cdp.bean.CareerWorkSheetSuggestedRolesFlagEnum;
+import com.successfactors.cdp.bean.CareerWorksheetSuggestedRoleVO;
+import com.successfactors.cdp.bean.SuggestedRoleVOComparator;
+import com.successfactors.cdp.bean.idp.CareerWorkSheetTemplateBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerBehaviorBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerEntryBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerRoleBean;
+import com.successfactors.cdp.service.AddRoleToProfile;
+import com.successfactors.cdp.service.AutoCompleteRoleSearch;
+import com.successfactors.cdp.service.DeleteDevGoal;
+import com.successfactors.cdp.service.GetCareerWorksheetBean;
+import com.successfactors.cdp.service.GetCareerWorksheetSuggestedRoles;
+import com.successfactors.cdp.service.GetRoleCompetencyMapByRoleIdSet;
+import com.successfactors.cdp.service.GetRoleIdRelevantIndustriesMapByRoleIdSet;
+import com.successfactors.cdp.service.GetSuggestedRolesFilterFlags;
+import com.successfactors.cdp.service.RemoveRoleFromProfile;
+import com.successfactors.cdp.ui.util.CWSV12ViewConstants;
+import com.successfactors.cdp.ui.util.CWSV12ViewHelper;
+import com.successfactors.cdp.ui.util.CareerWorksheetUIUtils;
+import com.successfactors.cdp.util.CareerWorksheetConstants;
+import com.successfactors.cdp.util.CareerWorksheetUtils;
+import com.successfactors.competency.bean.CompetencyBean;
+import com.successfactors.competency.bean.FamilyBean;
+import com.successfactors.competency.service.GetFamilyById;
+import com.successfactors.competency.service.GetRoleById;
+import com.successfactors.competency.service.GetRolesByCompetencyId;
+import com.successfactors.competency.service.ejb.Competency;
+import com.successfactors.dashboard.util.DashboardUtils;
+import com.successfactors.edu.api.EmployeeProfileFacade;
+import com.successfactors.edu.api.bean.EmployeeProfileBean;
+import com.successfactors.edu.api.bean.ProfileLoadCriteria;
+import com.successfactors.edu.api.bean.ProfileLoadCriteria.UserDataParam;
+import com.successfactors.edu.service.userinfo.FieldContext;
+import com.successfactors.edu.service.userinfo.impl.TimeInCurrentPositionFieldDataHandler;
+import com.successfactors.empdir.service.EmployeeDirService;
+import com.successfactors.empfile.rules.SuccessionRulesEngine;
+import com.successfactors.genericobject.api.StatusEnum;
+import com.successfactors.gm.api.bean.IEnumValue;
+import com.successfactors.gm.api.bean.IField;
+import com.successfactors.gm.api.bean.IPermission;
+import com.successfactors.gm.bean.FindObjectiveBean;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.bean.TextReplacementEnum;
+import com.successfactors.gm.service.GetPermittedActiveTemplates;
+import com.successfactors.gm.service.ejb.Objective;
+import com.successfactors.gm.service.objective.FindObjectives;
+import com.successfactors.gm.service.objective.GetDefaultTemplate;
+import com.successfactors.gm.service.objective.GetDefaultTemplateId;
+import com.successfactors.gm.service.objective.GetObjById;
+import com.successfactors.gm.service.objective.GetTemplateById;
+import com.successfactors.gm.util.TGMCommonUtils;
+import com.successfactors.gm.util.permission.DelegateObjectiveRulesEngine;
+import com.successfactors.gm.util.permission.GMRulesEngine;
+import com.successfactors.gm.util.permission.ObjectiveRulesEngineException;
+import com.successfactors.gm.util.permission.TGMPermissionUtils;
+import com.successfactors.gm.util.type.ObjPlanStatusEnum;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.goalcommon.util.exception.ObjEJBException;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.jdm.bean.RoleMapBean;
+import com.successfactors.jdmng.bean.RoleEntity;
+import com.successfactors.jdmng.bean.jobprofile.JobProfile;
+import com.successfactors.jdmng.service.FindJDEntitiesByKey;
+import com.successfactors.jdmng.service.FindReferencedJDEntities;
+import com.successfactors.jdmng.util.JDConstants;
+import com.successfactors.legacy.bean.FeedbackBean;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.ScaleBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.bean.vo.listFramework.ListRowVOInterface;
+import com.successfactors.legacy.service.GetSysConfig;
+import com.successfactors.legacy.service.ejb.SysConfig;
+import com.successfactors.legacy.ui.controller.AjaxServiceStatus;
+import com.successfactors.legacy.util.JSONUtils;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.legacy.util.type.ProfileInfoCategoryEnum;
+import com.successfactors.legacy.util.type.ProfileInfoSourceEnum;
+import com.successfactors.legacy.util.type.ProfileInfoTypeEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.platform.di.SFContextUtils;
+import com.successfactors.platform.ui.servlet.BoilerPlateServlet;
+import com.successfactors.platform.util.DateUtils;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.platform.util.HtmlUtils;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.pmcommon.util.ClientDateFormat;
+import com.successfactors.rbp.app.api.RBPFacade;
+import com.successfactors.rbp.app.api.TargetPopulationCriteria;
+import com.successfactors.rbp.app.collector.ContextualPermissionSpec;
+import com.successfactors.rbp.app.collector.PermissionSpec;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.sm.service.GetSharedRolesInCWS;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.preference.PreferenceBean;
+import com.successfactors.user.service.FindUserById;
+import com.successfactors.user.service.GetUserCountByRoleId;
+import com.successfactors.user.service.ejb.preference.Preferences;
+import com.successfactors.user.service.preference.GetPreferenceBean;
+import com.successfactors.user.service.preference.GetPreferenceBeanV2;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+import com.successfactors.user.service.preference.UpdatePreferenceBeansV2;
+import com.successfactors.xi.ui.messages.SFMessages;
+
+/**
+ * CWSV12Ctronller for Revolution .
+ * 
+ * @author haixunlu
+ * 
+ */
+@AjaxService
+@Name("cwsV12Controller")
+@javax.inject.Named("cwsV12Controller")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+public class CWSV12Controller implements Serializable {
+  /**
+   * special sca handler which accepts custom params
+   */
+  private transient LocalContextSCAHandler legacyHandler = LocalContextSCAHandler
+      .create();
+  /** serialVersionUID */
+  private static final long serialVersionUID = 1L;
+  /** logger. */
+  private static Logger logger = LogManager.getLogger();
+  /**
+   * ParamBean in session.
+   */
+  @Inject
+  @In(value = "params")
+  private ParamBean params;
+
+  /** Requested employee Id, optional **/
+  @RequestParameter("selected_userid")
+  private String urlSelectedUserId = SFContextUtils.getRequestParameter(
+      "selected_userid", String.class);
+  /**
+   * goalService
+   */
+  @Inject
+  @In(create = true)
+  private Objective goalService;
+
+  /** competency service */
+  @Inject
+  @In(create = true)
+  private Competency competencyService;
+  /** SysConfig EJB. */
+  @Inject
+  @In(create = true)
+  private transient SysConfig sysConfigService;
+  /** preferencesService */
+  @Inject
+  @In(create = true)
+  private transient Preferences preferencesService;
+  /** Permission list of login user. */
+  @Inject
+  @In(value = PermissionUtils.PERMISSION_LIST_BEAN)
+  private PermissionListBean permList;
+  /** EJBListAdapter for EJBList to be used by the legacy ObjectiveRulesEngine. */
+  @Inject
+  @In(create = true)
+  protected EJBList ejbListAdapter;
+  /** successionRuleEngine */
+  @Inject
+  @In(create = true)
+  private transient SuccessionRulesEngine successionRulesEngine;
+  /** scahandler */
+  @Inject
+  @In
+  private transient ServiceCommandHandler scaHandler;
+  /** context information */
+  @Inject
+  @In(create = true)
+  private FieldContext userInfoFieldContext;
+  /** Localization message file. */
+  @Inject
+  @In(create = true, value = "msgs")
+  private SFMessages msgs;
+  /** V10 Messages. */
+  @Inject
+  @In(create = true, value = "v10msgs")
+  private Messages v10msgs;
+  /** EmployeeDirService for EmployeeDirMBeans. */
+  @Inject
+  @In(create = true)
+  private transient EmployeeDirService employeeDirService;
+  /** Person Data Model. */
+  @Inject
+  @In(value = SuccessionDataModelBean.SEAM_NAME, create = true)
+  private SuccessionDataModelBean dataModel;
+
+  @Inject
+  @In(value = EmployeeProfileFacade.NAME, create = true)
+  private EmployeeProfileFacade employeeProfileFacade;
+
+  @Inject
+  @In(create = true, value = CareerPathV2Helper.SEAM_NAME)
+  private CareerPathV2Helper careerPathV2Helper;
+
+  /** default goal read permission */
+  private Set<String> goalFieldsPermSet = null;
+  /** cache for state field values on default goal plan */
+  private Map<String, IEnumValue> stateFieldValues = null;
+  /** max number of suggested roles */
+  private static final int SUGGEST_ROLES_MAX = 60;
+
+  private static final String SUGGESTED_ROLES_FILTER_PREFERENCE_BEAN_KEY = "suggested_roles_filter_key";
+  /** RBP instance. */
+  @Inject
+  @In(value = RBPFacade.RBP_FACADE_NAME, create = true)
+  protected RBPFacade rbp;
+  
+  @AjaxMethod
+  public AjaxServiceStatus setFilterSelections(String filterSelectionJsonString) {
+    AjaxServiceStatus serviceStatus = new AjaxServiceStatus();
+    serviceStatus.setOKFlag(true);
+    PreferenceBean filterSelectionPreferenceBean = new PreferenceBean(
+        SUGGESTED_ROLES_FILTER_PREFERENCE_BEAN_KEY, filterSelectionJsonString,
+        ProfileInfoCategoryEnum.CWS_SUGGESTED_ROLES_FILTERS,
+        ProfileInfoSourceEnum.CWS_SUGGESTED_ROLES_FILTERS,
+        ProfileInfoTypeEnum.STRING);
+    List<PreferenceBean> preferenceBeanList = new ArrayList<PreferenceBean>();
+    preferenceBeanList.add(filterSelectionPreferenceBean);
+    UpdatePreferenceBeans cmd = new UpdatePreferenceBeans(preferenceBeanList);
+    try {
+      scaHandler.execute(cmd);
+    } catch (ServiceApplicationException e) {
+      serviceStatus.setOKFlag(false);
+      serviceStatus
+          .setStatusMsg("An error orrurred while saving filter selection as part of the user preferences.");
+      logger.error("An error occurred: " + e);
+    }
+    return serviceStatus;
+  }
+
+  private String getFilterSelections() {
+    String resultJsonString = "{}";
+    PreferenceBean preferenceBean = new PreferenceBean();
+    preferenceBean
+        .setCategory(ProfileInfoCategoryEnum.CWS_SUGGESTED_ROLES_FILTERS);
+    preferenceBean.setSource(ProfileInfoSourceEnum.CWS_SUGGESTED_ROLES_FILTERS);
+    preferenceBean.setKey(SUGGESTED_ROLES_FILTER_PREFERENCE_BEAN_KEY);
+    GetPreferenceBean cmd = new GetPreferenceBean(preferenceBean);
+    try {
+      PreferenceBean resultPreferenceBean = scaHandler.execute(cmd);
+      resultJsonString = resultPreferenceBean.getValue();
+    } catch (ServiceApplicationException e) {
+      logger.error("An error occurred while getting the filter selections:", e);
+    }
+    return resultJsonString;
+  }
+
+  /**
+   * isTemplateInPermittedList
+   * 
+   * @param obj
+   *          - the template need to check
+   * @param permittedList
+   *          the list of the permitted template
+   * @return
+   */
+  private ObjTemplateBean isTemplateInPermittedList(ObjTemplateBean obj,
+      List<ObjTemplateBean> permittedList) throws ServiceApplicationException {
+    ObjTemplateBean firstBean = null;
+    int j = 0;
+    ObjTemplateBean finalBean = obj;
+    boolean isFoundPermittedPlan = false;
+    for (ObjTemplateBean plan : permittedList) {
+      if (j++ == 0) {
+        firstBean = plan;
+      }
+      if (plan.getObjPlanId() == obj.getObjPlanId()) {
+        isFoundPermittedPlan = true;
+        break;
+      }
+    }
+    if (!isFoundPermittedPlan) {
+      finalBean = firstBean;
+      // finalBean = scaHandler.execute(new
+      // GetTemplateById(firstBean.getObjPlanId()));
+    }
+    return finalBean;
+  }
+
+  /**
+   * first time load page or user change
+   * 
+   * @return page load data
+   */
+  public JSONObjectOutput getPageData() {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      // get selected userid
+      String selectedUserId = params.getUserId();
+      if (!StringUtils.isBlank(urlSelectedUserId)) {
+        selectedUserId = urlSelectedUserId;
+      }
+
+      // get plan list in dropdown
+      List<ObjTemplateBean> planList = getAllPermittedPlans();
+
+      // load preference plan from database for first time loading the page
+      ObjTemplateBean defaultTemplateBean = getDefaultTemplateBean();
+      if (defaultTemplateBean == null) {
+        logger.error("Default Template is null");
+        throw new ServiceApplicationException("Default template is null");
+      }
+      // Fix for CDP-4070 remove the preferred template and get problem in
+      // worksheet- start
+      ObjTemplateBean permittedSelectedBean = isTemplateInPermittedList(
+          defaultTemplateBean, planList);
+      if (permittedSelectedBean == null) {
+        logger.error("Exception when check rule engine");
+        throw new ServiceApplicationException();
+      }
+      defaultTemplateBean = permittedSelectedBean;
+      // Fix for CDP-4070 remove the preferred template and get problem in
+      // worksheet- end
+      output.put("plans",
+          this.getPlansOutput(selectedUserId, planList, defaultTemplateBean));
+
+      String intro = defaultTemplateBean.getTextReplacement(
+          TextReplacementEnum.INSTRUCTIONS, params.getLocale(), "");
+      output.put("introduction", StringUtils.notNull(intro));
+      boolean showDefaultRoleIcon = params.getUserId().equals(selectedUserId)
+          && params.getProxy() == null;
+      if (showDefaultRoleIcon) {
+        output.put("showDefaultRoleIcon", showDefaultRoleIcon);
+      }
+
+      boolean isCareerPathV2Enabled = params
+          .isFeatureExist(FeatureEnum.CAREER_PATH_V2);
+      boolean isRBPEnabled = params
+          .isFeatureExist(FeatureEnum.ROLE_BASED_PERMISSION);
+      boolean isGOEnabled = params.isFeatureExist(FeatureEnum.GENERIC_OBJECTS);
+
+      int careerPathDisplayVersion = 0; // 0 - hide link, 1 - career path v1
+                                        // popup, 2 - career path v2 popup
+      if (isCareerPathV2Enabled) {
+        if (isRBPEnabled && isGOEnabled) {
+          careerPathDisplayVersion = 2;
+        } else {
+          careerPathDisplayVersion = 0;
+        }
+      } else {
+        careerPathDisplayVersion = 1;
+      }
+      output.put("careerPathDisplayVersion", careerPathDisplayVersion);
+
+      // loading user data
+      output.put("user", this.getUserOutput(selectedUserId));
+
+      // check if user have read permission, same with FBObjectivePlanv10
+      GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine.getRulesEngine(
+          null, params, ejbListAdapter, params.getUserId(),
+          defaultTemplateBean, null, null);
+      ObjBean objBean = new ObjBean(-1, -1,
+          ObjBean.TYPE_CAREERWORKSHEET_COMPETENCY, null, selectedUserId, null,
+          null, null, null, null, -1, null, null, -1, null, null, null, null,
+          null);
+      boolean canRead = rulesEngine.hasReadPermission(objBean);
+      output.put(CWSV12ViewConstants.JSON_KEY_CAN_READ, canRead);
+      if (canRead) {
+        // get role list for default template and selected user
+        output.put("roles", this.getRolesByTempalte(defaultTemplateBean,
+            selectedUserId, rulesEngine));
+      }
+      // suggested roles only apply for user self and granted permission user
+      boolean showSuggestedRoles = params.getUserId().equals(selectedUserId)
+          && permList != null
+          && permList.hasPermission(PermissionBean.CDP_ACCESS,
+              PermissionBean.CDP_CWS_RECOMMENDATION_ENGINE_ACCESS, 0);
+      if (showSuggestedRoles) {
+        output.put("showSuggestedRoles", showSuggestedRoles);
+      }
+
+      // CDP-3944 Role description popup in CWS V12: legacy popup size is
+      // enlarged.
+      if (params.isFeatureExist(FeatureEnum.JDM_NG)) {
+        output.put("showNewReadinessWin", true);
+      } else {
+        output.put("showNewReadinessWin", false);
+      }
+    } catch (ObjectiveRulesEngineException e) {
+      logger.error("Exception when check rule engine", e);
+    } catch (ServiceApplicationException e) {
+      logger.error("loadPage error:" + e);
+    }
+
+    return output;
+  }
+
+  private boolean isJDM20Enabled() {
+    return params.getCompanyBean().isFeatureEnabledForCompany(
+        FeatureEnum.JDM_NG);
+  }
+
+  private List<CareerWorkSheetSuggestedRolesFilterSettingBean> getFilterFlagList() {
+    List<CareerWorkSheetSuggestedRolesFilterSettingBean> filterFlagList = new ArrayList<CareerWorkSheetSuggestedRolesFilterSettingBean>();
+    try{
+        filterFlagList = scaHandler.execute(new GetSuggestedRolesFilterFlags());
+      } catch (ServiceApplicationException e) {
+        logger.error("An error occurred while getting filter setting from DB: ", e);
+      }
+    return filterFlagList;
+  }
+  
+  private boolean isIndustryFilterEnabled() {
+    boolean isFilterEnabled = false;
+      for (CareerWorkSheetSuggestedRolesFilterSettingBean flag : getFilterFlagList()) {
+        if (flag.getFlagEnum() == CareerWorkSheetSuggestedRolesFlagEnum.RELEVANT_INDUSTRY) {
+          isFilterEnabled = flag.isEnabled();
+        }
+      }
+    return isFilterEnabled && isJDM20Enabled();
+  }
+  
+  private boolean isJobFamilyFilterEnabled() {
+    boolean isFilterEnabled = false;
+      for (CareerWorkSheetSuggestedRolesFilterSettingBean flag : getFilterFlagList()) {
+        if (flag.getFlagEnum() == CareerWorkSheetSuggestedRolesFlagEnum.JOB_FAMILIES) {
+          isFilterEnabled = flag.isEnabled();
+        }
+      }
+    return isFilterEnabled;
+  }
+  
+  private boolean isCompetencyFilterEnabled() {
+    boolean isFilterEnabled = false;
+      for (CareerWorkSheetSuggestedRolesFilterSettingBean flag : getFilterFlagList()) {
+        if (flag.getFlagEnum() == CareerWorkSheetSuggestedRolesFlagEnum.COMPETENCIES) {
+          isFilterEnabled = flag.isEnabled();
+        }
+      }
+    return isFilterEnabled;
+  }
+
+  /***
+   * Fetch suggested role list for suggested tab
+   * 
+   * @param userId
+   *          selected user id
+   * @param templateId
+   *          CareerWorksheet template id
+   * @return suggested role list at most 60 records
+   */
+  @AjaxMethod
+  public String getSuggestedRoleList(String userId, long templateId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    // user can only see his own roles, support proxy...
+    if (!userId.equals(params.getUserId())) {
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+      return JSONUtils.toJSON(output);
+    }
+    // security check, will hide tab in UI
+    if (!permList.hasPermission(PermissionBean.CDP_ACCESS,
+        PermissionBean.CDP_CWS_RECOMMENDATION_ENGINE_ACCESS, 0)) {
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+      return JSONUtils.toJSON(output);
+    }
+    try {
+      GetCareerWorksheetSuggestedRoles rolesCmd = new GetCareerWorksheetSuggestedRoles();
+      rolesCmd.setUserId(userId);
+      rolesCmd.setTemplateId(templateId);
+      List<CareerWorksheetSuggestedRoleVO> roleList = scaHandler
+          .execute(rolesCmd);
+      roleList = enrichRoleList(roleList);
+      // sort all vos
+      Collections.sort(roleList, new SuggestedRoleVOComparator());
+      output = CWSV12ViewHelper.getSuggestedRoleVOList(roleList);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      logger.error("getSuggestedRoleList error:" + e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    } catch (IndexOutOfBoundsException e) {
+      logger.error("getSuggestedRoleList error:" + e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    }
+    output.put(CWSV12ViewConstants.JSON_KEY_IS_INDUSTRY_FILTER_ENABLED, isIndustryFilterEnabled());
+    output.put(CWSV12ViewConstants.JSON_KEY_IS_COMPETENCY_FILTER_ENABLED, isCompetencyFilterEnabled());
+    output.put(CWSV12ViewConstants.JSON_KEY_IS_JOB_FAMILY_FILTER_ENABLED, isJobFamilyFilterEnabled());
+    String jsonString = JSONUtils.toJSON(output);
+    return jsonString;
+  }
+
+  private List<CareerWorksheetSuggestedRoleVO> enrichRoleList(
+      List<CareerWorksheetSuggestedRoleVO> list)
+      throws ServiceApplicationException {
+    List<CareerWorksheetSuggestedRoleVO> resultList = new ArrayList<CareerWorksheetSuggestedRoleVO>();
+    Set<Long> legacyRoleIdSet = new HashSet<Long>();
+    for (CareerWorksheetSuggestedRoleVO roleVO : list) {
+      if (roleVO.getScore() > 0.0) {
+        if (resultList.size() >= SUGGEST_ROLES_MAX) {
+          break;
+        } else {
+          legacyRoleIdSet.add(roleVO.getRoleId());
+          resultList.add(roleVO);
+        }
+      }
+    }
+    GetRoleCompetencyMapByRoleIdSet getRoleCompetencyMapByRoleIdSetCmd = new GetRoleCompetencyMapByRoleIdSet(legacyRoleIdSet);
+    Map<Long, List<CompetencyBean>> roleCompetencyMap = scaHandler
+        .execute(getRoleCompetencyMapByRoleIdSetCmd);
+    Map<Long, Set<String>> legacyRoleIdInternalIdSetMap = new HashMap<Long, Set<String>>();
+    Map<String, Set<String>> roleRelevantIndustriesMap = new HashMap<String, Set<String>>();
+    Set<String> allInternalRoleIdSet = new HashSet<String>();
+    if (isIndustryFilterEnabled()) {
+      for (Long legacyRoleId : legacyRoleIdSet) {
+        List<String> internalIdList = careerPathV2Helper
+            .getInternalIdForLegacyRoleIdNew(legacyRoleId);
+        if (internalIdList != null && !internalIdList.isEmpty()) {
+          for (String internalId : internalIdList) {
+            if (legacyRoleIdInternalIdSetMap.get(legacyRoleId) == null) {
+              legacyRoleIdInternalIdSetMap.put(legacyRoleId,
+                  new HashSet<String>());
+            }
+            legacyRoleIdInternalIdSetMap.get(legacyRoleId).add(internalId);
+            allInternalRoleIdSet.add(internalId);
+          }
+        }
+      }
+    }
+    GetRoleIdRelevantIndustriesMapByRoleIdSet getRoleIdRelevantIndustriesMapByRoleIdSetCmd = new GetRoleIdRelevantIndustriesMapByRoleIdSet(
+        allInternalRoleIdSet);
+    roleRelevantIndustriesMap = scaHandler
+        .execute(getRoleIdRelevantIndustriesMapByRoleIdSetCmd);
+    assignCompetenciesAndRelevantIndustries(resultList, roleCompetencyMap,
+        roleRelevantIndustriesMap, legacyRoleIdInternalIdSetMap);
+    return resultList;
+  }
+
+  private void assignCompetenciesAndRelevantIndustries(
+      List<CareerWorksheetSuggestedRoleVO> suggestedRoleVOList,
+      Map<Long, List<CompetencyBean>> roleCompetencyMap,
+      Map<String, Set<String>> roleRelevantIndustriesMap,
+      Map<Long, Set<String>> legacyRoleIdInternalIdSetMap) {
+    for (CareerWorksheetSuggestedRoleVO suggestedRoleVO : suggestedRoleVOList) {
+      if (roleCompetencyMap.get(suggestedRoleVO.getRoleId()) != null) {
+        for (CompetencyBean competencyBean : roleCompetencyMap
+            .get(suggestedRoleVO.getRoleId())) {
+          if (competencyBean == null) {
+            continue;
+          }
+          suggestedRoleVO.getCompetencies().put(competencyBean.getCompetencyId(), competencyBean.getCompetencyName());
+          suggestedRoleVO.getCompetencySet().add(competencyBean.getCompetencyId());
+        }
+      }
+      Set<String> internalIdSet = legacyRoleIdInternalIdSetMap.get(suggestedRoleVO.getRoleId());
+      if (internalIdSet == null || internalIdSet.isEmpty()) {
+        continue;
+      }
+      for (String internalId : internalIdSet) {
+        Set<String> industrySet = roleRelevantIndustriesMap.get(internalId);
+        if (industrySet != null && !industrySet.isEmpty()) {
+          suggestedRoleVO.getIndustries().addAll(industrySet);
+        }
+      }
+    }
+  }
+
+  private List<ObjTemplateBean> getAllPermittedPlans()
+      throws ServiceApplicationException {
+    GetPermittedActiveTemplates getActiveTemplates = new GetPermittedActiveTemplates(
+        ObjPlanTypeEnum.CAREER_WORKSHEET);
+    // use login user id to sync with old behavior
+    getActiveTemplates.setUserId(params.getUserId());
+    getActiveTemplates.setParseBlob(true);// for permission
+    getActiveTemplates.setLoadRatingScale(true);// for last rating scale
+    GetPermittedActiveTemplates result = scaHandler.execute(getActiveTemplates);
+    return result.getObjTemplateBeans();
+  }
+
+  private ObjTemplateBean getDefaultTemplateBean()
+      throws ServiceApplicationException {
+    long selectedTemplateId = 0;
+
+    PreferenceBean prefCriteria = new PreferenceBean();
+    prefCriteria.setCategory(ProfileInfoCategoryEnum.TGM_FILTER);
+    prefCriteria.setSource(ProfileInfoSourceEnum.PREFERENCES);
+    prefCriteria.setType(ProfileInfoTypeEnum.STRING);
+    prefCriteria.setKey(CWSV12ViewConstants.SELECTPLAN_PREF_KEY);
+    PreferenceBean prefBean = scaHandler.execute(new GetPreferenceBean(
+        prefCriteria));
+    ObjTemplateBean planBean = null;
+    // if the original plan is invalid, use default
+    if (null != prefBean && !StringUtils.isBlank(prefBean.getValue())) {
+      selectedTemplateId = Long.parseLong(prefBean.getValue());
+      planBean = scaHandler.execute(new GetTemplateById(selectedTemplateId));
+    }
+    if (planBean == null
+        || ObjPlanStatusEnum.ACTIVE != planBean.getObjPlanStatus()) {
+      selectedTemplateId = scaHandler.execute(new GetDefaultTemplateId(
+          ObjPlanTypeEnum.CAREER_WORKSHEET));
+      planBean = scaHandler.execute(new GetTemplateById(selectedTemplateId));
+    }
+    return planBean;
+    // catch (@SuppressWarnings(\"removable\") RemoteException e) {
+    // logger.error(\"CWSV12Controller.getDefaultTemplateId()
+    // RemoteException\");
+    // throw new
+    // ServiceApplicationException(\"CWSV12Controller.getDefaultTemplateId()\");
+    // }
+  }
+
+  @AjaxMethod
+  public String updateDefaultTargetRole(long planId, long roleId, String userId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      // this is for security purpose that only login user can set default role
+      if (StringUtils.isBlank(userId) || !params.getUserId().equals(userId)
+          || params.getProxy() != null) {
+        logger
+            .error("CWSV12Controller.updateDefaultRole() not allowed action!");
+        throw new ServiceApplicationException("Not allowed action!");
+      }
+      PreferenceBean prefBean = new PreferenceBean();
+      prefBean.setCategory(ProfileInfoCategoryEnum.TGM_FILTER);
+      prefBean.setSource(ProfileInfoSourceEnum.PREFERENCES);
+      prefBean.setType(ProfileInfoTypeEnum.STRING);
+      String prefKey = CWSV12ViewConstants.DEFAULTROLE_PREF_KEY + "_" + planId;
+      prefBean.setKey(prefKey);
+      String prefValue = String.valueOf(roleId);// add/update the default_role
+                                                // value
+      prefBean.setValue(prefValue);
+      List<PreferenceBean> prefList = new ArrayList<PreferenceBean>();
+      prefList.add(prefBean);
+      UpdatePreferenceBeans cmd = new UpdatePreferenceBeans(prefList);
+      scaHandler.execute(cmd);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      logger
+          .error(
+              "CWSV12Controller.updateDefaultRole() Failed to do an update default role",
+              e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    }
+    return JSONUtils.toJSON(output);
+  }
+
+  private Long getDefaultTargetRoleByTemplateId(long planId) {
+    try {
+      Long defaultRole = null;
+      PreferenceBean prefCriteria = new PreferenceBean();
+      prefCriteria.setCategory(ProfileInfoCategoryEnum.TGM_FILTER);
+      prefCriteria.setSource(ProfileInfoSourceEnum.PREFERENCES);
+      String prefKey = CWSV12ViewConstants.DEFAULTROLE_PREF_KEY + "_" + planId;
+      prefCriteria.setKey(prefKey);
+      GetPreferenceBean cmd = new GetPreferenceBean(prefCriteria);
+      PreferenceBean prefBean = scaHandler.execute(cmd);
+      if (null != prefBean && !StringUtils.isBlank(prefBean.getValue())) {
+        defaultRole = Long.valueOf(prefBean.getValue());// if default role is
+                                                        // deleted, check in UI
+      }
+      return defaultRole;
+    } catch (ServiceApplicationException e) {
+      logger
+          .error("CWSV12Controller.getDefaultRoleByTemplateId() ServiceApplicationException");
+      return null;// to unblock the other function, only trace the log
+    }
+  }
+
+  private JSONObjectOutput getUserOutput(String selectedUserId)
+      throws ServiceApplicationException {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      UserBean user = legacyHandler.execute(params, new FindUserById(
+          selectedUserId, false));
+      if (null == user || null == user.getFullNameBean()) {
+        logger
+            .error("CWSV12Controller.getUser() user empty for selected user id:"
+                + selectedUserId);
+        throw new ServiceApplicationException("Invalid user id "
+            + selectedUserId);// security check
+      }
+      // SuccessionProfileBean profile = scaHandler.execute(new
+      // GetProfileV4(selectedUserId, true, false, false, false,
+      // false, false, false, false /* maskData */));
+
+      EmployeeProfileBean profile = employeeProfileFacade.getEmployeeProfile(
+          selectedUserId, new ProfileLoadCriteria().fetchUser(
+              UserDataParam.USERS_INFO, UserDataParam.EXT_INFO));
+
+      if (null == profile || null == profile.getUser()) {
+        logger
+            .error("CWSV12Controller.getUser() user empty for selected user id:"
+                + selectedUserId);
+        throw new ServiceApplicationException("Invalid user id "
+            + selectedUserId);// security check
+      }
+      StandardElement standardElement = new StandardElement();
+      standardElement.setEnum(StandardElementEnum.TIMEINCURRENTPOSITION);
+      TimeInCurrentPositionFieldDataHandler handler = new TimeInCurrentPositionFieldDataHandler();
+      userInfoFieldContext.setSelectedUsersProfile(profile);
+      String currentTimeInPosition = (String) handler.fetchData(
+          userInfoFieldContext, standardElement);
+
+      output = CWSV12ViewHelper.getUserJSON(profile, successionRulesEngine,
+          selectedUserId, user, currentTimeInPosition, v10msgs);
+      // catch (@SuppressWarnings(\"removable\") RemoteException e) {
+      // logger.error(\"CWSV12Controller.getUser() RemoteException caught\",e);
+      // throw new ServiceApplicationException();
+      // }
+    } catch (ServiceApplicationException e) {
+      logger.error(
+          "CWSV12Controller.getUser() ServiceApplicationException caught", e);
+      throw new ServiceApplicationException();
+    }
+    return output;
+  }
+
+  /***
+   * get drop down template list for first load in xhtml
+   * 
+   * @return JSON Object
+   */
+  private JSONObjectOutput getPlansOutput(String selectedUserId,
+      List<ObjTemplateBean> planList, ObjTemplateBean selectedPlan)
+      throws ServiceApplicationException {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      // reset objBean type to align with selected CareerWorksheet template.
+      CareerBehaviorBean behaviorBean = selectedPlan.getCareerBehaviorBean();
+      boolean hideBehavior = behaviorBean != null
+          && behaviorBean.isHideBehaviors();
+      ObjBean objBean = new ObjBean(-1, -1,
+          hideBehavior ? ObjBean.TYPE_CAREERWORKSHEET_COMPETENCY
+              : ObjBean.TYPE_CAREERWORKSHEET_BEHAVIOR, null, selectedUserId,
+          null, null, null, null, null, -1, null, null, -1, null, null, null,
+          null, null);
+      JSONArrayOutput planListOutput = new JSONArrayOutput();
+      // TODO can we just get current plan data and pass to UI???
+      for (ObjTemplateBean plan : planList) {
+        //CDP-4744 bug fix. add target user(seletectUserId) parameter to rulesEngine 
+        //in order to keep consistency with the "development plan". i324657      
+        GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine
+            .getRulesEngine(null, params, ejbListAdapter, params.getUserId(),
+                plan, null, selectedUserId);
+        planListOutput.add(CWSV12ViewHelper.getPlanJSON(plan, rulesEngine,
+            objBean, selectedUserId, params.getLocale(),
+            params.isFeatureExist(FeatureEnum.JDM_NG)));
+      }
+      output.put(CWSV12ViewConstants.JSON_KEY_PLAN_LIST, planListOutput);
+      output.put(CWSV12ViewConstants.JSON_KEY_SELECTED_PLAN,
+          selectedPlan.getObjPlanId());
+
+      // get default goal plan permission
+      ObjTemplateBean goalPlan = scaHandler.execute(new GetDefaultTemplate(
+          ObjPlanTypeEnum.DEVELOPMENT));
+
+      if (goalPlan != null) {
+          //CDP-4744 bug fix. add target user(seletectUserId) parameter to rulesEngine 
+        //in order to keep consistency with the "development plan".i324657
+        GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine
+            .getRulesEngine(null, params, ejbListAdapter, params.getUserId(),
+                goalPlan, null,selectedUserId);
+        JSONObjectOutput devPlan = new JSONObjectOutput();
+        devPlan.put("id", goalPlan.getObjPlanId());
+        devPlan.put("perms", this.getGoalPlanPerms(goalPlan, selectedUserId,
+            objBean, rulesEngine));
+        output.put("devPlan", devPlan);
+      }
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ObjectiveRulesEngineException e) {
+      logger.error("Exception when check rule engine", e);
+      throw new ServiceApplicationException();
+    } catch (RemoteException e) {
+      logger.error(
+          "CWSV12Controller.getPlansOutput() error for get default plan", e);
+      throw new ServiceApplicationException();
+    }
+    return output;
+  }
+
+  /***
+   * get role detail information by role id when switch between roles
+   * 
+   * @param userId
+   *          selected user id
+   * @param roleId
+   *          selected role id
+   * @param planId
+   *          selected cws plan id
+   * @return .
+   */
+  @AjaxMethod
+  public String getCompetenciesByRole(String userId, long roleId, long planId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      // get plan
+      ObjTemplateBean planBean = scaHandler
+          .execute(new GetTemplateById(planId));
+
+      GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine.getRulesEngine(
+          null, params, ejbListAdapter, params.getUserId(), planBean, null,
+          null);
+      boolean isCurrentOnly = !rulesEngine.hasPrivateAccessPermission(userId);
+      boolean reverseOrder = this.isUseCompanyScale();
+      GetCareerWorksheetBean cmd = new GetCareerWorksheetBean(planBean, userId,
+          isCurrentOnly, roleId);
+      CareerWorksheetBean careerWorksheetBean = scaHandler.execute(cmd);
+      CareerRoleBean careerRoleBean = (CareerRoleBean) careerWorksheetBean
+          .getRoleList().get(0);
+      // to keep order, don't use entryMap
+      if (null != careerRoleBean && null != careerRoleBean.getEntryList()) {
+        ObjTemplateBean goalPlan = scaHandler.execute(new GetDefaultTemplate(
+            ObjPlanTypeEnum.DEVELOPMENT));
+        output.put("competencies", this.getCompetenciesOutput(planBean,
+            rulesEngine, careerWorksheetBean, careerRoleBean, userId, roleId,
+            reverseOrder, goalPlan));
+
+        output.put("metadataLabels",
+            this.getObjectivesMetaLabelsForCompetencyOutput(goalPlan));
+
+        IField lastRatingField = planBean
+            .getField(CareerWorkSheetTemplateBean.FIELD_LAST_RATING);
+        boolean displayLastRating = this.hasReadPermission(rulesEngine,
+            planBean, CareerWorkSheetTemplateBean.FIELD_LAST_RATING, userId);
+        if (displayLastRating && lastRatingField != null) {
+          List ratingScaleBeans = lastRatingField.getScaleBeanList();
+          if (ratingScaleBeans != null && ratingScaleBeans.size() > 1) {
+            // CDP-2518: move scale key in case JS error.
+            output.put("scale",
+                CWSV12ViewHelper.getScaleJSON(ratingScaleBeans, reverseOrder));
+          }
+        }
+
+        // self assessment URL information
+        UserBean selectedUserBean = legacyHandler.execute(params,
+            new FindUserById(userId, false));
+        JSONObjectOutput assessmentURLOutput = this.getAssessmentUrlJSON(
+            careerRoleBean == null ? -1 : careerRoleBean.getFolderMapId(),
+            roleId, selectedUserBean, planBean);
+        if (assessmentURLOutput != null) {
+          output.put("form", assessmentURLOutput);
+        }
+
+        output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+      }
+    } catch (ObjectiveRulesEngineException e) {
+      logger.error("Exception when check rule engine", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    } catch (ObjEJBException e) {
+      logger.error("ObjEJBException", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    } catch (RemoteException e) {
+      logger.error("Remote Exception", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    } catch (ServiceApplicationException e) {
+      logger.error("Internal error ", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    }
+    return JSONUtils.toJSON(output);
+  }
+
+  /***
+   * get competencies output for one role
+   * 
+   * @param planBean
+   *          ObjTemplateBean
+   * @param careerRoleBean
+   *          CareerRoleBean
+   * @param roleId
+   *          role id
+   * @param reverseOrder
+   *          reverse order
+   * @return
+   */
+  private JSONArrayOutput getCompetenciesOutput(ObjTemplateBean planBean,
+      GMRulesEngine rulesEngine, CareerWorksheetBean careerWorksheetBean,
+      CareerRoleBean careerRoleBean, String userId, long roleId,
+      boolean reverseOrder, ObjTemplateBean goalPlan) throws RemoteException,
+      ObjectiveRulesEngineException {
+    JSONArrayOutput compArray = new JSONArrayOutput();
+    Map<Long, JSONArrayOutput> cachedShareRolesVO = new HashMap<Long, JSONArrayOutput>();
+    CareerBehaviorBean behaviorBean = planBean.getCareerBehaviorBean();
+    boolean hideBehavior = behaviorBean != null
+        && behaviorBean.isHideBehaviors();
+    boolean hideBehaviorRating = behaviorBean != null
+        && behaviorBean.isHideRatings();
+    boolean displayCompName = this.hasReadPermission(rulesEngine, planBean,
+        CareerWorkSheetTemplateBean.FIELD_COMPETENCY_NAME, userId);
+    boolean displayLastRating = this.hasReadPermission(rulesEngine, planBean,
+        CareerWorkSheetTemplateBean.FIELD_LAST_RATING, userId);
+    boolean displayExpRating = this.hasReadPermission(rulesEngine, planBean,
+        CareerWorkSheetTemplateBean.FIELD_GAP_GRAPH, userId);
+    boolean displayLastRatedForm = this.hasReadPermission(rulesEngine,
+        planBean, CareerWorkSheetTemplateBean.FIELD_LAST_RATED_FORM, userId);
+    boolean displayLastRatedDate = this.hasReadPermission(rulesEngine,
+        planBean, CareerWorkSheetTemplateBean.FIELD_LAST_RATED_DATE, userId);
+    boolean displayGoals = this.displayGoals(rulesEngine, planBean,userId);
+
+    String compFieldFormat = CareerWorksheetUtils.getCompFieldFormat(goalPlan);
+    boolean showBehaviorsGoals = IField.FIELD_FORMAT_USE_BEHAVIOR
+        .equals(compFieldFormat);
+    for (Iterator<CareerEntryBean> it = careerRoleBean.getEntryList()
+        .iterator(); it.hasNext();) {
+      CareerEntryBean entryBean = (CareerEntryBean) it.next();
+      long compId = entryBean.getCompetencyId();
+      JSONObjectOutput o = new JSONObjectOutput();
+      this.addCompetencyMoreDetails(o, planBean, entryBean, roleId,
+          careerWorksheetBean, false, compId, displayCompName,
+          displayLastRating, displayExpRating, displayLastRatedForm,
+          displayLastRatedDate, reverseOrder);
+
+      if (!hideBehavior) {
+        this.addBehaviors(o, entryBean.getSubEntryList(), planBean, goalPlan,
+            roleId, careerWorksheetBean, hideBehaviorRating, userId, compId,
+            displayCompName, displayLastRating, displayExpRating,
+            displayLastRatedForm, displayLastRatedDate, displayGoals,
+            showBehaviorsGoals, reverseOrder);
+      }
+      if (!showBehaviorsGoals && displayGoals) {
+        o.put("goals",
+            this.getObjectivesForCompetencyOutput(compId, userId, goalPlan));
+      }
+
+      // get shared roles, cached for performance
+      o.put("sharedRoles", this.getSharedRoleVO(cachedShareRolesVO, compId));
+
+      o.put("isShowAll", false);
+      compArray.add(o);
+    }
+    return compArray;
+  }
+
+  /**
+   * get shared roles VO for one competency, cache result as well
+   * 
+   * @param cachedShareRolesVO
+   * @param compId
+   * @return
+   * @throws RemoteException
+   */
+  private JSONArrayOutput getSharedRoleVO(
+      Map<Long, JSONArrayOutput> cachedShareRolesVO, Long compId)
+      throws RemoteException {
+    try {
+      JSONArrayOutput sharedRoleVO = null;
+      if (cachedShareRolesVO.containsKey(compId)) {
+        sharedRoleVO = cachedShareRolesVO.get(compId);
+      } else {
+        List<RoleMapBean> roleMapList = scaHandler
+            .execute(new GetRolesByCompetencyId(compId));
+        sharedRoleVO = CWSV12ViewHelper.getSharedRolesJSON(roleMapList);
+        cachedShareRolesVO.put(compId, sharedRoleVO);
+      }
+      return sharedRoleVO;
+    } catch (ServiceApplicationException e) {
+      throw new RemoteException("Wrapped Exception: " + e, e);
+    }
+  }
+
+  /***
+   * get target and current roles by template id when template change for
+   * template dropdown change
+   * 
+   * @param planId
+   *          .
+   * @param userId
+   *          .
+   * @return .
+   */
+  @AjaxMethod
+  public String getPlanData(long planId, String userId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      ObjTemplateBean planBean = scaHandler
+          .execute(new GetTemplateById(planId));
+
+      // update preference
+      this.updatePreference(planBean.getObjPlanId());
+
+      // check if user have read permission, same with FBObjectivePlanv10
+      GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine.getRulesEngine(
+          null, params, ejbListAdapter, params.getUserId(), planBean, null,
+          null);
+      CareerBehaviorBean behaviorBean = planBean.getCareerBehaviorBean();
+      boolean hideBehavior = behaviorBean != null
+          && behaviorBean.isHideBehaviors();
+      ObjBean objBean = new ObjBean(-1, -1,
+          hideBehavior ? ObjBean.TYPE_CAREERWORKSHEET_COMPETENCY
+              : ObjBean.TYPE_CAREERWORKSHEET_BEHAVIOR, null, userId, null,
+          null, null, null, null, -1, null, null, -1, null, null, null, null,
+          null);
+      boolean canRead = rulesEngine.hasReadPermission(objBean);
+      output.put(CWSV12ViewConstants.JSON_KEY_CAN_READ, canRead);
+      if (canRead) {
+        output.put("roles",
+            this.getRolesByTempalte(planBean, userId, rulesEngine));
+      }
+
+      String intro = planBean.getTextReplacement(
+          TextReplacementEnum.INSTRUCTIONS, params.getLocale(), "");
+      output.put("introduction", StringUtils.notNull(intro));
+      boolean showDefaultRoleIcon = params.getUserId().equals(userId)
+          && params.getProxy() == null;
+      if (showDefaultRoleIcon) {
+        output.put("showDefaultRoleIcon", showDefaultRoleIcon);
+      }
+
+      // get default goal plan permission
+      ObjTemplateBean goalPlan = scaHandler.execute(new GetDefaultTemplate(
+          ObjPlanTypeEnum.DEVELOPMENT));
+
+      if (goalPlan != null) {
+        GMRulesEngine devPlanRulesEngine = DelegateObjectiveRulesEngine
+            .getRulesEngine(null, params, ejbListAdapter, params.getUserId(),
+                goalPlan, null, userId);
+        JSONObjectOutput devPlan = new JSONObjectOutput();
+        devPlan.put("id", goalPlan.getObjPlanId());
+        devPlan.put("perms", this.getGoalPlanPerms(goalPlan, userId, objBean,
+            devPlanRulesEngine));
+        output.put("devPlan", devPlan);
+      }
+
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ObjectiveRulesEngineException e) {
+      logger.error("ObjectiveRulesEngineException", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    } catch (ServiceApplicationException e) {
+      logger.error("Internal error ", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    } catch (RemoteException e) {
+      logger.error("getGoalPlanPerms error ", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    }
+    return JSONUtils.toJSON(output);
+  }
+
+  /***
+   * get roles by template bean
+   * 
+   * @param objTemplateBean
+   *          .
+   * @param userId
+   *          .
+   * @return .
+   * @throws RemoteException .
+   * @throws ServiceApplicationException .
+   */
+  private JSONObjectOutput getRolesByTempalte(ObjTemplateBean objTemplateBean,
+      String userId, GMRulesEngine rulesEngine)
+      throws ServiceApplicationException {
+    JSONObjectOutput roleOutput = new JSONObjectOutput();
+    try {
+      // check if user has permission to load target roles
+      boolean isCurrentOnly = !rulesEngine.hasPrivateAccessPermission(userId);
+      GetCareerWorksheetBean cmd = new GetCareerWorksheetBean(objTemplateBean,
+          userId, isCurrentOnly);
+      CareerWorksheetBean careerWorksheetBean = scaHandler.execute(cmd);
+      List<CareerRoleBean> roleList = careerWorksheetBean.getRoleList();
+
+      boolean displayRedinessMeter = this.hasReadPermission(rulesEngine,
+          objTemplateBean, CareerWorkSheetTemplateBean.FIELD_READINESS_METER,
+          userId);
+
+      if (null != roleList && !roleList.isEmpty()) {
+        Long defaultTargetRole = null;
+        // only support default role for login user; otherwise, locate the first
+        // role
+        if (params.getProxy() == null && params.getUserId().equals(userId)) {
+          defaultTargetRole = this
+              .getDefaultTargetRoleByTemplateId(objTemplateBean.getObjPlanId());
+        }
+        roleOutput.put(CWSV12ViewConstants.JSON_KEY_ROLE_LIST, CWSV12ViewHelper
+            .getRolesJSON(roleList, objTemplateBean, careerWorksheetBean,
+                this.isUseCompanyScale(), displayRedinessMeter,
+                defaultTargetRole));
+      }
+    } catch (ObjectiveRulesEngineException e) {
+      throw new ServiceApplicationException();
+    } catch (RemoteException e) {
+      throw new ServiceApplicationException();
+    }
+    return roleOutput;
+  }
+
+  /***
+   * get security token
+   * 
+   * @return
+   */
+  private String getSecToken() {
+    HttpServletRequest request = (HttpServletRequest) FacesContext
+        .getCurrentInstance().getExternalContext().getRequest();
+    return SecTokenUtils.generateSecurityCrumb(request);
+  }
+
+  /***
+   * get role details display in action bar
+   * 
+   * @param userId
+   *          .
+   * @param roleId
+   *          .
+   * @param selectedPlanId
+   *          .
+   * @return .
+   */
+  @AjaxMethod
+  public String getRoleMoreDetails(String userId, long roleId,
+      long selectedPlanId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      ObjTemplateBean planBean = scaHandler.execute(new GetTemplateById(
+          selectedPlanId));
+      // checkbox if Live In Profile checked
+      GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine.getRulesEngine(
+          null, params, ejbListAdapter, params.getUserId(), planBean, null,
+          null);
+      if (rulesEngine.hasPermission(userId, IPermission.SHARE, null)) {
+        RoleBean roleBean = scaHandler.execute(new GetRoleById(roleId));
+        if (null == roleBean) {
+          logger
+              .error("CWSV12Controller.getRoleMoreDetails() error no role found for roleId:"
+                  + roleId);
+          throw new ServiceApplicationException(
+              "error no role found for roleId " + roleId);
+        }
+        BackgroundElement bgElement = dataModel
+            .lookupBackgroundElementById(CareerWorksheetConstants.BG_ELEMENT_PREFERRED_NEXT_MOVE_ID);
+        if (null != bgElement) {
+          JSONObjectOutput o = new JSONObjectOutput();
+          o.put("isChecked",
+              this.isLiveProfileChecked(roleBean.getRoleName(), bgElement));
+          String profileLink = "/xi/ui/pages/empfile/liveprofile.xhtml?"
+              + BoilerPlateServlet.PARAM_COMPANYID + "="
+              + HtmlUtils.escapeAll(params.getCompanyId()) + "&selected_user="
+              + HtmlUtils.escapeAll(params.getUserId()) + "&"
+              // CDP-2469 add security token
+              + SecTokenUtils.PARAM_SECURITY_CRUMB + "="
+              + HtmlUtils.encodeURIComponent(this.getSecToken()) + "&";
+          o.put("link", profileLink);
+          o.put("tooltipValue",
+              bgElement.getLabel().getString(params.getLocale()));
+          output.put("liveProfile", o);
+        }
+      }
+      // Get Employees
+      Map<String, Integer> countRole = legacyHandler.execute(params,
+          new GetUserCountByRoleId(roleId));
+      if (planBean.isCWSPeopleRole()) {
+        output.put("showCWSPeopleRole", true);
+        output.put("employees",
+            CareerWorksheetUtils.getNumberOfActiveEmployeeInRole(countRole));
+        boolean emDirEnabled=permList.hasPermission(PermissionBean.USER, PermissionBean.USER_DIRECTORY_SEARCH,0)
+                &&params.isFeatureExist(FeatureEnum.EMPLOYEE_DIRECTORY); 
+        output.put("empDirEnabled",
+            emDirEnabled);
+        // CDP-2993 hide positoin count
+        if (params.isFeatureExist(FeatureEnum.TRUE_POSITION_HIERARCHY)
+            && !planBean.isHidePositionCountEnabled()) {
+          output.put("openings",
+              CareerWorksheetUtils.getNumberOfVacantEmployeeInRole(countRole));
+        }
+      } else {
+        output.put("showCWSPeopleRole", false);
+      }
+      output.put("mentors", 0);
+
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ObjectiveRulesEngineException e) {
+      logger
+          .error(
+              "CWSV12Controller.getRoleMoreDetails() ObjectiveRulesEngineException",
+              e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    } catch (ServiceApplicationException e) {
+      logger.error("CWSV12Controller.getRoleMoreDetails() RemoteException", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    }
+    return JSONUtils.toJSON(output);
+  }
+  /***
+   * add profile link in target role details
+   * 
+   * @param roleName
+   * @param bgElement
+   * @return
+   */
+  private boolean isLiveProfileChecked(String roleName,
+      BackgroundElement bgElement) {
+    if (null != bgElement) {
+      DataField dataField = bgElement.lookupDataFieldById("title");
+      FieldNameEnum fieldName = dataField.getFieldName();
+      final String columnName = SuccessionDataModelBean.fieldNameEnum2ColumnName
+          .lookupColumnName(fieldName);
+      try {
+        List<String> sharedRoles = scaHandler.execute(new GetSharedRolesInCWS(
+            bgElement.getId(), params.getUserId(), columnName));
+        return null != sharedRoles && sharedRoles.contains(roleName);
+        // catch (RemoteException e) {
+        // logger.error(\"Unable to get shared roles in CWS and Live Profile
+        // \",e);
+        // }
+      } catch (ServiceApplicationException e) {
+        logger.error("Unable to get shared roles in CWS and Live Profile ", e);
+      }
+    }
+    return false;
+  }
+
+  /***
+   * if use company scale to reverse gap
+   * 
+   * @return
+   */
+  private boolean isUseCompanyScale() {
+    // reverse the gap if needed to
+    boolean useCompanyScale = false;
+    try {
+      useCompanyScale = (null != scaHandler.execute(new GetSysConfig(
+          SystemBean.COMPANYWIDE_SCALE_KEY, SystemBean.COMPANYWIDE_SCALE_TYPE)));
+      // catch (RemoteException e) {
+      // useCompanyScale=false;
+      // }
+    } catch (ServiceApplicationException e) {
+      useCompanyScale = false;
+    }
+    return useCompanyScale;
+  }
+
+  /***
+   * get date gap by months/years and "less than one month"
+   * 
+   * @param startStr
+   * @return .
+   */
+  private String getPositionDuration(String startStr) {
+    if (StringUtils.isBlank(startStr)) {
+      return null;
+    }
+    Date startDate = ClientDateFormat.parseDate(startStr, true,
+        params.getLocale());
+    if (null == startDate) {
+      return null;
+    }
+    Date endDate = Calendar.getInstance().getTime();
+    if (startDate.after(endDate)) {
+      return null;
+    }
+    int monthsBetween = DateUtils.monthsBetween(startDate, endDate);
+    int numberOfMonths = monthsBetween
+        % CWSV12ViewConstants.NUM_MONTHS_IN_A_YEAR;
+    int numberOfYears = monthsBetween
+        / CWSV12ViewConstants.NUM_MONTHS_IN_A_YEAR;
+
+    String yearString = null;
+    String monthString = null;
+    if (numberOfYears == 1) {
+      yearString = msgs.format("COMMON_Num_year",
+          new Object[] { numberOfYears });
+    } else if (numberOfYears > 1) {
+      yearString = msgs.format("COMMON_Num_years",
+          new Object[] { numberOfYears });
+    }
+    if (numberOfMonths == 1) {
+      monthString = msgs.format("COMMON_Num_month",
+          new Object[] { numberOfMonths });
+    } else if (numberOfMonths > 1) {
+      monthString = msgs.format("COMMON_Num_months",
+          new Object[] { numberOfMonths });
+    }
+    String label;
+    if (yearString != null && monthString != null) {
+      label = msgs.format(
+          "DEVELOPMENT_CWS_CURRENT_ROLE_DATE_Year_Month_No_Separator",
+          new Object[] { yearString, monthString });
+    } else if (yearString != null) {
+      label = yearString;
+    } else if (monthString != null) {
+      label = monthString;
+    } else {
+      label = msgs
+          .getString("DEVELOPMENT_CWS_CURRENT_ROLE_DATE_LESS_THAN_A_MONTH");
+    }
+    return label;
+  }
+
+  /***
+   * sync with FBTGMCategory.getAssessmentURL()
+   * 
+   * @param output
+   * @param roleId
+   * @param userId
+   * @param planBean
+   * @param rulesEngine
+   * @throws RemoteException
+   * @throws ServiceApplicationException
+   * @throws ObjectiveRulesEngineException
+   */
+  private JSONObjectOutput getAssessmentUrlJSON(long folderId, long roleId,
+      UserBean planOwner, ObjTemplateBean planBean) throws RemoteException,
+      ServiceApplicationException, ObjectiveRulesEngineException {
+
+    Map<String, String> assessmentData = CareerWorksheetUIUtils
+        .getAssessmentURL(String.valueOf(roleId), planBean, planOwner, params,
+            folderId, v10msgs, this.getSecToken(), permList);
+
+    if (assessmentData != null
+        && assessmentData.get(CareerWorksheetUIUtils.ASSESSMENT_HREF) != null) {
+      JSONObjectOutput formOutput = new JSONObjectOutput();
+      formOutput.put("createNewForm", Boolean.valueOf(assessmentData
+          .get(CareerWorksheetUIUtils.ASSESSMENT_NEWFORM)));
+      formOutput.put("formName", HtmlUtils.escapeContent(assessmentData
+          .get(CareerWorksheetUIUtils.ASSESSMENT_FORMNAME)));
+      formOutput.put("formUrl", HtmlUtils.escapeContent(assessmentData
+          .get(CareerWorksheetUIUtils.ASSESSMENT_HREF)));
+      return formOutput;
+    } else {
+      return null;
+    }
+  }
+
+  /***
+   * get employees list when hover on employees
+   * 
+   * @param selectedPlanId
+   *          .
+   * @param roleId
+   *          .
+   * @return employee list
+   */
+  @AjaxMethod
+  public String getEmployeesByRoleId(long selectedPlanId, long roleId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      // Employee Directory feature should be enabled
+      if (!params.isFeatureExist(FeatureEnum.EMPLOYEE_DIRECTORY)) {
+        logger
+            .error("CWSV12Controller.getEmployeesByRoleId Feature disabled: Employee Directory!");
+        throw new ServiceApplicationException(
+            "Feature disabled: Employee Directory");
+      }
+
+      // show people in role should configured in template
+      ObjTemplateBean planBean = scaHandler.execute(new GetTemplateById(
+          selectedPlanId));
+      if (!planBean.isCWSPeopleRole()) {
+        logger.error("CWSV12Controller.getEmployeesInRole() select plan "
+            + selectedPlanId + " has CWS People Role disabled!");
+        throw new ServiceApplicationException(" Select plan "
+            + planBean.getObjPlanName() + " has People Role disabled!!");
+      }
+
+      String roleIdString = String.valueOf(roleId);
+      List<ListRowVOInterface> rowList = this.employeeDirService.getList(
+          roleIdString,
+          // CWSV12ViewConstants.BG_ELEMENT_USER_DIRECTORY,
+          "sysVisibleUserDirectorySetting", true,
+          CWSV12ViewConstants.EMPLOYEES_PAGINATION_START,
+          CWSV12ViewConstants.EMPLOYEES_PAGINATION_SIZE);
+      if (null != rowList && !rowList.isEmpty()) {
+        output.put("employees", CWSV12ViewHelper.getEmployeeListJSON(rowList));
+
+        Integer totalCount = this.employeeDirService.getListSize(roleIdString,
+            "sysVisibleUserDirectorySetting", true);
+        if (totalCount != null
+            && totalCount > CWSV12ViewConstants.EMPLOYEES_PAGINATION_SIZE) {
+          output.put("totalCount", totalCount);
+        }
+      }
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      logger.error("CWSV12Controller getEmployeesInRole() failed!", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    }
+    return JSONUtils.toJSON(output);
+  }
+
+  /***
+   * add/remove role in profile
+   * 
+   * @param roleId
+   *          .
+   * @param userId
+   *          .
+   * @param action
+   *          .
+   * @return .
+   */
+  @AjaxMethod
+  public String updateRoleInProfile(long roleId, String userId, String action) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      // Get item from live profile where roleName = title
+      if ("addRoleToProfile".equals(action)) {
+        AddRoleToProfile cmd = new AddRoleToProfile(roleId, userId);
+        cmd = scaHandler.execute(cmd);
+      } else if ("removeRoleFromProfile".equals(action)) {
+        RemoveRoleFromProfile cmd = new RemoveRoleFromProfile(roleId, userId);
+        cmd = scaHandler.execute(cmd);
+      } else {
+        logger.error("CWSV12Controller.updateRoleInProfile() Invalid action"
+            + action);
+        throw new ServiceApplicationException("Invalid action:" + action);
+      }
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      logger
+          .error(
+              "CWSV12Controller.updateRoleInProfile() Failed to do an update role on Live Profile ",
+              e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    }
+    return JSONUtils.toJSON(output);
+  }
+
+  /**
+   * delete goal
+   * 
+   * @param goalId
+   *          .
+   * @return .
+   */
+  @AjaxMethod
+  public String deleteGoal(long goalId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      ObjTemplateBean goalPlan = scaHandler.execute(new GetDefaultTemplate(
+          ObjPlanTypeEnum.DEVELOPMENT));
+      if (goalPlan != null) {
+        ObjBean objBean = scaHandler.execute(new GetObjById(goalId, false,
+            false));
+        // Make sure we don't delete the wrong type of beans.
+        if (objBean != null) {
+          DelegateObjectiveRulesEngine rulesEngine = DelegateObjectiveRulesEngine
+              .getRulesEngine(null, params, ejbListAdapter, params.getUserId(),
+                  goalPlan, null, null);
+          if (!rulesEngine.hasPermission(objBean.getObjAssignee(),
+              IPermission.DELETE, objBean)) {
+            output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+            output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE, v10msgs
+                .getString("GOALS_PLAN_ERR_NO_DELETE_PERMISSION_IDP_ITEM"));
+          } else {
+            DeleteDevGoal cmd = new DeleteDevGoal(objBean,
+                rulesEngine.isDeleteEmailEnabled());
+            scaHandler.execute(cmd);
+            output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+          }
+        }
+      } else {
+        output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+        output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+            msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+      }
+    } catch (ObjectiveRulesEngineException e) {
+      logger.error("Fail to delete goalm, ObjectiveRulesEngineException", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    } catch (ServiceApplicationException e) {
+      logger.error("Fail to delete goal", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    }
+    return output.toString();
+  }
+
+  /***
+   * add behaviors associated with goals each competency
+   * 
+   * @param output
+   * @param behaviorList
+   * @param planBean
+   * @param roleId
+   * @param careerWorksheetBean
+   * @param hideRating
+   * @param userId
+   * @param parentId
+   * @param displayCompName
+   * @param displayLastRating
+   * @param displayExpRating
+   * @param displayLastRatedForm
+   * @param displayLastRatedDate
+   * @param displayGoals
+   * @param showBehaviorsGoals
+   * @param reverseOrder
+   * @throws RemoteException
+   */
+  private void addBehaviors(JSONObjectOutput output, List behaviorList,
+      ObjTemplateBean planBean, ObjTemplateBean goalPlan, long roleId,
+      CareerWorksheetBean careerWorksheetBean, boolean hideRating,
+      String userId, long parentId, boolean displayCompName,
+      boolean displayLastRating, boolean displayExpRating,
+      boolean displayLastRatedForm, boolean displayLastRatedDate,
+      boolean displayGoals, boolean showBehaviorsGoals, boolean reverseOrder)
+      throws RemoteException {
+    JSONArrayOutput behaviorOutput = new JSONArrayOutput();
+    if (null != behaviorList && !behaviorList.isEmpty()) {
+      for (Iterator it = behaviorList.iterator(); it.hasNext();) {
+        CareerEntryBean subEntry = (CareerEntryBean) it.next();
+        JSONObjectOutput o = new JSONObjectOutput();
+        this.addCompetencyMoreDetails(o, planBean, subEntry, roleId,
+            careerWorksheetBean, hideRating, parentId, displayCompName,
+            displayLastRating, displayExpRating, displayLastRatedForm,
+            displayLastRatedDate, reverseOrder);
+        if (showBehaviorsGoals && displayGoals) {
+          o.put("goals", this.getObjectivesForCompetencyOutput(
+              subEntry.getCompetencyId(), userId, goalPlan));
+        }
+        behaviorOutput.add(o);
+      }
+    }
+    output.put("behaviors", behaviorOutput);
+  }
+
+  /***
+   * extract method to reuse adding competency/behavior more details
+   * 
+   * @param o
+   * @param planBean
+   * @param entryBean
+   * @param roleId
+   * @param careerWorksheetBean
+   * @param hideRating
+   * @param parentId
+   * @param displayCompName
+   * @param displayLastRating
+   * @param displayExpRating
+   * @param displayLastRatedForm
+   * @param displayLastRatedDate
+   * @param reverseOrder
+   */
+  private void addCompetencyMoreDetails(JSONObjectOutput o,
+      ObjTemplateBean planBean, CareerEntryBean entryBean, long roleId,
+      CareerWorksheetBean careerWorksheetBean, boolean hideRating,
+      long parentId, boolean displayCompName, boolean displayLastRating,
+      boolean displayExpRating, boolean displayLastRatedForm,
+      boolean displayLastRatedDate, boolean reverseOrder) {
+    long compId = entryBean.getCompetencyId();
+    CareerEntryBean mapEntryBean = careerWorksheetBean
+        .getCareerEntryBean(compId);
+    o.put(CWSV12ViewConstants.JSON_KEY_ID, compId);
+    if (displayCompName) {
+      o.put(CWSV12ViewConstants.JSON_KEY_NAME,
+          HtmlUtils.escapeContent(entryBean.getCompName()));
+      o.put(CWSV12ViewConstants.JSON_KEY_DESC,
+          HtmlUtils.partialHtmlFilter(entryBean.getCompetencyDescription()));
+    }
+    String formName = entryBean.getLastFormName() == null ? mapEntryBean
+        .getLastFormName() : entryBean.getLastFormName();
+    // don't show rating if formName is empty which means the competency is not
+    // rated,
+    // CDP-2862 CWS Revolution: Gap graph should be hidden if no rating assigned
+    // to the competency
+    if (formName == null) {
+      return;
+    }
+    if (displayLastRatedForm) {
+      o.put("lastFormName", formName);
+    }
+    if (displayLastRatedDate) {
+      String dateFormat = v10msgs.getString("FLD_DATEFORMAT");
+      o.put("lastRatedDate", ClientDateFormat.simpleformat(entryBean
+          .getLastRatedDate() == null ? mapEntryBean.getLastRatedDate()
+          : entryBean.getLastRatedDate(), dateFormat, params.getLocale()));
+    }
+    boolean isCompetencyCompleted = false;
+    IField lastRatingField = planBean
+        .getField(CareerWorkSheetTemplateBean.FIELD_LAST_RATING);
+
+    double lastRating = CareerWorksheetUtils.adjustLastRating(lastRatingField,
+        entryBean, mapEntryBean);
+    if (lastRating != FeedbackBean.NOT_APPLICABLE
+        && lastRating != FeedbackBean.EXPLICIT_UNRATED) {
+      double expRatingPercent = careerWorksheetBean.getExpectedRating(roleId,
+          compId);
+      // if it is behavior, use competency rating percent instead if behavior
+      // not set up.
+      if (parentId != compId
+          && ScaleBean.DEFAULT_NOT_RATED_VALUE == expRatingPercent) {
+        expRatingPercent = careerWorksheetBean.getExpectedRating(roleId,
+            parentId);
+      }
+      double expectedRating = CareerWorksheetUtils.getExpectedRating(
+          lastRatingField, expRatingPercent);
+      double formattedExpRating = Double.parseDouble(TGMCommonUtils
+          .formatNumber(lastRatingField.getFieldFormat(), expectedRating));
+      double formattedCurRating = Double.parseDouble(TGMCommonUtils
+          .formatNumber(lastRatingField.getFieldFormat(), lastRating));
+      if (expectedRating != FeedbackBean.NOT_APPLICABLE) {
+        isCompetencyCompleted = (reverseOrder && formattedCurRating <= formattedExpRating)
+            || (!reverseOrder && formattedCurRating >= formattedExpRating);
+      }
+      if (!hideRating) {
+        // add rating of value and localized
+        if (displayExpRating) {
+          JSONObjectOutput o2 = new JSONObjectOutput();
+          o2.put(
+              "value",
+              expectedRating == FeedbackBean.NOT_APPLICABLE ? FeedbackBean.NOT_APPLICABLE
+                  : formattedExpRating);
+          o2.put(
+              "display",
+              expectedRating == FeedbackBean.NOT_APPLICABLE ? FeedbackBean.NOT_APPLICABLE
+                  : TGMCommonUtils.formatNumber(
+                      lastRatingField.getFieldFormat(), expectedRating,
+                      params.getLocale()));
+          o.put("expectedRating", o2);
+        }
+        if (displayLastRating) {
+          JSONObjectOutput o2 = new JSONObjectOutput();
+          o2.put("value", formattedCurRating);
+          o2.put("display", TGMCommonUtils.formatNumber(
+              lastRatingField.getFieldFormat(), lastRating, params.getLocale()));
+          o.put("currentRating", o2);
+        }
+      }
+    }
+    o.put("competencyCompleted", isCompetencyCompleted);
+  }
+
+  /***
+   * check if login user has field read permission for target user
+   * 
+   * @param rulesEngine
+   * @param planBean
+   * @param fieldId
+   * @param userId
+   * @return
+   * @throws RemoteException
+   * @throws ObjectiveRulesEngineException
+   */
+  private boolean hasReadPermission(GMRulesEngine rulesEngine,
+      ObjTemplateBean planBean, String fieldId, String userId)
+      throws RemoteException, ObjectiveRulesEngineException {
+    boolean hasPermission = false;
+    if (planBean != null) {
+      IField field = planBean.getField(fieldId);
+      if (field != null) {
+        hasPermission = rulesEngine.hasReadPermission(userId, field, null);
+      }
+    }
+    return hasPermission;
+  }
+
+  /***
+   * get objectives by competency for Edit/Delete partial refresh
+   * 
+   * @param planId
+   *          .
+   * @param compId
+   *          .
+   * @param userId
+   *          .
+   * @param isBehavior
+   *          .
+   * @return .
+   */
+  @AjaxMethod
+  public String getObjectivesByCompetency(long planId, long compId,
+      String userId, boolean isBehavior) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      // get related career plan to check if display goals and if isBehavior is
+      // a valid flag
+      ObjTemplateBean planBean = scaHandler
+          .execute(new GetTemplateById(planId));
+      GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine.getRulesEngine(
+          null, params, ejbListAdapter, params.getUserId(), planBean, null,
+          null);
+      CareerBehaviorBean behaviorBean = planBean.getCareerBehaviorBean();
+      boolean hideBehavior = behaviorBean != null
+          && behaviorBean.isHideBehaviors();
+      // this is to avoid security reason, normally it will not happen
+      if (hideBehavior && isBehavior) {
+        logger
+            .error("CWSV12Controller.getObjectivesByCompetency() useBehavior is disabled for plan id +"
+                + planId);
+        throw new ServiceApplicationException(
+            "useBehavior is disabled for plan id " + planId);
+      }
+    // get objectives
+      boolean displayGoals = this.displayGoals(rulesEngine, planBean, userId);
+      if (displayGoals) {
+        ObjTemplateBean goalPlan = scaHandler.execute(new GetDefaultTemplate(
+            ObjPlanTypeEnum.DEVELOPMENT));
+        output.put("goals",
+            this.getObjectivesForCompetencyOutput(compId, userId, goalPlan));
+      }
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ObjectiveRulesEngineException e) {
+      logger.error("Exception when check rule engine", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    } catch (RemoteException e) {
+      logger.error("Remote Exception", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    } catch (ServiceApplicationException e) {
+      logger.error("Internal error ", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    }
+    return JSONUtils.toJSON(output);
+  }
+
+  /**
+   * search role by keyword
+   * 
+   * @param roleName
+   *          roleName
+   * @param userId
+   *          userId
+   * @param templateId
+   *          templateId
+   * @return string
+   */
+  @AjaxMethod
+  public String searchRoleByKeyword(String roleName, String userId,
+      long templateId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      AutoCompleteRoleSearch cmd = new AutoCompleteRoleSearch();
+      String kw = "";
+      try {
+        kw = java.net.URLDecoder.decode(roleName, "UTF-8");
+      } catch (UnsupportedEncodingException e) {
+        logger.error("Decode error ", e);
+      }
+      cmd.setKeyword(kw);
+      cmd.setUserId(userId);
+      cmd.setTemplateId(templateId);
+      List<AutoCompleteRoleSearchVO> results = scaHandler.execute(cmd);
+      // TODO: [BH] Parse vo to json
+      output.put(CWSV12ViewConstants.JSON_KEY_ROLE_LIST, results);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      logger.error(
+          "CWSV12Controller.searchRoleByKeyword() Failed to do an query role",
+          e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    }
+    return JSONUtils.toJSON(output);
+    // return
+    // "{\"ResultSet\":{\"Result\":[{\"Count\":1,\"MiddleInitial\":\"\",\"Suffix\":\"\",\"Salutation\":\"\",\"Location\":\"N/A\",\"UserName\":\"admin\",\"UserId\":\"admin\",\"LastName\":\"admin\",\"JobCode\":\"\",\"Nickname\":\"\",\"FullName\":\"admin admin\",\"FirstName\":\"admin\",\"Department\":\"N/A\"}]}}";
+  }
+
+  /**
+   * get JDM2.0 RoleId by JDM1.0 RoleId
+   * 
+   * @return
+   * @throws ServiceApplicationException
+   */
+  @AjaxMethod
+  public String getInternalIdByRoleId(Long roleId)
+      throws ServiceApplicationException {
+    JSONObjectOutput output = new JSONObjectOutput();
+    output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+    output.put("jdm2RoleId", getInternalIdForLegacyRoleIdNew(roleId));
+    return JSONUtils.toJSON(output);
+  }
+
+  /**
+   * 
+   * @param roleId
+   * @return
+   * @throws ServiceApplicationException
+   */
+  private String getInternalIdForLegacyRoleIdNew(Long roleId)
+      throws ServiceApplicationException {
+    List<RoleEntity> roleEntityList = null;
+    RoleEntity roleEntity = null;
+    String legacyRoleName = null;
+    Long internalId = null;
+    List<String> roleIds = null;
+
+    RoleBean roleBean = scaHandler.execute(new GetRoleById(roleId));
+    if (null != roleBean) {
+      legacyRoleName = roleBean.getRoleName();
+      if (!StringUtils.isBlank(legacyRoleName)) {
+        FamilyBean familyBean = scaHandler.execute(new GetFamilyById(roleBean
+            .getFamilyId()));
+        Map<String, Object> fields = new HashMap<String, Object>();
+        fields.put("name", legacyRoleName);
+        if (familyBean != null) {
+          fields.put("family.name", familyBean.getFamilyName());
+        }
+
+        // Search for RoleEntity with the logged in user's locale
+        FindJDEntitiesByKey findCmd = new FindJDEntitiesByKey(RoleEntity.class,
+            fields, false);
+        findCmd.setIgnoreSecurity(true);
+        findCmd.setIncludeInactive(true);
+        roleEntityList = scaHandler.execute(findCmd);
+
+        /*
+         * If the role list returned is empty, search for RoleEntity with the
+         * default locale ("en_US") The below condition must be removed once CWS
+         * moves completely into JDM 2.0
+         */
+        if (roleEntityList == null || roleEntityList.isEmpty()) {
+          findCmd.setLocale(JDConstants.GLOBAL_TABLE_DEFAULT_LOCALE);
+          roleEntityList = scaHandler.execute(findCmd);
+        }
+
+        if (roleEntityList != null && !roleEntityList.isEmpty()) {
+          roleIds = new ArrayList<String>();
+          Iterator<RoleEntity> iter = roleEntityList.iterator();
+          while (iter.hasNext()) {
+            roleEntity = iter.next();
+            if (roleEntity != null) {
+              internalId = roleEntity.getInternalId();
+              if (internalId != null) {
+                roleIds.add(internalId.toString());
+              }
+            }
+          }
+        }
+
+      }
+    }
+    // fix for CDP-4020 add roleIds is null check
+    if (roleIds == null) {
+      return null;
+    }
+
+    else if (roleIds.size() == 1) {
+      FindReferencedJDEntities<JobProfile> findCmd = new FindReferencedJDEntities<JobProfile>(
+          Long.parseLong(roleIds.get(0)), JobProfile.class, "role", false);
+      List<JobProfile> jobProfiles = scaHandler.execute(findCmd);
+
+      if (jobProfiles.size() == 1) {
+        // CDP-4083 CWS V12: New JPB popup should NOT show JPB profile while it
+        // is in inactive status
+        // only show Job Profile whose status is ACTIVE and draft is NO
+        boolean isDraft = jobProfiles.get(0).isDraft();
+        StatusEnum status = jobProfiles.get(0).getStatus();
+        if (status == StatusEnum.A && !isDraft) {
+          return String.valueOf(jobProfiles.get(0).getInternalId());
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+
+  /***
+   * get template metadata labels id and display text
+   * 
+   * @param compId
+   * @param userId
+   * @param goalPlan
+   *          , the goal template
+   * @throws RemoteException
+   */
+  private JSONObjectOutput getObjectivesMetaLabelsForCompetencyOutput(
+      ObjTemplateBean goalPlan) {
+    JSONObjectOutput objectiveLabelListJSON = new JSONObjectOutput();
+    for (IField field : goalPlan.getFields()) {
+      String label = TGMCommonUtils.getLocalizedString(field.getLabel(),
+          params.getLocale());
+      String id = field.getId();
+      objectiveLabelListJSON.put(id, label);
+    }
+    return objectiveLabelListJSON;
+  }
+
+  /***
+   * add Objectives for each competency
+   * 
+   * @param compOutput
+   * @param compId
+   * @param userId
+   * @param isBehavior
+   * @param displayGoals
+   * @throws RemoteException
+   */
+  private JSONArrayOutput getObjectivesForCompetencyOutput(long compId,
+      String userId, ObjTemplateBean goalPlan) throws RemoteException {
+    try {
+      // sync with BrowseGoalStep.init()
+
+      // get objective list for competency/behavior
+      UserBean user = legacyHandler.execute(params, new FindUserById(userId,
+          false));
+      FindObjectiveBean findBean = new FindObjectiveBean();
+      findBean.setExactMatch(true);
+      findBean.setIncludePrivateGoals(true);
+      findBean.setSearchType(ObjBean.TYPE_DEV);
+      findBean.setUsername(user.getUsername());
+      findBean.setCompetencyId(compId);
+      findBean.setTemplateId(goalPlan.getObjPlanId());
+      List<ObjBean> objBeanList = scaHandler.execute(new FindObjectives(
+          findBean));
+      JSONArrayOutput objectiveListJSON = null;
+      if (objBeanList.size() > 0) {
+        // get state Fields
+        if (stateFieldValues == null) {
+          List<ObjTemplateBean> templates = new ArrayList<ObjTemplateBean>();
+          templates.add(goalPlan);
+          stateFieldValues = new LinkedHashMap<String, IEnumValue>();
+          DashboardUtils.getStateFields(templates, params.getLocale(),
+              (LinkedHashMap<String, IEnumValue>) stateFieldValues);
+        }
+        // init goalFieldsReadPermission, rulesEngine was cached, no need care
+        // about performance here
+        GMRulesEngine rulesEngine = DelegateObjectiveRulesEngine.getRulesEngine(null, params, ejbListAdapter, params.getUserId(), goalPlan, null, userId);
+        this.getGoalFieldReadPermissionSet(userId, objBeanList.get(0), rulesEngine, goalPlan);
+        //CDP-4991 Respect field level permission of status-change dev plan template on CWS
+        //cdp-5143&&CDP-5182&&cdp-5141
+        List<ObjBean> remainObjeBeans=removeUnreadbleObjs(rulesEngine,objBeanList);
+        objectiveListJSON = CWSV12ViewHelper.getObjectivesJSON(remainObjeBeans, v10msgs, stateFieldValues, userId, params.getLocale(), goalFieldsPermSet);
+      } else {
+        objectiveListJSON = new JSONArrayOutput();
+      }
+      return objectiveListJSON;
+
+    } catch (ServiceApplicationException e) {
+      throw new RemoteException("Wrapped Exception: ", e);
+    } catch (ObjectiveRulesEngineException e) {
+      logger.error(
+          "Unable to check rules  permission for the   objectives:"
+            , e);
+      throw new RemoteException("Wrapped Exception: ", e);
+      }
+  }
+
+  private List<ObjBean> removeUnreadbleObjs(GMRulesEngine rulesEngine, List<ObjBean> objBeanList) throws ObjectiveRulesEngineException {
+    for (Iterator<ObjBean> iterator = objBeanList.iterator(); iterator.hasNext();) {
+      if (!rulesEngine.hasReadPermission(iterator.next())) {
+        iterator.remove();
+      }
+    }
+    return objBeanList;
+  }
+  
+  
+  
+  /***
+   * add JSON key if 1. field-format in default development template matches the
+   * field type. 2. User has permission to modify the plan
+   * 
+   * @param planBean
+   * @param userId
+   * @param objBean
+   * @return
+   * @throws RemoteException
+   */
+  private JSONObjectOutput getGoalPlanPerms(ObjTemplateBean planBean,
+      String userId, ObjBean objBean, GMRulesEngine rulesEngine)
+      throws RemoteException {
+    JSONObjectOutput perms = new JSONObjectOutput();
+
+    try {
+      // CDP-667 Add/Edit Permission restricted to Managers/Admins on Career
+      // Worksheet
+      if (CareerWorksheetUtils.canAddGoal(planBean, rulesEngine, userId,
+          objBean)) {
+        perms.put("ADD", true);
+      }
+      // call TGM util class since this will need to check write permissions for
+      // each fields
+      if (TGMPermissionUtils.hasWritePermission(rulesEngine,
+          params.getUserId(), objBean, planBean, userId)) {
+        perms.put("WRITE", true);
+      }
+      if (rulesEngine.hasPermission(userId, IPermission.DELETE, objBean)) {
+        perms.put("DELETE", true);
+      }
+    } catch (ObjectiveRulesEngineException e) {
+      logger.error(
+          "Unable to check create permission for the default CDP templateId:"
+              + planBean.getObjPlanId(), e);
+    }
+    return perms;
+  }
+
+  /***
+   * update CWS template preference for login user
+   * 
+   * @param planId
+   *          .
+   */
+  private void updatePreference(long planId) {
+    try {
+      PreferenceBean prefBean = new PreferenceBean();
+      prefBean.setCategory(ProfileInfoCategoryEnum.TGM_FILTER);
+      prefBean.setSource(ProfileInfoSourceEnum.PREFERENCES);
+      prefBean.setType(ProfileInfoTypeEnum.STRING);
+      prefBean.setKey(CWSV12ViewConstants.SELECTPLAN_PREF_KEY);
+      prefBean.setValue(String.valueOf(planId));
+      List<PreferenceBean> prefList = new ArrayList<PreferenceBean>();
+      prefList.add(prefBean);
+      scaHandler.execute(new UpdatePreferenceBeans(prefList));
+      // catch (RemoteException e) {
+      // logger.error(\"CWSV12Controller.updateRoleInProfile() Failed to do an
+      // update
+      // preference for planId \" + planId,e);
+      // }
+    } catch (ServiceApplicationException e) {
+      logger
+          .error(
+              "CWSV12Controller.updateRoleInProfile() Failed to do an update preference for planId "
+                  + planId, e);
+    }
+  }
+
+  /***
+   * check if user has specific permissions for special goal fields:
+   * name,state,percent and desc
+   * 
+   * @param targetUserId
+   *          targetUserId
+   * @param obj
+   *          objective
+   * @param targetFieldId
+   *          targetFieldId
+   * @return true if user has read permission; Otherwise return false.
+   * @throws RemoteException .
+   */
+  private void getGoalFieldReadPermissionSet(String targetUserId, ObjBean obj,
+      GMRulesEngine rulesEngine, ObjTemplateBean goalPlan)
+      throws RemoteException {
+    // use singleton to save performance for goal fields permission of
+    // competenies and behaviors
+    if (null == goalFieldsPermSet) {
+      goalFieldsPermSet = new HashSet<String>();
+      for (String fieldId : CWSV12ViewConstants.GOAL_FIELDS) {
+        IField field = goalPlan.getField(fieldId);
+        if (null == field) {
+          logger.error("CWSV12Controller.hasGoalFieldReadPermission() field "
+              + fieldId + " doesn't exist in goalTemplate "
+              + goalPlan.getObjPlanId());
+          continue;
+        }
+        try {
+          if (rulesEngine.hasReadPermission(targetUserId, field, obj)) {
+            goalFieldsPermSet.add(fieldId);
+          }
+        } catch (ObjectiveRulesEngineException e) {
+          logger
+              .error(
+                  "CWSV12Controller.hasGoalFieldReadPermission() exception caught when check read permission"
+                      + " for field " + fieldId, e);
+          throw new RemoteException(
+              "Failed to check read permission for field " + fieldId);
+        }
+      }
+    }
+  }
+
+  /**
+   * update CWS instruction display preference
+   * 
+   * @param isShown
+   * @return
+   */
+  @AjaxMethod
+  public String updateCWSInstructionDisplayPreference(String isShown) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      String userId = params.getProxy() == null ? params.getUserId() : params
+          .getProxy().getUserId();
+      ObjTemplateBean currentCwsTemplate = getDefaultTemplateBean();
+
+      PreferenceBean prefBean = new PreferenceBean();
+      prefBean.setCategory(ProfileInfoCategoryEnum.CWS_FILTER);
+      prefBean.setSource(ProfileInfoSourceEnum.PREFERENCES);
+      prefBean.setType(ProfileInfoTypeEnum.STRING);
+      prefBean.setKey(CWSV12ViewConstants.CWS_INSTRUCTION_PREF_KEY + "_"
+          + userId + "_" + currentCwsTemplate.getObjPlanId());
+      prefBean.setValue(isShown);
+      List<PreferenceBean> prefList = new ArrayList<PreferenceBean>();
+      prefList.add(prefBean);
+      UpdatePreferenceBeansV2 cmd = new UpdatePreferenceBeansV2(prefList,
+          userId);
+      scaHandler.execute(cmd);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      logger
+          .error(
+              "CWSV12Controller.updateCWSInstructionDisplayPreference() Failed to do an update instruction ",
+              e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(CWSV12ViewConstants.JSON_KEY_MESSAGE,
+          msgs.getString("DEVELOPMENT_ERR_INTERNAL"));
+    }
+    return JSONUtils.toJSON(output);
+  }
+
+  /**
+   * get CWS instruction display preference
+   * 
+   * @param userId
+   * @return
+   */
+  @AjaxMethod
+  public String getCWSInstructionDisplayPreference() {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      String userId = params.getProxy() == null ? params.getUserId() : params
+          .getProxy().getUserId();
+      ObjTemplateBean currentCwsTemplate = getDefaultTemplateBean();
+
+      PreferenceBean prefCriteria = new PreferenceBean();
+      prefCriteria.setCategory(ProfileInfoCategoryEnum.CWS_FILTER);
+      prefCriteria.setSource(ProfileInfoSourceEnum.PREFERENCES);
+      prefCriteria.setType(ProfileInfoTypeEnum.STRING);
+      prefCriteria.setKey(CWSV12ViewConstants.CWS_INSTRUCTION_PREF_KEY + "_"
+          + userId + "_" + currentCwsTemplate.getObjPlanId());
+      PreferenceBean prefBean = scaHandler.execute(new GetPreferenceBeanV2(
+          prefCriteria, userId));
+      output.put("showInstruction", prefBean.getValue());
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      logger.error(
+          "CWSV12Controller.getCWSInstructionDisplayPreference() Failed", e);
+      output.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, false);
+    }
+    return JSONUtils.toJSON(output);
+  }
+
+  private boolean displayGoals(GMRulesEngine rulesEngine, ObjTemplateBean planBean, String targetUserId) throws RemoteException, ObjectiveRulesEngineException {
+    boolean isDevelopmentGoalsFeatureEnabled = params.getCompanyBean().isFeatureExist(FeatureEnum.IDP)
+        && permList.hasPermission(PermissionBean.CDP_ACCESS, PermissionBean.VIEW_CDP, 0);
+    if (isDevelopmentGoalsFeatureEnabled && this.hasReadPermission(rulesEngine, planBean, CareerWorkSheetTemplateBean.FIELD_DEVELOPMENT_GOALS, targetUserId)) {
+      if (params.getCompanyBean().isFeatureExist(FeatureEnum.ROLE_BASED_PERMISSION)) {
+        PermissionSpec permSpec = new ContextualPermissionSpec<Long>(null, PermissionBean.TGM, PermissionBean.TGM_TEMPLATE_VIEW, planBean.getObjPlanId(),
+            Long.class);
+        TargetPopulationCriteria criteria = new TargetPopulationCriteria(false, false);
+        Set<String> targetPopulation = rbp.getTargetPopulation(params.getUserId(), permSpec, criteria);
+        if (targetPopulation != null && targetPopulation.contains(targetUserId)) {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    }
+    return false;
+  }
+}

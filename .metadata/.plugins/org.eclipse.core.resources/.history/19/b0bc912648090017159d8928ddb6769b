@@ -1,0 +1,15 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.service.mentoring.DeleteProgram;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import org.jboss.seam.annotations.In;
+import javax.inject.Inject;
+
+public interface IDeleteProgramImpl {
+	Void execute(DeleteProgram cmd) throws ServiceApplicationException;
+}

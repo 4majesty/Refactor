@@ -1,0 +1,74 @@
+/**
+ * 
+ */
+package com.successfactors.cdp.service;
+
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * command interface for delete dev goal
+ * @author ytian
+ */
+public class DeleteDevGoal implements ServiceCommand<DeleteDevGoal>{
+
+  /**
+   * serialVersionUID
+   */
+  private static final long serialVersionUID = 1L;
+  
+  /**
+   * delete email enabled
+   */
+  private boolean deleteEmail = false;
+    
+  /**
+   * obj bean
+   */
+  private ObjBean objBean;
+  
+  
+  /**
+   * delete dev goal.
+   * @param objBean .
+   * @param deleteEmail .
+   */
+  public DeleteDevGoal(ObjBean objBean, boolean deleteEmail) {
+      this.objBean = objBean;
+      this.deleteEmail = deleteEmail;
+  }
+
+  
+  /**
+   * geter 
+   * @return .
+   */
+  public ObjBean getObjBean() {
+      return objBean;
+  }
+
+
+  /**
+   * setter 
+   * @param objBean .
+   */
+  public void setObjBean(ObjBean objBean) {
+      this.objBean = objBean;
+  }
+
+  /**
+   * getter
+   * @return .
+   */
+  public boolean isDeleteEmail() {
+      return deleteEmail;
+  }
+  /**
+   * setter
+   * @param deleteEmail .
+   */
+  public void setDeleteEmail(boolean deleteEmail) {
+      this.deleteEmail = deleteEmail;
+  }
+
+}

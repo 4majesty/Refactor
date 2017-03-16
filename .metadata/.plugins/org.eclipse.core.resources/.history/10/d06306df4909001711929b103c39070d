@@ -1,0 +1,14 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.sca.ServiceCommand;
+
+public interface IProcessMentoringRequest {
+	String getProgramId();
+
+	String getRequestId();
+
+	MentorRequestStatusEnum getStatus();
+
+	String getComment();
+}

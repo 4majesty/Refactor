@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
+import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
+
+public interface ISpecificContentAssistExecutor {
+	void invokeContentAssist(final ITextEditor editor, String categoryId);
+}

@@ -1,0 +1,24 @@
+package com.successfactors.cdp.service.scheduledjob;
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.jam.ProgramLaunchJamActivityJobPayload;
+import com.successfactors.cdp.service.mentoring.AddMentoringJamAdmins;
+import com.successfactors.cdp.service.mentoring.AddMentoringJamPicture;
+import com.successfactors.cdp.service.mentoring.GetProgramById;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupAddAdminFailureEmail;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupPhotoFailureEmail;
+import com.successfactors.jobscheduler.JobSchedulerException;
+import com.successfactors.jobscheduler.ScheduledJobExecutionException;
+import com.successfactors.jobscheduler.jobimpl.StandardJob;
+import com.successfactors.jobscheduler.service.JobScheduleFacade;
+import com.successfactors.legacy.util.Serializer;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceSystemException;
+
+public interface IMentoringProgramLaunchJamActivityJob {
+	void executeJob();
+}

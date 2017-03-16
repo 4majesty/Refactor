@@ -1,0 +1,27 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+
+public interface ICorrectionMarkerResolutionGenerator {
+	String getLabel();
+
+	void run(IMarker marker);
+
+	void run(IMarker[] markers, IProgressMonitor monitor);
+
+	String getDescription();
+
+	Image getImage();
+
+	IMarker[] findOtherMarkers(IMarker[] markers);
+
+	boolean hasResolutions(IMarker marker);
+
+	IMarkerResolution[] getResolutions(IMarker marker);
+}

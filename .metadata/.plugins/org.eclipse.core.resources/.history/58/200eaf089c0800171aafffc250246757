@@ -1,0 +1,86 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import com.successfactors.applicationcontext.api.ProviderFor;
+import com.successfactors.cdp.api.service.util.IMentoringProgramUtils;
+import com.successfactors.cdp.app.mentoring.RetrieveLabelService;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.service.mentoring.GetMentoringProgramByUserID;
+import com.successfactors.cdp.service.mentoring.GetSkillList;
+import com.successfactors.cdp.service.mentoring.GetUserActiveProgram;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.xi.util.SeamEnvUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@ProviderFor(IMentoringProgramUtils.class)
+public class MentoringProgramUtilsImpl implements IMentoringProgramUtils{
+
+    IRetrieveLabelService retrieveLableService = (RetrieveLabelService) SeamEnvUtils.getInstance("retrieveLabelService", true);
+
+    private static Logger logger = LogManager.getLogger();
+
+    public MentoringProgramUtilsImpl(){
+    }
+
+    @Override
+    public List hasActivePrograms(){
+        GetUserActiveProgram cmd = new GetUserActiveProgram();
+        logger.info("MentoringProgramUtilsImpl.hasActivePrograms start");
+        try {
+            cmd = ServiceCommandHandlerFactory.getSCAHandler().execute(cmd);
+        } catch (ServiceApplicationException e) {
+           logger.error("MentoringProgramUtilsImpl.hasActivePrograms error occurs due to", e);
+           return cmd.getResult();
+        }
+        logger.info("MentoringProgramUtilsImpl.hasActivePrograms end");
+        return cmd.getResult();
+    }
+
+    @Override
+    public List<String> getProgramsByUserID(){
+        GetMentoringProgramByUserID cmd = new GetMentoringProgramByUserID();
+        try {
+            cmd = ServiceCommandHandlerFactory.getSCAHandler().execute(cmd);
+        } catch (ServiceApplicationException e) {
+            return cmd.getMentoringProgramList();
+        }
+        return cmd.getMentoringProgramList();
+    }
+
+    @Override
+    public Map<String, String> getLabelsBySectionIDs(){
+        Map<String, String> result = new HashMap<String, String>();
+        try {
+            for(DMFieldWhiteListEnum section : DMFieldWhiteListEnum.values()){
+                result.put(section.getId(), retrieveLableService.getSectionLabelbyId(section.getId()));
+            }
+            result.put("COMPETENCY", "Competency");
+            result.put("SKILLS", "Skills");
+            return result;
+        } catch (ServiceApplicationException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public Map<String, String> getAllSkillLabels(){
+        Map<String, String> result = new HashMap<String, String>();
+        try {
+            GetSkillList cmd = new GetSkillList();
+            cmd = ServiceCommandHandlerFactory.getSCAHandler().execute(cmd);
+            List<MentoringProgramSignupFormSectionValue> skills = cmd.getSectionValues();
+
+            for(MentoringProgramSignupFormSectionValue skill : skills){
+                result.put(skill.getItemId(), skill.getItemLabel());
+            }
+        } catch (ServiceApplicationException e) {
+            return null;
+        }
+        return result;
+    }
+}

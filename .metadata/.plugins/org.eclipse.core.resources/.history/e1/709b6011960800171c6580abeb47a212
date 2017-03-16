@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.corext.refactoring.changes;
+
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IRenameJavaProjectChange {
+	String getName();
+}

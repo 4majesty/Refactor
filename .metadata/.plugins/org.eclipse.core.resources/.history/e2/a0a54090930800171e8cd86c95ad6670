@@ -1,0 +1,59 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ILazyJavaCompletionProposal {
+	char[] getTriggerCharacters();
+
+	void setTriggerCharacters(char[] triggerCharacters);
+
+	void setProposalInfo(ProposalInfo proposalInfo);
+
+	void setCursorPosition(int cursorPosition);
+
+	IContextInformation getContextInformation();
+
+	void setContextInformation(IContextInformation contextInformation);
+
+	StyledString getStyledDisplayString();
+
+	String getDisplayString();
+
+	void setStyledDisplayString(StyledString text);
+
+	String getAdditionalProposalInfo();
+
+	int getReplacementOffset();
+
+	void setReplacementOffset(int replacementOffset);
+
+	int getPrefixCompletionStart(IDocument document, int completionOffset);
+
+	int getReplacementLength();
+
+	void setReplacementLength(int replacementLength);
+
+	String getReplacementString();
+
+	void setReplacementString(String replacementString);
+
+	Image getImage();
+
+	void setImage(Image image);
+
+	int getRelevance();
+
+	void setRelevance(int relevance);
+
+	String getSortString();
+
+	void setContextInformationPosition(int contextInformationPosition);
+}

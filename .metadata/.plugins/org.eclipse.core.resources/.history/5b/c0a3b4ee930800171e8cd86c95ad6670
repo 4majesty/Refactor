@@ -1,0 +1,67 @@
+package org.eclipse.jdt.internal.ui.jarpackagerfat;
+
+import java.io.File;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jdt.ui.jarpackager.IJarBuilderExtension;
+import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+import org.eclipse.jdt.internal.ui.jarpackager.JarBuilder;
+
+/** 
+ * A builder which is able to handle referenced libraries.
+ * @since 3.4
+ */
+public abstract class FatJarBuilder extends JarBuilder implements IJarBuilderExtension, IFatJarBuilder {
+	private JarPackageData fJarPackage;
+
+	private IJarWriter4 fJarWriter;
+
+	protected JarWriter4 getJarWriter() {
+		return fJarWriter;
+	}
+
+	@Override
+	public abstract boolean isRemoveSigners();
+
+	@Override
+	public abstract boolean isMergeManifests();
+
+	@Override
+	public abstract String getManifestClasspath();
+
+	/** 
+	* {@inheritDoc}
+	*/
+	@Override
+	public void open(JarPackageData jarPackage, Shell displayShell, MultiStatus status) throws CoreException {
+		super.open(jarPackage, displayShell, status);
+		fJarPackage= jarPackage;
+		fJarWriter= new JarWriter4(fJarPackage, displayShell);
+	}
+
+	/** 
+	* {@inheritDoc}
+	*/
+	@Override
+	public void writeFile(IFile resource, IPath destinationPath) throws CoreException {
+		fJarWriter.write(resource, destinationPath);
+	}
+
+	@Override
+	public void writeFile(File file, IPath destinationPath) throws CoreException {
+		fJarWriter.write(file, destinationPath);
+	}
+
+	/** 
+	* {@inheritDoc}
+	*/
+	@Override
+	public void close() throws CoreException {
+		if (fJarWriter != null) {
+			fJarWriter.close();
+		}
+	}
+}

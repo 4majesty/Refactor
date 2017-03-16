@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+
+public interface IPackageBrowseAdapter {
+	void setReceiver(PackageSelectionDialogButtonField receiver);
+
+	void changeControlPressed(DialogField field);
+}

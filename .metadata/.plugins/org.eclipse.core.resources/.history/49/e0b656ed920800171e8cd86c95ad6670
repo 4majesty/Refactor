@@ -1,0 +1,27 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+
+abstract class SearchScopeAction extends Action implements ISearchScopeAction {
+	private final SearchScopeActionGroup fGroup;
+
+	public SearchScopeAction(SearchScopeActionGroup group, String text) {
+		super(text, AS_RADIO_BUTTON);
+		this.fGroup= group;
+	}
+
+	@Override
+	public abstract IJavaSearchScope getSearchScope();
+
+	@Override
+	public abstract int getSearchScopeType();
+
+	@Override
+	public void run() {
+		this.fGroup.setSelected(this, true);
+	}
+
+	@Override
+	public abstract String getFullDescription();
+}

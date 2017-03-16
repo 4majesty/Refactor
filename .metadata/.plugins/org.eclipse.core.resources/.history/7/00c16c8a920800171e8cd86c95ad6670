@@ -1,0 +1,39 @@
+package org.eclipse.jdt.ui;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJarEntryResource;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+public interface IStandardJavaElementContentProvider {
+	boolean getProvideMembers();
+
+	void setProvideMembers(boolean b);
+
+	boolean getProvideWorkingCopy();
+
+	void setProvideWorkingCopy(boolean b);
+
+	boolean providesWorkingCopies();
+
+	Object[] getElements(Object parent);
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+
+	void dispose();
+
+	Object[] getChildren(Object element);
+
+	boolean hasChildren(Object element);
+
+	Object getParent(Object element);
+}

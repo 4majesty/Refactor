@@ -1,0 +1,8 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.sca.ServiceCommand;
+
+public interface IAddMentoringJamPicture {
+	MentoringProgram getProgram();
+}

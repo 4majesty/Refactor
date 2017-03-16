@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.jdt.core.IJavaProject;
+
+public interface IJavaProjectAdapterFactory {
+	Class[] getAdapterList();
+
+	Object getAdapter(Object element, Class key);
+}

@@ -1,0 +1,98 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.http.HttpStatus;
+import org.apache.http.message.BasicNameValuePair;
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.service.mentoring.jam.MakeJamGroupAdminByMemberId;
+import com.successfactors.cdp.service.mentoring.jam.exception.JamAuthenticationException;
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.cdp.service.mentoring.jam.util.MakeGroupAdminConstants;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sfutil.UrlUtils;
+
+@Service
+public class MakeJamGroupAdminByMemberIdImpl extends AbstractJamService 
+               implements ServiceCommandImpl<Boolean, MakeJamGroupAdminByMemberId>, MakeGroupAdminConstants {
+
+  /** Logger. */
+  private static final Logger log = LogManager.getLogger();
+
+  /** param bean. */
+  @Inject
+  @In
+  protected ParamBean params;
+
+  /** scaHandler. */
+  @Inject
+  @In
+  protected ServiceCommandHandler scaHandler;
+
+  public Boolean execute(MakeJamGroupAdminByMemberId cmd) throws ServiceApplicationException {
+      String url = getMakeAdminByMemberIdURL(cmd.getGroupId(), cmd.getMemberId());
+      List<BasicNameValuePair> requestHeaders = getHeaderContent(cmd.getAccessToken());
+
+      BasicHttpResponse response = invoke(url, REQUEST_TYPE_POST, requestHeaders);
+
+      if (isSuccess(response)) {
+        return Boolean.TRUE;
+      } else {
+        int errorCode = response.getResponseCode();
+        String errorResponse = getPayload(response);
+
+        if (isForbidden(response)) {
+           throw new JamAuthenticationException("Jam Authentication failed."
+               + " Group Id:"+cmd.getGroupId()
+               +", Member Id:"+cmd.getMemberId() 
+               +". Jam Response Code:"+ errorCode +"; Jam Error Response:" + errorResponse);
+        } else {
+           throw new ServiceApplicationException("MakeJamGroupAdminByMemberId failed for "
+               + "group Id:"+cmd.getGroupId()
+               +", memberId:"+cmd.getMemberId() 
+               +"; Jam Response Code:"+ errorCode +"; Jam Error Response:" + errorResponse);
+        }
+      }
+  }
+
+  /**
+   * Fetches MakeAdminByMemberIdURL API URL
+   * 
+   * @return String - MakeAdminByMemberIdURL API URL
+   */
+  private String getMakeAdminByMemberIdURL(String groupId, String memberId) throws ServiceApplicationException {
+    StringBuilder urlBuilder = new StringBuilder();
+
+    urlBuilder.append(getJamBaseURL()).append(MAKE_ADMIN_BY_MEMBER_ID_API_URL);
+
+    String url = urlBuilder.toString();
+
+    url = UrlUtils.appendQueryParam(url, MAKE_ADMIN_REQUEST_PARAM_GROUP_ID, addSingleQuotes(groupId));
+    url = UrlUtils.appendQueryParam(url, MAKE_ADMIN_REQUEST_PARAM_MEMBER_ID, addSingleQuotes(memberId));
+
+    return url;
+  }
+
+  private boolean isSuccess(BasicHttpResponse response) {
+    return (response.getResponseCode() == HttpStatus.SC_NO_CONTENT);
+  }
+
+  @Override
+  public ServiceCommandHandler getSCAHandler() {
+    return scaHandler;
+  }
+
+  @Override
+  public ParamBean getParams() {
+    return params;
+  }
+}

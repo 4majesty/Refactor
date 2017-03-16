@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface IToggleBreadcrumbAction {
+	void run();
+
+	void update();
+
+	void propertyChange(PropertyChangeEvent event);
+
+	void dispose();
+
+	void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspective);
+
+	void perspectiveChanged(IWorkbenchPage page, IPerspectiveDescriptor perspective, String changeId);
+}

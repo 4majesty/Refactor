@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+
+public interface IBulletListBlock {
+	void setText(String text);
+
+	boolean getEnabled();
+
+	void setEnabled(boolean enabled);
+}

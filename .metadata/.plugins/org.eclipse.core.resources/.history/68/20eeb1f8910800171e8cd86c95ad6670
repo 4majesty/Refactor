@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
+
+public interface IJavaAnnotationIterator {
+	boolean hasNext();
+
+	Object next();
+
+	void remove();
+}

@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.osgi.util.NLS;
+
+public interface ITextMessages {
+}

@@ -1,0 +1,36 @@
+package org.eclipse.jdt.internal.ui.text.spelling;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
+
+public interface ICoreSpellingProblem {
+	String[] getArguments();
+
+	int getID();
+
+	String getMessage();
+
+	char[] getOriginatingFileName();
+
+	int getSourceEnd();
+
+	int getSourceLineNumber();
+
+	int getSourceStart();
+
+	boolean isError();
+
+	boolean isWarning();
+
+	void setSourceStart(int sourceStart);
+
+	void setSourceEnd(int sourceEnd);
+
+	void setSourceLineNumber(int lineNumber);
+
+	int getCategoryID();
+
+	String getMarkerType();
+}

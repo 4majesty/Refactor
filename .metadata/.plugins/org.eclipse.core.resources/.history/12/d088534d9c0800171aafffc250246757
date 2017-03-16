@@ -1,0 +1,51 @@
+
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.bean.mentoring.jam.Member;
+import com.successfactors.cdp.service.mentoring.jam.FindJamMemberBySyncId;
+import com.successfactors.cdp.service.mentoring.jam.MakeJamGroupAdminByMemberId;
+import com.successfactors.cdp.service.mentoring.jam.MakeJamGroupAdminByUserId;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+@Service
+public class MakeJamGroupAdminByUserIdImpl implements ServiceCommandImpl<Boolean, MakeJamGroupAdminByUserId> {
+
+  /** Logger. */
+  private static final Logger log = LogManager.getLogger();
+
+  /** scaHandler. */
+  @Inject
+  @In
+  protected ServiceCommandHandler scaHandler;
+
+  public Boolean execute(MakeJamGroupAdminByUserId cmd) throws ServiceApplicationException {
+
+    if(StringUtils.isEmpty(cmd.getUserId())) {
+      throw new ServiceApplicationException("UserId is empty.");
+    }
+
+    if(StringUtils.isEmpty(cmd.getGroupId())) {
+      throw new ServiceApplicationException("GroupId is empty.");
+    }
+
+    Member member = scaHandler.execute(new FindJamMemberBySyncId(cmd.getUserId(), cmd.getAccessToken()));
+
+    if(member == null || StringUtils.isEmpty(member.getMemberId())) {
+      throw new ServiceApplicationException("Unable to fetch Jam memberId for userId:"+cmd.getUserId());
+    }
+
+    Boolean result = scaHandler.execute(new MakeJamGroupAdminByMemberId(member.getMemberId(), cmd.getGroupId(), cmd.getAccessToken()));
+
+    return result;
+  }
+}

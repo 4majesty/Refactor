@@ -1,0 +1,41 @@
+/*
+ * $Id: AcmeFrameStateEnum.java 1007887 2016-06-11 04:52:20Z adevarajan $
+ */
+
+package com.successfactors.legacy.api.servlet.acme;
+
+import com.successfactors.legacy.util.EnumeratedType;
+import com.successfactors.i18n.service.IMessageBundle;
+
+/**
+ * Abstract base class for state enums used by FBAcmeFrame classes.
+ */
+public abstract class AcmeFrameStateEnum extends EnumeratedType
+{
+
+  private String label;
+
+  public String getLabel(IMessageBundle messages) {
+    return  messages.getString(label);
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
+  }
+
+  public AcmeFrameStateEnum(String name, int id, String label) {
+    super(name, id);
+    this.label = label;
+  }
+
+  /**
+   * Returns the value of the enumerated type with the specified name
+   */
+  public static AcmeFrameStateEnum parseEnum(String name, Class enumClass) {
+    return (AcmeFrameStateEnum)parseEnum(enumClass, name);
+  }
+  
+}
+
+
+

@@ -1,0 +1,44 @@
+package org.eclipse.jdt.ui.text;
+
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.rules.IPartitionTokenScanner;
+import org.eclipse.jface.text.rules.RuleBasedScanner;
+import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
+import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
+import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
+
+public interface IJavaTextTools {
+	void propertyChange(PropertyChangeEvent event);
+
+	void propertyChange(Preferences.PropertyChangeEvent event);
+
+	void dispose();
+
+	IColorManager getColorManager();
+
+	RuleBasedScanner getCodeScanner();
+
+	RuleBasedScanner getMultilineCommentScanner();
+
+	RuleBasedScanner getSinglelineCommentScanner();
+
+	RuleBasedScanner getStringScanner();
+
+	RuleBasedScanner getJavaDocScanner();
+
+	IPartitionTokenScanner getPartitionScanner();
+
+	IDocumentPartitioner createDocumentPartitioner();
+
+	String[] getPartitionManagingPositionCategories();
+
+	boolean affectsBehavior(PropertyChangeEvent event);
+
+	void setupJavaDocumentPartitioner(IDocument document);
+
+	void setupJavaDocumentPartitioner(IDocument document, String partitioning);
+}

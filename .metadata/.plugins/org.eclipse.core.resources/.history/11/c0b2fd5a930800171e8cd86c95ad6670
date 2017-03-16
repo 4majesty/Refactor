@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+
+public interface IMissingReturnTypeCorrectionProposal {
+	String getName();
+}

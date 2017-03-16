@@ -1,0 +1,27 @@
+package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
+
+import java.util.List;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaEditor;
+
+public interface ISelectionHistory {
+	void setHistoryAction(StructureSelectHistoryAction action);
+
+	boolean isEmpty();
+
+	void remember(ISourceRange range);
+
+	ISourceRange getLast();
+
+	void flush();
+
+	void ignoreSelectionChanges();
+
+	void listenToSelectionChanges();
+
+	void dispose();
+}

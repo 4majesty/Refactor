@@ -1,0 +1,9 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import java.util.ArrayList;
+import java.util.List;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionValueVO;
+
+public interface IMentoringBeanUtils {
+}

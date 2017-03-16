@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSavePreferences;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+public interface IJavaBasePreferencePage {
+	void init(IWorkbench workbench);
+
+	void createControl(Composite parent);
+
+	boolean performOk();
+}

@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.jarpackagerfat;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IFatJarRsrcUrlAntExporter {
+}

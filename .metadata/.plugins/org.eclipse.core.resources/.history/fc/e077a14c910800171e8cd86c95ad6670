@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.core.IClasspathEntry;
+
+public interface ICPListElementSorter {
+	int category(Object obj);
+
+	int compare(Viewer viewer, Object e1, Object e2);
+}

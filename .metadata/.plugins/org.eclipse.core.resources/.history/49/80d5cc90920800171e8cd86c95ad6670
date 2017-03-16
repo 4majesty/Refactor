@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import java.util.List;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ICompletionProposalComputerRegistry {
+	List getProposalCategories();
+
+	void reload();
+}

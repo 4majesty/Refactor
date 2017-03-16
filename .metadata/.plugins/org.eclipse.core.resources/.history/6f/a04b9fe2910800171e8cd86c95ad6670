@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IFocusOnSelectionAction {
+	boolean canActionBeAdded();
+
+	void run();
+}

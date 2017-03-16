@@ -1,0 +1,206 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertTrue;
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.jam.Group;
+import com.successfactors.cdp.bean.mentoring.jam.JamFeedWidgetInfo;
+import com.successfactors.cdp.service.mentoring.CheckJAMPermission;
+import com.successfactors.cdp.service.mentoring.jam.GetJamAuthToken;
+import com.successfactors.cdp.service.mentoring.jam.GetJamBaseURL;
+import com.successfactors.cdp.service.mentoring.jam.GetJamFeedWidgetInfo;
+import com.successfactors.cdp.service.mentoring.jam.GetJamGroup;
+import com.successfactors.cdp.service.mentoring.jam.GetJamSingleUseToken;
+import com.successfactors.cdp.service.mentoring.jam.util.JamConstants;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+
+public class GetJamFeedWidgetInfoImplTest {
+
+  @Mock
+  private ServiceCommandHandler mockSCAHandler;
+
+  @Mock
+  private ParamBean params;
+
+  @Mock
+  private MentoringServiceBase mockServiceBase;
+
+  @InjectMocks
+  private GetJamFeedWidgetInfoImpl service;
+
+  private static final String MOCK_PROGRAM_ID = "1";
+
+  private static final String MOCK_JAM_GROUP_ID = "2";
+  
+  private static final String MOCK_USER_ID = "test_user";
+
+  private static final String MOCK_AUTH_TOKEN = "test_auth_token";
+
+  private static final String MOCK_SINGLE_USE_TOKEN = "test_single_token";
+
+  private static final String MOCK_BASE_URL = "test_base_url";
+
+  @BeforeMethod(groups = { "checkin" })
+  public void setup() {
+    service = new GetJamFeedWidgetInfoImpl();
+    MockitoAnnotations.initMocks(this);
+  }
+
+  @AfterMethod
+  public void tearDown() {
+    service = null;
+  }
+
+  @Test(groups = { "checkin" })
+  public void testOuputNotNull() throws ServiceApplicationException {
+    when(params.getUserId()).thenReturn(MOCK_USER_ID);
+    when(mockServiceBase.getProgramById(MOCK_PROGRAM_ID)).thenReturn(getMockProgram(Boolean.TRUE));
+    when(mockSCAHandler.execute(isA(GetJamAuthToken.class))).thenReturn(MOCK_AUTH_TOKEN);
+    when(mockSCAHandler.execute(isA(CheckJAMPermission.class))).thenReturn(Boolean.TRUE);
+    when(mockSCAHandler.execute(isA(GetJamGroup.class))).thenReturn(getMockJamGroup());
+    when(mockSCAHandler.execute(isA(GetJamSingleUseToken.class))).thenReturn(MOCK_SINGLE_USE_TOKEN);
+    when(mockSCAHandler.execute(isA(GetJamBaseURL.class))).thenReturn(MOCK_BASE_URL);
+
+    JamFeedWidgetInfo widgetInfo = service.execute(new GetJamFeedWidgetInfo(MOCK_PROGRAM_ID));
+
+    assertTrue(widgetInfo != null);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testGroupId() throws ServiceApplicationException {
+    when(params.getUserId()).thenReturn(MOCK_USER_ID);
+    when(mockServiceBase.getProgramById(MOCK_PROGRAM_ID)).thenReturn(getMockProgram(Boolean.TRUE));
+    when(mockSCAHandler.execute(isA(GetJamAuthToken.class))).thenReturn(MOCK_AUTH_TOKEN);
+    when(mockSCAHandler.execute(isA(CheckJAMPermission.class))).thenReturn(Boolean.TRUE);
+    when(mockSCAHandler.execute(isA(GetJamGroup.class))).thenReturn(getMockJamGroup());
+    when(mockSCAHandler.execute(isA(GetJamSingleUseToken.class))).thenReturn(MOCK_SINGLE_USE_TOKEN);
+    when(mockSCAHandler.execute(isA(GetJamBaseURL.class))).thenReturn(MOCK_BASE_URL);
+
+    JamFeedWidgetInfo widgetInfo = service.execute(new GetJamFeedWidgetInfo(MOCK_PROGRAM_ID));
+
+    assertTrue(widgetInfo.getGroupId() != null && MOCK_JAM_GROUP_ID.equals(widgetInfo.getGroupId()));
+  }
+
+  @Test(groups = { "checkin" })
+  public void testSingleUseToken() throws ServiceApplicationException {
+    when(params.getUserId()).thenReturn(MOCK_USER_ID);
+    when(mockServiceBase.getProgramById(MOCK_PROGRAM_ID)).thenReturn(getMockProgram(Boolean.TRUE));
+    when(mockSCAHandler.execute(isA(GetJamAuthToken.class))).thenReturn(MOCK_AUTH_TOKEN);
+    when(mockSCAHandler.execute(isA(CheckJAMPermission.class))).thenReturn(Boolean.TRUE);
+    when(mockSCAHandler.execute(isA(GetJamGroup.class))).thenReturn(getMockJamGroup());
+    when(mockSCAHandler.execute(isA(GetJamSingleUseToken.class))).thenReturn(MOCK_SINGLE_USE_TOKEN);
+    when(mockSCAHandler.execute(isA(GetJamBaseURL.class))).thenReturn(MOCK_BASE_URL);
+
+    JamFeedWidgetInfo widgetInfo = service.execute(new GetJamFeedWidgetInfo(MOCK_PROGRAM_ID));
+
+    assertTrue(widgetInfo.getSingleUseToken() != null && MOCK_SINGLE_USE_TOKEN.equals(widgetInfo.getSingleUseToken()));
+  }
+
+  @Test(groups = { "checkin" })
+  public void testGroupURL() throws ServiceApplicationException {
+    when(params.getUserId()).thenReturn(MOCK_USER_ID);
+    when(mockServiceBase.getProgramById(MOCK_PROGRAM_ID)).thenReturn(getMockProgram(Boolean.TRUE));
+    when(mockSCAHandler.execute(isA(GetJamAuthToken.class))).thenReturn(MOCK_AUTH_TOKEN);
+    when(mockSCAHandler.execute(isA(CheckJAMPermission.class))).thenReturn(Boolean.TRUE);
+    when(mockSCAHandler.execute(isA(GetJamGroup.class))).thenReturn(getMockJamGroup());
+    when(mockSCAHandler.execute(isA(GetJamSingleUseToken.class))).thenReturn(MOCK_SINGLE_USE_TOKEN);
+    when(mockSCAHandler.execute(isA(GetJamBaseURL.class))).thenReturn(MOCK_BASE_URL);
+
+    JamFeedWidgetInfo widgetInfo = service.execute(new GetJamFeedWidgetInfo(MOCK_PROGRAM_ID));
+
+    assertTrue(widgetInfo.getGroupURL() != null 
+        && (MOCK_BASE_URL + JamConstants.GO_TO_GROUP_URL + MOCK_JAM_GROUP_ID).equals(widgetInfo.getGroupURL()));
+  }
+
+  @Test(groups = { "checkin" })
+  public void testNoGroupPermission() throws ServiceApplicationException {
+    when(params.getUserId()).thenReturn(MOCK_USER_ID);
+    when(mockServiceBase.getProgramById(MOCK_PROGRAM_ID)).thenReturn(getMockProgram(Boolean.TRUE));
+    when(mockSCAHandler.execute(isA(GetJamAuthToken.class))).thenReturn(MOCK_AUTH_TOKEN);
+    when(mockSCAHandler.execute(isA(CheckJAMPermission.class))).thenReturn(Boolean.TRUE);
+    when(mockSCAHandler.execute(isA(GetJamSingleUseToken.class))).thenReturn(MOCK_SINGLE_USE_TOKEN);
+    when(mockSCAHandler.execute(isA(GetJamBaseURL.class))).thenReturn(MOCK_BASE_URL);
+    when(mockSCAHandler.execute(isA(GetJamGroup.class))).thenReturn(null);
+
+    boolean exception = false;
+
+    try {
+     service.execute(new GetJamFeedWidgetInfo(MOCK_PROGRAM_ID));
+    } catch(ServiceApplicationException e) {
+      exception = true;
+    }
+
+    assertTrue(exception);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testNoJamPermission() throws ServiceApplicationException {
+    when(params.getUserId()).thenReturn(MOCK_USER_ID);
+    when(mockServiceBase.getProgramById(MOCK_PROGRAM_ID)).thenReturn(getMockProgram(Boolean.TRUE));
+    when(mockSCAHandler.execute(isA(GetJamAuthToken.class))).thenReturn(MOCK_AUTH_TOKEN);
+    when(mockSCAHandler.execute(isA(CheckJAMPermission.class))).thenReturn(Boolean.FALSE);
+    when(mockSCAHandler.execute(isA(GetJamSingleUseToken.class))).thenReturn(MOCK_SINGLE_USE_TOKEN);
+    when(mockSCAHandler.execute(isA(GetJamBaseURL.class))).thenReturn(MOCK_BASE_URL);
+    when(mockSCAHandler.execute(isA(GetJamGroup.class))).thenReturn(null);
+
+    boolean exception = false;
+
+    try {
+     service.execute(new GetJamFeedWidgetInfo(MOCK_PROGRAM_ID));
+    } catch(ServiceApplicationException e) {
+      exception = true;
+    }
+
+    assertTrue(exception);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testMentoringJamSwitchDisabled() throws ServiceApplicationException {
+    when(params.getUserId()).thenReturn(MOCK_USER_ID);
+    when(mockServiceBase.getProgramById(MOCK_PROGRAM_ID)).thenReturn(getMockProgram(Boolean.FALSE));
+    when(mockSCAHandler.execute(isA(GetJamAuthToken.class))).thenReturn(MOCK_AUTH_TOKEN);
+    when(mockSCAHandler.execute(isA(CheckJAMPermission.class))).thenReturn(Boolean.TRUE);
+    when(mockSCAHandler.execute(isA(GetJamSingleUseToken.class))).thenReturn(MOCK_SINGLE_USE_TOKEN);
+    when(mockSCAHandler.execute(isA(GetJamBaseURL.class))).thenReturn(MOCK_BASE_URL);
+    when(mockSCAHandler.execute(isA(GetJamGroup.class))).thenReturn(null);
+
+    boolean exception = false;
+
+    try {
+     service.execute(new GetJamFeedWidgetInfo(MOCK_PROGRAM_ID));
+    } catch(ServiceApplicationException e) {
+      exception = true;
+    }
+
+    assertTrue(exception);
+  }
+
+  private MentoringProgram getMockProgram(boolean jamEnabled) {
+    MentoringProgram program = new MentoringProgram();
+    program.setExternalId(MOCK_PROGRAM_ID);
+    program.setName("test program name");
+    program.setJamEnabled(jamEnabled);
+    program.setJamGroupId(MOCK_JAM_GROUP_ID);
+
+    return program;
+  }
+
+  private Group getMockJamGroup() {
+    Group group = new Group();
+    group.setGroupId(MOCK_JAM_GROUP_ID);
+
+    return group;
+  }
+}

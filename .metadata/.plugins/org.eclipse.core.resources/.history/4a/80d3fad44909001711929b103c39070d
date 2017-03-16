@@ -1,0 +1,10 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.List;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.service.mentoring.GetMentoringRequest;
+import com.successfactors.sca.ServiceApplicationException;
+
+public interface IGetMentoringRequestImpl {
+	List<MentoringProgramMentorRequest> execute(GetMentoringRequest cmd) throws ServiceApplicationException;
+}

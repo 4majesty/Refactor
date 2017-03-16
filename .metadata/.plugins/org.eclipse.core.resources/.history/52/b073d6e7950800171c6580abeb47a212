@@ -1,0 +1,35 @@
+package org.eclipse.jdt.internal.corext.refactoring.code.flow;
+
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.TryStatement;
+
+public interface IFlowInfo {
+	void setNoReturn();
+
+	boolean isUndefined();
+
+	boolean isNoReturn();
+
+	boolean isPartialReturn();
+
+	boolean isVoidReturn();
+
+	boolean isValueReturn();
+
+	boolean isThrow();
+
+	boolean isReturn();
+
+	boolean branches();
+
+	ITypeBinding[] getExceptions();
+
+	ITypeBinding[] getTypeVariables();
+
+	IVariableBinding[] get(FlowContext context, int mode);
+
+	boolean hasAccessMode(FlowContext context, IVariableBinding local, int mode);
+
+	int getAccessMode(FlowContext context, IVariableBinding local);
+}

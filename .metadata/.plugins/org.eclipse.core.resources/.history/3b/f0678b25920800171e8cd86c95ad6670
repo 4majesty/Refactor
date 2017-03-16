@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.text.javadoc;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.rules.ICharacterScanner;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
+
+public interface IJavaDocScanner {
+	boolean isWordStart(char c);
+
+	boolean isWordPart(char c);
+
+	IToken evaluate(ICharacterScanner scanner);
+
+	IDocument getDocument();
+}

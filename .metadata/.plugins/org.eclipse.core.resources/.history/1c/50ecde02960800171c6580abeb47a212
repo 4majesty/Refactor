@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.corext.refactoring.participants;
+
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
+public interface IJavaProcessors {
+}

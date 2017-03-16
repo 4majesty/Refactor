@@ -1,0 +1,2771 @@
+/** 
+ * $Id: FeatureEnum.java 1188145 2017-03-07 14:18:12Z sdubetz $ <br/> Copyright (C) 2009 SuccessFactors, Inc. All Rights Reserved <br/>
+ * @author : ??? Date: ??
+ * @version $Revision: 1188145 $ $Date: 2012-02-24 12:42:00 +0530 (Fri, 24 Feb2012) $
+ */
+package com.successfactors.legacy.bean.provisioning;
+
+import java.io.InvalidObjectException;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import com.successfactors.legacy.bean.FeatureReadinessEnum;
+import com.successfactors.pmcommon.bean.FeatureSet;
+
+/** 
+ * <p> FeatureEnum - an enumeration of features supported by SFV4. </p> <p> <b>Things to note on adding a new feature:</b> </p> <ul> <li>The <code>public static final FeatureEnum</code> constant must be defined after the static lists and maps, and before the "lockdown" static initializer.</li> <li><strong>The product argument to the constructor for each feature bit must be unique!</strong></li> <li>Source order of the constant definitions is significant&mdash;it defines the order of the constants in list returned by the list() method, and the iterator() method.</li> <li>The numeric id of the constant is used by the database. Changing the id once its in production should be done with caution.</li> <li>The constants do NOT need to be defined in numeric id order. They 0-31 are defined in order for backwards compatibility. It may be much better to create logical groupings of constants, for example, place all the goal management constants next to each other.</li> <li>For efficiency do not skip ids. FeatureSet stores the set of enabled features using a bitset. If a constant has an id of 10000, FeatureSet will need to use 10000 bits. (also, right now FeatureSet is limited to 64 bits, but that is easily changed)</li> </ul>
+ * @see FeatureSet
+ * @author Jeffrey Ichnowski
+ * @version $Revision: 1188145 $
+ */
+public class FeatureEnum implements Serializable, IFeatureEnum {
+	/** 
+	* Maps product names to FeatureEnum constants. (For use with LicenseBean)
+	*/
+	private static final HashMap _productMap = new HashMap();
+	/** 
+	* List that contains the FeatureEnum constants in the order defined. This list is made unmodifiable my a static initializer after the constants are defined.
+	*/
+	private static List _enumList = new ArrayList();
+	/** 
+	* Array that contains maps id index to FeatureEnum constant. If all constants are defined in sequential order, starting with 0, then this array is the same as _enumList. This object is used for looking up FeatureEnum constants by id.
+	*/
+	private static FeatureEnum _idMap[];
+	/** 
+	* Maps constand name to enum object.
+	*/
+	private static final Map<String, FeatureEnum> _enumMap = new HashMap<String, FeatureEnum>();
+	/** 
+	* Performance manager review form
+	*/
+	public static final FeatureEnum PMREVIEW = new FeatureEnum(0, "FEATURE_PMREVIEW", "form.review",
+			"PM Appraisal Form", FeatureGroupEnum.GENERAL);
+	/** 
+	* Writing assistant
+	*/
+	public static final FeatureEnum WRITING_ASSIST = new FeatureEnum(1, "FEATURE_WRITING_ASSIST", "writingassistant",
+			"Writing Assistant", FeatureGroupEnum.GENERAL);
+	/** 
+	* Admin configuration Tool
+	*/
+	public static final FeatureEnum ADMIN_CONFIG = new FeatureEnum(2, "FEATURE_ADMIN_CONFIG", "admin",
+			"Admin Configuration Tool", FeatureGroupEnum.GENERAL);
+	/** 
+	* User directory
+	*/
+	public static final FeatureEnum USER_DIRECTORY = new FeatureEnum(3, "FEATURE_USER_DIRECTORY", "userdirectory",
+			"User Directory", FeatureGroupEnum.GENERAL);
+	/** 
+	* Workflow (only valid if one of the PM features is also enabled)
+	*/
+	public static final FeatureEnum WORKFLOW = new FeatureEnum(4, "FEATURE_WORKFLOW", "workflow", "Workflow",
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Objective management suite. If enabled without ADVANCED_OBJECTIVES or TGM, enables "basic" objective managment.
+	*/
+	public static final FeatureEnum OBJECTIVE_MANAGEMENT = new FeatureEnum(6, "FEATURE_OBJECTIVE_MANAGEMENT", null,
+			"Objective Managment Suite", FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Competency Library Management Suite
+	*/
+	public static final FeatureEnum COMPETENCY_LIBRARY_MANAGEMENT = new FeatureEnum(7,
+			"FEATURE_COMPETENCY_LIBRARY_MANAGEMENT", "admin.competency", "Competency Library Management Suite",
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* 360 forms
+	*/
+	public static final FeatureEnum PM360 = new FeatureEnum(10, "FEATURE_PM360", "form.360", "360 Multi-Rater",
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Graphical 360 reports
+	*/
+	public static final FeatureEnum PM360_REPORTS = new FeatureEnum(11, "FEATURE_PM360_REPORTS", "form.360.report",
+			"Graphical Report (360)", FeatureGroupEnum.GENERAL);
+	/** 
+	* Legal scan
+	*/
+	public static final FeatureEnum LEGAL_SCAN = new FeatureEnum(12, "FEATURE_LEGAL_SCAN", "legalscan", "Legal Scan",
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Spell check
+	*/
+	public static final FeatureEnum SPELL_CHECK = new FeatureEnum(13, "FEATURE_SPELL_CHECK", "spellcheck",
+			"Spell Check", FeatureGroupEnum.GENERAL);
+	/** 
+	* Advanced objective managment. Quite obsolete. Lets reclaim this bit! =)
+	* @deprecated not in use anymore
+	*/
+	@Deprecated
+	public static final FeatureEnum ADVANCED_OBJECTIVES = new FeatureEnum(14, "FEATURE_ADVANCED_OBJECTIVES", null,
+			"Advanced Objective Management", FeatureGroupEnum.GENERAL);
+	/** 
+	* Live profile (v1)
+	*/
+	public static final FeatureEnum LIVE_PROFILE = new FeatureEnum(15, "FEATURE_LIVE_PROFILE", "liveprofile",
+			"Live Profile", FeatureGroupEnum.GENERAL);
+	/** 
+	* Offline support
+	*/
+	public static final FeatureEnum OFFLINE = new FeatureEnum(16, "FEATURE_OFFLINE", "form.offline", "Offline Form",
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Succession form
+	*/
+	public static final FeatureEnum PMSUCCESSION = new FeatureEnum(17, "FEATURE_PMSUCCESSION", "form.succession",
+			"Succession Planning", FeatureGroupEnum.GENERAL);
+	/** 
+	* Notes
+	*/
+	public static final FeatureEnum PMNOTE = new FeatureEnum(18, "FEATURE_PMNOTE", "form.note", "PM Note",
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Independent development plan. (not ready for production).
+	*/
+	public static final FeatureEnum IDP = new FeatureEnum(19, "ADMINV2_FEATURE_CDPFULL", "development",
+			"Development Plan", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.OBJECTIVE);
+	public static final FeatureEnum DEVELOPMENT_PLAN_V12 = new FeatureEnum(493,
+			"PROVISIONING_FEATURE_ENABLE_DEVELOPMENT_PLAN_V12", null, "Development Plan V12",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.OBJECTIVE);
+	public static final FeatureEnum CDP_MENTORING = new FeatureEnum(620,
+			"PROVISIONING_FEATURE_ENABLE_MENTORING_PROGRAM", null, "Mentoring Program",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* cdp lite. (not ready for production).
+	*/
+	public static final FeatureEnum CDP_LITE = new FeatureEnum(411, "ADMINV2_FEATURE_CDPLITE", "cdplite", "CDP Lite",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Project Teams. (not ready for production).
+	*/
+	public static final FeatureEnum PROJ_TEAMS = new FeatureEnum(49, "FEATURE_PROJ_TEAMS", "project", "Project Teams",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Language packs.
+	*/
+	public static final FeatureEnum LANGUAGE_PACKS = new FeatureEnum(21, "PROVISIONING_FEATURE_LANGUAGE_PACKS", null,
+			"Language Packs", FeatureGroupEnum.GENERAL);
+	/** 
+	* Total Goals Management suite. Requires OBJECTIVE_MANAGEMENT. This feature is best enabled using the CompanyBean.setObjMgtBits() method.
+	*/
+	public static final FeatureEnum TGM = new FeatureEnum(22, "FEATURE_TGM", null, "Objective Planning",
+			FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Allow admin to manage documents
+	*/
+	public static final FeatureEnum MANAGING_DOCUMENTS = new FeatureEnum(23, "PROVISIONING_MANAGING_DOCUMENTS",
+			"admin.managedocuments", "Managing Documents", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* consolidated form renderer (a.k.a. form renderer v2). When activated in Provisioning, the admin has access to a new "Form UI v2" checkbox in Admin/Form Templates/single template.
+	*/
+	public static final FeatureEnum FORM_V2 = new FeatureEnum(24, "FEATURE_FORM_V2", "form.v2", "Form Renderer v2",
+			FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.GENERAL);
+	/** 
+	* Succession Management (different than Succession Planning!!!)
+	*/
+	public static final FeatureEnum SUCCESSION_MANAGEMENT = new FeatureEnum(25, "FEATURE_SUCCESSION_MANAGEMENT",
+			"succession", "Succession Management", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Left Navigation bar (Treeview). When activated a treestyle navigation piece will be rendered in the left part of the interface.
+	*/
+	public static final FeatureEnum LEFTNAV = new FeatureEnum(26, "FEATURE_LEFTNAV", "form.leftnav", "Left Navigation",
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Compensation management
+	*/
+	public static final FeatureEnum COMPENSATION = new FeatureEnum(27, "FEATURE_COMPENSATION", "compensation",
+			"Compensation Management", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Development flag for turning on all of the V2 consolidation work.
+	*/
+	public static final FeatureEnum UI_CONSOLIDATION = new FeatureEnum(29, "FEATURE_UI_CONSOLIDATION", null,
+			"Consolidation of UI code", FeatureReadinessEnum.NEVER, FeatureGroupEnum.GENERAL);
+	/** 
+	* Matrix Grid Report (aka 9-box). (at this time, FEATURE_SUCCMAN is required as well)
+	*/
+	public static final FeatureEnum MATRIX_GRID_REPORT = new FeatureEnum(30, "FEATURE_MATRIX_GRID_REPORT",
+			"matrixgridreport", "Matrix Grid Report (9-Box)", FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum EMPLOYEE_SCORECARD = new FeatureEnum(51, "FEATURE_EMPLOYEE_SCORECARD",
+			"employee_scorecard", "Employee Scorecard", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* The Org Chart
+	*/
+	public static final FeatureEnum ORGANIZATION_CHART = new FeatureEnum(32, "FEATURE_ORGANIZATION_CHART", "orgchart",
+			"Organization Chart", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Graphical workflow that uses FB2s and is shown on the screen with the form.
+	*/
+	public static final FeatureEnum ON_FORM_WORKFLOW = new FeatureEnum(33, "FEATURE_ON_FORM_WORKFLOW",
+			"on_form_workflow", "On Form Workflow", FeatureGroupEnum.GENERAL);
+	/** 
+	* Succession Query Tool
+	*/
+	public static final FeatureEnum SUCCESSION_QUERY = new FeatureEnum(35, "FEATURE_SUCCESSION_QUERY",
+			"successionquery", "Succession User Query Tool", FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	/** 
+	* Left Navigation bar (Treeview) views.
+	*/
+	public static final FeatureEnum LEFTNAV_VIEW_FORM = new FeatureEnum(36, "LeftNav_FULL_FORM", "form.leftnav",
+			"Left Navigation Form View", FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum LEFTNAV_VIEW_SECTION = new FeatureEnum(37, "LeftNav_SECTIONS", "form.leftnav",
+			"Left Navigation Section View", FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum LEFTNAV_VIEW_ITEM = new FeatureEnum(38, "LeftNav_ITEMS", "form.leftnav",
+			"Left Navigation Item View", FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum LEFTNAV_VIEW_DISABLE_ITEM = new FeatureEnum(39, "LeftNav_DISABLE_ITEMS",
+			"form.leftnav", "Left Navigation Disable Item View", FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum SELF_REG = new FeatureEnum(40, "FEATURE_SELF_REG", "selfreg", "Self Registration",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum V10_UI = new FeatureEnum(41, "FEATURE_V10_UI", "v10ui", "Version 10 UI (Acme)",
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum MATRIX_GRID_REPORT_HOW_VS_WHAT = new FeatureEnum(42,
+			"FEATURE_MATRIX_GRID_REPORT_HOW_VS_WHAT", "matrixgridreporthowvswhat",
+			"Matrix Grid Report (9-Box) How vs What", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum TGM_V10 = new FeatureEnum(43, "FEATURE_TGM_V10", "tgmv10", "TGM V10",
+			FeatureGroupEnum.OBJECTIVE);
+	public static final FeatureEnum TGM_GOAL_TRANSFER_WIZARD = new FeatureEnum(44, "FEATURE_TGM_GOAL_TRANSFER_WIZARD",
+			"tgmGoalTransfer", "TGM/IDP Objective Transfer Wizard", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.OBJECTIVE);
+	public static final FeatureEnum TALENT_SEARCH = new FeatureEnum(46, "FEATURE_TALENT_SEARCH", "talentSearch",
+			"Succession Management Talent Search", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum STANDALONE_TALENT_SEARCH = new FeatureEnum(61, "Standalone_Talent_Search",
+			"standalone_talent_search", "Standalone Talent Search", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum POSITION_CHART = new FeatureEnum(47, "FEATURE_POSITION_CHART", "positionChart",
+			"Position Chart", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Analytics 4/25/2005; This FeatureEnum has new been deprecated. The functionality of this enum has been combined with FeatureEnum.REPORTS.
+	*/
+	public static final FeatureEnum ANALYTICS = new FeatureEnum(31, "FEATURE_ANALYTICS", "analytics", "Analytics",
+			FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum DASHBOARD_DRILLDOWN = new FeatureEnum(45, "FEATURE_DASHBOARD_DRILLDOWN",
+			"dashboard_drilldown", "Dashboard Drilldown to detailed lists", FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum RESOLVE_NULL_SCALE_ID_IN_REPORT = new FeatureEnum(720,
+			"PROVISIONING_FEATURE_RESOLVE_NULL_SCALE_ID_IN_REPORT", "RESOLVE_NULL_SCALE_ID_IN_REPORT",
+			"Resolve NULL Scale Id in Report", FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum SPOTLIGHT_VIEW = new FeatureEnum(50,
+			"FB_ANALYTICS_ANALYTICS_CENTER_MAIN_SL_VIEW_LBL", "spotlightViews", "Spotlight View",
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum CANNED_REPORT = new FeatureEnum(48, "FEATURE_CANNED_REPORT", "cannedReport",
+			"Canned Report", FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Reporting (v1)
+	*/
+	public static final FeatureEnum REPORTS = new FeatureEnum(8, "FEATURE_REPORTS", "reports", "Classic Reporting",
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* The Constant INFORM_SSO. 
+	*/
+	public static final FeatureEnum INFORM_SSO = new FeatureEnum(324, "PROVISIONING_INFORM_SSO", "INFORM_SSO",
+			"Inform reports", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Dashboard for new UI
+	*/
+	public static final FeatureEnum DASHBOARD = new FeatureEnum(34, "PROVISIONING_FEATURE_DASHBOARD", "dashboard",
+			"Dashboard", FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Hierarchical stage reporting.
+	*/
+	public static final FeatureEnum HIERARCHICAL_REPORTS = new FeatureEnum(20, "FEATURE_HIERARCHICAL_REPORTS",
+			"hierarchicalReport", "Hierarchical Report", FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Manager dashboard
+	*/
+	public static final FeatureEnum MANAGER_DASHBOARD = new FeatureEnum(5, "FEATURE_MANAGER_DASHBOARD",
+			"managerdashboard", "Manager Dashboard", FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Gap analysis
+	*/
+	public static final FeatureEnum GAP_ANALYSIS = new FeatureEnum(9, "FEATURE_GAP_ANALYSIS", "gapanalysis",
+			"Gap Analysis", FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Reports version 2
+	*/
+	public static final FeatureEnum REPORTS_V2 = new FeatureEnum(28, "FEATURE_REPORTS_V2", "reports.v2", "Reporting v2",
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ADD_SINGLE_USER = new FeatureEnum(52, "ADMINV2_FEATURE_USER_MANAGEMENT",
+			"add_single_user", "User Management", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CUST_LOGO_HOME_ONLY = new FeatureEnum(53, "CUST_LOGO_HOME_ONLY",
+			"customer_logo_on_Home_page_only", "Customer Logo on Home Page Only", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum QUESTION_OBJECT_MANAGEMENT = new FeatureEnum(54, "QUESTION_OBJECT_MANAGEMENT",
+			"question_object_management", "Question Object Management", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum SURVEY = new FeatureEnum(55, "SURVEY", "survey", "Survey",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* @deprecated by RECRUITING_V2
+	*/
+	@Deprecated
+	public static final FeatureEnum RECRUITING = new FeatureEnum(56, "RECRUITING", "recruiting", "Recruiting",
+			FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.GENERAL);
+	/** 
+	* Added for Recruiting 2.0 Feature
+	*/
+	public static final FeatureEnum RECRUITING_V2 = new FeatureEnum(220, "RECRUITING", "recruiting2", "Recruiting 2",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum GOALS_TAB = new FeatureEnum(57, "FEATURE_MY_GOAL_TAB", "myGoalsTab", "Goal Tab",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Variable Pay
+	*/
+	public static final FeatureEnum VARIABLE_PAY = new FeatureEnum(58, "FEATURE_VARIABLE_PAY", "variable_pay",
+			"Variable Pay", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum INCLUDE_ONLY_COMPLETED_FORMS_FOR_VARPAY = new FeatureEnum(427,
+			"PROVISIONING_INCLUDE_ONLY_COMPLETED_FORMS_FOR_VARPAY", "only_completed_forms", "VarPay",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CAREER_WORKSHEET = new FeatureEnum(59, "CareerWorksheet", "CareerWorksheet", "CDP",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Web Services
+	*/
+	public static final FeatureEnum PARTNER_WEB_SERVICE = new FeatureEnum(60, "FEATURE_PARTNER_WEB_SERVICE",
+			"PartnerWebService", "Partner Web Service", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.WEBSERVICES);
+	public static final FeatureEnum SF_WEB_SERVICE = new FeatureEnum(94, "FEATURE_SF_WEB_SERVICE", "SFWebService",
+			"SF Web Service", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.WEBSERVICES);
+	public static final FeatureEnum DOCSEARCH_WEB_SERVICE = new FeatureEnum(95, "FEATURE_DOCSEARCH_WEB_SERVICE",
+			"DocSearchWebService", "DocSearch Web Service", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.WEBSERVICES);
+	public static final FeatureEnum USER_WEB_SERVICE = new FeatureEnum(96, "FEATURE_USER_WEB_SERVICE", "UserWebService",
+			"User Web Service", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.WEBSERVICES);
+	public static final FeatureEnum SOAP_RPC_SERVLET = new FeatureEnum(97, "FEATURE_SOAP_RPC_SERVLET", "SoapRPCServlet",
+			"SOAP RPC Servlet", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.WEBSERVICES);
+	public static final FeatureEnum SFAPI = new FeatureEnum(98, "FEATURE_SFAPI", "SFAPI", "SFAPI",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.WEBSERVICES);
+	/** 
+	* SFAPI Adhoc Feature
+	*/
+	public static final FeatureEnum SFAPI_ADHOC_FEATURE = new FeatureEnum(360, "PROVISIONING_FEATURE_SFAPI_ADHOC",
+			"SFAPIAdhoc", "SFAPI Adhoc", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.WEBSERVICES);
+	/** 
+	* INFORM Adhoc Feature
+	*/
+	public static final FeatureEnum INFORM_ADHOC_FEATURE = new FeatureEnum(365, "PROVISIONING_FEATURE_INFORM_ADHOC",
+			"INFORMAdhoc", "INFORM Adhoc", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.WEBSERVICES);
+	/** 
+	* Job Description Management Ng
+	*/
+	public static final FeatureEnum JDM_NG = new FeatureEnum(456, "PROVISIONING_FEATURE_JOB_DESCRIPTION_MANAGEMENT_NG",
+			"job_description_management", "Job Description Management Ng", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Master Catalog
+	*/
+	public static final FeatureEnum JDM_NG_MASTER_CATALOG = new FeatureEnum(457,
+			"PROVISIONING_FEATURE_JOB_DESCRIPTION_MANAGEMENT_NG_MASTER_CATALOG", "jdmng_master_catalog",
+			"Master Catalog", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Job Description Management Ng Sub Features
+	*/
+	public static final FeatureEnum[] JDM_NG_SUB_FEATURES = new FeatureEnum[] { JDM_NG_MASTER_CATALOG };
+	/** 
+	* Employee Block
+	*/
+	public static final FeatureEnum PERF_PRO = new FeatureEnum(62, "FEATURE_PERF_PRO", "performance_profile",
+			"Performance Profile", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Proficiency level
+	*/
+	public static final FeatureEnum PROFICIENCY_LEVEL = new FeatureEnum(70, "FEATURE_PROFICIENCY_LEVEL",
+			"proficiency_level", "Proficiency Level", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Employee Directory
+	*/
+	public static final FeatureEnum EMPLOYEE_DIRECTORY = new FeatureEnum(63, "FEATURE_EMPLOYEE_DIRECTORY",
+			"employee_directory", "Employee Directory", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* V12 User Interface
+	*/
+	public static final FeatureEnum V12_TOP_NAV = new FeatureEnum(108, "PROVISIONING_FEATURE_V12_TOP_NAV", "v12TopNav",
+			"Version 12 UI framework (Revolution)", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum V12_THEMING_DISABLED = new FeatureEnum(409,
+			"PROVISIONING_FEATURE_V12_THEMING_DISABLED", "v12ThemingDisabled",
+			"Version 12 UI framework Theming Disabled", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* New Wow Home Page
+	* @deprecated from provisioning, replaced by sys_config setting in admin page
+	*/
+	@Deprecated
+	public static final FeatureEnum WOW_HOME_PAGE = new FeatureEnum(112, "PROVISIONING_FEATURE_WOW_HOME_PAGE",
+			"wowHomePage", "WoW Home Page", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.GENERAL);
+	/** 
+	* V11 User Interface
+	*/
+	public static final FeatureEnum V11_UI = new FeatureEnum(64, "FEATURE_V11_UI", "v11ui", "Version 11 UI",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Use Legacy Quickcard
+	*/
+	public static final FeatureEnum USE_LEGACY_QUICKCARD = new FeatureEnum(446,
+			"PROVISIONING_FEATURE_USE_LEGACY_QUICKCARD", "v11Quickcard", "Use Legacy Quickcard",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* SFCoach
+	*/
+	public static final FeatureEnum SFCOACH = new FeatureEnum(65, "FEATURE_SFCOACH", "sfcoach", "SF Coach",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable schedule report for list view
+	*/
+	public static final FeatureEnum SCHEDULE_REPORTS = new FeatureEnum(66, "FEATURE_SCHEDULE_REPORTS", "reports",
+			"Scheduled Export", FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Disable report to excel for list view
+	*/
+	public static final FeatureEnum DISABLE_EXPORT_TO_EXCEL = new FeatureEnum(67, "FEATURE_DISABLE_EXPORT_TO_EXCEL",
+			"reports", "Scheduled Export Only", FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Company Barometer
+	*/
+	public static final FeatureEnum COMPANY_BAROMETER = new FeatureEnum(68, "FEATURE_COMPANY_BAROMETER",
+			"companyBarometer", "Company Barometer", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Custom Language Pack
+	*/
+	public static final FeatureEnum CUSTOM_LANG_PACK = new FeatureEnum(69, "FEATURE_CUSTOM_LANGPACK",
+			"customLanguagePack", "Custom Language Pack", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Learning Management System
+	*/
+	public static final FeatureEnum LMS = new FeatureEnum(71, "PROVISIONING_FEATURE_LMS", "learningManagementSystem",
+			"Learning Management System", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.LMS);
+	/** 
+	* Learning Content Management
+	*/
+	public static final FeatureEnum LCMS = new FeatureEnum(72, "PROVISIONING_FEATURE_LCMS", "learningContentManagement",
+			"Learning Content Management", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.LMS);
+	/** 
+	* Dynamic Groups
+	*/
+	public static final FeatureEnum DYNAMIC_GROUPS = new FeatureEnum(73, "FEATURE_DYNAMIC_GROUPS", "dynamicGroups",
+			"Dynamic Groups", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CALIBRATION_TOOL = new FeatureEnum(74, "FEATURE_CALIBRATION_TOOL",
+			"calibrationTool", "Calibration Tool", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum TRUE_POSITION_HIERARCHY = new FeatureEnum(75, "FEATURE_TRUE_POSITION_HIERARCHY",
+			"truePositionHierarchy", "True Position Hierarchy", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ORGANIZATION_CHART_V3 = new FeatureEnum(76, "FEATURE_ORGANIZATION_CHART_V3",
+			"orgchartV3", "Organiztion Chart V3", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Vertical dictionaries
+	*/
+	public static final FeatureEnum VERTICAL_DICTIONARIES = new FeatureEnum(77, "FEATURE_VERTICAL_DICTIONARIES", null,
+			"Vertical Dictionaries", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* rich text editor
+	*/
+	public static final FeatureEnum RTE = new FeatureEnum(78, "FEATURE_RTE", null, "rte",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* rich text editor flag cleanup on Word paste
+	*/
+	public static final FeatureEnum RTE_CONFIRM_WORD_PASTE_CLEANUP = new FeatureEnum(397,
+			"PROVISIONING_FEATURE_RTE_WORD_PASTE_CLEANUP_CONFIRM", null,
+			"Rich text editor cleanup on text pasted from MS-Word (PM form only)", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* PE Self Service feature options
+	*/
+	public static final FeatureEnum PE_SELFSERVICE = new FeatureEnum(79, "PROVISIONING_FEATURE_PE_SELFSERVICE",
+			"peSelfService", "PE Self Service", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.PE_SELFSERVICE);
+	public static final FeatureEnum PE_LAUNCH_REVIEW_CYCLE = new FeatureEnum(80, "FEATURE_PE_LAUNCH_REVIEW_CYCLE",
+			"peLaunchReviewCycle", "PE Launch Review Cycle", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.PE_SELFSERVICE);
+	public static final FeatureEnum PE_LAUNCH_COMP_CYCLE = new FeatureEnum(81, "FEATURE_PE_COMP_SELF_SERVICE",
+			"peCompSelfService", "Comp Self Service", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.PE_SELFSERVICE);
+	public static final FeatureEnum PE_LAUNCH_GOAL_PLAN = new FeatureEnum(82, "FEATURE_PE_LAUNCH_GOAL_PLAN",
+			"peLaunchGoalPlan", "PE Launch Goal Plan", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.PE_SELFSERVICE);
+	public static final FeatureEnum PE_LAUNCH_360 = new FeatureEnum(83, "FEATURE_PE_LAUNCH_360", "peLaunch360",
+			"PE Launch 360", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.PE_SELFSERVICE);
+	public static final FeatureEnum PE_LAUNCH_DEV_PLAN = new FeatureEnum(84, "FEATURE_PE_LAUNCH_DEV_PLAN",
+			"peLaunchDevPlan", "PE Launch Development Plan", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.PE_SELFSERVICE);
+	/** 
+	* Version 11 Native TGM (XI TGM)
+	* @deprecated not in use anymore
+	*/
+	@Deprecated
+	public static final FeatureEnum V11_NATIVE_TGM = new FeatureEnum(85, "FEATURE_V11_NATIVE_TGM", null,
+			"Version 11 Native TGM", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Version 11 Faces(XI Faces)
+	*/
+	public static final FeatureEnum V11_FACES = new FeatureEnum(86, "FEATURE_V11_FACES", "faces", "Version 11 Faces",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Hierarchy visibility control feature (see EE-16206).
+	*/
+	public static final FeatureEnum HIDE_HIERARCHY = new FeatureEnum(87, "FEATURE_HIDE_HIERARCHY", "hierarchy",
+			"Hide Hierarchy", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Formless Nomination feature - deprecated since it is implemented as a new setting instead of a new feature (see EE-17033).
+	*/
+	public static final FeatureEnum FORMLESS_NOMINATION = new FeatureEnum(88, "FEATURE_FORMLESS_NOMINATION",
+			"formlessNomination", "Formless Nomination", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.GENERAL);
+	/** 
+	* Manage Scheduler -- removed from UI until implementation finished for Admin Tools
+	*/
+	public static final FeatureEnum MANAGE_SCHEDULER = new FeatureEnum(89, "FEATURE_MANAGE_SCHEDULER",
+			"manageJobScheduler", "Manage Job Scheduler", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.GENERAL);
+	/** 
+	* Turn off client side caching.
+	*/
+	public static final FeatureEnum NO_CLIENTSIDE_CACHING = new FeatureEnum(90, "FEATURE_NO_CLIENTSIDE_CACHING",
+			"noClientSideCaching", "Turn Off Client Side Caching (Warning!  This will reduce application performance!)",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Distributed Admin feature
+	*/
+	public static final FeatureEnum DISTRIBUTED_ADMIN = new FeatureEnum(91, "FEATURE_DISTRIBUTED_ADMIN",
+			"distributedAdmin", "Distributed Admin", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Distributed Admin feature
+	*/
+	public static final FeatureEnum RESTRICT_PERMISSION_DISTRIBUTION_PRIVILEGES = new FeatureEnum(92,
+			"FEATURE_RESTRICT_PERMISSION_DISTRIBUTION", "restrictPermissionDistributionPrivileges",
+			"Restrict Permission Distribution Privileges", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable BI Publisher integration feature
+	*/
+	public static final FeatureEnum BI_PUBLISHER_SCORECARD_INTEGRATION = new FeatureEnum(93,
+			"FEATURE_BI_PUBLISHER_SCORECARD_INTEGRATION", "BIPublisherScorecardIntegration",
+			"BI Publisher Scorecard Integration", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Multiple Files in Batch publish
+	*/
+	public static final FeatureEnum BI_MULTIPLE_FILES_IN_BATCH_PUBLISH = new FeatureEnum(430,
+			"PROVISIONING_MULTIPLE_FILES_IN_BATCH_PUBLISH", "BIMultipleFilesinBatchPublish",
+			"BI Multiple Files in Batch Publish", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Google Apps
+	*/
+	public static final FeatureEnum GBOOK = new FeatureEnum(99, "FEATURE_GBOOK", "GBOOK", "Google Books",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GOOGLEAPPS);
+	public static final FeatureEnum GCAL = new FeatureEnum(100, "FEATURE_GCAL", "GCAL", "Google Calendar",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GOOGLEAPPS);
+	public static final FeatureEnum GMAP = new FeatureEnum(101, "FEATURE_GMAP", "GMAP", "Google Map",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GOOGLEAPPS);
+	public static final FeatureEnum GTALK = new FeatureEnum(102, "FEATURE_GTALK", "GTALK", "Google Talk",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GOOGLEAPPS);
+	public static final FeatureEnum USE_MV = new FeatureEnum(103, "FEATURE_USE_MV", "USE_MV",
+			"Use Pre-built Goal List to Improve Performance", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum UPDATE_BUTTON_REFRESH_MV = new FeatureEnum(104, "FEATURE_UPDATE_BUTTON_REFRESH_MV",
+			"UPDATE_BUTTON_REFRESH_MV", "Use Update Button on Goal List to Refresh Pre-built Goal List",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum SUCCESSION_LINEAGE_REPORT = new FeatureEnum(105,
+			"FEATURE_SUCCESSION_LINEAGE_REPORT", "SUCCESSION_LINEAGE_REPORT",
+			"Succession Lineage Report [requires ULTRA]", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum GOAL_IMPORT_ULTRA = new FeatureEnum(106, "PROVISIONING_GOAL_IMPORT_ULTRA",
+			"GOAL_IMPORT_ULTRA", "Import Goals from Template", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.OBJECTIVE);
+	public static final FeatureEnum MY_TEAM_RATER = new FeatureEnum(107, "PERFORMANCE_FEATURE_STACK_RANKER_PM",
+			"MY_TEAM_RATER", "My Team Rater", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum MY_TEAM_RATER_360 = new FeatureEnum(535, "PERFORMANCE_FEATURE_STACK_RANKER_360",
+			"PERFORMANCE_FEATURE_STACK_RANKER_360", "Stack Ranker for 360", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable standard report
+	*/
+	public static final FeatureEnum STANDARD_REPORT = new FeatureEnum(211, "PROVISIONING_ADMIN_STANDARD_REPORT",
+			"standard_report", "Standard Report", FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum LIST_VIEW_BUILDER = new FeatureEnum(200, "FEATURE_LIST_VIEW_BUILDER",
+			"LIST_VIEW_BUILDER", "Ad Hoc Report Builder", FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum RESTORE_ADHOC_SDS_FEATURE = new FeatureEnum(671,
+			"PROVISIONING_FEATURE_RESTORE_ADHOC_SDS_FEATURE", "restoreSubdomainSchema", "Restore earlier defined SDS",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum LIST_VIEW_BUILDER_BIRT_TEMPLATE = new FeatureEnum(301,
+			"ANALYTICS_REPORT_BUILDER_FEATURE_BIRT_TEMPLATE", "LIST_VIEW_BUILDER_BIRT_TEMPLATE",
+			"Ad Hoc Report Builder BIRT Template", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum INCLUDE_STARTING_FROM_CHECK = new FeatureEnum(422,
+			"ANALYTICS_REPORT_BUILDER_INCLUDE_STARTING_FROM_USER", "INCLUDE_STARTING_FROM_CHECK",
+			"Enable INCLUDE STARTING FROM USER in the people pill", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	@Deprecated
+	public static final FeatureEnum EMP_PROFILE = new FeatureEnum(423,
+			"ANALYTICS_REPORT_BUILDER_INCLUDE_STARTING_FROM_USER_EP", "EMP_PROFILE",
+			"Enable INCLUDE STARTING FROM USER For EMP_PROFILE in the people pill", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	@Deprecated
+	public static final FeatureEnum ECTINT = new FeatureEnum(436,
+			"ANALYTICS_REPORT_BUILDER_INCLUDE_STARTING_FROM_USER_ECTINT", "ECTINT",
+			"Enable INCLUDE STARTING FROM USER For ECTINT in the people pill", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	@Deprecated
+	public static final FeatureEnum ECTAUDINFO = new FeatureEnum(437,
+			"ANALYTICS_REPORT_BUILDER_INCLUDE_STARTING_FROM_USER_ECTAUDINFO", "ECTAUDINFO",
+			"Enable INCLUDE STARTING FROM USER For ECTAUDINFO in the people pill", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	@Deprecated
+	public static final FeatureEnum ECTINTCOMPINFO = new FeatureEnum(438,
+			"ANALYTICS_REPORT_BUILDER_INCLUDE_STARTING_FROM_USER_ECTINTCOMPINFO", "ECTINTCOMPINFO",
+			"Enable INCLUDE STARTING FROM USER For ECTINTCOMPINFO in the people pill", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	@Deprecated
+	public static final FeatureEnum ECTINTJOBINFO = new FeatureEnum(439,
+			"ANALYTICS_REPORT_BUILDER_INCLUDE_STARTING_FROM_USER_ECTINTJOBINFO", "ECTINTJOBINFO",
+			"Enable INCLUDE STARTING FROM USER For ECTINTJOBINFO in the people pill", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	@Deprecated
+	public static final FeatureEnum ECTINTBONUSPAYOUT = new FeatureEnum(441,
+			"ANALYTICS_REPORT_BUILDER_INCLUDE_STARTING_FROM_USER_ECTINTBONUSPAYOUT", "ECTINTBONUSPAYOUT",
+			"Enable INCLUDE STARTING FROM USER For ECTINTBONUSPAYOUT in the people pill",
+			FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Doc Attachment
+	*/
+	public static final FeatureEnum ATTACHMENT_MANAGE = new FeatureEnum(201, "FEATURE_ATTACHMENT_MANAGE",
+			"ATTACHMENT_MANAGE", "Attachment", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum COMPENSATION_MANAGER_HIERARCHY = new FeatureEnum(202,
+			"FEATURE_COMPENSATION_MANAGER_HIERARCHY", "COMPENSATION_MANAGER_HIERARCHY",
+			"Compensation Manager Hierarchy", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum COMPENSATION_MANAGER_EIP_EXEC = new FeatureEnum(203,
+			"FEATURE_COMPENSATION_MANAGER_EIP_EXEC", "COMPENSATION_MANAGER_EIP_EXEC",
+			"Compensation Manager EIP Executive View", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ECT_FOUNDATION_OBJECTS_TRANSLATION = new FeatureEnum(482,
+			"PROVISIONING_FEATURE_ECT_FOUNDATION_OBJECTS_TRANSLATION", "ENABLE_ECT_FOUNDATION_OBJECTS_TRANSLATION",
+			"Enable Translation of Employee Central Foundation Objects", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ECT_FOUNDATION_OBJECTS_JOBCODE_USES_FOTRANSLATION = new FeatureEnum(583,
+			"PROVISIONING_FEATURE_ECT_FOUNDATION_OBJECTS_JOBCODE_USES_FOTRANSLATION",
+			"ENABLE_ECT_FOUNDATION_OBJECTS_JOBCODE_USES_FOTRANSLATION",
+			"Job Classification Foundation Object uses standard Foundation Object Translation functionality (not ready to Use with ODATA APIs)",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum EDDP = new FeatureEnum(204, "FEATURE_EDDP", "EDDP", "Effective Dated Data Platform",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT V1 (Action based).
+	*/
+	public static final FeatureEnum ECT_V1 = new FeatureEnum(223, "FEATURE_ECT_V1", "ECT_V1", "Employee Central V1",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT V2 (Event Reason derivation, New Workflow).
+	*/
+	public static final FeatureEnum ECT_V2 = new FeatureEnum(326, "FEATURE_ECT_V2", "ECT_V2", "Employee Central V2",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT V2 Phased Migration to MDF (This feature is meant to protect code under development. Never to be switched on in productive environments).
+	*/
+	public static final FeatureEnum ECT_V2P = new FeatureEnum(557, "PROVISIONING_FEATURE_ECT_V2P", "ECT_V2P",
+			"Employee Central Phased Transition", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT V3 (ECT based on MDF).
+	*/
+	public static final FeatureEnum ECT_V3 = new FeatureEnum(464, "PROVISIONING_FEATURE_ECT_V3", "ECT_V3",
+			"Employee Central V3", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT V2 (hide/unhide help icon on the top right corner of the portlet title).
+	*/
+	public static final FeatureEnum ECT_HELP_LINK = new FeatureEnum(403, "PROVISIONING_FEATURE_ECT_HELP_LINK",
+			"ECT_HELP_LINK", "Employee Central help link", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT V2 (Enable/Disable My Benefit link from EC).
+	*/
+	public static final FeatureEnum ECT_MY_BENEFIT_LINK = new FeatureEnum(407,
+			"PROVISIONING_FEATURE_ECT_MY_BENEFIT_LINK", "ECT_MY_BENEFIT_LINK", "Employee Central My Benefit Link",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT V2 (Enable/Disable timesheets link from EC).
+	*/
+	public static final FeatureEnum ECT_TIMESHEETS_LINK = new FeatureEnum(415,
+			"PROVISIONING_FEATURE_ECT_TIMESHEETS_LINK", "ECT_TIMESHEETS_LINK", "Employee Central Timesheets Link",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Russian DC
+	*/
+	public static final FeatureEnum ECT_ENABLE_RUSSIAN_DC = new FeatureEnum(639,
+			"PROVISIONING_FEATURE_ECT_RUSSIAN_DC_DBLINK", "ECT_ENABLE_RUSSIAN_DC",
+			"Enable Russian DC Feature - DB Link", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Russian DC - API Version
+	*/
+	public static final FeatureEnum ECT_ENABLE_RUSSIAN_DC_API = new FeatureEnum(644,
+			"PROVISIONING_FEATURE_ECT_RUSSIAN_DC_API", "ECT_ENABLE_RUSSIAN_DC_API", "Enable Russian DC Feature - API",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Russian DC Attachment Sync for API Version
+	*/
+	public static final FeatureEnum ECT_ENABLE_RUSSIAN_DC_ATTACHMENT_SYNC = new FeatureEnum(746,
+			"PROVISIONING_FEATURE_ECT_RUSSIAN_DC_ATTACHMENT_SYNC", "ECT_ENABLE_RUSSIAN_DC_ATTACHMENT_SYNC",
+			"Enable Russian DC Attachment Sync", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Global Assignment
+	*/
+	public static final FeatureEnum ECT_GLOBAL_ASSIGNMENT = new FeatureEnum(396,
+			"PROVISIONING_FEATURE_ECT_GLOBAL_ASSIGNMENT", "ENABLE_ECT_GLOBAL_ASSIGNMENT",
+			"Employee Central Global Assignment Management", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Dependents Management
+	*/
+	public static final FeatureEnum ECT_DEPENDENT_INFO = new FeatureEnum(413, "PROVISIONING_FEATURE_ECT_DEPENDENT_INFO",
+			"ENABLE_ECT_DEPENDENT_INFO", "Employee Central Dependents Management", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Position Management
+	*/
+	public static final FeatureEnum ECT_POSITION_MANAGEMENT = new FeatureEnum(400,
+			"PROVISIONING_FEATURE_ECT_POSITION_MANAGEMENT", "ENABLE_ECT_POSITION_MANAGEMENT",
+			"Enable Position Management", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Position Management RCM Integration
+	*/
+	public static final FeatureEnum ECT_POSITION_MANAGEMENT_RCM_INTEGRATION = new FeatureEnum(542,
+			"PROVISIONING_POSITION_RCM_INTEGRATION_ENABLE", "ENABLE_ECT_POSITION_MANAGEMENT_RCM_INTEGRATION",
+			"Enable Position Management RCM Integration", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Absence Management
+	*/
+	public static final FeatureEnum ECT_ABSENCE_MANAGEMENT = new FeatureEnum(406,
+			"PROVISIONING_FEATURE_ECT_ABSENCE_MANAGEMENT", "ENABLE_ECT_ABSENCE_MANAGEMENT", "Time Off",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Absence Management - Leave of Absence
+	*/
+	public static final FeatureEnum ECT_LEAVE_OF_ABSENCE = new FeatureEnum(476,
+			"PROVISIONING_FEATURE_ECT_LEAVE_OF_ABSENCE", "ENABLE_ECT_LEAVE_OF_ABSENCE", "Leave of Absence",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT TimeSheet
+	*/
+	public static final FeatureEnum ECT_TIMESHEET = new FeatureEnum(532, "PROVISIONING_FEATURE_ECT_TIMESHEET",
+			"ENABLE_ECT_TIMESHEET", "Time Sheet", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Advances Management
+	*/
+	public static final FeatureEnum ECT_ADVANCES_MANAGEMENT = new FeatureEnum(418,
+			"PROVISIONING_FEATURE_ECT_ADVANCES_MANAGEMENT", "ENABLE_ECT_ADVANCES_MANAGEMENT", "Advances",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Benefits Management
+	*/
+	public static final FeatureEnum ECT_BENEFITS_MANAGEMENT = new FeatureEnum(490,
+			"PROVISIONING_FEATURE_ECT_BENEFITS_MANAGEMENT", "ENABLE_ECT_BENEFITS_MANAGEMENT", "Benefits",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Compound Employee Mapping Extension
+	*/
+	public static final FeatureEnum ECT_COMPOUND_EMPLOYEE_MAPPING_EXTENSION = new FeatureEnum(543,
+			"PROVISIONING_FEATURE_ECT_COMPOUND_EMPLOYEE_MAPPING_EXTENSION",
+			"ENABLE_ECT_COMPOUND_EMPLOYEE_MAPPING_EXTENSION", "Compound Employee Mapping Extension",
+			FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT IT Declarations Management
+	*/
+	public static final FeatureEnum ECT_IT_DECLARATIONS_MANAGEMENT = new FeatureEnum(419,
+			"PROVISIONING_FEATURE_ECT_IT_DECLARATIONS_MANAGEMENT", "ENABLE_ECT_IT_DECLARATIONS_MANAGEMENT",
+			"IT Declarations", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Fiscal Year
+	*/
+	public static final FeatureEnum ECT_FISCAL_YEAR = new FeatureEnum(425, "PROVISIONING_FEATURE_ECT_FISCAL_YEAR",
+			"ENABLE_ECT_FISCAL_YEAR", "Fiscal Year", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Deductions Management
+	*/
+	public static final FeatureEnum ECT_DEDUCTIONS_MANAGEMENT = new FeatureEnum(499,
+			"PROVISIONING_FEATURE_ECT_DEDUCTIONS_MANAGEMENT", "ENABLE_ECT_DEDUCTIONS_MANAGEMENT", "Deductions",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable MDF Dummy Objects
+	*/
+	public static final FeatureEnum MDF_DUMMY_OBJECTS = new FeatureEnum(555, "PROVISIONING_FEATURE_MDF_DUMMY_OBJECTS",
+			"ENABLE_MDF_DUMMY_OBJECTS", "MDF Dummy Objects", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable UTS Sample Type System for Rule Engine
+	*/
+	public static final FeatureEnum RE_UTS_SAMPLE_TYPE_SYSTEM = new FeatureEnum(554,
+			"PROVISIONING_FEATURE_RE_UTS_SAMPLE_TYPE_SYSTEM", "ENABLE_RE_UTS_SAMPLE_TYPE_SYSTEM",
+			"Enable UTS Sample Type System for Rule Engine", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Service Center
+	*/
+	public static final FeatureEnum ECT_SERVICE_CENTER = new FeatureEnum(530, "PROVISIONING_ENABLE_SERVICE_CENTER",
+			"serviceCenterEnabled", "Enable Service Center", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Work Force Planning
+	*/
+	public static final FeatureEnum WORK_FORCE_PLANNING = new FeatureEnum(205, "FEATURE_WORK_FORCE_PLANNING",
+			"work.force.planning", "Work Force Planning", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.GENERAL);
+	/** 
+	* Compensation Manage plan template
+	*/
+	public static final FeatureEnum COMPENSATION_MANAGE_PLAN_TEMPLATE = new FeatureEnum(206,
+			"FB_COMP_GUIDELINEMATRIX_MGR", "COMPENSATION_MANAGE_PLAN_TEMPLATE", "Compensation Manage Plan Template",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum DISABLE_SECURE_ST_TEMPLATE_TRANSFORMATION = new FeatureEnum(627,
+			"PROVISIONING_FEATURE_DISABLE_SECURE_STATEMENT_TEMPLATE_TRANSFORMATION",
+			"Disable Secure Statement Template Transformation", "Disable Secure Statement Template Transformation",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_XSS_ATTACK_CHECKS_FOR_COMP_STATEMENTS = new FeatureEnum(690,
+			"PROVISIONING_FEATURE_ENABLE_XSS_ATTACK_CHECKS_FOR_COMP_STATEMENTS",
+			"Enable XSS attack checks in  Compensation Statements",
+			"Enable XSS attack checks in  Compensation Statements", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Compensation Form UI V2
+	*/
+	public static final FeatureEnum COMPENSATION_FORM_UI_V2 = new FeatureEnum(207, "COMPENSATION_PROV_FORM_UI_V2",
+			"COMPENSATION_FORM_UI_V2", "Compensation Form UI V2", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Voice of Customer
+	*/
+	public static final FeatureEnum VOICE_OF_CUSTOMER = new FeatureEnum(208, "COMMON_VOICE_OF_CUSTOMER",
+			"VOICE_OF_CUSTOMER", "Voice of Customer", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Added for BPP Enable/Disable BPP Feature
+	*/
+	public static final FeatureEnum PROCESS = new FeatureEnum(210, "FEATURE_PROCESS", "form.processes",
+			"Business Process Platform", FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable BI Publisher integration feature
+	*/
+	public static final FeatureEnum BI_PUBLISHER_EXPORT_SCORECARD_XML = new FeatureEnum(221,
+			"BIPUBLISHER_EXPORT_SCORECARD_XML", "BIPublisherExportScorecardXml", "BI Publisher Export Scorecard Xml",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum EMPLOYEE_PROFILE_AUDIT = new FeatureEnum(222, "PROVISIONING_AUDIT_FEATURE",
+			"employeeprofile.audit", "Employee Profile Audit", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum EXPANDED_JOB_ROLE = new FeatureEnum(224, "RECRUITING_FEATURE_EXPANDED_JOB_ROLE",
+			"EXPANDED_JOB_ROLE", "Expanded Job Role", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable org metric viewing in analytics
+	*/
+	public static final FeatureEnum QUICK_FACTS = new FeatureEnum(225, "FEATURE_QUICK_FACTS", "QUICK_FACTS",
+			"Organisational Quick Facts", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum GROUP_GOALS = new FeatureEnum(226, "PROVISIONING_GROUP_GOAL_FEATURE_TITLE",
+			"ENABLE_GROUP_GOALS", "Enable Group Goals", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* New Feature to Enable Target Population for Mass create forms Instances TGM-2305.
+	*/
+	public static final FeatureEnum ENABLE_TARGETPOP_USAGE_IN_MASSCREATE_FORMS = new FeatureEnum(227,
+			"PROVISIONING_TARGET_POPULATION_FOR_MASSCREATE_FORMS_TITLE",
+			"ENABLE_TARGET_POPULATION_FOR_MASSCREATE_FORMS", "Target Population For Mass Create Forms Instances",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* New Feature to Enable Target Population for Group Goals TGM-2305.
+	*/
+	public static final FeatureEnum ENABLE_TARGETPOP_USAGE_IN_GROUP_GOALS = new FeatureEnum(228,
+			"PROVISIONING_TARGET_POPULATION_FOR_GROUP_GOALS_TITLE", "ENABLE_TARGET_POPULATION_FOR_GROUP_GOALS",
+			"Target Population For Group Goals", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Enable group goal push-down update for inactive user. - TGM-3295
+	*/
+	public static final FeatureEnum ENABLE_GROUP_GOALS_FOR_INACTIVE_USER = new FeatureEnum(229,
+			"PROVISIONING_ENABLE_GROUP_GOALS_FOR_INACTIVE_USER_FEATURE_TITLE", "ENABLE_GROUP_GOALS_FOR_INACTIVE_USER",
+			"Enable Group Goals 2.0 Push-down Update for Inactive users", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* New Feature to Enable Collaboration, Collab-24 (Facebook for the Enterprise, he we come!!)
+	*/
+	public static final FeatureEnum ENABLE_COLLABORATION = new FeatureEnum(298, "PROVISIONING_ENABLE_COLLABORATION",
+			"ENABLE_COLLABORATION", "Collaboration", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.COLLABORATION);
+	/** 
+	* New Feature to Enable effective dated fields in HRIS Basic Import. Meaning when this feature is turned on, all data effectivity fields will be added to Basic import template.
+	*/
+	public static final FeatureEnum ENABLE_EFFECTIVE_DATED_FIELDS_IN_BASICIMPORT = new FeatureEnum(299,
+			"PROVISIONING_ENABLE_EFFECTIVE_DATED_FIELDS_IN_BASICIMPORT", "ENABLE_EFFECTIVE_DATED_FIELDS_IN_BASICIMPORT",
+			"Enable Effective Dated fields in Basic Import", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_COLLABORATION_HOME = new FeatureEnum(300,
+			"PROVISIONING_ENABLE_COLLABORATION_HOME", "ENABLE_COLLABORATION_HOME", "Use Collaboration Home",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.COLLABORATION);
+	public static final FeatureEnum DISABLE_TGM_LINK = new FeatureEnum(302, "PROVISIONING_DISABLE_TGM_LINK",
+			"DISABLE_TGM_LINK", "Disable TGM link in Quick Cards", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum DYNAMIC_GROUPS_V2 = new FeatureEnum(303, "FEATURE_DYNAMIC_GROUPS_V2",
+			"dynamicGroupsV2", "Dynamic Groups V2 (My Groups)", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Manage Groups In Options menu
+	*/
+	public static final FeatureEnum MANAGE_GROUPS_IN_OPTIONS_MENU = new FeatureEnum(629,
+			"PROVISIONING_FEATURE_MANAGE_GROUPS_IN_OPTIONS_MENU", "manageGroupsInOptionsMenu",
+			"MANAGE GROUPS IN OPTIONS MENU", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* DYNAMIC_GROUPS_V2 Sub Features
+	*/
+	public static final FeatureEnum[] DYNAMIC_GROUPS_V2_SUB_FEATURES = new FeatureEnum[] { DYNAMIC_GROUPS,
+			MANAGE_GROUPS_IN_OPTIONS_MENU };
+	public static final FeatureEnum STACK_RANKER_ALL_BUT_SELF = new FeatureEnum(304,
+			"PERFORMANCE_FEATURE_STACK_RANKER_ALL_BUT_SELF", "PERFORMANCE_FEATURE_STACK_RANKER_ALL_BUT_SELF",
+			"Display all but self in Stack Ranker", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Feature to control TTF Embedding for HTML to PDF converting.
+	*/
+	public static final FeatureEnum PDF_ALWAYS_USE_TTF_EMBED = new FeatureEnum(305,
+			"PROVISIONING_FEATURE_PDF_ALWAYS_USE_TTF_EMBED", "PROVISIONING_FEATURE_PDF_ALWAYS_USE_TTF_EMBED",
+			"Always use TTF embedding when when rendering PDF", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Feature to control Calibration module.
+	*/
+	public static final FeatureEnum ENABLE_CALIBRATION = new FeatureEnum(306, "PROVISIONING_FEATURE_ENABLE_CALIBRATION",
+			"PROVISIONING_FEATURE_ENABLE_CALIBRATION", "Enable Calibration", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum EMPLOYEE_ONLY_IN_ONE_CALIBRATION_SESSION = new FeatureEnum(307,
+			"PROVISIONING_FEATURE_EMPLOYEE_ONLY_IN_ONE_CALIBRATION_SESSION",
+			"PROVISIONING_FEATURE_EMPLOYEE_ONLY_IN_ONE_CALIBRATION_SESSION",
+			"Employee can only be selected for one calibration session", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum GM_EXECUTIONMAP = new FeatureEnum(308, "PROVISIONING_FEATURE_EXECUTION_MAP",
+			"PROVISIONING_FEATURE_EXECUTION_MAP", "Execution Map", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GM_EXECUTION);
+	public static final FeatureEnum GM_STATUSREPORT = new FeatureEnum(309, "PROVISIONING_FEATURE_STATUS_REPORT",
+			"PROVISIONING_FEATURE_STATUS_REPORT", "Status Report", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GM_EXECUTION);
+	public static final FeatureEnum TRANSCRIPT = new FeatureEnum(310, "DEVELOPMENT_TRANSCRIPT_FEATURE", "Transcript",
+			"Transcript", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.OBJECTIVE);
+	public static final FeatureEnum MOBILE_ACCESS = new FeatureEnum(311, "PROVISIONING_FEATURE_MOBILE_ACCESS",
+			"mobileAccess", "Enable Mobile access.", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable JUIC Based report builder in analytics
+	*/
+	public static final FeatureEnum JUIC_REPORT_BUILDER = new FeatureEnum(312,
+			"PROVISIONING_FEATURE_JUIC_REPORT_BUILDER", "JUIC_REPORT_BUILDER", "Report Builder 2.0 UI",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_COLLABORATION_ENTIRECOMPANY = new FeatureEnum(313,
+			"PROVISIONING_ENABLE_COLLABORATION_ENTIRECOMPANYPILOTGROUP", "ENABLE_COLLABORATION_ENTIRECOMPANYPILOTGROUP",
+			"Collab Pilot Group Permission", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.COLLABORATION);
+	public static final FeatureEnum ENABLE_ORG_PULSE = new FeatureEnum(314,
+			"PROVISIONING_ENABLE_COLLABORATION_ORG_PULSE", "ENABLE_COLLABORATION_ORG_PULSE", "Collab Org Pulse",
+			FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.COLLABORATION);
+	public static final FeatureEnum ECT_FOUNDATION_OBJECTS = new FeatureEnum(315,
+			"PROVISIONING_FEATURE_ECT_FOUNDATION_OBJECTS", "ENABLE_ECT_FOUNDATION_OBJECTS",
+			"Employee Central Foundation Objects", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum SDM_CONFIGURATION_ADMIN = new FeatureEnum(421,
+			"ADMIN_PROVISIONING_FEATURE_BUSINESS_CONFIGURATION", "ENABLE_BUSINESS_CONFIGURATION",
+			"Business Configuration", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CALIBRATION_EXTERNAL_SUMMARY = new FeatureEnum(316,
+			"PROVISIONING_CALIBRATION_FEATURE_ENABLE_EXTERNAL_SUMMARY", "CALIBRATION_EXTERNAL_SUMMARY",
+			"Calibration External Summary", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum GM_MEETING_AGENDA = new FeatureEnum(317, "PROVISIONING_FEATURE_MEETING_AGENDA",
+			"PROVISIONING_FEATURE_MEETING_AGENDA", "Meeting Agenda", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GM_EXECUTION);
+	public static final FeatureEnum TRANSCRIPT_REQUIRED_FIELD_VALIDATION = new FeatureEnum(318,
+			"DEVELOPMENT_TRANSCRIPT_REQUIRED_FIELD_VALIDATION_FEATURE", "Transcript Required Field Validation",
+			"Transcript Required Field Validation", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.OBJECTIVE);
+	public static final FeatureEnum TRANSCRIPT_MANUAL_ADD_ENABLE = new FeatureEnum(319,
+			"DEVELOPMENT_TRANSCRIPT_MANUAL_ADD_ENABLE_FEATURE", "Transcript Manual Add Enable",
+			"Transcript Manual Add Enable", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.OBJECTIVE);
+	public static final FeatureEnum ENABLE_BGI_SETTINGS = new FeatureEnum(321, "PROVISIONING_ENABLE_BGI_SETTINGS",
+			"ENABLE_BGI_SETTINGS", "Recruiting Background Check", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.RCM);
+	public static final FeatureEnum COMPENSATION_EXCEL_OFFLINE_EDIT = new FeatureEnum(322,
+			"COMPENSATION_EXCEL_OFFLINE_EDIT_ENABLED", "COMPENSATION_EXCEL_OFFLINE_EDIT_ENABLED",
+			"Enable compensation excel offline edit", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum DISABLE_EXTERNAL_PHOTO_LINK = new FeatureEnum(323,
+			"PROVISIONING_DISABLE_EXTERNAL_PHOTO_LINK", "DISABLE_EXTERNAL_PHOTO_LINK", "Disable external photo link",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ROLE_BASED_PERMISSION = new FeatureEnum(325,
+			"PROVISIONING_FEATURE_ROLE_BASED_PERMISSION", "ROLE_BASED_PERMISSION", "Role Based Permission",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum PERMISSION_GROUP_TEAM_VIEW_INCLUDE_INACTIVE_USERS = new FeatureEnum(734,
+			"PROVISIONING_FEATURE_ENABLE_PERMISSION_GROUP_TEAM_VIEW_INCLUDE_INACTIVE_USERS",
+			"permissionGroupTeamViewIncludeInactiveUsers", "Permission Group Team View Include Inactive Users",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum COMPENSATION_MANAGER_ASSIGN_PLANNER_PERMISSION = new FeatureEnum(327,
+			"COMPENSATION_MANAGER_ASSIGN_PLANNER_PERMISSION", "COMPENSATION_MANAGER_ASSIGN_PLANNER_PERMISSION",
+			"Edit compensation planner permission via UI", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_ONBOARDING_SETTINGS = new FeatureEnum(329,
+			"PROVISIONING_ENABLE_ONBOARDING_SETTINGS", "ENABLE_ONBOARDING_SETTINGS", "Recruiting Onboarding",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.RCM);
+	public static final FeatureEnum ENABLE_CUBETREE_INTEGRATION = new FeatureEnum(330,
+			"PROVISIONING_FEATURE_ENABLE_CUBETREE_INTEGRATION", "ENABLE_CUBETREE_INTEGRATION",
+			"Enable CubeTree Integration", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_MOBILE_ACCESS = new FeatureEnum(337,
+			"PROVISIONING_FEATURE_ENABLE_MOBILE_ACCESS", "ENABLE_MOBILE_ACCESS", "Enable Mobile Access",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_MOBILE_ADMIN1 = new FeatureEnum(510, "PROVISIONING_FEATURE_MOBILE_AdminV1",
+			"ENABLE_MOBILE_ADMIN1", "Mobile Admin V1", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_MOBILE_ADMIN2 = new FeatureEnum(511, "PROVISIONING_FEATURE_MOBILE_AdminV2",
+			"ENABLE_MOBILE_ADMIN2", "Mobile Admin V2", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_CUBETREE_USER_PERMISSION = new FeatureEnum(342,
+			"PROVISIONING_FEATURE_ENABLE_CUBETREE_USER_PERMISSION", "ENABLE_CUBETREE_USER_PERMISSION",
+			"Enable CubeTree user permission", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CONFIGURE_SHOW_DEMO_UI = new FeatureEnum(331, "PERFORMANCE_CONFIGURE_SHOW_DEMO_UI",
+			"PERFORMANCE_CONFIGURE_SHOW_DEMO_UI", "Configure Show Demo UI for PM - NO LONGER USED",
+			FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_YOUCALC_FOR_COMPENSATION = new FeatureEnum(332,
+			"PROVISIONING_ENABLE_YOUCALC_FOR_COMPENSATION", "ENABLE_YOUCALC_FOR_COMPENSATION",
+			"Enable YouCalc widget on compensation form", FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	/** 
+	* This feature enum is no longer used now. The Comp profile is turned on/off through provisioing.
+	*/
+	public static final FeatureEnum ENABLE_COMPENSATION_PROFILE = new FeatureEnum(440,
+			"PROVISIONING_ENABLE_COMPENSATION_PROFILE", "ENABLE_PROFILE_FOR_COMPENSATION",
+			"Enable Compensation Employee Profile (Individual View) for Compensation module",
+			FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	/** 
+	* * Enable BI Publisher integration feature with additional information
+	*/
+	public static final FeatureEnum BI_PUBLISHER_EXPORT_SCORECARD_XML_WITH_ADDITIONAL_INFO = new FeatureEnum(333,
+			"BIPUBLISHER_EXPORT_SCORECARD_XML_WITH_ADDITIONAL_INFO", "BIPublisherExportScorecardXmlWithAddlInfo",
+			"BI Publisher Export Scorecard Xml with additional Information", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.GENERAL);
+	@Deprecated
+	public static final FeatureEnum ENABLE_QUARTZ_FOR_ANALYTICS_REPORTS = new FeatureEnum(334,
+			"PROVISIONING_FEATURE_ENABLE_QUARTZ_FOR_ANALYTICS", "ENABLE_QUARTZ_FOR_ANALYTICS",
+			"Enable Quartz Scheduling for Analytics", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_PURGE_JOB_FOR_ANALYTICS_REPORTS = new FeatureEnum(488,
+			"PROVISIONING_FEATURE_ENABLE_PURGE_JOB_FOR_ANALYTICS", "ENABLE_PURGE_JOB_FOR_ANALYTICS",
+			"Enable Purge Job for Analytics", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_SPREADSHEET_REPORTS_FOR_STANDARD_RDF = new FeatureEnum(492,
+			"PROVISIONING_FEATURE_SPREADSHEET_REPORT_FOR_STANDARD_RDF", "ENABLE_SPREADSHEET_REPORTS_FOR_STANDARD_RDF",
+			"Enable Spreadsheet reports for standard RDFs", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Enable Execution audit
+	*/
+	public static final FeatureEnum DISABLE_EXECUTION_AUDIT = new FeatureEnum(613,
+			"PROVISIONING_FEATURE_EXECUTION_AUDIT", "EnableExecutionAudit", "Enable Execution audit",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Enable Event audit
+	*/
+	public static final FeatureEnum DISABLE_EVENT_AUDIT = new FeatureEnum(614, "PROVISIONING_FEATURE_EVENT_AUDIT",
+			"EnableEventAudit", "Enable Event Audit", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Switch to Enable all offline execution of Analytics Spreadsheet reports by Quartz servers
+	*/
+	@Deprecated
+	public static final FeatureEnum FORCE_QUARTZ_FOR_SPREADSHEET_REPORTS = new FeatureEnum(467,
+			"PROVISIONING_FEATURE_FORCE_QUARTZ_FOR_SPREADSHEET_REPORTS", "FORCE_QUARTZ_FOR_SPREADSHEET_REPORTS",
+			"Enable offline execution of all analytics spreadsheet/RDF reports by Quartz",
+			FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Enable youCalc rules engine for HRIS.
+	*/
+	public static final FeatureEnum YOUCALC_FOR_HRIS = new FeatureEnum(335, "PROVISIONING_YOUCALC_FOR_HRIS",
+			"YOUCALC_FOR_HRIS", "YouCalc for HRIS", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Dashboards 2.0
+	* @deprecated from provisioning since Dashboards 2.0 must be available forall.
+	*/
+	@Deprecated
+	public static final FeatureEnum ENABLE_YOUCALC_FOR_ANALYTICS = new FeatureEnum(336,
+			"PROVISIONING_FEATURE_ENABLE_YOUCALC", "ENABLE_YOUCALC", "Enable YouCalc for Analytics",
+			FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Use User Permissions when displaying youcalc models, like permission to export to Excel and CSV.
+	*/
+	public static final FeatureEnum ENABLE_YOUCALC_USER_PERMS_FOR_ANALYTICS = new FeatureEnum(339,
+			"PROVISIONING_FEATURE_YOUCALC_PERMISSIONS", "ENABLE_YOUCALC", "Enable YouCalc User Permissions",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	@Deprecated
+	public static final FeatureEnum ENABLE_CREATE_MULTIDATASET_ADHOC_REPORTS = new FeatureEnum(375,
+			"PROVISIONING_FEATURE_ENABLE_MULTI_ADHOC_DATASET_REPORTS", "ENABLE_ADHOC_MULTIDATASET_REPORTS",
+			"Enabled Adhoc MultiDataSet reports", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	@Deprecated
+	public static final FeatureEnum ENABLE_CREATE_CROSSDOMAIN_ADHOC_REPORTS = new FeatureEnum(380,
+			"PROVISIONING_FEATURE_ENABLE_CROSSDOMAIN_ADHOC_REPORTS", "ENABLE_ADHOC_CROSSDOMAIN_REPORTS",
+			"Enable Adhoc Cross Domain reports", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Enable Employee Central API feature.
+	*/
+	public static final FeatureEnum FEATURE_ECT_SFAPI = new FeatureEnum(340, "PROVISIONING_FEATURE_ECT_SFAPI",
+			"ECT_SFAPI", "ECT_SFAPI", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.WEBSERVICES);
+	public static final FeatureEnum ENABLE_FTP_TRANSFER_OPTION = new FeatureEnum(341,
+			"PROVISIONING_ENABLE_FTP_TRANSFER_OPTION", "PROVISIONING_ENABLE_FTP_TRANSFER_OPTION",
+			"Enable FTP Transfer option", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum DISABLE_DP_LINK = new FeatureEnum(343, "PROVISIONING_DISABLE_DP_LINK",
+			"DISABLE_DP_LINK", "Disable Development Plan link in Quick Cards", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum EDU_PROFILE = new FeatureEnum(344, "PROVISIONING_ENABLE_EDU_PROFILE",
+			"PROVISIONING_ENABLE_EDU_PROFILE", "Everyday Use Profile", FeatureReadinessEnum.DEMOABLE,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CALIBRATION_MANAGER_SESSION = new FeatureEnum(345,
+			"PROVISIONING_CALIBRATION_MANAGER_SESSION", "MANAGER_CALIBRATION_SESSION", "Calibration Manager Session",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* JobFamily JobRole compound key
+	*/
+	public static final FeatureEnum JOBFAMILY_VALIDATE_ROLE_WITHOUT_COMPOUND_KEY = new FeatureEnum(346,
+			"JDM_FAMILY_PLUS_ROLE_COMPOUND_KEY", "JDM_FAMILY_PLUS_ROLE_COMPOUND_KEY",
+			"Jdm Family Plus Role Compound Key ", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum JOBFAMILY_VALIDATE_ROLE_WITH_COMPOUND_KEY = new FeatureEnum(347,
+			"JDM_FAMILY_PLUS_ROLE_PLUS_MAPPING_DATA_TYPE_PLUS_MAPPING_DATA_TYPE_VALUE_COMPOUND_KEY",
+			"JDM_FAMILY_PLUS_ROLE_PLUS_MAPPING_DATA_TYPE_PLUS_MAPPING_DATA_TYPE_VALUE_COMPOUND_KEY",
+			"Jdm Family Plus Role Plus Mapping Data Type Plus Mapping Data Type Value Compound Key",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* JobCode only map to one JobRole
+	*/
+	public static final FeatureEnum JOBCODE_ONLY_MAP_ONE_ROLE = new FeatureEnum(362, "JDM_JOBCODE_ONLY_MAP_ONE_ROLE",
+			"JDM_JOBCODE_ONLY_MAP_ONE_ROLE", "Jobcode may only be mapped to one role", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Data Retention Management.
+	*/
+	public static final FeatureEnum DATA_RETENTION_MANAGEMENT = new FeatureEnum(348,
+			"PROVISIONING_FEATURE_ENABLE_DATA_RETENTION_MANAGEMENT",
+			"PROVISIONING_FEATURE_ENABLE_DATA_RETENTION_MANAGEMENT", "Enable Data Retention Management Option",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* This is strictly for SOCGEN Manager Transfer for Employee Profile.
+	*/
+	public static final FeatureEnum MTEP = new FeatureEnum(349, "PROVISIONING_FEATURE_MTEP", "MTEP",
+			"Manager Transfer for Employee Profile", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Obsoleted feature, move to universal and user permission
+	*/
+	@Deprecated
+	public static final FeatureEnum ORGANIZATION_CHART_CUBETREE_INTEGRATION = new FeatureEnum(350,
+			"PROVISIONING_FEATURE_ORGANIZATION_CHART_CUBETREE_INTEGRATION", "orgchartCubetreeIntegration",
+			"Enable Organization Chart for BizX Mobile Access", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum V12_PROFILE = new FeatureEnum(351, "PROVISIONING_FEATURE_V12_PROFILE",
+			"PROVISIONING_FEATURE_V12_PROFILE", "Profile V12", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_BASIC_AUDITING = new FeatureEnum(352, "ENABLE_BASIC_AUDITING",
+			"ENABLE_BASIC_AUDITING", "Enable Basic Auditing", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.ENABLE_AUDITING);
+	public static final FeatureEnum ENABLE_COMPREHENSIVE_AUDITING = new FeatureEnum(353,
+			"ENABLE_COMPREHENSIVE_AUDITING", "ENABLE_COMPREHENSIVE_AUDITING", "Enable Comprehensive Auditing",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.ENABLE_AUDITING);
+	public static final FeatureEnum PM2_REDESIGN = new FeatureEnum(354, "PROVISIONING_FEATURE_PM2",
+			"PROVISIONING_FEATURE_PM2", "Performance Management v2.0", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CALIBRATION_FILTER_MULTI_SELECT = new FeatureEnum(355,
+			"PROVISIONING_CALIBRATION_FILTER_MULTI_SELECT", "CALIBRATION_FILTER_MULTI_SELECT",
+			"Calibration Filter Multi Select", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum AUDIT_ON_FORM_SAVING = new FeatureEnum(356, "AUDIT_ON_FORM_SAVING",
+			"AUDIT_ON_FORM_SAVING", "AUDIT ON FORM SAVING", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.ENABLE_AUDITING);
+	public static final FeatureEnum ENABLE_ADMINV2 = new FeatureEnum(328, "PROVISIONING_FEATURE_ADMINV2",
+			"ENABLE_ADMINV2", "Admin 2.0", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL, false);
+	/** 
+	* Admin homepage
+	*/
+	public static final FeatureEnum ADMIN_HOMEPAGE = new FeatureEnum(605, "PROVISIONING_FEATURE_ADMIN_HOMEPAGEE",
+			"admin_homepage", "Admin Homepage", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_SETUP_WIZARD = new FeatureEnum(358, "PROVISIONING_FEATURE_SETUP_WIZARD",
+			"SETUP_WIZARD", "Setup Wizard", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Obsoleted feature, move to universal and user permission
+	*/
+	@Deprecated
+	public static final FeatureEnum ECT_MOBILE_TODO = new FeatureEnum(357, "PROVISIONING_FEATURE_ECT_MOBILE_TODO",
+			"ENABLE_ECT_MOBILE_TODO", "Employee Central Mobile To-Dos", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum AUTO_FORM_CREATION = new FeatureEnum(359, "PROVISIONING_FEATURE_AUTO_FORM_CREATION",
+			"ENABLE_AUTO_FORM_CREATION", "Automatic Form Creation", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_PLATEAU_INTEGRATION = new FeatureEnum(361,
+			"PROVISIONING_FEATURE_ENABLE_PLATEAU_INTEGRATION", "ENABLE_PLATEAU_INTEGRATION",
+			"Enable Plateau Integration", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_PLATEAU_THIRD_PARTY_COOKIE_MECHANISM = new FeatureEnum(742,
+			"PROVISIONING_FEATURE_ENABLE_PLATEAU_THIRD_PARTY_COOKIE_MECHANISM",
+			"ENABLE_PLATEAU_THIRD_PARTY_COOKIE_MECHANISM",
+			"Enable SuccessFactors Learning third-party cookie mechanism", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_GRANTING_LMS_ROLES_TO_GROUPS = new FeatureEnum(686,
+			"PROVISIONING_FEATURE_ENABLE_GRANTING_LMS_ROLES_TO_GROUPS", "enableGrantingLMSRolesToGroups",
+			"Enable Granting LMS Roles to Groups", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_CUSTOM_EXTERNAL_MODULE_INTEGRATION = new FeatureEnum(417,
+			"PROVISIONING_FEATURE_ENABLE_CUSTOM_EXTERNAL_MODULE_INTEGRATION", "enableCustomExternalModuleIntegration",
+			"Enable Custom External Module Integration", FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_QUARTZ_DATE_TIME_COMP_FOR_INCREMENTAL_EXPORT = new FeatureEnum(366,
+			"PROVISIONING_FEATURE_ENABLE_QUARTZ_DATE_TIME_COMP_FOR_INCREMENTAL_EXPORT",
+			"ENABLE_QUARTZ_DATE_TIME_COMP_FOR_INCREMENTAL_EXPORT",
+			"Use Date and Time from Quartz configuration rather than default value", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_REMOVE_HTML_TAGS_FROM_PM_ADHOC_REPORT = new FeatureEnum(433,
+			"PERFORMANCE_PROVISIONING_REMOVE_HTML_TAGS_FROM_PM_ADHOC_REPORT",
+			"ENABLE_REMOVE_HTML_TAGS_FROM_PM_ADHOC_REPORT",
+			"Remove HTML tags for ad-hoc reporting on Performance Management v11", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum GENERIC_OBJECTS = new FeatureEnum(367, "PROVISIONING_FEATURE_GENERIC_OBJECTS",
+			"ENABLE_GENERIC_OBJECTS", "Generic Objects", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_MULTI_THREADIN_ARCHIVE_PRINT_REPORTS = new FeatureEnum(368,
+			"PROVISIONING_FEATURE_ENABLE_MULTI_THREADIN_ARCHIVE_PRINT_REPORTS",
+			"ENABLE_MULTI_THREADIN_ARCHIVE_PRINT_REPORTS", "Enable multi threading for archive & print reports",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_DPCS2 = new FeatureEnum(369, "PROVISIONING_ENABLE_DPCS2", "ENABLE_DPCS2",
+			"Enable DPCS2", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum DISABLE_EMAIL_LISTVIEW_CHARACTER_LIMITATION = new FeatureEnum(373,
+			"PROVISIONING_FEATURE_DISABLE_LISTVIEW_EMAIL_CHARACTER_LIMITATION",
+			"DISABLE_LISTVIEW_EMAIL_CHARACTER_LIMITATION", "Disable Listview Email Character Limitation",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Compensation Plan Activity Audit.
+	*/
+	public static final FeatureEnum ENABLE_COMP_PLAN_ACTIVITY_AUDIT = new FeatureEnum(371,
+			"PROVISIONING_FEATURE_ENABLE_COMP_PLAN_ACTIVITY_AUDIT", "ENABLE_COMP_PLAN_ACTIVITY_AUDIT",
+			"Enable Compensation Plan Activity Audit", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum PM_SEARCH_COMPETENCY = new FeatureEnum(372,
+			"PROVISIONING_FEATURE_PM_FORM_SEARCH_COMPENTECY", "PM_FORM_SEARCH_COMPETENCY",
+			"Enable PM Form Search Competencies", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_COMP_ONLY_AUDITING = new FeatureEnum(374, "ENABLE_COMP_ONLY_AUDITING",
+			"ENABLE_COMP_ONLY_AUDITING", "Enable Comp Only Auditing", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.ENABLE_AUDITING);
+	public static final FeatureEnum INFORM_ARB_INTEG = new FeatureEnum(377, "PROVISIONING_INFORM_ARB_INTEG",
+			"INFORM_ARB_INTEG", "Adhoc Report Builder Web Service URL(ARB)", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum INFORM_AUTO_USER_CREATION_SFAPI = new FeatureEnum(378,
+			"PROVISIONING_INFORM_AUTO_USER_CREATION_SFAPI", "INFORM_AUTO_USER_CREATION_SFAPI",
+			"Auto creation of user accounts via SFAPI:", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_LEGACY_DATE_TIME = new FeatureEnum(379,
+			"PROVISIONING_FEATURE_ENABLE_LEGACY_DATE_HANDLING_IN_ADHOC_REPORTS", "ENABLE_LEGACY_DATE_HANDLING",
+			"Enable Legacy Date Handling in Adhoc Reports", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum COMPENSATION_DISABLE_SINGLE_CREATE = new FeatureEnum(381,
+			"COMPENSATION_PROV_DISABLE_SINGLE_CREATE", "COMPENSATION_DISABLE_SINGLE_CREATE",
+			"Compensation Disable Single Create", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum COMPENSATION_DISABLE_NUMBER_FORMAT_I18N = new FeatureEnum(565,
+			"PROVISIONING_COMPENSATION_DISABLE_NUMBER_FORMAT_I18N",
+			"PROVISIONING_COMPENSATION_DISABLE_NUMBER_FORMAT_I18N", "Compensation Disable Number Format I18N",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_BIPUBLISHER_TO_BIRT_CONVERTER = new FeatureEnum(566,
+			"PROVISIONING_ENABLE_BIPUBLISHER_TO_BIRT_CONVERTER", "Enable BI Publisher to BIRT Template Converter",
+			"Enabling BIPublisher to BIRT Converter", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum INSTSYNC = new FeatureEnum(382, "FEATURE_INSTSYNC", "inst.sync",
+			"Instance Synchronization", FeatureGroupEnum.GENERAL, false);
+	/** 
+	* Ad-hoc 3.0 reporting (aka Inform)
+	*/
+	public static final FeatureEnum INFORM_ADHOC_REPORTING = new FeatureEnum(383,
+			"PROVISIONING_FEATURE_INFORM_ADHOC_REPORTING", "inform_adhoc_reporting", "Inform Adhoc Reporting",
+			FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum CALIBRATION_REVERSE_SCALE = new FeatureEnum(384,
+			"PROVISIONING_CALIBRATION_REVERSE_SCALE", "calibration reverse scale", "Calibration Reverse Scale",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum INSTSYNC_CONFIG = new FeatureEnum(385, "PROVISIONING_FEATURE_INSTSYNC_CONFIG",
+			"inst.sync.config", "Instance Synchronization (Config)", FeatureGroupEnum.GENERAL);
+	/** 
+	* Planning
+	*/
+	public static final FeatureEnum WORKFORCE_PLANNING = new FeatureEnum(386, "PROVISIONING_FEATURE_WORKFORCE_PLANNING",
+			"inform_planning", "Inform Planning", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum PM_ACCESS_PERMISSION = new FeatureEnum(387, "PROVISIONING_PM_ACCESS_PERMISSION",
+			"PM Access permission", "PM Access permission", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum TEAM_OVERVIEW_ACCESS_PERMISSION = new FeatureEnum(674,
+			"PROVISIONING_TEAM_OVERVIEW_ACCESS_PERMISSION", "Team Overview Access permission",
+			"Team Overview Access permission", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* The Constant ENABLE_RBP_AYT_PERF_IMPROVEMENT. Using the id 388 as this feature has been patched to b1201. To maintain consistency across the releases, I am using 388 and incrementing the other features that are only part of trunk.
+	*/
+	public static final FeatureEnum ENABLE_RBP_AYT_PERF_IMPROVEMENT = new FeatureEnum(388,
+			"PROVISIONING_FEATURE_RBP_AYT_PERF_IMPROVEMENT", "ENABLE_RBP_AYT_PERF_IMPROVEMENT",
+			"Enable RBP AYT Perf Improvements", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum GM_ACCESS_PERMISSION = new FeatureEnum(389, "PROVISIONING_GM_ACCESS_PERMISSION",
+			"GM Access permission", "GM Access permission", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_COMPENSATION_ADMINV2 = new FeatureEnum(390,
+			"PROVISIONING_ENABLE_COMPENSATION_ADMINV2", "ENABLE_COMPENSATION_ADMINV2", "Comp Admin 2.0",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum BIZX_AUTOMATION = new FeatureEnum(392,
+			"PROVISIONING_FEATURE_ENABLE_BIZX_AUTOMATION", "Enable_Bizx_Automation", "Enable Bizx Automation",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* This will enable the advanced find user feature.
+	*/
+	public static final FeatureEnum ENABLE_ADVANCED_FIND_USER_COMPONENT = new FeatureEnum(393,
+			"PROVISIONING_ENABLE_ADVANCED_FIND_USER_COMPONENT", "PROVISIONING_ENABLE_ADVANCED_FIND_USER_COMPONENT",
+			"Enable Advanced Find User Component", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* SAML2 SSO 
+	*/
+	public static final FeatureEnum INFORM_SAML2_SSO = new FeatureEnum(394, "PROVISIONING_INFORM_SAML2_SSO",
+			"INFORM_SAML2_SSO", "Enable SAML SSO", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_MEDIA_SERVICE = new FeatureEnum(395,
+			"PROVISIONING_FEATURE_ENABLE_MEDIA_SERVICE", "ENABLE_MEDIA_SERVICE", "Enable Media Service",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Disable In Product Support
+	*/
+	public static final FeatureEnum DISABLE_IN_PRODUCT_SUPPORT = new FeatureEnum(450,
+			"PROVISIONING_FEATURE_DISABLE_IN_PRODUCT_SUPPORT", "DISABLE_IN_PRODUCT_SUPPORT",
+			"Disable In-Product Support", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Disable In Product Support 2
+	*/
+	public static final FeatureEnum DISABLE_IN_PRODUCT_SUPPORT_2 = new FeatureEnum(529,
+			"PROVISIONING_FEATURE_DISABLE_IN_PRODUCT_SUPPORT_2", "DISABLE_IN_PRODUCT_SUPPORT_2",
+			"Disable In-Product Support 2", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Disable In Product Support 3. This will overwrite PROVISIONING_FEATURE_DISABLE_IN_PRODUCT_SUPPORT_2 flag above
+	*/
+	public static final FeatureEnum DISABLE_IN_PRODUCT_SUPPORT_3 = new FeatureEnum(591,
+			"PROVISIONING_FEATURE_DISABLE_IN_PRODUCT_SUPPORT_3", "DISABLE_IN_PRODUCT_SUPPORT_3",
+			"Disable In-Product Support 3", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* In Product Support Use Demo Data
+	*/
+	public static final FeatureEnum IN_PRODUCT_SUPPORT_USE_STAGING_SERVERS = new FeatureEnum(517,
+			"PROVISIONING_FEATURE_IN_PRODUCT_SUPPORT_USE_STAGING_SERVERS", "IN_PRODUCT_SUPPORT_USE_STAGING_SERVERS",
+			"Use staging server environment", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable hidden header option
+	*/
+	public static final FeatureEnum ENABLE_V12_EMBEDDABLE_MODE = new FeatureEnum(410,
+			"PROVISIONING_FEATURE_ENABLE_V12_EMBEDDABLE_MODE", "ENABLE_V12_EMBEDDABLE_MODE",
+			"Enable V12 embeddable mode", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable add home icon to global header
+	*/
+	public static final FeatureEnum ENABLE_ADD_HOMEICON_TO_V12_GLOBAL_HEADER = new FeatureEnum(435,
+			"PROVISIONING_FEATURE_ADD_HOMEICON_TO_V12_GLOBAL_HEADER", "ADD_V12_HOMEICON_HEADER", "Enable V12 home icon",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable the PM-GM sync up action
+	*/
+	public static final FeatureEnum ENABLE_PM_GM_SYNC_UP = new FeatureEnum(404,
+			"PROVISIONING_FEATURE_ENABLE_PM_GM_SYNC_UP", null, "Enable GM-PM Sync up", FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Disable Form Status Page 
+	*/
+	public static final FeatureEnum DISABLE_FORM_STATUS = new FeatureEnum(401, "PROVISIONING_DISABLE_FORM_STATUS",
+			"Disable_form_status", "Disable form status", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CALIBRATION_ENFORCE_RATING_CHANGES = new FeatureEnum(402,
+			"PROVISIONING_CALIBRATION_ENFORCE_RATING_CHANGES", "CALIBRATION_ENFORCE_RATING_CHANGES",
+			"Calibration Enforce Rating Changes", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* HANA
+	*/
+	public static final FeatureEnum RBP_HANA = new FeatureEnum(405, "PROVISIONING_FEATURE_RBP_HANA", "RBP_HANA",
+			"Enable HANA access for RBP", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CALIBRATION_SHOW_IN_PROGRESS_RATINGS_IN_LIVE_PROFILE = new FeatureEnum(408,
+			"PROVISIONING_CALIBRATION_SHOW_IN_PROGRESS_RATINGS_IN_LIVE_PROFILE",
+			"CALIBRATION_SHOW_IN_PROGRESS_RATINGS_IN_LIVE_PROFILE",
+			"Calibration Show In Progress Calibration Ratings In Live Profile", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum COMPENSATION_EXECUTIVE_FORM_VIEW = new FeatureEnum(481,
+			"COMPENSATION_FEATURE_EXECREVIEW_FORM_VIEW", "COMPENSATION_FEATURE_EXECREVIEW_FORM_VIEW",
+			"Executive Review Form View", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CALIBRATION_LAUNCH_FROM_PM2_TEAM_OVERVIEW = new FeatureEnum(420,
+			"PROVISIONING_CALIBRATION_LAUNCH_FROM_PM2_TEAM_OVERVIEW", "CALIBRATION_LAUNCH_FROM_PM2_TEAM_OVERVIEW",
+			"Calibration Launch Calibration From PM2 Team Overview", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CALIBRATION_EXECUTIVE_REVIEW = new FeatureEnum(485,
+			"PROVISIONING_CALIBRATION_EXECUTIVE_REVIEW", "CALIBRATION_EXECUTIVE_REVIEW", "Calibration Executive Review",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CALIBRATION_ENABLE_V12_ORG_CHART = new FeatureEnum(685,
+			"PROVISIONING_CALIBRATION_ENABLE_V12_ORG_CHART", "CALIBRATION_ENABLE_V12_ORG_CHART",
+			"Calibration enable v12 org chart", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CALIBRATION_ENABLE_UI5 = new FeatureEnum(769, "PROVISIONING_CALIBRATION_ENABLE_UI5",
+			"CALIBRATION_ENABLE_UI5", "Calibration enable UI5", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum[] CALIBRATION_SUB_FEATURES = new FeatureEnum[] {
+			FeatureEnum.EMPLOYEE_ONLY_IN_ONE_CALIBRATION_SESSION, FeatureEnum.CALIBRATION_EXECUTIVE_REVIEW,
+			FeatureEnum.CALIBRATION_MANAGER_SESSION, FeatureEnum.CALIBRATION_REVERSE_SCALE,
+			FeatureEnum.CALIBRATION_ENFORCE_RATING_CHANGES,
+			FeatureEnum.CALIBRATION_SHOW_IN_PROGRESS_RATINGS_IN_LIVE_PROFILE,
+			FeatureEnum.CALIBRATION_LAUNCH_FROM_PM2_TEAM_OVERVIEW, FeatureEnum.CALIBRATION_EXTERNAL_SUMMARY,
+			FeatureEnum.CALIBRATION_ENABLE_V12_ORG_CHART, FeatureEnum.CALIBRATION_ENABLE_UI5 };
+	public static final FeatureEnum HTML5_HIERARCHY_VIEW = new FeatureEnum(412,
+			"PROVISIONING_FEATURE_HTML5_HIERARCHY_VIEW", "hierachyView", "Hierarchy View",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_REORGANIZATION_PLANNING = new FeatureEnum(414,
+			"PROVISIONING_FEATURE_ENABLE_REORGANIZATION_PLANNING", "ENABLE_REORGANIZATION_PLANNING",
+			"Enable Reorg Planning", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum TGM_V12 = new FeatureEnum(428, "PROVISIONING_FEATURE_ENABLE_GM_V12", null, "GM v12",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Payment Method field in Payment Information Portlet When Checked/Marked, the Payment Method field will appear even if the "Enable Payroll Integration" is unchecked
+	*/
+	public static final FeatureEnum SHOW_PAYMENT_METHOD_FIELD = new FeatureEnum(491,
+			"PROVISIONING_FEATURE_SHOW_PAYMENT_METHOD_FIELD", "SHOW_PAYMENT_METHOD_FIELD", "Show Payment Method Field",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ECT_PAYMENT_INFORMATION_V3 = new FeatureEnum(564,
+			"PROVISIONING_FEATURE_PAYMENT_INFORMATION", "ENABLE_PAYMENT_INFORMATION", "PaymentInformation",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ECT_PAYMENT_INFORMATION_MIGRATION = new FeatureEnum(567,
+			"PROVISIONING_FEATURE_PAYMENT_INFORMATION_MIGRATION", "ENABLE_PAYMENT_INFORMATION_MIGRATION",
+			"PaymentInformationMigration", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_SOLR_PEOPLE_SEARCH = new FeatureEnum(568,
+			"PROVISIONING_FEATURE_ENABLE_SOLR_PEOPLE_SEARCH", "solrPeopleSearch", "Solr People Search",
+			FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_PEOPLE_SEARCH_ALT_FIELDS = new FeatureEnum(621,
+			"PROVISIONING_FEATURE_ENABLE_PEOPLE_SEARCH_ALT_FIELDS", "peopleSearchAltFields", "People Search Alt Fields",
+			FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	/** 
+	* Payroll Integration SAP ERP Cloud(ECP) <> EC
+	*/
+	public static final FeatureEnum ENABLE_EMPLOYEE_CENTRAL_PAYROLL = new FeatureEnum(751,
+			"PROVISIONING_EMPFILE_ENABLE_EMPLOYEE_CENTRAL_PAYROLL", "enable_employee_central_payroll",
+			"Enable Employee Central Payroll", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Payroll Integration SAP ERP <> EC
+	*/
+	public static final FeatureEnum PAYROLL_INTEGRATION = new FeatureEnum(424,
+			"PROVISIONING_EMPFILE_PAYROLL_INTEGRATION", "payroll_integration", "Enable Payroll Integration",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Payroll Error
+	*/
+	public static final FeatureEnum PAYROLL_WORKBENCH = new FeatureEnum(494, "PROVISIONING_PAYROLL_WORKBENCH",
+			"payroll_workbench", "Enable Payroll Workbench", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL,
+			false);
+	/** 
+	* Payroll Process
+	*/
+	public static final FeatureEnum PAYROLL_PROCESS = new FeatureEnum(495, "PROVISIONING_PAYROLL_PROCESS",
+			"payroll_process", "Enable Payroll Process", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL,
+			false);
+	/** 
+	* Enable New Experience Payroll Process
+	*/
+	public static final FeatureEnum ENABLE_NEW_EXPERIENCE_PAYROLL_PROCESS = new FeatureEnum(496,
+			"PROVISIONING_ENABLE_NEW_EXPERIENCE_PAYROLL_PROCESS", "enable_new_experience_payroll_process",
+			"Enable New Experience Payroll Process", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL, false);
+	public static final FeatureEnum PAYROLL_CONTROL_CENTER = new FeatureEnum(497, "PROVISIONING_PAYROLL_CONTROL_CENTER",
+			"payroll_control_center", "Enable Payroll Control Center", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Payroll Process Sub Features
+	*/
+	public static final FeatureEnum[] PAYROLL_PROCESS_SUB_FEATURES = new FeatureEnum[] {
+			ENABLE_NEW_EXPERIENCE_PAYROLL_PROCESS };
+	/** 
+	* Eanble Boomi admin Link
+	*/
+	public static final FeatureEnum ENABLE_BOOMI_ADMIN_LINK = new FeatureEnum(426,
+			"PROVISIONING_BOOMI_ENABLE_ADMIN_LINK", "enable_boomi_admin_link", "Enable Boomi Admin Link",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.ENABLE_BOOMI_ADMIN_LINK);
+	/** 
+	* Enable CWS V12
+	*/
+	public static final FeatureEnum CAREER_WORKSHEET_V12 = new FeatureEnum(429, "PROVISIONING_FEATURE_CDP_V12",
+			"CareerWorksheetV12", "Career Worksheet V12", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Enable Adhoc Configuration pill
+	*/
+	@Deprecated
+	public static final FeatureEnum ADHOC_CONFIGURATION_PILL = new FeatureEnum(432,
+			"PROVISIONING_FEATURE_ADHOC_CONFIGURATION_PILL", "ADHOC_CONFIGURATION_PILL",
+			"Enable Ad Hoc Configuration Pill", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Avoiding cartesian product formation for adhoc reports
+	*/
+	public static final FeatureEnum ADHOC_AVOID_CARTESIAN_PRODUCT = new FeatureEnum(477,
+			"PROVISIONING_FEATURE_CARTESIAN_PRODUCT_AVOID", "ADHOC_AVOID_CARTESIAN_PRODUCT",
+			"Avoid Cartesian Product in Ad Hoc Report (Employee Profile Only) ", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Enable Onboarding applictaion
+	*/
+	public static final FeatureEnum ONBOARDING_APPLICATION = new FeatureEnum(434,
+			"PROVISIONING_FEATURE_ONBOARDING_APPLICATION", "onboarding", "Onboarding Application",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Name Format Feature
+	*/
+	public static final FeatureEnum NAME_FORMAT = new FeatureEnum(442, "PROVISIONING_FEATURE_NAME_FORMAT",
+			"ENABLE_NAME_FORMAT", "Name Formats", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable security sanitization of content from Company Resource
+	*/
+	public static final FeatureEnum ENABLE_COMPANY_RESOURCES_CONTENT_SECURITY = new FeatureEnum(443,
+			"PROVISIONING_ENABLE_SECURITY_OF_COMPANY_RESOURCES_CONTENT", "EnableCompanyResourcesContentSecurity",
+			"Enable security sanitization of content from Company Resource", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Ad-Hoc Field level permission
+	*/
+	public static final FeatureEnum ADHOC_FIELD_LEVEL_PERMISSION = new FeatureEnum(444,
+			"PROVISIONING_FEATURE_ADHOC_FIELD_LEVEL_PERMISSION", "fielLevelPermission",
+			"Enable Ad Hoc Field Level Permission", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Enable People Insights Feature (Mobile)
+	*/
+	@Deprecated
+	public static final FeatureEnum PEOPLE_INSIGHTS = new FeatureEnum(445, "PROVISIONING_FEATURE_PEOPLE_INSIGHTS",
+			"ENABLE_PEOPLE_INSIGHTS", "People Insights (Mobile)", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Pension Payout
+	*/
+	public static final FeatureEnum ECT_PENSION_PAYOUT = new FeatureEnum(447, "PROVISIONING_FEATURE_ECT_PENSION_PAYOUT",
+			"ENABLE_ECT_PENSION_PAYOUT", "Employee Central Pension Payout", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Cost Distribution
+	*/
+	public static final FeatureEnum ECT_COST_DISTRIBUTION = new FeatureEnum(448,
+			"PROVISIONING_FEATURE_ECT_COST_DISTRIBUTION", "cost_distribution", "Enable cost distribution",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Ad-Hoc Field level permission
+	*/
+	public static final FeatureEnum ADHOC_CELL_LEVEL_PERMISSION = new FeatureEnum(449,
+			"PROVISIONING_FEATURE_ADHOC_CELL_LEVEL_PERMISSION", "cellLevelPermission",
+			"Enable Ad Hoc Cell Level Permission", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Enable Footer text for scheduled job report notifications
+	*/
+	public static final FeatureEnum ENABLE_FOOTER_TEXT_SCHEDULED_JOBS = new FeatureEnum(451,
+			"PROVISIONING_FEATURE_ENABLE_FOOTER_TEXT_SCHEDULED_JOBS", "enableFooterTextScheduledReports",
+			"Enable Footer text for Scheduled Job Report Notifications", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum CUSTOM_NAVIGATION = new FeatureEnum(453, "PROVISIONING_FEATURE_CUSTOM_NAVIGATION",
+			"CUSTOM_NAVIGATION", "Config custom navigation", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum FEATURE_ECT_ODATA_API = new FeatureEnum(454, "PROVISIONING_FEATURE_ECT_ODATA_API",
+			"ECT_ODATA_API", "ECT_OData_API", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.WEBSERVICES);
+	public static final FeatureEnum AGGREGATE_FOR_OTHER_DATATYPE = new FeatureEnum(455,
+			"PROVISIONING_FEATURE_AGGREGATE_FOR_OTHER_DATATYPE", "AGGREGATE_FOR_OTHER_DATATYPE",
+			"Enable Aggregation for other Numeric data types", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_ACCESS_UNPUBLISH_CONTENT = new FeatureEnum(458,
+			"PROVISIONING_ENABLE_ACCESS_UNPUBLISH_CONTENT", "ENABLE_ACCESS_UNPUBLISH_CONTENT",
+			"Enable access to unpublish content from successstore", FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum PHOTO_CACHING_DISABLE = new FeatureEnum(460,
+			"PROVISIONING_FEATURE_PHOTO_CACHING_DISABLE", "PHOTO_CACHING_DISABLE", "Disable Photo Caching",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum TALENT_REVIEW = new FeatureEnum(461, "PROVISIONING_FEATURE_TALENT_REVIEW",
+			"TALENT_REVIEW", "Enable Talent Reviews", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum XML_CONFIGURATOR_RCM_JOB_REQ = new FeatureEnum(462,
+			"PROVISIONING_XML_CONFIGURATOR_RCM_JOB_REQ", "XML_CONFIGURATOR_RCM_JOB_REQ",
+			"XML Configurator For Job Requisition", FeatureGroupEnum.XML_CONFIGURATOR);
+	public static final FeatureEnum XML_CONFIGURATOR_PM = new FeatureEnum(563, "PROVISIONING_XML_CONFIGURATOR_PM",
+			"XML_CONFIGURATOR_PM", "XML Configurator For PM", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.XML_CONFIGURATOR);
+	/** 
+	* Only filter options associated with active entities should be retrieved in FBDashboardFilter
+	*/
+	public static final FeatureEnum RETRIEVE_ACTIVE_AND_INACTIVE_FILTER_OPTIONS = new FeatureEnum(463,
+			"PROVISIONING_FEATURE_ENABLE_INACTIVE_FILTER_OPTIONS", "activeFiltersOnly", "Classic Reporting Filters",
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum LIMITING_NUMBER_OF_ENTITES = new FeatureEnum(465,
+			"PROVISIONING_FEATURE_LIMITING_NUMBER_OF_ENTITES", "LIMITING_NUMBER_OF_ENTITES",
+			"Enable limiting the number of participating entities", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_MDF_AUDITING = new FeatureEnum(468, "ENABLE_MDF_AUDITING",
+			"ENABLE_MDF_AUDITING", "Enable MDF Auditing", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.ENABLE_AUDITING);
+	/** 
+	* Switch to Enable/Disable competency and behaviour values localization in DDS reports
+	*/
+	public static final FeatureEnum ENABLE_COMPETENCY_BEHAVIOR_LOCALIZATION_IN_DDS = new FeatureEnum(469,
+			"PROVISIONING_FEATURE_ENABLE_COMPETENCY_BEHAVIOR_LOCALIZATION_IN_DDS",
+			"ENABLE_COMPETENCY_BEHAVIOR_LOCALIZATION_IN_DDS",
+			"Enable Competency/Behavior localization in Detailed Document Search", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_TARGET_POPULATION_OF_GOAL_ASSIGNMENT = new FeatureEnum(471,
+			"PROVISIONING_FEATURE_ENABLE_TARGET_POPULATION_OF_GOAL_ASSIGNMENT",
+			"FEATURE_TARGET_POPULATION_OF_GOAL_ASSIGNMENT",
+			"Enable target population of Group Goal Assignment permission", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.OBJECTIVE);
+	public static final FeatureEnum ENABLE_RELATIVE_DATES_IN_ROUTEMAP = new FeatureEnum(472,
+			"PROVISIONING_FEATURE_ENABLE_RELATIVE_DATES_IN_ROUTEMAP", "FEATURE_RELATIVE_DATES_IN_ROUTEMAP",
+			"Enable relative dates in routemap", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_FETCH_LATEST_RDF = new FeatureEnum(473,
+			"PROVISIONING_FEATURE_ENABLE_FETCH_LATEST_RDF", "FEATURE_FETCH_LATEST_RDF",
+			"Execute the latest version of standard spreadsheet reports overriding the version uploaded in that instance",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum LIMITING_NUMBER_OF_ENTITES_ENFORCE_VALIDATION = new FeatureEnum(474,
+			"PROVISIONING_FEATURE_LIMITING_NUMBER_OF_ENTITES_ENFORCE_VALIDATION",
+			"LIMITING_NUMBER_OF_ENTITES_ENFORCE_VALIDATION", "Enforce limiting entites validation on existing report",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum MEMORY_ALLOCATION_ADHOC_REPORTS = new FeatureEnum(475,
+			"PROVISIONING_FEATURE_MEMORY_ALLOCATION_ADHOC_REPORTS", "MEMORY_ALLOCATION_ADHOC_REPORTS",
+			"Allocate Memory limitation to run a Adhoc 2.0 reports.", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum MEMORY_ALLOCATION_ADHOC_REPORTS_ENFORCE_VALIDATION = new FeatureEnum(478,
+			"PROVISIONING_FEATURE_MEMORY_ALLOCATION_ADHOC_REPORTS_ENFORCE_VALIDATION",
+			"MEMORY_ALLOCATION_ADHOC_REPORTS_ENFORCE_VALIDATION",
+			"Enforce Validation For Allocate Memory limitation to run a Adhoc 2.0 reports.",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ADHOC_AVOID_CARTESIAN_PRODUCT_ENFORCE_VALIDATION = new FeatureEnum(479,
+			"PROVISIONING_FEATURE_CARTESIAN_PRODUCT_AVOID_ENFORCE_VALIDATION",
+			"ADHOC_AVOID_CARTESIAN_PRODUCT_ENFORCE_VALIDATION",
+			"Enforce Validation For Avoid Cartesian Product in Ad Hoc Report (Employee Profile Only) ",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum LIMITING_THE_NUMBERS_OF_COLUMNS = new FeatureEnum(480,
+			"PROVISIONING_FEATURE_ALLOWED_NUMBER_OF_COLUMNS_NEW_REPORTS", "ALLOWED_NUMBER_OF_COLUMNS_EXISTING_REPORTS",
+			"Save new Ad-Hoc reports as draft (non-runnable) if the above condition is not satisfied.",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum LIMITING_THE_NUMBERS_OF_COLUMNS_ENFORCE_VALIDATION = new FeatureEnum(483,
+			"PROVISIONING_FEATURE_ALLOWED_NUMBER_OF_COLUMNS_EXISTING_REPORTS", "ALLOWED_NUMBER_OF_COLUMNS_NEW_REPORTS",
+			"Terminate the request to execute existing Ad-Hoc reports if above condition is not satisfied.",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum LOG_INCIDENT_INFO = new FeatureEnum(484, "PROVISIONING_FEATURE_LOG_INCIDENT_INFO",
+			"LOG_INCIDENT_INFO", "Log incident info even in case when the provisioning switches are not turned on",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_COMPENSATION_NEW_WORKSHEET_UI = new FeatureEnum(486,
+			"PROVISIONING_ENABLE_COMPENSATION_NEW_WORKSHEET_UI", "ENABLE_COMPENSATION_NEW_WORKSHEET_UI",
+			"Enable New Compensation Worksheet UI for Compensation module", FeatureReadinessEnum.DEMOABLE,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Reorg cell level permission
+	*/
+	public static final FeatureEnum ADHOC_CELL_LEVEL_PERMISSION_REORG = new FeatureEnum(487,
+			"PROVISIONING_FEATURE_ADHOC_CELL_LEVEL_PERMISSION_REORG", "cellLevelPermissionForReOrg",
+			"Enable Ad Hoc Cell Level Permission for ReOrg", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ADHOC_SORTING_PLBASED_COL = new FeatureEnum(531,
+			"PROVISIONING_FEATURE_ADHOC_SORTING_PLBASED_COL", "sortUsingLabel", "Sort Picklist Columns Based On Labels",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ADHOC_MODIFY_DATE_FILTERS = new FeatureEnum(540,
+			"PROVISIONING_FEATURE_ADHOC_MODIFY_DATE_FILTERS", "modifyDateFilters", "Modify Date Filters",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	@Deprecated
+	public static final FeatureEnum DEFAULT_SUB_TAB_CONFIGURATION = new FeatureEnum(500,
+			"PROVISIONING_FEATURE_DEFAULT_SUB_TAB_CONFIGURATION", "DEFAULT_SUB_TAB_CONFIGURATION",
+			"Enable Default Sub Tab Configurtaion", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum MS_OFFICE_2010_COMPATIBLE_OUTPUT_FOR_SPREADSHEET_REPORTS = new FeatureEnum(501,
+			"PROVISIONING_FEATURE_MS_OFFICE_2010_COMPATIBLE_OUTPUT_FOR_SPREADSHEET_REPORTS",
+			"MS_OFFICE_2010_COMPATIBLE_OUTPUT_FOR_SPREADSHEET_REPORTS",
+			"MS Office 2010 compatible output for spreadsheet reports", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum USE_ONLY_2007_SPREADSHEET_REPORT_TEMPLATES = new FeatureEnum(503,
+			"PROVISIONING_FEATURE_USE_ONLY_2007_SPREADSHEET_REPORT_TEMPLATES",
+			"USE_ONLY_2007_SPREADSHEET_REPORT_TEMPLATES", "Use Only 2007 Spreadsheet Reports",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_RBP_SETUP_WIZARD = new FeatureEnum(504,
+			"PROVISIONING_FEATURE_RBP_SETUP_WIZARD", "RBP_SETUP_WIZARD", "RBP Setup Wizard",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ECT_CONCURRENT_EMPLOYMENT = new FeatureEnum(505,
+			"PROVISIONING_FEATURE_ECT_CONCURRENT_EMPLOYMENT", "ENABLE_ECT_CONCURRENT_EMPLOYMENT",
+			"Employee Central Concurrent Employment Management", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ADHOC_ROW_LEVEL_PERMISSION_SUCCESSION = new FeatureEnum(506,
+			"PROVISIONING_FEATURE_ADHOC_ROW_LEVEL_PERMISSION_SUCCESSION",
+			"ENABLE_ADHOC_ROW_LEVEL_PERMISSION_SUCCESSION", "Enable Adhoc row level permission for Succession SDS",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ADHOC_FIELD_LEVEL_PERMISSION_SUCCESSION = new FeatureEnum(507,
+			"PROVISIONING_FEATURE_ADHOC_FIELD_LEVEL_PERMISSION_SUCCESSION",
+			"ENABLE_ADHOC_FIELD_LEVEL_PERMISSION_SUCCESSION", "Enable Adhoc field level permission for Succession SDS",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ADHOC_CELL_LEVEL_PERMISSION_SUCCESSION = new FeatureEnum(508,
+			"PROVISIONING_FEATURE_ADHOC_CELL_LEVEL_PERMISSION_SUCCESSION",
+			"ENABLE_ADHOC_CELL_LEVEL_PERMISSION_SUCCESSION", "Enable Adhoc cell level permission for Succession SDS",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Onboarding Demo Environment for ExternalATS-ONB-EC Integration
+	*/
+	public static final FeatureEnum ATS_ONB_EC_DEMO_ENVIRONMENT = new FeatureEnum(513,
+			"PROVISIONING_FEATURE_ATS_ONB_EC_DEMO_ENVIRONMENT", "ONBOARDING_DEMO_ENVIRONMENT",
+			"externalATS-ONB-EC Demo Environment", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.ONBOARDING);
+	/** 
+	* Onboarding Tour
+	*/
+	public static final FeatureEnum ONBOARDING_TOUR = new FeatureEnum(519, "PROVISIONING_FEATURE_ONBOARDING_TOUR",
+			"ONBOARDING_TOUR", "Enable onboarding tour", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.ONBOARDING);
+	/** 
+	* Onboarding Pre-Day1 access for new hires
+	*/
+	public static final FeatureEnum ONBOARDING_PRE_DAY1_EXPERIENCE = new FeatureEnum(574,
+			"PROVISIONING_FEATURE_ONBOARDING_PRE_DAY1_EXPERIENCE", "ONBOARDING_PRE_DAY1_EXPERIENCE",
+			"Enable Pre-Day1 experience for new hires", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.ONBOARDING);
+	public static final FeatureEnum PMUNITY = new FeatureEnum(512, "PROVISIONING_PMUNITY", "PROVISIONING_PMUNITY",
+			"Performance Management Unity", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum COMP_DECENTRALIZED_ADMIN = new FeatureEnum(514,
+			"PROVISIONING_COMP_DECENTRALIZED_ADMIN", "COMP_DECENTRALIZED_ADMIN", "Enable Decentralized Administration",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_POSITION_SLATE_FEATURE = new FeatureEnum(516,
+			"PROVISIONING_FEATURE_ENABLE_POSITION_SLATE", "posSlate", "Position Slate View",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	@Deprecated
+	public static final FeatureEnum ALLOW_QUICKLINKING_TO_CLASSIC_ANALYTICS = new FeatureEnum(520,
+			"PROVISIONING_FEATURE_ALLOW_QUICKLINKING_TO_CLASSIC_ANALYTICS", "ALLOW_QUICKLINKING_TO_CLASSIC_ANALYTICS",
+			"Allow Quicklinking to Classic Analytics", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	@Deprecated
+	public static final FeatureEnum ALLOW_QUICKLINKING_TO_WFA_REPORTS = new FeatureEnum(521,
+			"PROVISIONING_FEATURE_ALLOW_QUICKLINKING_TO_WFA_REPORTS", "ALLOW_QUICKLINKING_TO_WFA_REPORTS",
+			"Allow Quicklinking to WFA Reports", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ONLINE_REPORT_DESIGNER = new FeatureEnum(522, "PROVISIONING_ONLINE_REPORT_DESIGNER",
+			"ONLINE_REPORT_DESIGNER", "WFA ORD", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum WORKFORCE_ANALYTICS_CLIENT = new FeatureEnum(523,
+			"PROVISIONING_WORKFORCE_ANALYTICS_CLIENT", "WORKFORCE_ANALYTICS_CLIENT", "WORKFORCE_ANALYTICS_CLIENT",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum TALENT_INSIGHTS = new FeatureEnum(524, "PROVISIONING_TALENT_INSIGHTS",
+			"TALENT_INSIGHTS", "TALENT_INSIGHTS", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum EC_CLIENT = new FeatureEnum(525, "PROVISIONING_EC_CLIENT", "EC_CLIENT", "EC_CLIENT",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum PLATFORM_CLIENT = new FeatureEnum(526, "PROVISIONING_PLATFORM_CLIENT",
+			"PLATFORM_CLIENT", "PLATFORM_CLIENT", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum LMS_CLIENT = new FeatureEnum(527, "PROVISIONING_LMS_CLIENT", "LMS_CLIENT",
+			"LMS_CLIENT", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	@Deprecated
+	public static final FeatureEnum ALLOW_QUICKLINKING_TO_ADHOC_REPORTS = new FeatureEnum(528,
+			"PROVISIONING_FEATURE_ALLOW_QUICKLINKING_TO_ADHOC_REPORTS", "ALLOW_QUICKLINKING_TO_ADHOC_REPORTS",
+			"Allow Quicklinking to Adhoc Reports", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_READ_AUDIT = new FeatureEnum(533, "ENABLE_READ_AUDIT", "ENABLE_READ_AUDIT",
+			"ENABLE READ AUDIT", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.ENABLE_AUDITING);
+	/** 
+	* Onboarding use new MDF Storage for Manager Experience
+	*/
+	public static final FeatureEnum ONBOARDING_USE_NEW_MDF_STORAGE_FOR_MANAGER_EXPERIENCE = new FeatureEnum(534,
+			"PROVISIONING_FEATURE_ONBOARDING_MDF_STORAGE_FOR_MANAGER_EXPERIENCE", "ONBOARDING_MDF_OBJECTS",
+			"Use MDF objects for Manager Experience", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.ONBOARDING);
+	/** 
+	* Change join on run time for Adhoc reports
+	*/
+	public static final FeatureEnum ADHOC_2010_BIRT_EXCEL_OUTPUT = new FeatureEnum(536,
+			"PROVISIONING_FEATURE_ADHOC_2010_BIRT_EXCEL_OUTPUT", "ADHOC_2010_BIRT_EXCEL_OUTPUT",
+			"Generate 2010 compatible BIRT excel Output for Adhoc Reports ", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Allow to allow multiple joins in relatiponship pill for CRoss domain reports
+	*/
+	@Deprecated
+	public static final FeatureEnum ADHOC_ADD_MULTIPLE_JOIN = new FeatureEnum(552,
+			"PROVISIONING_FEATURE_ADHOC_ADD_MULTIPLE_JOIN", "ADHOC_ADD_MULTIPLE_JOIN",
+			" Allow to add multiple joins between same set of subDomainschema in Cross Domain Reports ",
+			FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Add provisioning switch for UI Integration with SAP ERP Systems
+	*/
+	public static final FeatureEnum ECT_UI_INTEGRATION_SAP_SYSTEMS = new FeatureEnum(537,
+			"PROVISIONING_FEATURE_ECT_UI_INTEGRATION_SAP_SYSTEMS", "ECT_UI_INTEGRATION_SAP_SYSTEMS",
+			"Enable UI Integration with SAP ERP Systems", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* This switch will activate the delete function of the compound employee API
+	*/
+	public static final FeatureEnum ECT_COMPOUND_EMPLOYEE_DELETE = new FeatureEnum(538,
+			"PROVISIONING_FEATURE_ECT_COMPOUND_EMPLOYEE_DELETE", "ECT_COMPOUND_EMPLOYEE_DELETE",
+			"Enable Compound Delete", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* This switch will be used to enable launch by Shared Groups.
+	*/
+	public static final FeatureEnum MY_FORMS_INBOX_SEARCH_ON_GROUP = new FeatureEnum(541,
+			"PROVISIONING_FEATURE_MY_FORMS_INBOX_SEARCH_ON_GROUP", "MY_FORMS_INBOX_SEARCH_ON_GROUP",
+			"Enable Group filter in Inbox of forms list page", FeatureGroupEnum.GENERAL);
+	/** 
+	* Temporary switch in 1405,to disable the upgrade center actions only for Siemens
+	*/
+	public static final FeatureEnum DISABLE_INFO_CENTER_ACTIONS = new FeatureEnum(544,
+			"PROVISIONING_DISABLE_INFO_CENTER_ACTIONS", "DISABLE_INFO_CENTER_ACTIONS", "Disable Info Center Actions",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	@Deprecated
+	public static final FeatureEnum ENABLE_GROUP_SHARING_FOR_ADHOC_REPORTS = new FeatureEnum(550,
+			"PROVISIONING_FEATURE_ENABLE_GROUP_SHARING_FOR_ADHOC_REPORTS", "ENABLE_GROUP_SHARING_FOR_ADHOC_REPORTS",
+			"Enable Group Sharing for Adhoc Reports", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Temporary switch for Siemens, fix C-Step inbox issue
+	*/
+	public static final FeatureEnum ENABLE_CSTEP_DOCUMENT_TRANSFER_IN_BULK_IMPORT = new FeatureEnum(551,
+			"PROVISIONING_ENABLE_CSTEP_DOCUMENT_TRANSFER_IN_BULK_IMPORT",
+			"ENABLE_CSTEP_DOCUMENT_TRANSFER_IN_BULK_IMPORT", "Enable Transfer Inbox documents for C-Step users",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum TALENT_SEARCH_V2 = new FeatureEnum(553,
+			"PROVISIONING_FEATURE_ENABLE_SCM_TALENT_SEARCH_V2", "talentSearchV2",
+			"Succession Management Talent Search v2", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Temporary switch in 1405 for goal management public static final FeatureEnum FEATURE_GOAL_ODATA_API = new FeatureEnum(554, "PROVISIONING_FEATURE_GOAL_ODATA_API", "GOAL_ODATA_API", "GOAL_ODATA_API", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.WEBSERVICES);
+	*/
+	public static final FeatureEnum ENABLE_BIRT_FEATURE_FOR_BIP = new FeatureEnum(556,
+			"PROVISIONING_ENABLE_BIRT_FEATURE_BIP", "Enable BIRT feature for Bip", "Enabling BIRT feature",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ALLOW_BIPUBLISHER_TEMPLATE = new FeatureEnum(571,
+			"PROVISIONING_DISABLE_BIPUBLISHER_TEMPLATE", "Allow BI Publisher Template", "Allow BI Publisher Template",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_TARGET_POPULATION_OF_GROUP_GOAL_DELETION = new FeatureEnum(558,
+			"PROVISIONING_FEATURE_ENABLE_TARGET_POPULATION_OF_GROUP_GOAL_DELETION",
+			"FEATURE_TARGET_POPULATION_OF_GROUP_GOAL_DELETION",
+			"Enable target population of Group Goal Deletion permission", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.OBJECTIVE);
+	public static final FeatureEnum ENABLE_ACTION_SEARCH = new FeatureEnum(559,
+			"PROVISIONING_FEATURE_ENABLE_ACTION_SEARCH", "actionSearch", "Action Search",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_ACTION_SEARCH_SPLIT_BOX = new FeatureEnum(569,
+			"PROVISIONING_FEATURE_ENABLE_ACTION_SEARCH_SPLIT_BOX", "actionSearchSplitBox", "Action Search Split Box",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_V12_POSITION_ORGANIZATION_CHART = new FeatureEnum(560,
+			"PROVISIONING_ENABLE_V12_POSITION_ORGANIZATION_CHART", "ENABLE_V12_POSITION_ORGANIZATION_CHART",
+			"Enable V12 Position Organization Chart", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum CAREER_PATH_V2 = new FeatureEnum(561, "PROVISIONING_ENABLE_CAREER_PATH_V2",
+			"ENABLE_CAREER_PATH_V2", "Career Path V2", FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.OBJECTIVE);
+	@Deprecated
+	public static final FeatureEnum ENABLE_ADHOC_CACHING_SERVICE = new FeatureEnum(562,
+			"PROVISIONING_ENABLE_ADHOC_CACHING_SERVICE", "Enable Ad-hoc caching service",
+			"Enable Ad-hoc caching service", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_CUS_PERF_RPT = new FeatureEnum(466, "PROVISIONING_CUS_RPT_ADMIN_TOOL",
+			"Customer Performance Reporting Tool", "Customer Performance Reporting Tool",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	@Deprecated
+	public static final FeatureEnum ENABLE_GENERIC_PILL = new FeatureEnum(570,
+			"PROVISIONING_ENABLE_GENERIC_PILL_FRAMEWORK", "Enable Generic Pill", "Enabling Generic Pill",
+			FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_BIRT_EXCEL_2010_OUTPUT_PERFORMANCE_ENHANCEMENT = new FeatureEnum(572,
+			"PROVISIONING_ENABLE_BIRT_EXCEL_2010_OUTPUT_PERFORMANCE_ENHANCEMENT",
+			"Enable BIRT Excel 2010 output Performance Enhancement", "Enabling BIRT Excel 2010 Output",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_GENERIC_PEOPLE_PILL = new FeatureEnum(578,
+			"PROVISIONING_ENABLE_GENERIC_PEOPLE_PILL_FRAMEWORK", "Enable Generic People Pill",
+			"Enabling Generic People Pill", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_GENERIC_REQUISITION_PILL = new FeatureEnum(579,
+			"PROVISIONING_ENABLE_GENERIC_REQUISITION_PILL_FRAMEWORK", "Enable Generic Requisition Pill",
+			"Enabling Generic Requisition Pill", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_NEW_9_BOX = new FeatureEnum(575, "PROVISIONING_ENABLE_NEW_9_BOX",
+			"ENABLE_NEW_9_BOX", "Enabling New 9 Box", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable 360 Executive Review Page
+	*/
+	public static final FeatureEnum ENABLE_360_REVIEW_PAGE = new FeatureEnum(580,
+			"ADMINV2_FEATURE_PM360_ENABLE_EXECUTIVE_REVIEW", "form.360.executiveReview", "360 Enable Executive Review",
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum DISABLE_ODATA_API = new FeatureEnum(581, "PROVISIONING_FEATURE_DISABLE_ODATA_API",
+			"DISABLE_ODATA_API", "Disable OData API", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.WEBSERVICES);
+	public static final FeatureEnum ENABLE_ODATA_API_PUBLICBETA_CATEGORY = new FeatureEnum(584,
+			"PROVISIONING_FEATURE_ENABLE_ODATA_API_PUBLICBETA_CATEGORY", "ENABLE_ODATA_API_PUBLICBETA_CATEGORY",
+			"Enable OData API Public Beta Category", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.WEBSERVICES);
+	public static final FeatureEnum PEOPLE_PROFILE_3 = new FeatureEnum(585, "PROVISIONING_FEATURE_PEOPLE_PROFILE_3",
+			"PROVISIONING_FEATURE_PEOPLE_PROFILE_3", "People Profile", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_HCP_PORTLET_PP3 = new FeatureEnum(625, "PROVISIONING_ENABLE_HCP_PORTLET_PP3",
+			"ENABLE_HCP_PORTLET_PP3", "Enable Conversation Notes HCP portlet in People Profile",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum SUPPORT_PROXY_LOCALE_IN_CLASSIC_ANALYTICS = new FeatureEnum(586,
+			"PROVISIONING_SUPPORT_PROXY_IN_CLASSIC_ANALYTICS", "Support Proxy Locale in Classic Analytics",
+			"Supporting Proxy Locale in Classic Analytics", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_SM_POSITION_PILL = new FeatureEnum(587,
+			"PROVISIONING_ENABLE_GENERIC_POSITION_PILL_FRAMEWORK", "Enable Succession Position Pill",
+			"Enabling Succession Position Pill", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum DISABLE_LAZY_PEOPLE_FETCH = new FeatureEnum(588,
+			"PROVISIONING_DISABLE_LAZY_PEOPLE_FETCH",
+			"Disable lazy loading of filter values to improve performance while creating/editing an ad-hoc report & tile builder",
+			"Disable lazy loading of filter values to improve performance while creating/editing an ad-hoc report & tile builder",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum PROVISIONING_ENABLE_OPERATIONAL_WORKFORCE_PLANNING = new FeatureEnum(590,
+			"PROVISIONING_ENABLE_OPERATIONAL_WORKFORCE_PLANNING", "Enable Operational Workforce Planning",
+			"Enable Operational Workforce Planning", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_FIORI_STYLING = new FeatureEnum(592, "PROVISIONING_ENABLE_FIORI_STYLING",
+			"Enable Fiori Styling", "Enable Fiori Styling", FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_V12_SUCCESSION_ORG_CHART = new FeatureEnum(593,
+			"PROVISIONING_ENABLE_V12_SOC", "Enable V12 Succession Org Chart", "Enable V12 Succession Org Chart",
+			FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum OFFBOARDING_APPLICATION = new FeatureEnum(594,
+			"PROVISIONING_ENABLE_OFFBOARDING_APPLICATION", "Enable Offboarding", "Enable offboarding",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ECT_S_INNOV_EE_MD_INTEGRATION = new FeatureEnum(595,
+			"PROVISIONING_FEATURE_S_INNOV_EE_MD_INTEGRATION", "ENABLE_S_INNOV_EE_MD_INTEGRATION",
+			"Enable s-innovations Employee Master Data Integration", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Document Generation
+	*/
+	public static final FeatureEnum ECT_DOCUMENT_GENERATION = new FeatureEnum(596,
+			"PROVISIONING_FEATURE_ECT_DOCUMENT_GENERATION", "ENABLE_ECT_DOCUMENT_GENERATION", "Document Generation",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_GENERIC_VALIDATION_FRAMEWORK = new FeatureEnum(597,
+			"PROVISIONING_ENABLE_GENERIC_VALIDATION_FRAMEWORK", "Enable Generic Validation Framework",
+			"Enabling Generic Validation Framework", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum DISABLE_ADHOC_CACHING_SERVICE = new FeatureEnum(598,
+			"PROVISIONING_DISABLE_ADHOC_CACHING_SERVICE", "Disable Ad-hoc caching service",
+			"Disable Ad-hoc caching service", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* ECT Forms As Service
+	*/
+	public static final FeatureEnum ECT_FORMS_AS_SERVICE = new FeatureEnum(600,
+			"PROVISIONING_FEATURE_ECT_FORMS_AS_SERVICE", "ENABLE_ECT_FORMS_AS_SERVICE", "Forms As Service",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ECT_ENABLE_BUSINESS_RULES_WF = new FeatureEnum(601,
+			"PROVISIONING_FEATURE_ECT_V2_BR_WF", "ECT_V2_BR_WF", "Enable Business Rules for EC V2 Workflow",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ECT_ENABLE_BUSINESS_RULES_EVT = new FeatureEnum(602,
+			"PROVISIONING_FEATURE_ECT_V2_BR_EVT", "ECT_V2_BR_EVT",
+			"Enable Business Rules for EC V2 event reason derivation", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_BPE_SERVICE = new FeatureEnum(603, "PROVISIONING_FEATURE_ENABLE_BPE",
+			"Enable BPE service", "BPE service", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ECT_SAP_ERP_INTEGRATION = new FeatureEnum(604,
+			"PROVISIONING_FEATURE_SAP_ERP_INTEGRATION", "ENABLE_SAP_ERP_INTEGRATION", "Enable SAP ERP Integration",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_USER_IMPORT_PERMISSI_IN_RBP = new FeatureEnum(606,
+			"PROVISIONING_ENABLE_IMPORT_PERMISSION_IN_RBP", "Enable Control Employee Import Permission In RBP",
+			"Import Permission in RBP", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_UPGRADE_CENTER_PERMISSION = new FeatureEnum(607,
+			"PROVISIONING_FEATURE_ENABLE_UPGRADE_CENTER_PERMISSION", "ENABLE_UPGRADE_CENTER_PERMISSION",
+			"Enable Upgrade Center Permission", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ECT_CWK = new FeatureEnum(608, "PROVISIONING_FEATURE_ENABLE_CWK", "ECT_CWK",
+			"Enable Contingent Workers", FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum FIELD_LEVEL_PERMISSION_FOR_DATA_MODEL_ELEMENTS = new FeatureEnum(609,
+			"PROVISIONING_FEATURE_FIELD_LEVEL_PERMISSION_FOR_DATA_MODEL_ELEMENTS",
+			"fieldLevelPermissionForDataModelElements",
+			"Enable Field Level Permission for data model elements in all Sub domain schemas",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_SDS_METADATA_CONFIGURATION = new FeatureEnum(610,
+			"PROVISIONING_FEATURE_ENABLE_SDS_METADATA_CONFIGURATION", "ENABLE_SDS_METADATA_CONFIGURATION",
+			"Enable Sds Metadata Configuration", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum CELL_LEVEL_PERMISSION_FOR_DATA_MODEL_ELEMENTS = new FeatureEnum(611,
+			"PROVISIONING_FEATURE_CELL_LEVEL_PERMISSION_FOR_DATA_MODEL_ELEMENTS",
+			"cellLevelPermissionForDataModelElements",
+			"Enable Cell Level Permission for data model elements in all Sub domain schemas",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_CPP = new FeatureEnum(612, "PROVISIONING_ENABLE_CPP", "Enable PMP",
+			"Enable PMP", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum PLT_DATA_ENCRYPTION = new FeatureEnum(615, "PROVISIONING_FEATURE_DATA_ENCRYPTION",
+			"ENABLE_DATA_ENCRYPTION", "Enable Data Encrytion", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ECT_APPRENTICE_MANAGEMENT = new FeatureEnum(616,
+			"PROVISIONING_FEATURE_APPRENTICE_MANAGEMENT", "ENABLE_APPRENTICE_MANAGEMENT", "ApprenticeManagement",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum RECRUITING_V3 = new FeatureEnum(617, "PROVISIONING_RECRUITING_V3", "RECRUITING_V3",
+			"Enable Recruiting V3", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Smart Suite
+	*/
+	public static final FeatureEnum ENABLE_SMART_SUITE = new FeatureEnum(618, "PROVISIONING_ENABLE_SMART_SUITE",
+			"enableSmartSuite", "Enable Smart Suite", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Intelligent Services Editor(ISE)
+	*/
+	public static final FeatureEnum ENABLE_INTELLIGENT_SERVICES_EDITOR = new FeatureEnum(684,
+			"PROVISIONING_ENABLE_INTELLIGENT_SERVICES_EDITOR", "enableIntelligentServicesEditor",
+			"Enable Intelligent Services Editor", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_SIMPLE_EXTENSIONS = new FeatureEnum(619,
+			"PROVISIONING_ENABLE_SIMPLE_EXTENSIONS", "enableSimpleExtensions", "Enable Simple Extensions",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_HOMEPAGE3 = new FeatureEnum(622, "PROVISIONING_ENABLE_HOMEPAGE3",
+			"enableHomepage3", "Enable Homepage3", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum SHOW_USERID_IN_JOB_OUTPUT = new FeatureEnum(623,
+			"PROVISIONING_SHOW_USERID_IN_JOB_OUTPUT", "SHOW_USERID_IN_JOB_OUTPUT",
+			"Show UserID in Scheduled Job Output", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum HIDE_TITLE_IN_ORG_CHART = new FeatureEnum(624,
+			"PROVISIONING_HIDE_TITLE_IN_ORG_CHART", "HIDE_TITLE_IN_ORG_CHART", "Hide Title Field In Org Chart",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_CELL_LEVEL_PERMISSION_FOR_GROUPBY = new FeatureEnum(630,
+			"PROVISIONING_FEATURE_ENABLE_CELL_LEVEL_PERMISSION_FOR_GROUPBY", "cellLevelPermissionForGroupByReports",
+			"Enable Cell Level Permission for group by reports", FeatureReadinessEnum.DEMOABLE,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum APPLY_CELL_LEVEL_PERMISSION_FOR_AGGREGATION_ELEMENT = new FeatureEnum(631,
+			"PROVISIONING_FEATURE_APPLY_CELL_LEVEL_PERMISSION_FOR_AGGREGATION_ELEMENT",
+			"enableCellLevelPermissionForGroupBySelections",
+			"Apply Cell Level Permission for aggregation selection elements", FeatureReadinessEnum.DEMOABLE,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum USE_ORACLE_BI_PUBLISHER_WAR_INSTEAD_OF_EAR = new FeatureEnum(628,
+			"PROVISIONING_FEATURE_USE_ORACLE_BI_PUBLISHER_WAR_INSTEAD_OF_EAR", "useOracleBIPublisherWAR",
+			"Use Oracle BI Publisher WAR", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_SUCCESSLINE = new FeatureEnum(632, "PROVISIONING_ENABLE_SUCCESSLINE",
+			"ENABLE_SUCCESSLINE", "Enable SuccessLine", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	@Deprecated
+	public static final FeatureEnum ADHOC_MAP_MODULE_FEATURE = new FeatureEnum(633,
+			"PROVISIONING_FEATURE_ADHOC_MAP_MODULE_FEATURE", "mapModuleFeatures",
+			"Mapping Module Features to Report Schemas", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	@Deprecated
+	public static final FeatureEnum ENABLE_INTEGRATION_CENTER = new FeatureEnum(634,
+			"PROVISIONING_FEATURE_ENABLE_INTEGRATION_CENTER", "ENABLE_INTEGRATION_CENTER", "Enable Integration Center",
+			FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum TEAM_GOALS = new FeatureEnum(635, "PROVISIONING_TEAM_GOAL_FEATURE_TITLE",
+			"ENABLE_TEAM_GOALS", "Enable Team Goals", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.OBJECTIVE);
+	public static final FeatureEnum INITIATIVES = new FeatureEnum(636, "PROVISIONING_INITIATIVES_FEATURE_TITLE",
+			"ENABLE_INITIATIVES", "Enable Initiatives", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Enable Employee Profile On MDF.
+	*/
+	public static final FeatureEnum EP_ON_MDF = new FeatureEnum(638, "PROVISIONING_FEATURE_EP_ON_MDF", "EP_ON_MDF",
+			"Enable EP on MDF", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum DISABLE_LEFTOUTERJOIN_FOR_CROSSDOMAIN_ADHOC_REPORTS = new FeatureEnum(640,
+			"PROVISIONING_FEATURE_DISABLE_LEFTOUTERJOIN_FOR_CROSSDOMAIN_ADHOC_REPORTS",
+			"DISABLE_LEFTOUTERJOIN_FOR_CROSSDOMAIN_ADHOC_REPORTS", "Disable Left outer join for cross domain report",
+			FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum ENABLE_SPOTAWARDSPROGRAM = new FeatureEnum(641,
+			"PROVISIONING_ENABLE_SPOTAWARDSPROGRAM", "ENABLE_SPOTAWARDSPROGRAM", "Enable Spot Awards Program",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum EXTERNAL_LEARNING_USER = new FeatureEnum(642, "PROVISIONING_EXTERNAL_LEARNING_USER",
+			"EXTERNAL_LEARNING_USER", "External Learning User", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum OFFBOARDING_EC_WRITEBACK = new FeatureEnum(670,
+			"PROVISIONING_FEATURE_OFFBOARDING_EC_WRITEBACK", "OFFBOARDING_EC_WRITEBACK",
+			"Enable Offboarding EC Writeback", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.OFFBOARDING, true);
+	@Deprecated
+	public static final FeatureEnum PROVISIONING_ENABLE_XM_REPORTING_MODEL_IN_ADHOC = new FeatureEnum(643,
+			"PROVISIONING_ENABLE_XM_REPORTING_MODEL_IN_ADHOC",
+			"Enable Intelligent Services Reporting Model in Adhoc 2.0", "EEnable Intelligent Services in Adhoc 2.0",
+			FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum DELETE_TEAM_GOALS_SHARE = new FeatureEnum(672,
+			"PROVISIONING_DELETE_TEAM_GOAL_SHARE_FEATURE_TITLE", "ENABLE_DELETE_TEAM_GOALS_SHARE",
+			"Enable DELETE TEAM GOALS SHARE", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.OBJECTIVE);
+	public static final FeatureEnum ENABLE_TEMPLATE_INSTRUCTION_PP3 = new FeatureEnum(675,
+			"PROVISIONING_ENABLE_TEMPLATE_INSTRUCTION_PP3", "ENABLE_TEMPLATE_INSTRUCTION_PP3",
+			"Enable to Show Goal Plan Introduction in PP3", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_GOAL_PLAN_PERM_CHK_OF_ASSIGNMENT = new FeatureEnum(666,
+			"PROVISIONING_ENABLE_GOAL_PLAN_PERM_CHK_OF_ASSIGNMENT_TITLE", "ENABLE_GOAL_PLAN_PERM_CHK_OF_ASSIGNMENT",
+			"Enable GOAL Template Permission Check for IBM-Ericsson", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.OBJECTIVE);
+	/** 
+	* Enable Onboarding2 applictaion
+	*/
+	public static final FeatureEnum ONBOARDING_2_APPLICATION = new FeatureEnum(676,
+			"PROVISIONING_FEATURE_ONBOARDING_2_APPLICATION", "onboarding2", "Onboarding2 Application",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Mobile PM
+	*/
+	public static final FeatureEnum ENABLE_MOBILE_PM = new FeatureEnum(680, "PROVISIONING_ENABLE_MOBILE_PM",
+			"ENABLE_MOBILE_PM", "Enable Mobile PM", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable debug homepage3 for custom debug, which is never usable in production.
+	*/
+	public static final FeatureEnum ENABLE_HOMEPAGE3_DEBUG = new FeatureEnum(681, "PROVISIONING_ENABLE_HOMEPAGE3_DEBUG",
+			"homepagev3Debug", "Homepage V3 Debug", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_PUBLISH_OWFP_EVENTS = new FeatureEnum(682,
+			"PROVISIONING_ENABLE_PUBLISH_OWFP_EVENTS", "ENABLE_PUBLISH_OWFP_EVENTS", "Enable publish owfp events",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum REPORT_CENTRAL = new FeatureEnum(687, "PROVISIONING_FEATURE_ENABLE_REPORT_CENTRAL",
+			"REPORT_CENTRAL", "Enable Report central", FeatureReadinessEnum.DEPRECATED,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* This feature is in use, but it's not showing on provisioning page
+	*/
+	public static final FeatureEnum DMS = new FeatureEnum(688, "ATTACHMENT_FEATURE_ENABLE_DMS", "dms",
+			"Document Management Service", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_POC_FOR_EH_DOCUMENT_TRANSFER = new FeatureEnum(689,
+			"ADMINV2_ENABLE_POC_FOR_EH_DOCUMENT_TRANSFER", "ENABLE_POC_FOR_EH_DOCUMENT_TRANSFER",
+			"Enable document transfer for HR Manager in Change engine", FeatureReadinessEnum.DEMOABLE,
+			FeatureGroupEnum.DTCE_COMMON_UI);
+	public static final FeatureEnum ENABLE_PPTC_TEMPLATE_PERMISSIONS = new FeatureEnum(691,
+			"PROVISIONING_ENABLE_PPTC_TEMPLATE_PERMISSIONS", "ENABLE_PPTC_TEMPLATE_PERMISSIONS",
+			"Enable PPTC template permissions", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum SMART_SUITE_MODE = new FeatureEnum(692,
+			"PROVISIONING_FEATURE_SMART_SUITE_INTEGRATION", "smartsuiteintegration", "Smart Suite Mode",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ADHOC_ADD_CARDINALITY_HINT = new FeatureEnum(693,
+			"PROVISIONING_ENHANCE_PERFORMANCE_ADHOC_USERS_QUERY", "ADD_CARDINALITY_HINT",
+			"Adding cardinality hint to users query", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum THIRD_PARTY_DPCS = new FeatureEnum(694, "PROVISIONING_THIRD_PARTY_DPCS",
+			"THIRD_PARTY_DPCS", "Enable Thrid Party DPCS", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT WorkSeniority Management
+	*/
+	public static final FeatureEnum ECT_WORKSENIORITY_MANAGEMENT = new FeatureEnum(695,
+			"PROVISIONING_FEATURE_ECT_WORKSENIORITY_MANAGEMENT", "ENABLE_ECT_WORKSENIORITY_MANAGEMENT", "WorkSeniority",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Location Based Payments
+	*/
+	public static final FeatureEnum ECT_LOCATION_BASED_PAYMENTS = new FeatureEnum(696,
+			"PROVISIONING_FEATURE_ECT_LOCATION_BASED_PAYMENTS", "ENABLE_ECT_LOCATION_BASED_PAYMENTS",
+			"LocationBasedPayments", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* ECT Dismissal Protection
+	*/
+	public static final FeatureEnum ECT_DISMISSAL_PROTECTION = new FeatureEnum(700,
+			"PROVISIONING_FEATURE_ECT_DISMISSAL_PROTECTION", "ENABLE_ECT_DISMISSAL_PROTECTION", "Dismissal Protection",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum LINKEDIN_WIDGET_INTEGRATION = new FeatureEnum(701,
+			"PROVISIONING_FEATURE_LINKEDIN_WIDGET_INTEGRATION", "PROVISIONING_FEATURE_LINKEDIN_WIDGET_INTEGRATION",
+			"LinkedIn Widget Integration in PP3", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum V12_MATRIX_REPORT_UI = new FeatureEnum(702,
+			"PROVISIONING_FEATURE_ENABLE_V12_MATRIX_REPORT", "PROVISIONING_FEATURE_ENABLE_V12_MATRIX_REPORT",
+			"V12 SM Matrix Report UI", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable session timeout redirect page
+	*/
+	public static final FeatureEnum ENABLE_SESSION_TIMEOUT_AUTOMATIC_REDIRECT = new FeatureEnum(705,
+			"PROVISIONING_FEATURE_ENABLE_AUTOMATIC_SESSION_TIMEOUT_REDIRECT", "session_timeout_static_page_redirect",
+			"Session Timeout Redirect", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum TREE_NAVIGATION_IN_ADHOC_REPORT_BUILDER = new FeatureEnum(706,
+			"PROVISIONING_FEATURE_TREE_NAVIGATION_IN_ADHOC_REPORT_BUILDER", "treeNavigationInARB",
+			"Enable MDF Reporting and Tree Navigation in Adhoc", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.DASHBOARDANALYTICS);
+	public static final FeatureEnum UI_CONSISTENCY_2016 = new FeatureEnum(707,
+			"PROVISIONING_FEATURE_UI_CONSISTENCY_2016", "ui_consistency_2016", "UI Consistency 2016",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum UI_CONSISTENCY_XXXX = new FeatureEnum(732,
+			"PROVISIONING_FEATURE_UI_CONSISTENCY_XXXX", "ui_consistency_xxxx", "Upper Bound UI Consistency",
+			FeatureReadinessEnum.NEVER, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum USER_ACCOUNT_DECOUPLING = new FeatureEnum(733,
+			"PROVISIONING_ENABLE_USER_ACCOUNT_DECOUPLING", "USER_ACCOUNT_DECOUPLING", "User Account Decoupling",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum DISABLE_FIORI_STYLED_LOGIN_PAGE = new FeatureEnum(735,
+			"PROVISIONING_DISABLE_LOGIN_REDESIGN", "DISABLE_LOGIN_REDESIGN", "Disable Login Redesign",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ONBOARDING_PRE_DAY1_USE_EXISTING_USERID = new FeatureEnum(736,
+			"PROVISIONING_FEATURE_PRE_DAY1_USE_EXISTING_USERID", "ONBOARDING_PRE_DAY1_USE_EXISTING_USERID",
+			"Use the same user ID for pre-day1 user and EC user", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.ONBOARDING);
+	public static final FeatureEnum ENABLE_COMP_EC_PROMOTION = new FeatureEnum(737,
+			"COMPENSATION_PROV_ENABLE_COMP_EC_PROMOTION", "COMPENSATION_PROV_ENABLE_COMP_EC_PROMOTION",
+			"Comp-EC promotion integration", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum PL_MIGRATION_COPY_EXT_CODE = new FeatureEnum(738,
+			"ADMINV2_PROVISIONING_FEATURE_COPY_EXTERNAL_CODE", "PL_MIGRATION_COPY_EXT_CODE", "Copy External Code",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Onboarding make the future-dated user active after EC hire process though Pre-day1 is not enabled This switch is introduced so that current customers can choose to have the same behavior as of 1605.
+	*/
+	public static final FeatureEnum ONBOARDING_MAKE_USER_ACTIVE_BEFORE_START_DATE = new FeatureEnum(739,
+			"PROVISIONING_FEATURE_MAKE_USER_ACTIVE_BEFORE_START_DATE", "ONBOARDING_MAKE_USER_ACTIVE_BEFORE_START_DATE",
+			"Make future dated users active after EC hire process", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.ONBOARDING);
+	/** 
+	* Enable Intelligent Services Editor(ISE)
+	*/
+	public static final FeatureEnum ENABLE_TEST_MODE_FOR_INTELLIGENT_SERVICES_EDITOR = new FeatureEnum(740,
+			"PROVISIONING_ENABLE_TEST_MODE_FOR_INTELLIGENT_SERVICES_EDITOR",
+			"enableTestModeForIntelligentServicesEditor", "Enable Test Mode for Intelligent Services Editor",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* EC Entity Org Chart
+	*/
+	public static final FeatureEnum ENTITY_ORGCHART = new FeatureEnum(741, "PROVISIONING_ENABLE_ENTITY_ORG_CHART",
+			"ENABLE_ENTITY_ORG_CHART", "Enable Entity Organizational Chart", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENTITY_ORGCHART_CONFIG = new FeatureEnum(748,
+			"PROVISIONING_ENABLE_ENTITY_ORG_CHART_CONFIG", "ENABLE_ENTITY_ORG_CHART_CONFIG",
+			"Enable Entity Organizational Chart Configuration", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Integration Framework
+	*/
+	@Deprecated
+	public static final FeatureEnum ENABLE_INTEGRATION_FRAMEWORK = new FeatureEnum(743,
+			"PROVISIONING_FEATURE_ENABLE_INTEGRATION_FRAMEWORK", "enableIntegrationFramework",
+			"Enable Integration Framework", FeatureReadinessEnum.DEPRECATED, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_DTCE_COMPONENT = new FeatureEnum(744, "ADMINV2_ENABLE_DTCE_COMPONENT",
+			"ENABLE_DTCE_COMPONENT", "Enable DTCE new common component (beta only)", FeatureReadinessEnum.DEMOABLE,
+			FeatureGroupEnum.DTCE_COMMON_UI);
+	public static final FeatureEnum CONCUR_DRM_INTEGRATION = new FeatureEnum(745,
+			"PROVISIONING_ENABLE_CONCUR_DRM_INTEGRATION", "ENABLE_CONCUR_DRM_INTEGRATION", "Enable Concur Integration",
+			FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum OPTIMIZED_ACCESS_TO_DRM = new FeatureEnum(747,
+			"PROVISIONING_ENABLE_OPTIMIZED_ACCESS_TO_DRM", "ENABLE_OPTIMIZED_ACCESS_TO_DRM",
+			"Enable optimized database access for Data Replication Monitor", FeatureReadinessEnum.DEMOABLE,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_HANA_COMPANY_AUDITING = new FeatureEnum(750, "ENABLE_HANA_COMPANY_AUDITING",
+			"ENABLE_HANA_COMPANY_AUDITING", "Enable HANA Company Auditing", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.ENABLE_AUDITING);
+	/** 
+	* Enable generic people pill for MDF schemas
+	*/
+	public static final FeatureEnum ENABLE_MDF_GENERIC_PEOPLE_PILL = new FeatureEnum(752,
+			"PROVISIONING_ENABLE_MDF_GENERIC_PEOPLE_PILL_FRAMEWORK", "Enable MDF Generic People Pill",
+			"Enabling MDF Generic People Pill", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.DASHBOARDANALYTICS);
+	/** 
+	* Enable Refresh Framework
+	*/
+	public static final FeatureEnum ENABLE_REFRESH_FRAMEWORK = new FeatureEnum(753,
+			"PROVISIONING_ENABLE_REFRESH_FRAMEWORK", "Enable Refresh Framework", "Enabling Refresh Framework",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Enable Macro BLocking in file
+	*/
+	public static final FeatureEnum ENABLE_MACRO_BLOCKING = new FeatureEnum(754,
+			"ATTACHMENT_FEATURE_ENABLE_MACRO_BLOCKING", "Enable Macro BLocking", "Enable Macro BLocking",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	/** 
+	* DocuSign Adaptor Feature
+	*/
+	public static final FeatureEnum DOCUSIGNADAPTOR_APPLICATION = new FeatureEnum(755,
+			"PROVISIONING_FEATURE_DOCUSIGNADAPTOR_APPLICATION", "DocuSignAdaptor", "DocuSignAdaptor Application",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	/** 
+	* Onboarding2 Demo Environment
+	*/
+	public static final FeatureEnum ONBOARDING2_DEMO_ENVIRONMENT = new FeatureEnum(756,
+			"PROVISIONING_FEATURE_ONBOARDING2_DEMO_ENVIRONMENT", "ONBOARDING2_DEMO_ENVIRONMENT",
+			"Enable Onboarding2 Demo Environment", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_RBP_GROUP_BASED_PERMISSION_CHECK = new FeatureEnum(757,
+			"PROVISIONING_ENABLE_RBP_GROUP_BASED_PERMISSION_CHECK", "n/a", "Enable RBP group based permission check",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum BPE_PROCESSJOB_IDENTITY = new FeatureEnum(758,
+			"PROVISIONING_FEATURE_BPE_PROCESSJOB", "BPE_PROCESSJOB_IDENTITY", "Use processJob identity ",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum BPE_PROCESSCREATOR_IDENTITY = new FeatureEnum(759,
+			"PROVISIONING_FEATURE_BPE_PROCESSCREATOR", "BPE_PROCESSCREATOR_IDENTITY",
+			"Use process definition creator identity ", FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum BPE_USERID_IDENTITY = new FeatureEnum(760, "PROVISIONING_FEATURE_BPE_USERID",
+			"BPE_USERID_IDENTITY", "Specific user identity ", FeatureReadinessEnum.DEVELOPMENT,
+			FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum INTERACTIVE_ANALYTICS_TILES = new FeatureEnum(761,
+			"PROVISIONING_INTERACTIVE_ANALYTICS_TILES", "INTERACTIVE_ANALYTICS_TILES", "Interactive Analytics Tiles",
+			FeatureReadinessEnum.DEVELOPMENT, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_EMM_DOCUMENT_TRANSFER = new FeatureEnum(763,
+			"ADMINV2_ENABLE_EMM_DOCUMENT_TRANSFER", "ENABLE_EMM_DOCUMENT_TRANSFER",
+			"Enable document transfer for 2nd Level Manager change (beta only)", FeatureReadinessEnum.DEMOABLE,
+			FeatureGroupEnum.DTCE_COMMON_UI);
+	public static final FeatureEnum DISABLE_DOWNLOAD_LINK_FOR_PERSONAL_COMPENSATION_STATEMENTS_IN_PDF_FORMAT = new FeatureEnum(
+			764, "DISABLE_DOWNLOAD_LINK_FOR_PERSONAL_COMPENSATION_STATEMENTS_IN_PDF_FORMAT",
+			"DISABLE_DOWNLOAD_LINK_FOR_PERSONAL_COMPENSATION_STATEMENTS_IN_PDF_FORMAT",
+			"Disable download link for personal compensation statements in PDF format", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL, false);
+	public static final FeatureEnum ENABLE_OTHER_TOPICS = new FeatureEnum(765,
+			"PROVISIONING_ENABLE_SUCCESSLINE_OTHER_TOPICS", "ENABLE_OTHER_TOPICS", "Enable SuccessLine Other Topics",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL, false);
+	public static final FeatureEnum ENABLE_COACHING_ADVICE = new FeatureEnum(766,
+			"PROVISIONING_ENABLE_SUCCESSLINE_COACHING_ADVICE", "ENABLE_COACHING_ADVICE",
+			"Enable SuccessLine Coaching Advice", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL, false);
+	public static final FeatureEnum DISABLE_REDESIGN_LOGIN_QR_CODE = new FeatureEnum(767,
+			"PROVISIONING_HIDE_LOGIN_PAGE_QRCODE", "DISABLE_REDESIGN_LOGIN_QR_CODE", "Disable login QR Code",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum DISPLAY_NUMBER_ON_STMT_BASED_ON_USER_LOCALE = new FeatureEnum(768,
+			"DISPLAY_NUMBER_ON_STMT_BASED_ON_USER_LOCALE", "DISPLAY_NUMBER_ON_STMT_BASED_ON_USER_LOCALE",
+			"Display numbers on statement based on user Locale", FeatureReadinessEnum.PRODUCTION,
+			FeatureGroupEnum.GENERAL, false);
+	/** 
+	* Enable Multi-Scanning (virus scan)
+	*/
+	public static final FeatureEnum ENABLE_MULTI_SCANNING = new FeatureEnum(770,
+			"ATTACHMENT_FEATURE_ENABLE_MULTI_SCANNING", "Enable Multi-Scanning", "Enable Multi-Scanning",
+			FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_BELIZE_UI5_THEME = new FeatureEnum(771,
+			"PROVISIONING_ENABLE_BELIZE_UI5_THEME", "Enable Belize Theme", "Enable Belize Theme",
+			FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum DISABLE_GLOBAL_UIC_HEADER = new FeatureEnum(772,
+			"PROVISIONING_DISABLE_GLOBAL_UIC_HEADER", "Disable Global UIC Header", "Disable Global UIC Header",
+			FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum COMPENSATION_ENABLE_TOTAL_COMP = new FeatureEnum(773,
+			"PROVISIONING_COMPENSATION_ENABLE_TOTAL_COMP", "PROVISIONING_COMPENSATION_ENABLE_TOTAL_COMP",
+			"Compensation Enable Total Compensation", FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ENABLE_ACCESS_TO_COMP_ODATA_API = new FeatureEnum(774,
+			"PROVISIONING_COMPENSATION_ENABLE_ACCESS_TO_COMP_ODATA_API", "Enable Access To Comp OData API",
+			"Enable Access To Comp OData API", FeatureReadinessEnum.PRODUCTION, FeatureGroupEnum.GENERAL);
+	public static final FeatureEnum ANALYTICS_IN_EC = new FeatureEnum(775, "PROVISIONING_ANALYTICS_IN_EC",
+			"ANALYTICS_IN_EC", "Analytics in EC", FeatureReadinessEnum.DEMOABLE, FeatureGroupEnum.DASHBOARDANALYTICS);
+	static {
+		PM360_REPORTS.requires(PM360);
+		TGM_V10.requires(TGM);
+		TRANSCRIPT.requires(V11_UI);
+		ENABLE_GOAL_PLAN_PERM_CHK_OF_ASSIGNMENT.requires(ENABLE_TARGET_POPULATION_OF_GOAL_ASSIGNMENT);
+		TRANSCRIPT_MANUAL_ADD_ENABLE.requires(V11_UI);
+		TRANSCRIPT_REQUIRED_FIELD_VALIDATION.requires(V11_UI);
+		TALENT_SEARCH.obsoletes(SUCCESSION_QUERY);
+		SURVEY.requires(QUESTION_OBJECT_MANAGEMENT);
+		RECRUITING_V2.requires(QUESTION_OBJECT_MANAGEMENT);
+		TRUE_POSITION_HIERARCHY.obsoletes(POSITION_CHART);
+		V11_NATIVE_TGM.requires(V11_UI);
+		V11_FACES.requires(V11_UI);
+		GMAP.requires(V11_UI);
+		GTALK.requires(V11_UI);
+		PROCESS.requires(V11_UI);
+		RECRUITING_V2.requires(V11_UI);
+		RECRUITING_V2.obsoletes(RECRUITING);
+		BI_PUBLISHER_EXPORT_SCORECARD_XML.requires(BI_PUBLISHER_SCORECARD_INTEGRATION);
+		ENABLE_COLLABORATION.requires(V11_UI);
+		ENABLE_COLLABORATION_HOME.requires(ENABLE_COLLABORATION);
+		ENABLE_COLLABORATION_ENTIRECOMPANY.requires(ENABLE_COLLABORATION);
+		GM_EXECUTIONMAP.requires(V11_UI);
+		GM_STATUSREPORT.requires(V11_UI);
+		GM_MEETING_AGENDA.requires(V11_UI);
+		ECT_V1.requires(EDDP);
+		ECT_V2.requires(GENERIC_OBJECTS);
+		ECT_V2.requires(EDDP);
+		ECT_V2.requires(EMPLOYEE_PROFILE_AUDIT);
+		ECT_V2P.requires(ECT_V2);
+		ECT_V2P.requires(GENERIC_OBJECTS);
+		ECT_HELP_LINK.requires(ECT_V2);
+		ECT_MY_BENEFIT_LINK.requires(ECT_V2);
+		ECT_TIMESHEETS_LINK.requires(ECT_V2);
+		ECT_ENABLE_RUSSIAN_DC.requires(ECT_V2);
+		ECT_ENABLE_RUSSIAN_DC_ATTACHMENT_SYNC.requires(ECT_ENABLE_RUSSIAN_DC_API);
+		ECT_GLOBAL_ASSIGNMENT.requires(ECT_V2);
+		ECT_SERVICE_CENTER.requires(ECT_V2);
+		ECT_CONCURRENT_EMPLOYMENT.requires(ECT_V2);
+		ECT_FOUNDATION_OBJECTS_TRANSLATION.requires(ECT_FOUNDATION_OBJECTS);
+		ECT_FOUNDATION_OBJECTS_TRANSLATION.requires(GENERIC_OBJECTS);
+		ECT_FOUNDATION_OBJECTS_JOBCODE_USES_FOTRANSLATION.requires(GENERIC_OBJECTS);
+		ECT_FOUNDATION_OBJECTS_JOBCODE_USES_FOTRANSLATION.requires(ECT_FOUNDATION_OBJECTS);
+		ECT_FOUNDATION_OBJECTS_JOBCODE_USES_FOTRANSLATION.requires(ECT_FOUNDATION_OBJECTS_TRANSLATION);
+		ECT_PENSION_PAYOUT.requires(ECT_V2);
+		ECT_DEPENDENT_INFO.requires(ECT_V2);
+		ECT_POSITION_MANAGEMENT.requires(ECT_V2);
+		ECT_POSITION_MANAGEMENT.requires(GENERIC_OBJECTS);
+		ECT_POSITION_MANAGEMENT_RCM_INTEGRATION.requires(ECT_POSITION_MANAGEMENT);
+		ECT_POSITION_MANAGEMENT_RCM_INTEGRATION.requires(RECRUITING_V2);
+		ENTITY_ORGCHART.requires(ECT_V2);
+		ENTITY_ORGCHART.requires(GENERIC_OBJECTS);
+		ECT_ABSENCE_MANAGEMENT.requires(ECT_V2);
+		ECT_ABSENCE_MANAGEMENT.requires(GENERIC_OBJECTS);
+		ECT_TIMESHEET.requires(ECT_V2);
+		ECT_TIMESHEET.requires(GENERIC_OBJECTS);
+		ECT_TIMESHEET.requires(ECT_ABSENCE_MANAGEMENT);
+		ECT_ADVANCES_MANAGEMENT.requires(ECT_V2);
+		ECT_ADVANCES_MANAGEMENT.requires(GENERIC_OBJECTS);
+		ECT_ADVANCES_MANAGEMENT.requires(ECT_DEDUCTIONS_MANAGEMENT);
+		ECT_COST_DISTRIBUTION.requires(ECT_V2);
+		ECT_COST_DISTRIBUTION.requires(GENERIC_OBJECTS);
+		ENABLE_EMPLOYEE_CENTRAL_PAYROLL.requires(GENERIC_OBJECTS);
+		PAYROLL_INTEGRATION.requires(GENERIC_OBJECTS);
+		PAYROLL_WORKBENCH.requires(GENERIC_OBJECTS);
+		PAYROLL_PROCESS.requires(GENERIC_OBJECTS);
+		PAYROLL_CONTROL_CENTER.requires(GENERIC_OBJECTS);
+		ENABLE_EMPLOYEE_CENTRAL_PAYROLL.requires(ECT_FOUNDATION_OBJECTS_TRANSLATION);
+		PAYROLL_INTEGRATION.requires(ECT_FOUNDATION_OBJECTS_TRANSLATION);
+		ECT_FISCAL_YEAR.requires(ECT_V2);
+		ECT_FISCAL_YEAR.requires(GENERIC_OBJECTS);
+		ECT_DEDUCTIONS_MANAGEMENT.requires(ECT_V2);
+		ECT_DEDUCTIONS_MANAGEMENT.requires(GENERIC_OBJECTS);
+		ECT_DISMISSAL_PROTECTION.requires(GENERIC_OBJECTS);
+		ECT_DOCUMENT_GENERATION.requires(GENERIC_OBJECTS);
+		ECT_IT_DECLARATIONS_MANAGEMENT.requires(ECT_V2);
+		ECT_IT_DECLARATIONS_MANAGEMENT.requires(GENERIC_OBJECTS);
+		ECT_IT_DECLARATIONS_MANAGEMENT.requires(ECT_FISCAL_YEAR);
+		MDF_DUMMY_OBJECTS.requires(GENERIC_OBJECTS);
+		YOUCALC_FOR_HRIS.requires(ECT_V2);
+		ENABLE_GROUP_GOALS_FOR_INACTIVE_USER.requires(GROUP_GOALS);
+		GROUP_GOALS.requires(TGM);
+		ENABLE_TARGETPOP_USAGE_IN_GROUP_GOALS.requires(TGM);
+		GOALS_TAB.requires(TGM);
+		EDU_PROFILE.requires(V12_TOP_NAV);
+		PM2_REDESIGN.requires(V12_TOP_NAV);
+		TGM_V12.requires(V12_TOP_NAV);
+		DEVELOPMENT_PLAN_V12.requires(V12_TOP_NAV);
+		PM_ACCESS_PERMISSION.requires(V11_UI);
+		GM_ACCESS_PERMISSION.requires(V11_UI);
+		NAME_FORMAT.requires(ECT_V2);
+		NAME_FORMAT.requires(GENERIC_OBJECTS);
+		INSTSYNC_CONFIG.requires(V11_UI);
+		ENABLE_MEDIA_SERVICE.requires(V12_TOP_NAV);
+		JDM_NG.requires(V12_TOP_NAV);
+		JDM_NG.requires(ROLE_BASED_PERMISSION);
+		JDM_NG.requires(GENERIC_OBJECTS);
+		SDM_CONFIGURATION_ADMIN.requires(GENERIC_OBJECTS);
+		SDM_CONFIGURATION_ADMIN.requires(ECT_V2);
+		CAREER_WORKSHEET_V12.requires(V12_TOP_NAV);
+		ENABLE_REMOVE_HTML_TAGS_FROM_PM_ADHOC_REPORT.requires(RTE);
+		ONBOARDING_APPLICATION.requires(GENERIC_OBJECTS);
+		ONBOARDING_APPLICATION.requires(V12_TOP_NAV);
+		ONBOARDING_2_APPLICATION.requires(GENERIC_OBJECTS);
+		ONBOARDING_2_APPLICATION.requires(V12_TOP_NAV);
+		ENABLE_ADD_HOMEICON_TO_V12_GLOBAL_HEADER.requires(V12_TOP_NAV);
+		INCLUDE_ONLY_COMPLETED_FORMS_FOR_VARPAY.requires(VARIABLE_PAY);
+		ECT_LEAVE_OF_ABSENCE.requires(ECT_ABSENCE_MANAGEMENT);
+		ECT_LEAVE_OF_ABSENCE.requires(ECT_V2);
+		ECT_LEAVE_OF_ABSENCE.requires(GENERIC_OBJECTS);
+		GENERIC_OBJECTS.requires(ATTACHMENT_MANAGE);
+		PMUNITY.requires(PMREVIEW);
+		ECT_BENEFITS_MANAGEMENT.requires(ECT_V2);
+		ECT_BENEFITS_MANAGEMENT.requires(GENERIC_OBJECTS);
+		ENABLE_RBP_SETUP_WIZARD.requires(ROLE_BASED_PERMISSION);
+		ECT_UI_INTEGRATION_SAP_SYSTEMS.requires(GENERIC_OBJECTS);
+		CAREER_PATH_V2.requires(GENERIC_OBJECTS);
+		ECT_PAYMENT_INFORMATION_V3.requires(ECT_V2);
+		ECT_PAYMENT_INFORMATION_V3.requires(GENERIC_OBJECTS);
+		OFFBOARDING_APPLICATION.requires(ENABLE_SMART_SUITE);
+		OFFBOARDING_APPLICATION.requires(GENERIC_OBJECTS);
+		ECT_S_INNOV_EE_MD_INTEGRATION.requires(GENERIC_OBJECTS);
+		ECT_ENABLE_BUSINESS_RULES_WF.requires(ECT_V2);
+		ECT_ENABLE_BUSINESS_RULES_WF.requires(GENERIC_OBJECTS);
+		ECT_ENABLE_BUSINESS_RULES_EVT.requires(ECT_ENABLE_BUSINESS_RULES_WF);
+		ADMIN_HOMEPAGE.requires(V12_TOP_NAV);
+		ADMIN_HOMEPAGE.requires(ENABLE_CPP);
+		ADMIN_HOMEPAGE.requires(ENABLE_ACTION_SEARCH);
+		PROVISIONING_ENABLE_OPERATIONAL_WORKFORCE_PLANNING.requires(GENERIC_OBJECTS);
+		PROVISIONING_ENABLE_OPERATIONAL_WORKFORCE_PLANNING.requires(ATTACHMENT_MANAGE);
+		PEOPLE_PROFILE_3.requires(ROLE_BASED_PERMISSION);
+		PEOPLE_PROFILE_3.requires(GENERIC_OBJECTS);
+		PEOPLE_PROFILE_3.requires(V12_PROFILE);
+		PEOPLE_PROFILE_3.requires(V12_TOP_NAV);
+		LINKEDIN_WIDGET_INTEGRATION.requires(PEOPLE_PROFILE_3);
+		MANAGE_GROUPS_IN_OPTIONS_MENU.requires(ROLE_BASED_PERMISSION);
+		MANAGE_GROUPS_IN_OPTIONS_MENU.requires(DYNAMIC_GROUPS_V2);
+		ENABLE_SUCCESSLINE.requires(GENERIC_OBJECTS);
+		ENABLE_SUCCESSLINE.requires(ROLE_BASED_PERMISSION);
+		ENABLE_OTHER_TOPICS.requires(ENABLE_SUCCESSLINE);
+		ENABLE_COACHING_ADVICE.requires(ENABLE_SUCCESSLINE);
+		ENABLE_SPOTAWARDSPROGRAM.requires(GENERIC_OBJECTS);
+		ENABLE_SPOTAWARDSPROGRAM.requires(ROLE_BASED_PERMISSION);
+		ENABLE_SPOTAWARDSPROGRAM.requires(ECT_FOUNDATION_OBJECTS);
+		ENABLE_HOMEPAGE3.requires(ROLE_BASED_PERMISSION);
+		OFFBOARDING_EC_WRITEBACK.requires(ECT_V2);
+		ENABLE_SMART_SUITE.requires(GENERIC_OBJECTS);
+		ENABLE_SMART_SUITE.requires(ENABLE_BPE_SERVICE);
+		TEAM_GOALS.requires(TGM_V12);
+		INITIATIVES.requires(TGM_V12);
+		CDP_MENTORING.requires(GENERIC_OBJECTS);
+		CDP_MENTORING.requires(ROLE_BASED_PERMISSION);
+		INITIATIVES.requires(GENERIC_OBJECTS);
+		TEAM_GOALS.requires(GENERIC_OBJECTS);
+		TEAM_OVERVIEW_ACCESS_PERMISSION.requires(ROLE_BASED_PERMISSION);
+		ENABLE_SIMPLE_EXTENSIONS.requires(GENERIC_OBJECTS);
+		INITIATIVES.requires(ROLE_BASED_PERMISSION);
+		TEAM_GOALS.requires(ROLE_BASED_PERMISSION);
+		ECT_FORMS_AS_SERVICE.requires(GENERIC_OBJECTS);
+		ECT_FORMS_AS_SERVICE.requires(ECT_DOCUMENT_GENERATION);
+		ECT_FORMS_AS_SERVICE.requires(PEOPLE_PROFILE_3);
+		EXTERNAL_LEARNING_USER.requires(GENERIC_OBJECTS);
+		EXTERNAL_LEARNING_USER.requires(ROLE_BASED_PERMISSION);
+		ENABLE_MOBILE_PM.requires(PMUNITY);
+		ENABLE_INTELLIGENT_SERVICES_EDITOR.requires(GENERIC_OBJECTS);
+		ENABLE_INTELLIGENT_SERVICES_EDITOR.requires(ENABLE_SMART_SUITE);
+		ENABLE_INTELLIGENT_SERVICES_EDITOR.requires(ENABLE_BPE_SERVICE);
+		ENABLE_TEST_MODE_FOR_INTELLIGENT_SERVICES_EDITOR.requires(ENABLE_INTELLIGENT_SERVICES_EDITOR);
+		ENABLE_TEST_MODE_FOR_INTELLIGENT_SERVICES_EDITOR.requires(GENERIC_OBJECTS);
+		ENABLE_TEST_MODE_FOR_INTELLIGENT_SERVICES_EDITOR.requires(ENABLE_SMART_SUITE);
+		ENABLE_TEST_MODE_FOR_INTELLIGENT_SERVICES_EDITOR.requires(ENABLE_BPE_SERVICE);
+		ECT_WORKSENIORITY_MANAGEMENT.requires(GENERIC_OBJECTS);
+		ECT_LOCATION_BASED_PAYMENTS.requires(GENERIC_OBJECTS);
+		ECT_LOCATION_BASED_PAYMENTS.requires(ENABLE_SMART_SUITE);
+		ENABLE_PLATEAU_THIRD_PARTY_COOKIE_MECHANISM.requires(ENABLE_PLATEAU_INTEGRATION);
+		ENABLE_GRANTING_LMS_ROLES_TO_GROUPS.requires(ROLE_BASED_PERMISSION);
+		ENABLE_GRANTING_LMS_ROLES_TO_GROUPS.requires(ENABLE_PLATEAU_INTEGRATION);
+		PERMISSION_GROUP_TEAM_VIEW_INCLUDE_INACTIVE_USERS.requires(ROLE_BASED_PERMISSION);
+		UI_CONSISTENCY_2016.requires(ENABLE_FIORI_STYLING);
+		CONCUR_DRM_INTEGRATION.requires(ECT_COMPOUND_EMPLOYEE_MAPPING_EXTENSION);
+		DOCUSIGNADAPTOR_APPLICATION.requires(GENERIC_OBJECTS);
+		ANALYTICS_IN_EC.requires(ECT_V2);
+		ANALYTICS_IN_EC.requires(INFORM_SSO);
+		lockdown();
+	}
+
+	/** 
+	* locks down the _enumList after all the enumeration constants have been created. Subsequent calls to the constructor will fail with an UnsupportedOperationException.
+	*/
+	private static final void lockdown() {
+		_enumList = Collections.unmodifiableList(Arrays.asList(_enumList.toArray()));
+		int maxId = 0;
+		for (int i = _enumList.size(); --i >= 0;) {
+			final int id = ((FeatureEnum) _enumList.get(i))._id;
+			if (id > maxId) {
+				maxId = id;
+			}
+		}
+		_idMap = new FeatureEnum[maxId + 1];
+		for (int i = _enumList.size(); --i >= 0;) {
+			final FeatureEnum feature = (FeatureEnum) _enumList.get(i);
+			final int id = feature.getId();
+			if (_idMap[id] != null) {
+				throw new InternalError("multiple FeatureEnum elements have the same id " + id);
+			}
+			_idMap[id] = feature;
+		}
+		try {
+			final Class thisClass = FeatureEnum.class;
+			final int MODIFIERS = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
+			final Field fields[] = thisClass.getFields();
+			for (final Field field : fields) {
+				if ((field.getModifiers() & MODIFIERS) == MODIFIERS && field.getType() == thisClass) {
+					final FeatureEnum feature = (FeatureEnum) field.get(null);
+					feature._constantName = field.getName();
+					_enumMap.put(feature._constantName, feature);
+				}
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** 
+	* The database unique identifier.
+	*/
+	private final int _id;
+	/** 
+	* The messages.properties key
+	*/
+	private final String _messageKey;
+	/** 
+	* The company settings .properties key (may be null)
+	*/
+	private final String _key;
+	/** 
+	* The licence product name.
+	*/
+	private final String _product;
+	/** 
+	* Is this feature visible on and hence editable through UI
+	*/
+	private boolean _isUIVisible = true;
+	/** 
+	* The name of the constant as defined in the java-name space. This value is pulled out using reflection, and is only available after the lock-down static initializer is called (e.g. not available to the constructor).
+	*/
+	private String _constantName;
+	private final FeatureReadinessEnum _readiness;
+	private List _obsoletes;
+	private FeatureEnum _obsoletedBy;
+	private List _requires;
+
+	public static FeatureEnum valueOf(final String name) {
+		if (_enumMap.containsKey(name)) {
+			return _enumMap.get(name);
+		} else {
+			throw new IllegalArgumentException("No FeatureEnum const " + name + "." + name);
+		}
+	}
+
+	/** 
+	* Registers an Enum constant with a default readiness of "PRODUCTION".
+	*/
+	private FeatureEnum(final int id, final String messageKey, final String key, final String product,
+			final FeatureGroupEnum fge) {
+		this(id, messageKey, key, product, FeatureReadinessEnum.PRODUCTION, fge, true);
+	}
+
+	/** 
+	* Registers an Enum constant with a default readiness of "PRODUCTION".
+	*/
+	private FeatureEnum(final int id, final String messageKey, final String key, final String product,
+			final FeatureGroupEnum fge, final boolean isVisible) {
+		this(id, messageKey, key, product, FeatureReadinessEnum.PRODUCTION, fge, isVisible);
+	}
+
+	/** 
+	* Registers a Enum constant in the map and list.
+	*/
+	private FeatureEnum(final int id, final String messageKey, final String key, final String product,
+			final FeatureReadinessEnum readiness, final FeatureGroupEnum fge) {
+		this(id, messageKey, key, product, readiness, fge, true);
+	}
+
+	/** 
+	* Registers a Enum constant in the map and list.
+	*/
+	private FeatureEnum(final int id, final String messageKey, final String key, final String product,
+			final FeatureReadinessEnum readiness, final FeatureGroupEnum fge, final boolean isVisible) {
+		if (id < 0) {
+			throw new IllegalArgumentException("Invalid ID.  IDs must be > 0");
+		}
+		_id = id;
+		_messageKey = messageKey;
+		_key = key;
+		_product = product;
+		if (null != _productMap.get(product)) {
+			throw new IllegalArgumentException("Duplicate product name: " + product + ". Product names must be unique");
+		}
+		_productMap.put(product, this);
+		_enumList.add(this);
+		_readiness = readiness;
+		_isUIVisible = isVisible;
+		fge.add(this);
+	}
+
+	/** 
+	* Returns the feature id.
+	*/
+	@Override
+	public int getId() {
+		return _id;
+	}
+
+	/** 
+	* Returns the LicenceBean Product name.
+	*/
+	@Override
+	public String getProduct() {
+		return _product;
+	}
+
+	/** 
+	* Returns the name of the constant. <b>This should only be used for debug messages, since there is no obligation to keep the constant names constant.</b>
+	*/
+	@Override
+	public String getConstantName() {
+		return _constantName;
+	}
+
+	/** 
+	* Returns the messages.properties key that maps to the localized name of this feature. Note, right now this is just "FEATURE_XXX" because of laziness, but should probably be something a little more readable.
+	*/
+	@Override
+	public String getMessageKey() {
+		return _messageKey;
+	}
+
+	/** 
+	* Returns the .properties file key for CompanySettingsBean and CompanySetter. May be null if there is no direct mapping to a .properties file entry.
+	*/
+	@Override
+	public String getKey() {
+		return _key;
+	}
+
+	/** 
+	* A hashcode. This implementation is not necessary because the Object.hashCode method will work fine for singletons, however this implementation is more predictable.
+	*/
+	@Override
+	public int hashCode() {
+		return _id;
+	}
+
+	/** 
+	* @return the production readiness of this feature
+	*/
+	@Override
+	public FeatureReadinessEnum getReadiness() {
+		return _readiness;
+	}
+
+	/** 
+	* @return a list of features that were obsoleted by this feature
+	*/
+	@Override
+	public List getObsoletedFeatures() {
+		return _obsoletes == null ? Collections.EMPTY_LIST : Collections.unmodifiableList(_obsoletes);
+	}
+
+	/** 
+	* @return true if this feature is obsolete
+	*/
+	@Override
+	public boolean isObsolete() {
+		return _obsoletedBy != null;
+	}
+
+	/** 
+	* @return the feature that obsoleted this feature, or null if this feature isnot obsolete.
+	*/
+	@Override
+	public FeatureEnum getObsoletedBy() {
+		return _obsoletedBy == this ? null : _obsoletedBy;
+	}
+
+	/** 
+	* small hack. a feature that is just obsolete is marked as such by setting it to obsolete itself.
+	*/
+	private void obsolete() {
+		_obsoletedBy = this;
+	}
+
+	/** 
+	* This feature obsoletes another feature.
+	* @param oldFeature the feature that is obsoleted by this feature
+	*/
+	private void obsoletes(final FeatureEnum oldFeature) {
+		oldFeature._obsoletedBy = this;
+		if (_obsoletes == null) {
+			_obsoletes = new ArrayList();
+		}
+		_obsoletes.add(oldFeature);
+	}
+
+	/** 
+	* @return the features required by this feature. Only includes the firstlevel of depenencies.
+	*/
+	@Override
+	public List getRequiredFeatures() {
+		return _requires == null ? Collections.EMPTY_LIST : Collections.unmodifiableList(_requires);
+	}
+
+	/** 
+	* @return the complete list of features required for this feature. Thisincludes features required by required features, etc...
+	*/
+	@Override
+	public List getCompleteRequiredFeatureList() {
+		if (_requires == null) {
+			return Collections.EMPTY_LIST;
+		}
+		final HashSet set = new HashSet(_requires);
+		final List reqList = new ArrayList(_requires);
+		for (int i = 0; i < reqList.size(); i++) {
+			final FeatureEnum f = (FeatureEnum) reqList.get(i);
+			final List subFeatures = f._requires;
+			if (subFeatures != null) {
+				for (int j = 0; j < subFeatures.size(); ++j) {
+					final FeatureEnum sub = (FeatureEnum) subFeatures.get(j);
+					if (!set.contains(sub)) {
+						set.add(sub);
+						reqList.add(sub);
+					}
+				}
+			}
+		}
+		return reqList;
+	}
+
+	/** 
+	* This feature requires another feature
+	* @param other the required feature
+	*/
+	private void requires(final FeatureEnum other) {
+		if (_requires == null) {
+			_requires = new ArrayList();
+		}
+		_requires.add(other);
+	}
+
+	/** 
+	* Is this feature visible and hence editable on UI.
+	* @return true if this feature is visible; false otherwise
+	*/
+	@Override
+	public boolean isVisible() {
+		return _isUIVisible;
+	}
+
+	/** 
+	* Returns a FeatureEnum for the given product name, or null if no such feature exists.
+	*/
+	public static final FeatureEnum forProduct(final String product) {
+		return (FeatureEnum) _productMap.get(product);
+	}
+
+	/** 
+	* Returns a FeatureEnum for the given feature id, or null if no such feature exists.
+	*/
+	public static final FeatureEnum forId(final int id) {
+		if (id < 0 || id >= _idMap.length) {
+			return null;
+		}
+		return _idMap[id];
+	}
+
+	/** 
+	* Returns an unmodifiable list of all FeatureEnum
+	*/
+	public static final List list() {
+		return _enumList;
+	}
+
+	/** 
+	* Returns the number of FeatureEnum constants.
+	*/
+	public static final int count() {
+		return _enumList.size();
+	}
+
+	/** 
+	* Returns an unmodifiable iterator over all the FeatureEnum constants.
+	*/
+	public static final Iterator iterator() {
+		return _enumList.iterator();
+	}
+
+	/** 
+	* Returns an unmodifiable listIterator over all the FeatureEnum constants.
+	*/
+	public static final ListIterator listIterator() {
+		return _enumList.listIterator();
+	}
+
+	/** 
+	* Serialization helper, so the the original (now-locked-down) constructor doesn't get called again as part of the deserialization process. Returned replacement will deserialize to the constant object.
+	*/
+	protected Object writeReplace() throws ObjectStreamException {
+		return new Serialization(getId());
+	}
+
+	/** 
+	* Serialization helper. These objects replace the StandardElementEnum before they are placed into the serialization stream. When deserialized, they resolve themselves to the enum constants.
+	*/
+	static class Serialization implements Serializable {
+		int _id;
+
+		/** 
+		* Serialization constructor
+		*/
+		public Serialization() {
+		}
+
+		/** 
+		* writeReplace constructor
+		*/
+		public Serialization(final int id) {
+			_id = id;
+		}
+
+		@Override
+		public Object readResolve() throws ObjectStreamException {
+			final FeatureEnum resolved = FeatureEnum.forId(_id);
+			if (resolved == null) {
+				throw new InvalidObjectException(
+						"Unknown " + FeatureEnum.class.getName() + " constant \"" + _id + "\" encountered");
+			}
+			return resolved;
+		}
+	}
+}

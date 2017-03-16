@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.text.template.contentassist;
+
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationControl;
+
+public interface ITemplateInformationControlCreator {
+	IInformationControl createInformationControl(Shell parent);
+
+	boolean canReuse(IInformationControl control);
+
+	boolean canReplace(IInformationControlCreator creator);
+}

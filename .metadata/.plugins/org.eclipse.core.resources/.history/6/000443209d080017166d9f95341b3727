@@ -1,0 +1,18 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.cdp.service.mentoring.IConfirmMatchingResult;
+import com.successfactors.cdp.service.mentoring.impl.IConfirmMatchingResultImpl;
+
+public interface IConfirmMatchingResultImplTest {
+	void setup();
+
+	void testConfirmWithException();
+
+	void testValidateUser();
+
+	void testValidEmptyUsers();
+
+	void testInvalidUsers();
+}

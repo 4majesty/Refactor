@@ -1,0 +1,39 @@
+/*
+ * $Id$
+ */
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Service command to create a new jam group for the Mentoring program
+ * @author ricardo.saito
+ *
+ */
+public class CreateMentoringJamGroup implements ServiceCommand<Boolean> {
+  private IMentoringProgram program;
+  private String jamGroupName;
+  private String jamGroupDescription;
+
+  /**
+   * Constructor
+   */
+  public CreateMentoringJamGroup(MentoringProgram program, String jamGroupName, String jamGroupDescription) {
+    this.program = program;
+    this.jamGroupName = jamGroupName;
+    this.jamGroupDescription= jamGroupDescription;
+  }
+
+  public MentoringProgram getProgram() {
+    return program;
+  }
+
+  public String getJamGroupName() {
+    return jamGroupName;
+  }
+
+  public String getJamGroupDescription() {
+    return jamGroupDescription;
+  }
+}

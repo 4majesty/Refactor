@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.corext.refactoring.base;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.jdt.core.ISourceRange;
+
+public interface IJavaStringStatusContext {
+	String getSource();
+
+	ISourceRange getSourceRange();
+
+	Object getCorrespondingElement();
+}

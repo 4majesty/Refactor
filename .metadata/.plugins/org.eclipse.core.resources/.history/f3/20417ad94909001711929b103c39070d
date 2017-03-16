@@ -1,0 +1,12 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.Collection;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupInviteFailureEmail;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceSystemException;
+
+public interface IAbstractJamGroupInviteObserver {
+}

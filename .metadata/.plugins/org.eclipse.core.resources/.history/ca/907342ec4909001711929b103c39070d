@@ -1,0 +1,12 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.cdp.service.GetDevPlanList;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.user.bean.preference.PreferenceBean;
+import com.successfactors.user.service.preference.GetPreferenceBean;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+
+public interface IGetDevPlanListImpl {
+	GetDevPlanList execute(GetDevPlanList cmd) throws ServiceApplicationException;
+}

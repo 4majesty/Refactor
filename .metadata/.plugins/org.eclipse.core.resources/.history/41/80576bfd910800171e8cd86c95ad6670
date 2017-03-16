@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.model;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
+import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryControlConfiguration;
+import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+
+public interface IJavaModelLabelProvider {
+	void dispose();
+
+	Image getImage(final Object element);
+
+	String getText(final Object element);
+}

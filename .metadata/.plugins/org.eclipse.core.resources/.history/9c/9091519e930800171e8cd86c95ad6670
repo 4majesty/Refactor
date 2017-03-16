@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import java.util.Hashtable;
+import java.util.List;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+
+public interface IJavaCompletionProcessor {
+	void restrictProposalsToVisibility(boolean restrict);
+
+	void restrictProposalsToMatchingCases(boolean restrict);
+
+	IContextInformationValidator getContextInformationValidator();
+}

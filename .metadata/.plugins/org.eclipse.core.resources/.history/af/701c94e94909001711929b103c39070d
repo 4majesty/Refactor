@@ -1,0 +1,294 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSection;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.bean.mentoring.vo.MatchedParticipantVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionValueVO;
+import com.successfactors.cdp.service.mentoring.ConfirmMatchingResult;
+import com.successfactors.cdp.service.mentoring.GetMentoringRequest;
+import com.successfactors.cdp.service.mentoring.ProcessMentoringRequest;
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.MentoringProgramMDFException;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.user.bean.UserBean;
+
+/**
+ * Service command to confirm matching result
+ * @author Keqin Liu
+ */
+@Service
+public class ConfirmMatchingResultImpl implements ServiceCommandImpl<ConfirmMatchingResult, ConfirmMatchingResult> {
+  /** Logger */
+  private static Logger logger = LogManager.getLogger();
+
+  private static final String USERID_SEPARATOR = "|||";
+  
+  /** Mentoring service base */
+  @Inject
+  @In(create = true)
+  private MentoringServiceBase mentoringServiceBase;
+
+  @Inject
+  @In
+  private IMessageBundle msgs;
+  
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler = ServiceCommandHandlerFactory.getSCAHandler();
+  
+  /** Mentor and mentees matched to them */
+  private Map<String, Set<String>> mentorMenteeMap = new HashMap<String, Set<String>>();
+
+  @Override
+  public ConfirmMatchingResult execute(ConfirmMatchingResult cmd) throws ServiceApplicationException {
+    MentoringProgram program = cmd.getProgram();
+    List<MatchedParticipantVO> matchList = cmd.getMatchList();
+    List<MatchedParticipantVO> cacheResults = cmd.getMatchresultsFromCache();
+    validateUsers(matchList);
+    getMatchingInfoFromCache(matchList, cacheResults); // Get matching information such as score and matched area from cache
+
+    try {
+      confirmPreferredMatch(program, matchList); // First process preferred match
+      confirmOtherMatch(program, matchList); // The process excellent, good and average match
+      
+      if (program.isNeedMentorApproval()) {
+        if (program.getStatus().getNextStatus(program) != ProgramStatusEnum.MENTOR_APPROVAL) {
+          logger.error("The next status of the program(current status:" + program.getStatus() + ") is not " + ProgramStatusEnum.MENTOR_APPROVAL);
+          return cmd;
+        }
+        program.setStatus(ProgramStatusEnum.MENTOR_APPROVAL);
+      } else {
+        if (program.getStatus().getNextStatus(program) != ProgramStatusEnum.MATCHED) {
+          logger.error("The next status of the program(current status:" + program.getStatus() + ") is not " + ProgramStatusEnum.MATCHED);
+          return cmd;
+        }
+        program.setStatus(ProgramStatusEnum.MATCHED);
+      }
+      
+      ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgram.class, program));    
+      mentoringServiceBase.validateContext(context);
+    } catch (ServiceApplicationException e) {
+      throw new MentoringProgramMDFException(e);
+    }
+    
+    if (program.isNeedMentorApproval()) {
+      // If matching needs mentor approval, send matching email to mentors
+      mentoringServiceBase.sendMatchingRequestEmail(program, mentorMenteeMap);
+    } else {
+      // If matching doesn't need menotr approval, send matched email to both mentors and mentees
+      for (String mentor : mentorMenteeMap.keySet()) {
+        mentoringServiceBase.sendMatchedEmailToMentor(program, mentor, new ArrayList<String>(mentorMenteeMap.get(mentor)));
+        
+        for (String mentee : mentorMenteeMap.get(mentor)) {
+          mentoringServiceBase.sendMatchedEmailToMentee(program, mentor, mentee);
+        }
+      }
+    }
+    
+    cmd.setMatchedParticipants(mentorMenteeMap);
+
+    return cmd;
+  }
+
+  private void getMatchingInfoFromCache(List<MatchedParticipantVO> matchList, List<MatchedParticipantVO> cacheResults) {
+    Map<String, MatchedParticipantVO> cacheMap = new HashMap<>();
+    
+    if (cacheResults != null && !cacheResults.isEmpty()) {
+      for (MatchedParticipantVO cacheResult : cacheResults) {
+        String key = cacheResult.getMentorId() + USERID_SEPARATOR + cacheResult.getMenteeId();
+        cacheMap.put(key, cacheResult);
+      }
+      
+      for (MatchedParticipantVO match : matchList) {
+        String key = match.getMentorId() + USERID_SEPARATOR + match.getMenteeId();
+        
+        if (cacheMap.containsKey(key)) {
+          match.setMachingFinalScore(cacheMap.get(key).getMachingFinalScore());
+          match.setMatchedAreas(cacheMap.get(key).getMatchedAreas());
+          match.setScore(cacheMap.get(key).getScore());
+        }
+      }
+    }
+  }
+
+  private void confirmPreferredMatch(MentoringProgram program, List<MatchedParticipantVO> matchList) throws ServiceApplicationException {
+    Map<String, MatchedParticipantVO> matchMap = new HashMap<>();
+    
+    for (MatchedParticipantVO match : matchList) {
+      String key = match.getMentorId() + USERID_SEPARATOR + match.getMenteeId();
+      matchMap.put(key, match);
+    }
+    
+    // Get all preferred requests in this program
+    List<MentoringProgramMentorRequest> requests = getPreferredRequests(program.getExternalId());
+    
+    if (requests != null) {
+      for (MentoringProgramMentorRequest request : requests) {
+        MatchedParticipantVO match = matchMap.get(request.getMentor() + USERID_SEPARATOR + request.getMentee());
+        
+        // This is a preferred match
+        if (match != null) {
+          addMentorMenteeToMap(request.getMentor(), request.getMentee()); // Add mentor and mentee to mentor and matched mentee map
+          
+          if (program.isNeedMentorApproval()) {
+            // If matching needs mentor approval, set request to confirmed so that mentor have chance to approve/decline
+            request.setMentoringRequestStatus(MentorRequestStatusEnum.CONFIRMED);
+          } else {
+            // If matching doesn't need mentor approval, set request to accepted
+            request.setMentoringRequestStatus(MentorRequestStatusEnum.ACCEPTED);
+          }
+        } else {
+          // This is not a preferred match, just reject preferred request
+          request.setMentoringRequestStatus(MentorRequestStatusEnum.REJECTED);
+        }
+        
+        if (!MentorRequestStatusEnum.CONFIRMED.equals(request.getMentoringRequestStatus())) {
+          // Approve or decline request since this request doesn't need mentor approval
+          scaHandler.execute(new ProcessMentoringRequest(request.getProgramId(), request.getExternalId(),
+            request.getMentoringRequestStatus(), request.getRejectComment()));
+        } else {
+          // Save request and skip approve/decline since this request needs mentor approval
+          ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgramMentorRequest.class, request));
+          mentoringServiceBase.validateContext(context);
+        }
+        
+        matchList.remove(match); // Since this match has been processed, remove it from list
+      } 
+    }
+  }
+
+  private List<MentoringProgramMentorRequest> getPreferredRequests(String programId) throws ServiceApplicationException {
+    // In supervised matching, mentoring request in draft status means preferred mentor mentee chosen in sign-up
+    GetMentoringRequest cmd = new GetMentoringRequest();
+    cmd.setProgramId(programId);      
+    cmd.setStatus(MentorRequestStatusEnum.DRAFT);
+    
+    return scaHandler.execute(cmd);
+  }
+  
+  private void confirmOtherMatch(MentoringProgram program, List<MatchedParticipantVO> matchList) throws ServiceApplicationException {
+    if (program.isNeedMentorApproval()) {
+      // If matching needs mentor approval, just create confirmed mentoring request
+      List<MentoringProgramMentorRequest> requestList = new ArrayList<MentoringProgramMentorRequest>();
+      
+      for (MatchedParticipantVO match : matchList) {
+        MentoringProgramMentorRequest request = new MentoringProgramMentorRequest();
+        request.setProgramId(program.getExternalId());
+        request.setMentor(match.getMentorId());
+        request.setMentee(match.getMenteeId());
+        request.setMentoringRequestStatus(MentorRequestStatusEnum.CONFIRMED);
+        request.setMatchingScore(match.getScore());
+        request.setMatchingCategory(match.getMatchedCategory());
+        request.setMentoringProgramMatchedArea(convertSectionVoToSection(match.getMatchedAreas()));
+        requestList.add(request);
+        
+        addMentorMenteeToMap(match.getMentorId(), match.getMenteeId()); // Add mentor and mentee to mentor and matched mentee map
+      }
+      
+      ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgramMentorRequest.class, requestList));
+      mentoringServiceBase.validateContext(context);
+    } else {
+      // If matching doesn't need mentor approval, create matched participant directly
+      List<MentoringProgramMatchedParticipant> matchedParList = new ArrayList<MentoringProgramMatchedParticipant>();
+    
+      for (MatchedParticipantVO match : matchList) {
+        MentoringProgramMatchedParticipant matchedPar = new MentoringProgramMatchedParticipant();
+        matchedPar.setProgramId(program.getExternalId());
+        matchedPar.setMentor(match.getMentorId());
+        matchedPar.setMentee(match.getMenteeId());
+        matchedPar.setMatchingScore(match.getScore());
+        matchedPar.setMatchingCategory(match.getMatchedCategory());
+        matchedPar.setMentoringProgramMatchedArea(convertSectionVoToSection(match.getMatchedAreas()));
+        matchedParList.add(matchedPar);
+        
+        addMentorMenteeToMap(match.getMentorId(), match.getMenteeId()); // Add mentor and mentee to mentor and matched mentee map
+      }
+    
+      ValidationContext context = scaHandler.execute(new SaveBean(MentoringProgramMatchedParticipant.class, matchedParList));
+      mentoringServiceBase.validateContext(context);
+    }
+  }
+  
+  private List<MentoringProgramSignupFormSection> convertSectionVoToSection(List<ProgramSignupFormSectionVO> sectionVOs) {
+    List<MentoringProgramSignupFormSection> sections = new ArrayList<MentoringProgramSignupFormSection>();
+    
+    if (sectionVOs != null) {
+      for (ProgramSignupFormSectionVO sectionVO : sectionVOs) {
+        List<MentoringProgramSignupFormSectionValue> sectionValues = new ArrayList<MentoringProgramSignupFormSectionValue>();
+        MentoringProgramSignupFormSection section = new MentoringProgramSignupFormSection();
+        section.setSectionId(sectionVO.getSectionId());
+        section.setSectionType(sectionVO.getType());
+
+        for (ProgramSignupFormSectionValueVO sectionValueVO : sectionVO.getSectionValues()) {
+          MentoringProgramSignupFormSectionValue sectionValue = new MentoringProgramSignupFormSectionValue();
+          sectionValue.setItemId(sectionValueVO.getItemId());
+          sectionValue.setItemLabel(sectionValueVO.getItemLabel());
+          sectionValues.add(sectionValue);
+        }
+        
+        section.setSectionValue(sectionValues);
+        sections.add(section);
+      }
+    }
+    
+    return sections;
+  }
+  
+  private void addMentorMenteeToMap(String mentor, String mentee) {
+    Set<String> mentees = mentorMenteeMap.get(mentor);
+    
+    if (mentees == null) {
+      mentees = new HashSet<String>();
+      mentorMenteeMap.put(mentor, mentees);
+    }
+    
+    mentees.add(mentee);
+  }
+  
+  protected void validateUsers(List<MatchedParticipantVO> matchList) throws ServiceApplicationException {
+    if (matchList == null || matchList.isEmpty()) {
+      return;
+    }
+    
+    Set<String> users = new HashSet<String>();
+    for (MatchedParticipantVO mentoring: matchList) {
+      users.add(mentoring.getMentorId());
+      users.add(mentoring.getMenteeId());
+    }
+    
+    Map<String, UserBean> map = mentoringServiceBase.getUsernameMapByIds(new ArrayList<String>(users));
+    for (String userId : users) {
+      UserBean user = map.get(userId);
+      if (userId != null && (user == null || !user.isValidUser())) {
+        logger.error("Inactive user is not allowed to be matched.");
+        throw new ServiceApplicationException(msgs.getString("DEVELOPMENT_MENTORING_MATCHING_ERROR_INACTIVE_USERS"));
+      }
+    }
+  }
+}

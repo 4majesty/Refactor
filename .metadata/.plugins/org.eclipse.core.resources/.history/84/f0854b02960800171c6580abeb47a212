@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+
+public interface ICompilationUnitRange {
+	ICompilationUnit getCompilationUnit();
+
+	ISourceRange getSourceRange();
+
+	ASTNode getNode(CompilationUnit rootNode);
+
+	String toString();
+
+	boolean equals(Object obj);
+
+	int hashCode();
+}

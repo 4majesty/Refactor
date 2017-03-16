@@ -1,0 +1,36 @@
+package org.eclipse.jdt.internal.ui.javaeditor.saveparticipant;
+
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.preferences.DefaultScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.jface.preference.IPreferencePageContainer;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+
+public interface IAbstractSaveParticipantPreferenceConfiguration {
+	Control createControl(Composite parent, IPreferencePageContainer container);
+
+	void initialize(final IScopeContext context, IAdaptable element);
+
+	void dispose();
+
+	void performDefaults();
+
+	void performOk();
+
+	void enableProjectSettings();
+
+	void disableProjectSettings();
+
+	boolean hasSettingsInScope(IScopeContext context);
+
+	boolean isEnabled(IScopeContext context);
+}

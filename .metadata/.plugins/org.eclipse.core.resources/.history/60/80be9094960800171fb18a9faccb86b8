@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls.search;
+
+import org.eclipse.search.ui.text.Match;
+import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
+import org.eclipse.jdt.internal.ui.search.TextSearchTableContentProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+import org.eclipse.jdt.internal.ui.search.ITextSearchTableContentProvider;
+
+public interface INLSSearchResultPage {
+	Object getAdapter(Class adapter);
+}

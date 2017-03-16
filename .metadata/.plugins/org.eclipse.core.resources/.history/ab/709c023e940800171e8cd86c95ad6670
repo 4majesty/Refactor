@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import java.util.Iterator;
+import org.eclipse.jface.util.OpenStrategy;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+public interface IOpenLocationAction {
+	ISelection getSelection();
+
+	void run(IStructuredSelection selection);
+}

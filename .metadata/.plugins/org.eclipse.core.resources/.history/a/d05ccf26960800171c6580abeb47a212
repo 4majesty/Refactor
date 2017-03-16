@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
+
+import java.util.HashSet;
+import org.eclipse.core.runtime.Assert;
+
+public interface IConstraintOperator {
+	String getOperatorString();
+
+	String toString();
+
+	boolean equals(Object obj);
+
+	int hashCode();
+
+	boolean isSubtypeOperator();
+
+	boolean isStrictSubtypeOperator();
+
+	boolean isEqualsOperator();
+
+	boolean isDefinesOperator();
+}

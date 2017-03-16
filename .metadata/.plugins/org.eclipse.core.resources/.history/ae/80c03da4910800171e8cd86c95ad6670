@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.ui.filters;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
+
+public interface INamePatternFilter {
+	String[] getPatterns();
+
+	boolean select(Viewer viewer, Object parentElement, Object element);
+
+	void setPatterns(String[] newPatterns);
+}

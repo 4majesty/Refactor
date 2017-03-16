@@ -1,0 +1,30 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.actions.BuildAction;
+import org.eclipse.ui.ide.IDEActionFactory;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.IRefreshable;
+
+public interface IBuildActionGroup {
+	void run(IStructuredSelection selection);
+
+	Shell getShell();
+
+	IAction getRefreshAction();
+
+	void fillActionBars(IActionBars actionBar);
+
+	void fillContextMenu(IMenuManager menu);
+
+	void dispose();
+}

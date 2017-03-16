@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jface.text.rules.ICharacterScanner;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.MultiLineRule;
+import org.eclipse.jface.text.rules.RuleBasedPartitionScanner;
+import org.eclipse.jface.text.rules.SingleLineRule;
+import org.eclipse.jface.text.rules.Token;
+import org.eclipse.jface.text.rules.WordRule;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
+public interface IJavaPartitionScanner {
+	boolean isWordStart(char c);
+
+	boolean isWordPart(char c);
+
+	IToken evaluate(ICharacterScanner scanner, boolean resume);
+
+	IToken getSuccessToken();
+}

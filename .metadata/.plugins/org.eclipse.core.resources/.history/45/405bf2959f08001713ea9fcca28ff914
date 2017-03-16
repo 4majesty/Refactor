@@ -1,0 +1,37 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.edu.ui.controller.exception.ProfileAjaxException;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.pmcommon.util.ClientDateFormat;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.serialization.SerializationException;
+import com.successfactors.serialization.json.JSONSerializationUtils;
+import com.successfactors.sfutil.util.FormatUtils;
+import com.successfactors.sfutil.util.XMLUtils;
+import com.successfactors.user.bean.preference.PreferenceBean;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+public interface IDevPlanPortletController {
+	String get(String selectedUserId, String selectedPlanId, int pageNum) throws ProfileAjaxException;
+
+	String getGoalListWithoutPagination(String selectedUserId, String selectedPlanId)
+			throws ProfileAjaxException, SerializationException;
+
+	void saveSelectedPlanId(long planId);
+}

@@ -1,0 +1,89 @@
+package com.successfactors.cdp.bean;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
+public class SuggestedRolesSettingBean implements Serializable {
+  private String weightKey;
+  private double weightValue;
+  private boolean enabled;
+  private int dispOrder;
+  private Map<String, SuggestedRolesSubItemBean> subItems;
+  private String displayName;
+
+  public SuggestedRolesSettingBean() {
+    super();
+  }
+  
+  public SuggestedRolesSettingBean(String weightKey, double weightValue,
+      boolean enabled, int dispOrder, Map<String, SuggestedRolesSubItemBean>subItems) {
+    super();
+    this.weightKey = weightKey;
+    this.weightValue = weightValue;
+    this.enabled = enabled;
+    this.dispOrder = dispOrder;
+    this.subItems = subItems;
+  }
+
+  public String getWeightKey() {
+    return weightKey;
+  }
+
+  public void setWeightKey(String weightKey) {
+    this.weightKey = weightKey;
+  }
+
+  public double getWeightValue() {
+    return weightValue;
+  }
+
+  public void setWeightValue(double weightValue) {
+    this.weightValue = weightValue;
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
+
+  public int getDispOrder() {
+    return dispOrder;
+  }
+
+  public void setDispOrder(int dispOrder) {
+    this.dispOrder = dispOrder;
+  }
+
+  public Map<String, SuggestedRolesSubItemBean> getSubItems() {
+    return subItems;
+  }
+
+  public void setSubItems(Map<String, SuggestedRolesSubItemBean> subItems) {
+    this.subItems = subItems;
+  }
+
+  public boolean addSubItem(String itemKey, boolean isEnabled) {
+    SuggestedRolesSubItemBean item = new SuggestedRolesSubItemBean(this.weightKey, itemKey, isEnabled);
+    return this.addSubItem(item);
+  }
+
+  public boolean addSubItem(SuggestedRolesSubItemBean item) {
+    if(this.subItems == null) {
+      this.subItems = new HashMap<String, SuggestedRolesSubItemBean>();
+    }
+    this.subItems.put(item.getItemKey(), item);
+    return true;
+  }
+
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
+}

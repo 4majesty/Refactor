@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.dialogs;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IPackageSelectionDialog {
+	int open();
+
+	boolean close();
+}

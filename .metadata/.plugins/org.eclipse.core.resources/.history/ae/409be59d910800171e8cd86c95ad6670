@@ -1,0 +1,28 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import java.util.List;
+import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Widget;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+
+public interface IPackagesViewTreeViewer {
+	void mapElement(Object element, Widget item);
+
+	void unmapElement(Object element, Widget item);
+
+	Widget doFindItem(Object element);
+
+	Widget doFindInputItem(Object element);
+
+	List getSelectionFromWidget();
+
+	void doUpdateItem(Widget item, Object element, boolean fullMap);
+
+	void internalRefresh(Object element);
+
+	void setSelectionToWidget(List l, boolean reveal);
+}

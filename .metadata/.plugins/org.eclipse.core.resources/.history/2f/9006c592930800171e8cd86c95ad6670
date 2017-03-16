@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface IGotoMatchingBracketAction {
+	void run();
+}

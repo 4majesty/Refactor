@@ -1,0 +1,64 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.Map;
+
+import com.successfactors.cdp.service.util.mentoring.MatchingScoreTypeEnum;
+import com.successfactors.sca.ServiceQuery;
+
+/**
+ * Service query to get matching counts by matching category
+ * @author Keqin Liu
+ */
+public class GetMatchingCounts implements ServiceQuery<GetMatchingCounts> {
+  private String programId;
+  private Map<MatchingScoreTypeEnum, Integer> matchingCounts;
+  private int matchedMentees;
+  
+  /**
+   * Constructor
+   * @param programId Program ID
+   */
+  public GetMatchingCounts(String programId) {
+    this.programId = programId;
+  }
+
+  /**
+   * Get program ID
+   * @return Program ID
+   */
+  public String getProgramId() {
+    return programId;
+  }
+
+  /**
+   * Get matching counts by matching category
+   * @return Matching counts by matching category
+   */
+  public Map<MatchingScoreTypeEnum, Integer> getMatchingCounts() {
+    return matchingCounts;
+  }
+
+  /**
+   * Set matching counts by matching category
+   * @param matchingCounts Matching counts by matching category
+   */
+  public void setMatchingCounts(Map<MatchingScoreTypeEnum, Integer> matchingCounts) {
+    this.matchingCounts = matchingCounts;
+  }
+
+  /**
+   * Get matched mentee size
+   * @return Matched mentee size
+   */
+  public int getMatchedMentees() {
+    return matchedMentees;
+  }
+
+  /**
+   * Set matched mentee size 
+   * @param matchedMentees Matched mentee size
+   */
+  public void setMatchedMentees(int matchedMentees) {
+    this.matchedMentees = matchedMentees;
+  }
+}

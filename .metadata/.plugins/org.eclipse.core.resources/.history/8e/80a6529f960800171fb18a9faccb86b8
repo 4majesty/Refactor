@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.refactoring.code;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.ChangeParametersControl;
+import org.eclipse.jdt.internal.ui.refactoring.IParameterListChangeListener;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.util.RowLayouter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.javaeditor.IJavaSourceViewer;
+
+public interface IExtractMethodInputPage {
+	void createControl(Composite parent);
+
+	void setVisible(boolean visible);
+}

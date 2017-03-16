@@ -1,0 +1,24 @@
+package com.successfactors.cdp.service.impl;
+
+import java.util.List;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.service.GetMentoringProgramsForMentorUnavailabilityExpirationCheck;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.MailInvalidAddressException;
+import com.successfactors.platform.bean.MailSendException;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.DateUtils;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.util.UserFormatUtils;
+
+public interface IGetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl {
+	Void execute(GetMentoringProgramsForMentorUnavailabilityExpirationCheck mentoringProgramsNotification)
+			throws ServiceApplicationException;
+
+	List<MentoringProgram> loadMentoringPrograms();
+}

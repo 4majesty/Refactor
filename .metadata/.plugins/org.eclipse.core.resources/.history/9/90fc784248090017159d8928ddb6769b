@@ -1,0 +1,567 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.cdp.service.util.mentoring.MentoringConstants;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.genericobject.api.model.APISubVersion;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.api.model.Type;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+
+import javax.persistence.Column;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * Program MDF Entity
+ * 
+ * @author I309618
+ * 
+ */
+@MDFEntity(effectiveDating = EffectiveDating.NONE, apiVisibility = APIVisibility.EDITABLE, apiSubVersion = APISubVersion.V1_0)
+public class MentoringProgram extends AuditFields {
+  // System Fields
+  /** Row Id. */
+  @Column(name = GENERIC_OBJECT_T.ROW_ID, nullable = false)
+  @Field(visibility = Visibility.READ_ONLY)
+  private Long rowId;
+
+  /** External Code. */
+  @Column(name = GENERIC_OBJECT_T.EXTERNAL_CODE, nullable = false)
+  @Field(visibility = Visibility.READ_ONLY, dataType = DataType.AUTO_NUMBER)
+  protected String externalId;
+
+  /** Internal Id. */
+  @Column(name = GENERIC_OBJECT_T.INTERNAL_ID)
+  @Field(visibility = Visibility.READ_ONLY)
+  protected Long internalId;
+
+  // Business Fields
+  /** Program Name */
+  @Column(name = GENERIC_OBJECT_T.EXTERNAL_NAME, nullable = false)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.STRING, maxLength = MentoringConstants.MAX_LENGTH_OF_PROGRAM_NAME)
+  private String name;
+  
+/** program description */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD1, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.STRING, maxLength = GENERIC_OBJECT_T.CUSTOM_FIELD100_LEN)
+  private String description;
+
+  /** program startDate */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD2, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date startDate;
+
+  /** program endDate */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD3, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date endDate;
+  
+  /** program mentorSignup Date*/
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD4, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date mentorSignupDate;
+  
+  /** program mentee Signup Date */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD5, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date menteeSignupDate;
+  
+  /** program matching Date */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD6, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date matchingDate;
+
+  /** program status */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD7, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.ENUM)
+  private ProgramStatusEnum status;
+
+  /** program matchingType */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD8)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.ENUM)
+  private ProgramMatchingTypeEnum matchingType = ProgramMatchingTypeEnum.SUPERVISED;
+
+  /** max number of mentees a mentor can have in one program */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD9)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.NUMBER)
+  private Integer maximumOfMentee;
+  
+  /** max number of mentors a mentee can have in one program */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD10)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.NUMBER)
+  private Integer maximumOfMentor;
+
+  /** program completedDate */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD11, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date completedDate;
+  
+  /** lprogram image ID */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD12, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.STRING)
+  private String photoId;
+  
+  /** Whether mentor request needs mentor approval, only apply to supervised matching */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD14, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.BOOLEAN)
+  private boolean needMentorApproval = false;
+  
+  /** Option to whether mentor or mentee can end the mentorship during program*/
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD15, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.BOOLEAN)
+  private boolean mentorshipClosureEnabled = false;
+
+  /** Option to whether mentor or mentee can end the mentorship during program*/
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD16, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.BOOLEAN)
+  private boolean jamEnabled = false;
+
+  /** Option to whether mentor or mentee can end the mentorship during program*/
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD17, nullable = true)
+  @Field(visibility = Visibility.READ_ONLY, dataType = DataType.STRING)
+  private String jamGroupId;
+
+  /** program actualStartDate */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD18, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date actualStartDate;
+
+  /** program actualMentorSignupDate */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD19, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date actualMentorSignupDate;
+
+  /** program actualMenteeSignupDate */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD20, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date actualMenteeSignupDate;
+
+  /** program actualMatchingDate */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD21, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.DATE)
+  private Date actualMatchingDate;
+
+  /** program signupFormTemplate */
+  @OneToOne()
+  @AssociationType(type = Type.COMPOSITE)
+  @Field(visibility = Visibility.EDITABLE)
+  private MentoringProgramSignupTemplate signupFormTemplate;
+
+  /** program mentors */
+  @OneToMany()
+  @AssociationType(type = Type.COMPOSITE)
+  @Field(visibility = Visibility.EDITABLE)
+  private List<MentoringProgramMentor> mentors = new ArrayList<MentoringProgramMentor>();
+  
+  /** program mentees */
+  @OneToMany()
+  @AssociationType(type = Type.COMPOSITE)
+  @Field(visibility = Visibility.EDITABLE)
+  private List<MentoringProgramMentee> mentees = new ArrayList<MentoringProgramMentee>();
+  
+  /** program emailTemplates */
+  @OneToMany()
+  @AssociationType(type = Type.COMPOSITE)
+  @Field(visibility = Visibility.EDITABLE)
+  private List<MentoringProgramEmailTemplate> emailTemplates = new ArrayList<MentoringProgramEmailTemplate>();
+  
+  @OneToMany()
+  @AssociationType(type = Type.COMPOSITE)
+  @Field(visibility = Visibility.EDITABLE)
+  private List<MentoringProgramOwner> owners = new ArrayList<MentoringProgramOwner>();
+
+  /**
+   * getExternalId 
+   * in mentoring program, we usually use externalcode as the program id
+   * @return externalId
+   */
+  public String getExternalId() {
+    return externalId;
+  }
+
+  /**
+   * setExternalId
+   * @param externalCode in mentoring program, we usually use externalcode as the program id
+   */
+  public void setExternalId(String externalCode) {
+    this.externalId = externalCode;
+  }
+
+  /**
+   * getInternalId
+   * MDF entity internalId
+   * @return internalId 
+   */
+  public Long getInternalId() {
+    return internalId;
+  }
+
+  /**
+   * setInternalId
+   * @param internalId MDF entity internalId
+   */
+  public void setInternalId(Long internalId) {
+    this.internalId = internalId;
+  }
+
+  /**
+   * get program name
+   * @return name 
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * set program name
+   * @param name programName
+   */
+  public void setName(String name) {
+    this.name = name;
+  }
+  
+/**
+ * get program description
+ * @return description 
+ */
+  public String getDescription() {
+    return description;
+  }
+
+  /**
+   * set program description
+   * @param description program description
+   */
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  /**
+   * getSignupFormTemplate
+   * @return signupFormTemplate 
+   * 
+   */
+  public MentoringProgramSignupTemplate getSignupFormTemplate() {
+    return signupFormTemplate;
+  }
+
+  /**
+   * getMatchingType
+   * @return matchingType 
+   */
+  public ProgramMatchingTypeEnum getMatchingType() {
+    return matchingType;
+  }
+
+  /**
+   * setMatchingType
+   * @param matchingType matchingType
+   */
+  public void setMatchingType(ProgramMatchingTypeEnum matchingType) {
+    this.matchingType = matchingType;
+  }
+
+  /**
+   * getMentorSignupDate
+   * @return mentorSignupDate 
+   */
+  public Date getMentorSignupDate() {
+    return mentorSignupDate;
+  }
+
+  /**
+   * setMentorSignupDate
+   * @param mentorSignupDate mentorSignupDate
+   */
+  public void setMentorSignupDate(Date mentorSignupDate) {
+    this.mentorSignupDate = mentorSignupDate;
+  }
+
+  /**
+   * getMenteeSignupDate
+   * @return menteeSignupDate 
+   */
+  public Date getMenteeSignupDate() {
+    return menteeSignupDate;
+  }
+
+  /**
+   * setMenteeSignupDate
+   * @param menteeSignupDate menteeSignupDate
+   */
+  public void setMenteeSignupDate(Date menteeSignupDate) {
+    this.menteeSignupDate = menteeSignupDate;
+  }
+
+  /**
+   * getMatchingDate
+   * @return getMatchingDate
+   */
+  public Date getMatchingDate() {
+    return matchingDate;
+  }
+
+  /**
+   * setMatchingDate
+   * @param matchingDate matchingDate
+   */
+  public void setMatchingDate(Date matchingDate) {
+    this.matchingDate = matchingDate;
+  }
+
+  /**
+   * getStartDate
+   * @return startDate
+   */
+  public Date getStartDate() {
+    return startDate;
+  }
+
+  /**
+   * setStartDate
+   * @param startDate setStartDate
+   */
+  public void setStartDate(Date startDate) {
+    this.startDate = startDate;
+  }
+
+  /**
+   * getEndDate
+   * @return endDate
+   */
+  public Date getEndDate() {
+    return endDate;
+  }
+
+  /**
+   * setEndDate
+   * @param endDate setEndDate
+   */
+  public void setEndDate(Date endDate) {
+    this.endDate = endDate;
+  }
+
+  /**
+   * setSignupFormTemplate
+   * @param signupFormTemplate setSignupFormTemplate
+   */
+  public void setSignupFormTemplate(
+      MentoringProgramSignupTemplate signupFormTemplate) {
+    this.signupFormTemplate = signupFormTemplate;
+  }
+
+  /**
+   * get program Status
+   * @return status 
+   */
+  public ProgramStatusEnum getStatus() {
+    return status;
+  }
+
+  /**
+   * set program Status
+   * @param status set program Status
+   */
+  public void setStatus(ProgramStatusEnum status) {
+    this.status = status;
+  }
+
+  /**
+   * get program Mentors
+   * @return mentors
+   */
+  public List<MentoringProgramMentor> getMentors() {
+    return mentors;
+  }
+
+  /**
+   * set program mentors
+   * @param mentors  set program mentors
+   */
+  public void setMentors(List<MentoringProgramMentor> mentors) {
+    this.mentors = mentors;
+  }
+
+  /**
+   * get program Mentees
+   * @return mentees  
+   */
+  public List<MentoringProgramMentee> getMentees() {
+    return mentees;
+  }
+
+  /**
+   * set program mentees
+   * @param mentees set program mentees
+   */
+  public void setMentees(List<MentoringProgramMentee> mentees) {
+    this.mentees = mentees;
+  }
+  
+  /**
+   * getEmailTemplates
+   * @return emailTemplates
+   */
+  public List<MentoringProgramEmailTemplate> getEmailTemplates() {
+    return emailTemplates;
+  }
+
+  /**
+   * setEmailTemplates
+   * @param emailTemplates setEmailTemplates
+   */
+  public void setEmailTemplates(List<MentoringProgramEmailTemplate> emailTemplates) {
+    this.emailTemplates = emailTemplates;
+  }
+
+  /**
+   * get MDF RowId
+   * @return rowId
+   */
+  public Long getRowId() {
+    return rowId;
+  }
+/**
+ * setRowId
+ * @param rowId setRowId
+ */
+  public void setRowId(Long rowId) {
+    this.rowId = rowId;
+  }
+
+  /**
+   * getCompletedDate
+   * @return completedDate
+   */
+  public Date getCompletedDate() {
+    return completedDate;
+  }
+  /**
+   * setCompletedDate
+   * @param completedDate setCompletedDate
+   */
+  public void setCompletedDate(Date completedDate) {
+    this.completedDate = completedDate;
+  }
+
+  /**
+   * getMaximumOfMentee
+   * @return maximumOfMentee
+   */
+  public Integer getMaximumOfMentee() {
+    return maximumOfMentee;
+  }
+
+  /**
+   * setMaximumOfMentee
+   * @param maximumOfMentee maximumOfMentee
+   */
+  public void setMaximumOfMentee(Integer maximumOfMentee) {
+    this.maximumOfMentee = maximumOfMentee;
+  }
+/**
+ * getMaximumOfMentor
+ * @return maximumOfMentor
+ */
+  public Integer getMaximumOfMentor() {
+    return maximumOfMentor;
+  }
+/**
+ * setMaximumOfMentor
+ * @param maximumOfMentor maximumOfMentor
+ */
+  public void setMaximumOfMentor(Integer maximumOfMentor) {
+    this.maximumOfMentor = maximumOfMentor;
+  }
+
+  public String getPhotoId() {
+    return photoId;
+  }
+  
+  public void setPhotoId(String photoId) {
+    this.photoId = photoId;
+  }
+
+  public boolean isNeedMentorApproval() {
+    return needMentorApproval;
+  }
+
+  public void setNeedMentorApproval(boolean needMentorApproval) {
+    this.needMentorApproval = needMentorApproval;
+  }
+
+  public List<MentoringProgramOwner> getOwners() {
+    return owners;
+  }
+
+  public void setOwners(List<MentoringProgramOwner> owners) {
+    this.owners = owners;
+  }
+
+  public boolean isMentorshipClosureEnabled() {
+    return mentorshipClosureEnabled;
+  }
+
+  public void setMentorshipClosureEnabled(boolean mentorshipClosureEnabled) {
+    this.mentorshipClosureEnabled = mentorshipClosureEnabled;
+  }
+
+  public boolean isJamEnabled() {
+    return jamEnabled;
+  }
+
+  public void setJamEnabled(boolean jamEnabled) {
+    this.jamEnabled = jamEnabled;
+  }
+
+  public String getJamGroupId() {
+    return jamGroupId;
+  }
+
+  public void setJamGroupId(String jamGroupId) {
+    this.jamGroupId = jamGroupId;
+  }
+
+  public Date getActualStartDate() {
+    return actualStartDate;
+  }
+
+  public void setActualStartDate(Date actualStartDate) {
+    this.actualStartDate = actualStartDate;
+  }
+
+  public Date getActualMentorSignupDate() {
+    return actualMentorSignupDate;
+  }
+
+  public void setActualMentorSignupDate(Date actualMentorSignupDate) {
+    this.actualMentorSignupDate = actualMentorSignupDate;
+  }
+
+  public Date getActualMenteeSignupDate() {
+    return actualMenteeSignupDate;
+  }
+
+  public void setActualMenteeSignupDate(Date actualMenteeSignupDate) {
+    this.actualMenteeSignupDate = actualMenteeSignupDate;
+  }
+
+  public Date getActualMatchingDate() {
+    return actualMatchingDate;
+  }
+
+  public void setActualMatchingDate(Date actualMatchingDate) {
+    this.actualMatchingDate = actualMatchingDate;
+  }
+}

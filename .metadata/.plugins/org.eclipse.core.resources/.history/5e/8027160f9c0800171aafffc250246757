@@ -1,0 +1,225 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.StandardElement;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.service.mentoring.GetStandardElementValue;
+import com.successfactors.cdp.service.util.mentoring.DMFieldWhiteListEnum;
+import com.successfactors.datamodel.api.DataModelFacade;
+import com.successfactors.i18n.util.L10nUtils;
+import com.successfactors.legacy.service.GetSysConfigListV2;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.platform.util.TimeZoneUtils;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.service.FetchAllUserInfoValues;
+import com.successfactors.user.service.FindUserById;
+import com.successfactors.user.service.GetAllJobCodes;
+
+/**
+ * Service command to get distinct values for data model standard element.
+ * @author Ruud Xu
+ */
+@Service
+public class GetStandardElementValueImpl implements ServiceQueryImpl<GetStandardElementValue, GetStandardElementValue> {
+  /** Parameter bean */
+  @Inject
+  @In
+  ParamBean params;
+
+  /** Messages */
+  @Inject
+  @In(create=true)
+  private Messages v10msgs;
+
+  /** Service command handler */
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+
+  @Inject
+  @In(value = DataModelFacade.NAME, create = true)
+  private DataModelFacade dataModelFacade;
+
+  @Override
+  public GetStandardElementValue execute(GetStandardElementValue cmd) throws ServiceApplicationException {
+    GetStandardElementValue output = new GetStandardElementValue();
+    
+    SuccessionDataModelBean dataModel = dataModelFacade.getDataModel();
+    StandardElement stdEle = dataModel.lookupStandardElementById(cmd.getStandardElementId());
+
+    if (stdEle == null) {
+      return null;
+    }
+    
+    String id = stdEle.getEnum().getName();
+
+    if (DMFieldWhiteListEnum.LOCATION.getId().equals(id)) {
+      output.setSectionValues(getLocations());
+    } else if (DMFieldWhiteListEnum.DEPARTMENT.getId().equals(id)) {
+      output.setSectionValues(getDepartments());
+    } else if (DMFieldWhiteListEnum.DIVISION.getId().equals(id)) {
+      output.setSectionValues(getDivisions());
+    } else if (DMFieldWhiteListEnum.JOBCODE.getId().equals(id)) {
+      output.setSectionValues(getJobCodes());
+    } else if (DMFieldWhiteListEnum.JOBFAMILY.getId().equals(id) || DMFieldWhiteListEnum.JOBROLE.getId().equals(id)
+      || DMFieldWhiteListEnum.JOBLEVEL.getId().equals(id) || DMFieldWhiteListEnum.JOBTITLE.getId().equals(id)) {
+      output.setSectionValues(getUserInfoValues(stdEle.getEnum().getUserInfoKey()));
+    } else if (stdEle.getEnum().getId().equalsIgnoreCase(DMFieldWhiteListEnum.GENDER.toString())) {
+      output.setSectionValues(getGenders());
+    }
+    
+    return output;
+  }
+
+  private List<MentoringProgramSignupFormSectionValue> getGenders() throws ServiceApplicationException {
+    List<MentoringProgramSignupFormSectionValue> itemValues = new ArrayList<MentoringProgramSignupFormSectionValue>();
+
+    MentoringProgramSignupFormSectionValue item = new MentoringProgramSignupFormSectionValue();
+    item.setItemId(UserBean.FEMALE);
+    item.setItemLabel(v10msgs.getString("COMMON_SUCCESSION_FEMALE"));
+    itemValues.add(item);
+    item = new MentoringProgramSignupFormSectionValue();
+    item.setItemId(UserBean.MALE);
+    item.setItemLabel(v10msgs.getString("COMMON_SUCCESSION_MALE"));
+    itemValues.add(item);
+
+    return itemValues;
+  }
+
+  private List<MentoringProgramSignupFormSectionValue> getLocations() throws ServiceApplicationException {
+    List<MentoringProgramSignupFormSectionValue> itemValues = new ArrayList<MentoringProgramSignupFormSectionValue>();
+
+    GetSysConfigListV2 locatonCmd = new GetSysConfigListV2(SystemBean.LOCATION_TYPE, false);
+    List<SystemBean> locations = scaHandler.execute(locatonCmd);
+
+    List<String> locationStrings = new ArrayList<String>();
+    for (SystemBean location : locations) {
+      locationStrings.add(location.getSysKey());
+    }
+
+    UserBean userBean = scaHandler.execute(new FindUserById(params.getUserId(), true));
+    String loginUserLocation = userBean.getUserLocation();
+
+    if (locationStrings.contains(loginUserLocation)) {
+      locationStrings.remove(loginUserLocation);
+    }
+    locationStrings.add(0, loginUserLocation);
+
+    for (int j = 0; j < locationStrings.size(); j++) {
+      MentoringProgramSignupFormSectionValue item = new MentoringProgramSignupFormSectionValue();
+      item.setItemId(locationStrings.get(j));
+      if (j == 0) {
+        item.setItemLabel(v10msgs.getString("DEVELOPMENT_MENTORING_MY_LOCATION") + " - " + loginUserLocation);
+      } else {
+        item.setItemLabel(locationStrings.get(j));
+      }
+      itemValues.add(item);
+    }
+    return itemValues;
+  }
+
+  private List<MentoringProgramSignupFormSectionValue> getDivisions() throws ServiceApplicationException {
+    List<MentoringProgramSignupFormSectionValue> itemValues = new ArrayList<MentoringProgramSignupFormSectionValue>();
+    List<SystemBean> divisions = scaHandler.execute(new GetSysConfigListV2(SystemBean.DIVISION_TYPE, false));
+    
+    for (int i = 0; i < divisions.size(); i++) {
+      MentoringProgramSignupFormSectionValue item = new MentoringProgramSignupFormSectionValue();
+      item.setItemId(divisions.get(i).getSysKey());
+      item.setItemLabel(divisions.get(i).getSysKey());
+
+      itemValues.add(item);
+    }
+    
+    return itemValues;
+  }
+
+  private List<MentoringProgramSignupFormSectionValue> getDepartments() throws ServiceApplicationException {
+    List<MentoringProgramSignupFormSectionValue> itemValues = new ArrayList<MentoringProgramSignupFormSectionValue>();
+    List<SystemBean> departments = scaHandler.execute(new GetSysConfigListV2(SystemBean.DEPARTMENT_TYPE, false));
+    
+    for (int i = 0; i < departments.size(); i++) {
+      MentoringProgramSignupFormSectionValue item = new MentoringProgramSignupFormSectionValue();
+      item.setItemId(departments.get(i).getSysKey());
+      item.setItemLabel(departments.get(i).getSysKey());
+
+      itemValues.add(item);
+    }
+    
+    return itemValues;
+  }
+  
+  private List<MentoringProgramSignupFormSectionValue> getJobCodes() throws ServiceApplicationException {
+    List<MentoringProgramSignupFormSectionValue> itemValues = new ArrayList<MentoringProgramSignupFormSectionValue>();
+    List<String> jobCodes = scaHandler.execute(new GetAllJobCodes(false));
+    
+    for (String jobCode : jobCodes) {
+      MentoringProgramSignupFormSectionValue item = new MentoringProgramSignupFormSectionValue();
+      item.setItemId(jobCode);
+      item.setItemLabel(jobCode);
+
+      itemValues.add(item);
+    }
+    
+    return itemValues;
+  }
+
+  private List<MentoringProgramSignupFormSectionValue> getUserInfoValues(String key) throws ServiceApplicationException {
+    List<MentoringProgramSignupFormSectionValue> itemValues = new ArrayList<MentoringProgramSignupFormSectionValue>();
+    List userInfoValues = scaHandler.execute(new FetchAllUserInfoValues(key));
+    
+    for (int i = 0; i < userInfoValues.size(); i++) {
+      MentoringProgramSignupFormSectionValue item = new MentoringProgramSignupFormSectionValue();
+      item.setItemId(userInfoValues.get(i).toString());
+      item.setItemLabel(userInfoValues.get(i).toString());
+
+      itemValues.add(item);
+    }
+    
+    return itemValues;
+  }
+
+  private List<MentoringProgramSignupFormSectionValue> getTimezones() throws ServiceApplicationException {
+    List<MentoringProgramSignupFormSectionValue> itemValues = new ArrayList<MentoringProgramSignupFormSectionValue>();
+    List<String> timezones = TimeZoneUtils.getTimezones();
+    
+    for (int i = 0; i < timezones.size(); i++) {
+      MentoringProgramSignupFormSectionValue item = new MentoringProgramSignupFormSectionValue();
+      item.setItemId(timezones.get(i));
+      item.setItemLabel(timezones.get(i));
+
+      itemValues.add(item);
+    }
+    
+    return itemValues;
+  }
+
+  private List<MentoringProgramSignupFormSectionValue> getDefaultLocales() throws ServiceApplicationException {
+    List<MentoringProgramSignupFormSectionValue> itemValues = new ArrayList<MentoringProgramSignupFormSectionValue>();
+    List<Locale> defaultLocales = L10nUtils.getSortedSupportedLocales(params, v10msgs);
+    
+    for (int i = 0; i < defaultLocales.size(); i++) {
+      MentoringProgramSignupFormSectionValue item = new MentoringProgramSignupFormSectionValue();
+      item.setItemId(defaultLocales.get(i).toString());
+      item.setItemLabel(defaultLocales.get(i).toString());
+
+      itemValues.add(item);
+    }
+    
+    return itemValues;
+  }
+}

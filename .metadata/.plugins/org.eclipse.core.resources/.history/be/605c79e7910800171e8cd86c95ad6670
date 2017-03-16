@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonDialogField;
+
+public interface ITypeFilterInputDialog {
+	void dialogFieldChanged(DialogField field);
+
+	void changeControlPressed(DialogField field);
+
+	void setInitialString(String input);
+
+	Object getResult();
+}

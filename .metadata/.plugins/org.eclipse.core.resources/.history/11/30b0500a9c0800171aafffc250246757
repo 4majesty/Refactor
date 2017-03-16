@@ -1,0 +1,32 @@
+package com.successfactors.cdp.app.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.vo.MatchingResult;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionVO;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+public interface IStandardMatchingAlgorithmStrategy {
+	void setFinalMatchingResult(MatchingResult matchResult);
+
+	MatchingResult getFinalMatchingResult();
+
+	MatchingResult getMatchingResult();
+
+	float getNumertorScore();
+
+	void setNumertorScore(float numertorScore);
+
+	List<ProgramSignupFormSectionVO> getMatchedAreas();
+
+	void setMatchedAreas(Map<String, Set<String>> matchedAreas);
+}

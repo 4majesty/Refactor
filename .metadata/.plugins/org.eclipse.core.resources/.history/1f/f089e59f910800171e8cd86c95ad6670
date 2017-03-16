@@ -1,0 +1,46 @@
+package org.eclipse.jdt.internal.ui.text.java.hover;
+
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.ITextViewerExtension5;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TextViewer;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.CompositeRuler;
+import org.eclipse.jface.text.source.IAnnotationAccess;
+import org.eclipse.jface.text.source.IAnnotationAccessExtension;
+import org.eclipse.jface.text.source.IAnnotationHover;
+import org.eclipse.jface.text.source.IAnnotationHoverExtension;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ILineRange;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRulerListener;
+import org.eclipse.jface.text.source.LineRange;
+import org.eclipse.jface.text.source.VerticalRulerEvent;
+import org.eclipse.jdt.internal.ui.text.java.hover.AnnotationExpansionControl.AnnotationHoverInput;
+
+public interface IAnnotationExpandHover {
+	IInformationControl createInformationControl(Shell parent);
+
+	boolean canReuse(IInformationControl control);
+
+	boolean canReplace(IInformationControlCreator creator);
+
+	void annotationSelected(VerticalRulerEvent event);
+
+	void annotationDefaultSelected(VerticalRulerEvent event);
+
+	void annotationContextMenuAboutToShow(VerticalRulerEvent event, Menu menu);
+
+	String getHoverInfo(ISourceViewer sourceViewer, int line);
+
+	IInformationControlCreator getHoverControlCreator();
+
+	Object getHoverInfo(ISourceViewer sourceViewer, ILineRange lineRange, int visibleLines);
+
+	ILineRange getHoverLineRange(ISourceViewer viewer, int lineNumber);
+
+	boolean canHandleMouseCursor();
+}

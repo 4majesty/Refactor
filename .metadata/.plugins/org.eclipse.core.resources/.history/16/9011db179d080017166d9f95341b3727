@@ -1,0 +1,28 @@
+package com.successfactors.cdp.service.impl;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.cdp.service.impl.IGetMentoringProgramsForMentorUnavailabilityExpirationCheckImpl;
+
+public interface IGetMentoringProgramsForMentorUnavailabilityExpirationCheckImplTest {
+	void setup();
+
+	void testGatherAllUsers();
+
+	void testCalculateDaysDifferenceWithToday();
+
+	void testCalculateDaysDifferenceWithYesterday();
+}

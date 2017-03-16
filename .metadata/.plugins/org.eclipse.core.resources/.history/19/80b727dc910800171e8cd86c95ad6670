@@ -1,0 +1,15 @@
+package org.eclipse.jdt.ui.cleanup;
+
+import java.util.Map;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.JavaCore;
+
+public interface ICleanUpRequirements {
+	boolean requiresAST();
+
+	boolean requiresFreshAST();
+
+	Map getCompilerOptions();
+
+	boolean requiresChangedRegions();
+}

@@ -1,0 +1,45 @@
+package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface IChangeCorrectionProposal {
+	void apply(IDocument document);
+
+	String getAdditionalProposalInfo();
+
+	Object getAdditionalProposalInfo(IProgressMonitor monitor);
+
+	IContextInformation getContextInformation();
+
+	String getDisplayString();
+
+	StyledString getStyledDisplayString();
+
+	String getName();
+
+	Image getImage();
+
+	Point getSelection(IDocument document);
+
+	void setImage(Image image);
+
+	Change getChange();
+
+	void setDisplayName(String name);
+
+	int getRelevance();
+
+	void setRelevance(int relevance);
+
+	String getCommandId();
+
+	void setCommandId(String commandId);
+}

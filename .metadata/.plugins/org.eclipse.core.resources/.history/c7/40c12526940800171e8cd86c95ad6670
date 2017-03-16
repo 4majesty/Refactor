@@ -1,0 +1,11 @@
+package org.eclipse.jdt.ui.cleanup;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
+public interface ICleanUpContext {
+	ICompilationUnit getCompilationUnit();
+
+	CompilationUnit getAST();
+}

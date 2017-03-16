@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface INLSKeyHyperlink {
+	IRegion getHyperlinkRegion();
+
+	void open();
+
+	String getTypeLabel();
+
+	String getHyperlinkText();
+}

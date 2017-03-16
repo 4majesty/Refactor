@@ -1,0 +1,56 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupForm;
+import com.successfactors.cdp.service.mentoring.GetMentoringSignupForm;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.sql.MDFCriteria;
+import com.successfactors.genericobject.api.sql.MDFResultSet;
+import com.successfactors.genericobject.api.sql.Projections;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+/**
+ * Service command to get mentor/mentee sign up form according to specified program ID, mentor/mentee ID and status
+ * @author Keqin Liu
+ */
+@Service
+public class GetMentoringSignupFormImpl<T extends MentoringProgramSignupForm> implements ServiceQueryImpl<T, GetMentoringSignupForm<T>> {
+  private static Logger logger = LogManager.getLogger();
+  
+  /** Parameter bean */
+  @Inject
+  @In
+  ParamBean params;
+
+  /** MDF configuration provider */
+  @Inject
+  @In(create = true)
+  private ConfigurationProvider configurationProvider;
+
+  @Override
+  public T execute(GetMentoringSignupForm cmd) throws ServiceApplicationException {
+    ObjectDefinition def = configurationProvider.getObjectDefinition(cmd.getClasz());
+    MDFCriteria search = new GOSQLGeneratorContext(def, params);
+    search.setProjection(Projections.all());
+    search.add(Restrictions.and(Restrictions.eq("programId", cmd.getProgramId()), Restrictions.eq("user", cmd.getParticipantId())));
+    
+    if (cmd.getStatus().size() > 0) {
+      search.add(Restrictions.and(Restrictions.in("status", cmd.getStatus())));
+    }
+
+    MDFResultSet resultSet = search.execute();
+
+    return (T) resultSet.getBeans().get(0);
+  }
+}

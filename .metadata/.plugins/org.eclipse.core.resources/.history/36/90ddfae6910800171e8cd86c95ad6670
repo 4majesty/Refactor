@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.actions;
+
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
+public interface IAddBlockCommentAction {
+}

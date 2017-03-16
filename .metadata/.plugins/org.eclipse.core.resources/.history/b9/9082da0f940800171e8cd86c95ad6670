@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jface.text.link.ILinkedModeListener;
+import org.eclipse.jface.text.link.LinkedModeModel;
+
+public interface IEditorHighlightingSynchronizer {
+	void left(LinkedModeModel environment, int flags);
+
+	void suspend(LinkedModeModel environment);
+
+	void resume(LinkedModeModel environment, int flags);
+}

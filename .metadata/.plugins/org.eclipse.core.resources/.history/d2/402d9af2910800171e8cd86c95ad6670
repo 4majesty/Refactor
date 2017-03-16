@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+
+public interface IJavaSourcePreviewerUpdater {
+}

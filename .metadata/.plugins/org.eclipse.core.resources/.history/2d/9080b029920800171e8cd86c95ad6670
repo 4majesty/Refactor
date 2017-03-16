@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.actions.ActionFactory;
+
+public interface ILocationViewer {
+}

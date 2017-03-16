@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.jdt.internal.ui.preferences.TodoTaskConfigurationBlock.TodoTask;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ComboDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+
+public interface ITodoTaskInputDialog {
+	void dialogFieldChanged(DialogField field);
+
+	TodoTask getResult();
+}

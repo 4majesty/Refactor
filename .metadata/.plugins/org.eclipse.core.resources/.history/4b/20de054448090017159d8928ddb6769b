@@ -1,0 +1,80 @@
+package com.successfactors.cdp.app.mentoring;
+
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramActivity;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramEmailTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentee;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMenteeSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorSignupForm;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSendEmailRecord;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSection;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplate;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplateSection;
+import com.successfactors.genericobject.bean.model.impl.AbstractMDFEntityRegistry;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+
+/**
+ * Register Mentoring related MDF object definition.
+ * @author I309618
+ *
+ */
+@Name(MentoringEntitiesRegisterer.SEAM_NAME)
+@javax.inject.Named(MentoringEntitiesRegisterer.SEAM_NAME)
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+public class MentoringEntitiesRegisterer extends AbstractMDFEntityRegistry {
+  
+  public static final String SEAM_NAME = "mentorMDFRegistery";
+
+  @Inject
+  @In
+  private ParamBean params;
+  
+  private static final Class[] MDF_ENTITIES = {
+      MentoringProgram.class, 
+      MentoringProgramMentor.class, 
+      MentoringProgramMentee.class, 
+      MentoringProgramSignupTemplate.class, 
+      MentoringProgramSignupTemplateSection.class,
+      MentoringProgramMentorSignupForm.class, 
+      MentoringProgramMenteeSignupForm.class,
+      MentoringProgramEmailTemplate.class,
+      MentoringProgramSendEmailRecord.class,
+      MentoringProgramSignupFormSection.class,
+      MentoringProgramSignupFormSectionValue.class,
+      MentoringProgramMentorRequest.class,
+      MentoringProgramMatchedParticipant.class,
+      MentoringProgramOwner.class,
+      MentoringProgramActivity.class
+    };
+  
+  @Override
+  public List<Class> getEntitiesToBeRegistered() {
+    return Arrays.asList(MDF_ENTITIES);
+  }
+
+  @Override
+  public boolean isFeatureEnabled() {
+    CompanyBean companyBean = params.getCompanyBean();
+    return companyBean.isFeatureEnabledForCompany(FeatureEnum.CDP_MENTORING);
+  }
+
+}

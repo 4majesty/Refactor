@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.ui.IElementFactory;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPersistableElement;
+import org.eclipse.ui.PlatformUI;
+
+public interface IMementos {
+}

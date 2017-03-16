@@ -1,0 +1,40 @@
+package com.successfactors.cdp.bean;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/***
+ * DevPlanPortletObjRawData
+ * @author haixunlu
+ *
+ */
+public class DevPlanPortletObjRawData {
+  /**raw data with fields map along with value and style, etc*/
+  private Map<String, Map<String, String>> rawDataMap;
+  /**obj category to filter objective list*/
+  private String objCategory;
+  /***
+   * constructor
+   */
+  public DevPlanPortletObjRawData() {
+    super();
+    rawDataMap = new HashMap<String, Map<String, String>>();
+  }
+
+  public Map<String, Map<String, String>> getRawDataMap() {
+    return rawDataMap;
+  }
+
+  public void setRawDataMap(Map<String, Map<String, String>> rawDataMap) {
+    this.rawDataMap = rawDataMap;
+  }
+
+  public String getObjCategory() {
+    return objCategory;
+  }
+
+  public void setObjCategory(String objCategory) {
+    this.objCategory = objCategory;
+  }
+
+}

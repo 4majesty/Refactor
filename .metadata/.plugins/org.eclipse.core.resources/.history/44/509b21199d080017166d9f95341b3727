@@ -1,0 +1,25 @@
+package com.successfactors.cdp.bean.mentoring.processor;
+
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.cdp.bean.mentoring.processor.IMentorshipProcessor;
+
+public interface IMentorshipProcessorTest {
+	void setUp();
+
+	void testInvalidStatus();
+
+	void testActiveParticipants();
+
+	void testCheckEmptyParticipant();
+
+	void testCheckInactiveParticipant();
+
+	void testInvalidStatus4ParticipantClosure();
+
+	void testClosureNotEnabled();
+
+	void testCheckParticipantClosure();
+}

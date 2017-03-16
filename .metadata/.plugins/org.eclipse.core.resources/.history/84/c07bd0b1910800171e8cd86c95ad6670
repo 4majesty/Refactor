@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.text.spelling;
+
+import org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
+
+public interface IJavaSpellingEngine {
+}

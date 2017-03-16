@@ -1,0 +1,15 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.sca.ServiceCommand;
+import com.successfactors.cdp.bean.mentoring.IMentoringProgram;
+
+public interface ICompleteProgram {
+	MentoringProgram getMentoringProgram();
+
+	void setMentoringProgram(MentoringProgram mentoringProgram);
+
+	String getAutoForwardJobToken();
+
+	void setAutoForwardJobToken(String autoForwardJobToken);
+}

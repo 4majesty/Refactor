@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.corext.refactoring.reorg;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
+
+public interface IRefactoringModifications {
+	ResourceModifications getResourceModifications();
+
+	RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared);
+
+	void buildDelta(IResourceChangeDescriptionFactory builder);
+
+	void buildValidateEdits(ValidateEditChecker checker);
+}

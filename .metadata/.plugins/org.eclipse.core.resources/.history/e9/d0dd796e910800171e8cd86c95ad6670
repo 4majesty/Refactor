@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetElementAdapter;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
+
+public interface IJavaWorkingSetElementAdapter {
+	IAdaptable[] adaptElements(IWorkingSet ws, IAdaptable[] elements);
+
+	void dispose();
+}

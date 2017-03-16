@@ -1,0 +1,107 @@
+package org.eclipse.jdt.internal.corext.refactoring.code;
+
+import java.util.List;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.ConvertLocalVariableDescriptor;
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
+import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
+import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+
+public interface IPromoteTempToFieldRefactoring {
+	String getName();
+
+	int[] getAvailableVisibilities();
+
+	int getVisibility();
+
+	boolean getDeclareFinal();
+
+	boolean getDeclareStatic();
+
+	int getInitializeIn();
+
+	void setVisibility(int accessModifier);
+
+	void setDeclareFinal(boolean declareFinal);
+
+	void setDeclareStatic(boolean declareStatic);
+
+	void setFieldName(String fieldName);
+
+	void setInitializeIn(int initializeIn);
+
+	boolean canEnableSettingStatic();
+
+	boolean canEnableSettingFinal();
+
+	boolean canEnableSettingDeclareInConstructors();
+
+	boolean canEnableSettingDeclareInMethod();
+
+	boolean canEnableSettingDeclareInFieldDeclaration();
+
+	RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException;
+
+	String[] guessFieldNames();
+
+	RefactoringStatus validateInput();
+
+	RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException;
+
+	Change createChange(IProgressMonitor pm) throws CoreException;
+
+	List getUsageOfEnclosingNodes();
+
+	boolean getClassTypeVariablesUsed();
+
+	boolean visit(SimpleName node);
+
+	void setLinkedProposalModel(LinkedProposalModel model);
+}

@@ -1,0 +1,145 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.OneToMany;
+
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.api.model.Type;
+
+/**
+ * MentoringProgramSignupFormSection MDF Entity
+ * 
+ * @author I320903
+ * 
+ */
+@MDFEntity(effectiveDating = EffectiveDating.FROM_PARENT, apiVisibility = APIVisibility.EDITABLE)
+public class MentoringProgramSignupFormSection extends AuditFields {
+    // System Fields
+    /** Row Id. */
+    @Column(name = GENERIC_OBJECT_T.ROW_ID, nullable = false)
+    @Field(visibility = Visibility.READ_ONLY)
+    private Long rowId;
+
+    /** External Code. */
+    @Column(name = GENERIC_OBJECT_T.EXTERNAL_CODE, nullable = false)
+    @Field(visibility = Visibility.READ_ONLY, dataType = DataType.AUTO_NUMBER)
+    protected String externalId;
+
+    /** Internal Id. */
+    @Column(name = GENERIC_OBJECT_T.INTERNAL_ID)
+    @Field(visibility = Visibility.READ_ONLY)
+    protected Long internalId;
+
+    // Business Fields
+    /** Program Name */
+    @Column(name = GENERIC_OBJECT_T.EXTERNAL_NAME, nullable = false)
+    @Field(visibility = Visibility.EDITABLE, dataType = DataType.STRING, maxLength = GENERIC_OBJECT_T.CUSTOM_FIELD100_LEN)
+    private String sectionId;
+    
+    /**sectionValue */
+    @OneToMany()
+    @AssociationType(type = Type.COMPOSITE)
+    @Field(visibility = Visibility.EDITABLE)
+    private List<MentoringProgramSignupFormSectionValue> sectionValue;
+    /** sectionType */
+    @Column(name = GENERIC_OBJECT_T.SF_FIELD3, nullable = true)
+    @Field(visibility = Visibility.EDITABLE, dataType = DataType.STRING)
+    private String sectionType;
+
+    /**
+     * getRowId
+     * @return rowId
+     */
+    public Long getRowId() {
+        return rowId;
+    }
+    /**
+     * setRowId
+     * @param rowId rowId
+     */
+    public void setRowId(Long rowId) {
+        this.rowId = rowId;
+    }
+    /**
+     * getExternalId
+     * @return externalId
+     */
+    public String getExternalId() {
+        return externalId;
+    }
+   /**
+    * setExternalId
+    * @param externalCode externalCode
+    */
+    public void setExternalId(String externalCode) {
+        this.externalId = externalCode;
+    }
+   /**
+    * getInternalId
+    * @return internalId
+    */
+    public Long getInternalId() {
+        return internalId;
+    }
+   /**
+    * setInternalId
+    * @param internalId internalId
+    */
+    public void setInternalId(Long internalId) {
+        this.internalId = internalId;
+    }
+   /**
+    * getSectionId
+    * @return sectionId
+    */
+    public String getSectionId() {
+        return sectionId;
+    }
+   /**
+    * setSectionId
+    * @param sectionId sectionId
+    */
+    public void setSectionId(String sectionId) {
+        this.sectionId = sectionId;
+    }
+   /**
+    * getSectionValue
+    * @return sectionValue sectionValue
+    */
+    public List<MentoringProgramSignupFormSectionValue> getSectionValue() {
+        return sectionValue;
+    }
+   /**
+    * setSectionValue
+    * @param sectionValue sectionValue
+    */
+    public void setSectionValue(
+            List<MentoringProgramSignupFormSectionValue> sectionValue) {
+        this.sectionValue = sectionValue;
+    }
+
+    /**
+     * getSectionType
+     * @return sectionType
+     */
+    public String getSectionType() {
+        return sectionType;
+    }
+    /**
+     * sectionType
+     * @param sectionType sectionType
+     */
+    public void setSectionType(String sectionType) {
+        this.sectionType = sectionType;
+    }
+}

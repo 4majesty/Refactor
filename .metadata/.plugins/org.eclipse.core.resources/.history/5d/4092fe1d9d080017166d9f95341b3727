@@ -1,0 +1,8 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import java.util.TimeZone;
+import org.testng.annotations.Test;
+
+public interface IMentoringDateUtilsTest {
+	void testCalculateDate0Hours();
+}

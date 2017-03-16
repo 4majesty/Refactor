@@ -1,0 +1,70 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+/** 
+ * Content Assist > Static Members preference page. <p> Note: Must be public since it is referenced from plugin.xml </p>
+ * @since 3.3
+ */
+public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage implements ICodeAssistFavoritesPreferencePage {
+	private CodeAssistFavoritesConfigurationBlock fConfigurationBlock;
+
+	@Override
+	public void createControl(Composite parent) {
+		IWorkbenchPreferenceContainer container= (IWorkbenchPreferenceContainer)getContainer();
+		fConfigurationBlock= new CodeAssistFavoritesConfigurationBlock(getNewStatusChangedListener(), container);
+		super.createControl(parent);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
+	}
+
+	protected Control createPreferenceContent(Composite composite) {
+		return fConfigurationBlock.createContents(composite);
+	}
+
+	protected boolean hasProjectSpecificOptions(IProject project) {
+		return false;
+	}
+
+	protected String getPreferencePageID() {
+		return "org.eclipse.jdt.ui.preferences.CodeAssistStaticMembersPreferencePage";
+	}
+
+	protected String getPropertyPageID() {
+		return null;
+	}
+
+	@Override
+	public void dispose() {
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.dispose();
+		}
+		super.dispose();
+	}
+
+	protected void performDefaults() {
+		super.performDefaults();
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.performDefaults();
+		}
+	}
+
+	@Override
+	public boolean performOk() {
+		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
+			return false;
+		}
+		return super.performOk();
+	}
+
+	@Override
+	public void performApply() {
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.performApply();
+		}
+	}
+}

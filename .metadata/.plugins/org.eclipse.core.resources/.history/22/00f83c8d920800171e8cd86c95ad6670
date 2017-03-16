@@ -1,0 +1,19 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.ui.wizards.NewAnnotationWizardPage;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
+import org.eclipse.jdt.ui.wizards.INewAnnotationWizardPage;
+
+public interface IOpenNewAnnotationWizardAction {
+	void setConfiguredWizardPage(NewAnnotationWizardPage page);
+
+	void setOpenEditorOnFinish(boolean openEditorOnFinish);
+}

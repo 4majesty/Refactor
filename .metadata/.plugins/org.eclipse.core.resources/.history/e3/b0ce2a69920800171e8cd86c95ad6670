@@ -1,0 +1,36 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import java.util.Map;
+import java.util.StringTokenizer;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.text.rules.ICharacterScanner;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.IWordDetector;
+import org.eclipse.jface.text.rules.Token;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.ui.text.IColorManager;
+import org.eclipse.jdt.ui.text.IJavaColorConstants;
+import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
+
+public interface IJavaCommentScanner {
+	boolean isWordStart(char c);
+
+	boolean isWordPart(char c);
+
+	void clearWords();
+
+	void addTaskTags(String value);
+
+	void addWord(String word, IToken token);
+
+	IToken evaluate(ICharacterScanner scanner, CombinedWordRule.CharacterBuffer word);
+
+	void setCaseSensitive(boolean caseSensitive);
+
+	boolean affectsBehavior(PropertyChangeEvent event);
+
+	void adaptToPreferenceChange(PropertyChangeEvent event);
+}

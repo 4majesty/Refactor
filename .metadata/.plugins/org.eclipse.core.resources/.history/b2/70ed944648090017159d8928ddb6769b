@@ -1,0 +1,37 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.cdp.service.util.mentoring.ProgramEmailTypeEnum;
+import com.successfactors.genericobject.api.model.APIVisibility;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.api.model.EffectiveDating;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.bean.model.impl.MDFEntity;
+import com.successfactors.genericobject.api.model.Visibility;
+
+public interface IMentoringProgramEmailTemplate {
+	String getExternalId();
+
+	void setExternalId(String externalCode);
+
+	Long getInternalId();
+
+	void setInternalId(Long internalId);
+
+	Long getRowId();
+
+	void setRowId(Long rowId);
+
+	ProgramEmailTypeEnum getEmailType();
+
+	void setEmailType(ProgramEmailTypeEnum emailType);
+
+	String getEmailSubject();
+
+	void setEmailSubject(String emailSubject);
+
+	String getEmailContent();
+
+	void setEmailContent(String emailContent);
+}

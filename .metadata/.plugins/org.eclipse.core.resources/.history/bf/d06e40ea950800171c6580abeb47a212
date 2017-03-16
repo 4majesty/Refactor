@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.corext.refactoring.rename;
+
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IRenameNonVirtualMethodProcessor {
+	boolean isApplicable();
+
+	String getDelegateUpdatingTitle(boolean plural);
+}

@@ -1,0 +1,23 @@
+package com.successfactors.sm.api.bean.pool;
+
+public interface ITalentPoolBean {
+	long getId();
+
+	void setId(long id);
+
+	String getCode();
+
+	void setCode(String code);
+
+	String getName();
+
+	void setName(String name);
+
+	String getType();
+
+	void setType(String type);
+
+	String getDescription();
+
+	void setDescription(String description);
+}

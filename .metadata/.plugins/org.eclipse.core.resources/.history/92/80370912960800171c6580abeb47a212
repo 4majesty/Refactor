@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.corext.refactoring.reorg;
+
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+public interface IArrayTypeConverter {
+}

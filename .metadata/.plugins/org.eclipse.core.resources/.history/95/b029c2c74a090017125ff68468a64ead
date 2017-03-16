@@ -1,0 +1,130 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import static com.successfactors.unittest.TestUtils.setField;
+
+import java.util.List;
+import java.util.Locale;
+
+import org.apache.http.HttpStatus;
+import org.apache.http.message.BasicNameValuePair;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.service.mentoring.jam.GetJamAuthToken;
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+
+public class GetJamAuthTokenImplTest {
+  private Mockery context;
+
+  private ParamBean params;
+
+  private ServiceCommandHandler scaHandler;
+
+  private static final String JAM_BASE_URL = "https://stage.sapjam.com";
+  
+  private static final String ACCESS_TOKEN = "hmavQtDj7XQy";
+
+  final public ParamBean getDefaultParam() {
+    if (params == null) {
+        params = new ParamBean();
+        params.setCompanyId("ABCINC");
+        params.setUserId("user1");
+        params.setDateFormat("mm/dd/yyyy");
+        params.setLocale(Locale.ENGLISH);
+    }
+
+    return params;
+  }
+  
+  @BeforeMethod(groups = { "checkin" })
+  public void setUp() throws Exception {
+    context = new Mockery();
+    context.setImposteriser(ClassImposteriser.INSTANCE);
+
+    this.params = this.getDefaultParam();
+    this.scaHandler = context.mock(ServiceCommandHandler.class);
+  }
+
+  private void setAttributes(MockJamAuthTokenImplTest service) {
+    setField(service, "params", this.params);
+    setField(service, "scaHandler", this.scaHandler);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testSuccessResponse() throws ServiceApplicationException  {
+    MockJamAuthTokenImplTest service = new MockJamAuthTokenImplTest(HttpStatus.SC_OK);
+
+    setAttributes(service);
+    String accessToken = service.execute(new GetJamAuthToken(params.getUserId()));
+
+    Assert.assertTrue(ACCESS_TOKEN.equals(accessToken));
+  }
+
+  @Test(groups = { "checkin" })
+  public void testFailureResponse() {
+    MockJamAuthTokenImplTest service = new MockJamAuthTokenImplTest(HttpStatus.SC_BAD_REQUEST);
+
+    setAttributes(service);
+
+    boolean thrownException = false;
+
+    try {
+      service.execute(new GetJamAuthToken(params.getUserId()));
+    } catch(ServiceApplicationException e) {
+      thrownException = true;
+    }
+
+    Assert.assertTrue(thrownException);
+  }
+
+  private class MockJamAuthTokenImplTest extends GetJamAuthTokenImpl {
+    
+    private int responseCode;
+
+    public MockJamAuthTokenImplTest(int responseCode) {
+      this.responseCode = responseCode;
+    }
+
+    @Override
+    protected BasicHttpResponse invoke(String url,String requestType,
+      List<BasicNameValuePair> headers,String body) {
+      return mockInvoke();
+    }
+
+    private BasicHttpResponse mockInvoke() {
+      switch (responseCode) {
+      case HttpStatus.SC_OK:
+        return getMockSuccessResponse();
+      case HttpStatus.SC_BAD_REQUEST:
+        return getBadRequestResponse();
+      default:
+        return getMockDefaultFailureResponse();
+      }
+    }
+
+    private BasicHttpResponse getMockSuccessResponse() {
+      String payload = new String("{  \"access_token\": \""+ACCESS_TOKEN+"\" }");
+
+      return new BasicHttpResponse(HttpStatus.SC_OK,null,payload);
+    }
+
+    private BasicHttpResponse getBadRequestResponse() {
+      return new BasicHttpResponse(HttpStatus.SC_BAD_REQUEST,null,null);
+    }
+
+    private BasicHttpResponse getMockDefaultFailureResponse() {
+      return new BasicHttpResponse(HttpStatus.SC_SERVICE_UNAVAILABLE,null,null);
+    }
+
+    @Override
+    protected String getJamBaseURL() throws ServiceApplicationException {
+      return JAM_BASE_URL;
+    }
+  }
+}

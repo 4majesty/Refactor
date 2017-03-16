@@ -1,0 +1,15 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+import java.io.Serializable;
+
+public interface IProgramSignupFormSectionValueVO {
+	String getItemId();
+
+	void setItemId(String itemId);
+
+	String getItemLabel();
+
+	void setItemLabel(String itemLabel);
+
+	String toString();
+}

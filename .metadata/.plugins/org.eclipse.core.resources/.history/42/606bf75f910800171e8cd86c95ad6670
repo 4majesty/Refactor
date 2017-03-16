@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
+import org.eclipse.jdt.internal.ui.compare.JavaElementHistoryPageSource;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;
+import org.eclipse.jdt.internal.ui.search.SearchUtil;
+
+public interface IJavaElementAdapterFactory {
+	Class[] getAdapterList();
+
+	Object getAdapter(Object element, Class key);
+
+	IResource getAdaptedResource(IAdaptable adaptable);
+
+	ResourceMapping getAdaptedResourceMapping(IAdaptable adaptable);
+}

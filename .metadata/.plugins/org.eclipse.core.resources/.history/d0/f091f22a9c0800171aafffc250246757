@@ -1,0 +1,22 @@
+package com.successfactors.cdp.service.mentoring.jam;
+
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Command to trigger program launch Jam group activity job
+ * 
+ * @author rsrigiri
+ *
+*/
+public class ScheduleProgramLaunchJamGroupActivityJob implements ServiceCommand<Void> {
+
+  private String programId;
+
+  public ScheduleProgramLaunchJamGroupActivityJob(String programId) {
+    this.programId = programId;
+  }
+
+  public String getProgramId() {
+    return programId;
+  }
+}

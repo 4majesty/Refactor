@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.EditFilterWizard;
+
+public interface IEditFilterAction {
+	String getDetailedDescription();
+
+	void run();
+}

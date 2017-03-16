@@ -1,0 +1,23 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.preference.IPreferencePageContainer;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.ui.preferences.IWorkingCopyManager;
+import org.eclipse.ui.preferences.WorkingCopyManager;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileConfigurationBlock;
+
+public interface IProfilePreferencePage {
+	void createControl(Composite parent);
+
+	void dispose();
+
+	boolean performOk();
+
+	void performApply();
+
+	void setElement(IAdaptable element);
+}

@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.wizards;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.jdt.ui.actions.OpenNewPackageWizardAction;
+
+public interface IOpenPackageWizardToolbarAction {
+	void dispose();
+
+	void init(IWorkbenchWindow window);
+
+	void run(IAction action);
+
+	void selectionChanged(IAction action, ISelection selection);
+}

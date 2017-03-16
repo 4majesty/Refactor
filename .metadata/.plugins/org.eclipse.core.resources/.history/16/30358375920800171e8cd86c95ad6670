@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.text.folding;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.jdt.ui.text.folding.IJavaFoldingPreferenceBlock;
+import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
+
+public interface IJavaFoldingStructureProviderDescriptor {
+	IJavaFoldingStructureProvider createProvider();
+
+	IJavaFoldingPreferenceBlock createPreferences();
+
+	String getId();
+
+	String getName();
+}

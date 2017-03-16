@@ -1,0 +1,49 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import com.ibm.icu.text.Collator;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IEditingSupport;
+import org.eclipse.jface.text.IEditingSupportRegistry;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.FilteredList;
+import org.eclipse.ui.progress.IProgressService;
+import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.search.TypeNameMatch;
+import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.internal.corext.util.History;
+import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
+
+public interface IAddImportOnSelectionAction {
+	int compare(Object o1, Object o2);
+
+	void update();
+
+	void run();
+
+	TypeNameMatch chooseImport(TypeNameMatch[] results, String containerName);
+
+	ISchedulingRule getScheduleRule();
+}

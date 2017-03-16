@@ -1,0 +1,39 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls;
+
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringDialogField;
+
+public interface IExternalizeWizardPage {
+	boolean canModify(Object element, String property);
+
+	Object getValue(Object element, String property);
+
+	void modify(Object element, String property, Object value);
+
+	String getColumnText(Object element, int columnIndex);
+
+	Image getColumnImage(Object element, int columnIndex);
+
+	Font getFont(Object element);
+
+	KeyValuePair getResult();
+
+	void dialogFieldChanged(DialogField field);
+
+	void createControl(Composite parent);
+
+	boolean performFinish();
+
+	IWizardPage getNextPage();
+
+	void dispose();
+}

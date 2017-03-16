@@ -1,0 +1,35 @@
+package com.successfactors.cdp.bean.mentoring.processor;
+
+import static com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum.CLOSED_BY_MENTEE;
+import static com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum.CLOSED_BY_MENTOR;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.service.mentoring.SendMentoringProgramClosureEmail;
+import com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum;
+import com.successfactors.fo.app.exception.ValidationException;
+import com.successfactors.genericobject.api.messages.Message;
+import com.successfactors.genericobject.api.model.DataOperation;
+import com.successfactors.genericobject.api.processor.OperationContext;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.app.processor.AbstractProcessor;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.user.bean.UserBean;
+
+public interface IMentorshipProcessor {
+	void validate(ValidationContext context) throws ValidationException;
+
+	void postSave(ValidationContext context) throws ValidationException;
+}

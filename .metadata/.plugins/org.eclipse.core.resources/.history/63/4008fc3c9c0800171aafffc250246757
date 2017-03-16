@@ -1,0 +1,27 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.ArrayList;
+import java.util.List;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupForm;
+import com.successfactors.cdp.service.util.mentoring.SignupFormStatusEnum;
+import com.successfactors.sca.ServiceQuery;
+
+public interface IGetMentoringSignupForm {
+	String getProgramId();
+
+	void setProgramId(String programId);
+
+	List<SignupFormStatusEnum> getStatus();
+
+	void setStatus(List<SignupFormStatusEnum> status);
+
+	void setStatus(SignupFormStatusEnum... types);
+
+	String getParticipantId();
+
+	void setParticipantId(String participantId);
+
+	Class<? extends MentoringProgramSignupForm> getClasz();
+
+	void setClasz(Class<? extends MentoringProgramSignupForm> clasz);
+}

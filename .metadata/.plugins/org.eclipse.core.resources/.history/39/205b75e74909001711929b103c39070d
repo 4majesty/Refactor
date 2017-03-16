@@ -1,0 +1,51 @@
+package com.successfactors.cdp.service.mentoring.jam;
+
+import javax.validation.constraints.NotNull;
+
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Make Jam Group Admin by MemberId API
+ * 
+ * @author rsrigiri
+ * 
+ * SAP SuccessFactors
+*/
+public class MakeJamGroupAdminByMemberId implements ServiceCommand<Boolean> {
+
+  @NotNull
+  /** Jam group Id **/
+  private String groupId;
+
+  @NotNull
+  /** Jam Member Id **/
+  private String memberId;
+
+  /** access token to be used for the API. 
+   * if this is null, then token will be generated for login user. **/
+  private String accessToken;
+
+  public MakeJamGroupAdminByMemberId(String memberId, String groupId) {
+    this.memberId = memberId;
+    this.groupId = groupId;
+  }
+
+  public MakeJamGroupAdminByMemberId(String memberId, 
+      String groupId, String accessToken) {
+    this.memberId = memberId;
+    this.groupId = groupId;
+    this.accessToken = accessToken;
+  }
+
+  public String getGroupId() {
+    return groupId;
+  }
+
+  public String getMemberId() {
+    return memberId;
+  }
+
+  public String getAccessToken() {
+    return accessToken;
+  }
+}

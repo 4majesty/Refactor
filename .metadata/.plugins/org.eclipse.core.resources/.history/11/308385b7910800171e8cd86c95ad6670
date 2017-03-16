@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.model;
+
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
+import org.eclipse.ltk.core.refactoring.model.AbstractRefactoringHistoryResourceMapping;
+
+public interface IJavaRefactoringHistoryResourceMapping {
+	String getModelProviderId();
+}

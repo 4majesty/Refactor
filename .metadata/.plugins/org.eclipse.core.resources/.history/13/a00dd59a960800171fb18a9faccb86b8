@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface IMoveInnerToTopWizard {
+	void createControl(Composite parent);
+
+	void setVisible(boolean visible);
+}

@@ -1,0 +1,55 @@
+package com.successfactors.cdp.service;
+
+import java.util.List;
+import java.util.Set;
+
+import com.successfactors.cdp.bean.UserReadinessVO;
+import com.successfactors.sca.ServiceCommand;
+
+public class GetRecommendedSuccessors implements ServiceCommand<GetRecommendedSuccessors>{
+  private static final long serialVersionUID = 1L;
+  
+  // in
+  private Set<String> excludedUserIds;
+  private long roleId;
+  private int maxReturnSize = 10;
+  
+  // out
+  private List<UserReadinessVO> userReadinessList;
+  
+  public GetRecommendedSuccessors() {
+    super();
+  }
+
+  public Set<String> getExcludedUserIds() {
+    return excludedUserIds;
+  }
+
+  public void setExcludedUserIds(Set<String> excludedUserIds) {
+    this.excludedUserIds = excludedUserIds;
+  }
+
+  public long getRoleId() {
+    return roleId;
+  }
+
+  public void setRoleId(long roleId) {
+    this.roleId = roleId;
+  }
+
+  public List<UserReadinessVO> getUserReadinessList() {
+    return userReadinessList;
+  }
+
+  public void setUserReadinessList(List<UserReadinessVO> userReadinessList) {
+    this.userReadinessList = userReadinessList;
+  }
+
+  public int getMaxReturnSize() {
+    return maxReturnSize;
+  }
+
+  public void setMaxReturnSize(int maxReturnSize) {
+    this.maxReturnSize = maxReturnSize;
+  }
+}

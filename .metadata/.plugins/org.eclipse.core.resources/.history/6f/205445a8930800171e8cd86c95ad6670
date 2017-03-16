@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+
+public interface IASTResolving {
+	boolean visit(SimpleName node);
+}

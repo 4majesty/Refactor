@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IGetterSetterCompletionProposal {
+	boolean isAutoInsertable();
+}

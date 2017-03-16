@@ -1,0 +1,129 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
+
+import java.util.List;
+import java.util.Stack;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+
+public interface ISuperTypeConstraintsCreator {
+	void endVisit(final ArrayAccess node);
+
+	void endVisit(final ArrayCreation node);
+
+	void endVisit(final ArrayInitializer node);
+
+	void endVisit(final ArrayType node);
+
+	void endVisit(final Assignment node);
+
+	void endVisit(final CastExpression node);
+
+	void endVisit(final CatchClause node);
+
+	void endVisit(final ClassInstanceCreation node);
+
+	void endVisit(final ConditionalExpression node);
+
+	void endVisit(final ConstructorInvocation node);
+
+	void endVisit(final FieldAccess node);
+
+	void endVisit(final FieldDeclaration node);
+
+	void endVisit(final MethodDeclaration node);
+
+	void endVisit(final MethodInvocation node);
+
+	void endVisit(final NullLiteral node);
+
+	void endVisit(final ParenthesizedExpression node);
+
+	void endVisit(final QualifiedName node);
+
+	void endVisit(final ReturnStatement node);
+
+	void endVisit(final SimpleName node);
+
+	void endVisit(final SingleVariableDeclaration node);
+
+	void endVisit(EnhancedForStatement node);
+
+	void endVisit(final SuperConstructorInvocation node);
+
+	void endVisit(final SuperFieldAccess node);
+
+	void endVisit(final SuperMethodInvocation node);
+
+	void endVisit(final ThisExpression node);
+
+	void endVisit(final Type node);
+
+	void endVisit(final VariableDeclarationExpression node);
+
+	void endVisit(final VariableDeclarationFragment node);
+
+	void endVisit(final VariableDeclarationStatement node);
+
+	boolean visit(final AnnotationTypeDeclaration node);
+
+	boolean visit(final Comment node);
+
+	boolean visit(final ImportDeclaration node);
+
+	boolean visit(final MethodDeclaration node);
+
+	boolean visit(final PackageDeclaration node);
+
+	boolean visit(final ThisExpression node);
+
+	boolean visit(final Type node);
+}

@@ -1,0 +1,31 @@
+package org.eclipse.jdt.internal.ui.wizards.dialogfields;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.core.runtime.Assert;
+
+public interface ISelectionButtonDialogFieldGroup {
+	Control[] doFillIntoGrid(Composite parent, int nColumns);
+
+	int getNumberOfControls();
+
+	Composite getSelectionButtonsGroup(Composite parent);
+
+	Button getSelectionButton(int index);
+
+	boolean isSelected(int index);
+
+	void setSelection(int index, boolean selected);
+
+	void enableSelectionButton(int index, boolean enable);
+
+	void refresh();
+}

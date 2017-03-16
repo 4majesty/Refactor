@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.jface.viewers.IElementComparer;
+
+public interface IDefaultElementComparer {
+	boolean equals(Object a, Object b);
+
+	int hashCode(Object element);
+}

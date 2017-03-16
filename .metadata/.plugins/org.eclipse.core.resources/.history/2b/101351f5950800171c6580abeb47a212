@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;
+
+import org.eclipse.jdt.core.BindingKey;
+
+public interface IStandardType {
+	int getKind();
+
+	boolean isJavaLangObject();
+
+	boolean isJavaLangCloneable();
+
+	boolean isJavaIoSerializable();
+
+	boolean doEquals(TType type);
+
+	int hashCode();
+
+	String getName();
+}

@@ -1,0 +1,63 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import java.util.List;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWindowListener;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.ui.SharedASTProvider.WAIT_FLAG;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IASTProvider {
+	void partActivated(IWorkbenchPartReference ref);
+
+	void partBroughtToTop(IWorkbenchPartReference ref);
+
+	void partClosed(IWorkbenchPartReference ref);
+
+	void partDeactivated(IWorkbenchPartReference ref);
+
+	void partOpened(IWorkbenchPartReference ref);
+
+	void partHidden(IWorkbenchPartReference ref);
+
+	void partVisible(IWorkbenchPartReference ref);
+
+	void partInputChanged(IWorkbenchPartReference ref);
+
+	void windowActivated(IWorkbenchWindow window);
+
+	void windowDeactivated(IWorkbenchWindow window);
+
+	void windowClosed(IWorkbenchWindow window);
+
+	void windowOpened(IWorkbenchWindow window);
+
+	boolean isCached(CompilationUnit ast);
+
+	boolean isActive(ICompilationUnit cu);
+
+	CompilationUnit getAST(ITypeRoot input, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor);
+
+	void dispose();
+}

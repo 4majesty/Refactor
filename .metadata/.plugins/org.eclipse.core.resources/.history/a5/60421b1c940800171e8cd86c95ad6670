@@ -1,0 +1,10 @@
+package org.eclipse.jdt.ui;
+
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocCommentReader;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
+
+public interface IJavadocContentAccess {
+}

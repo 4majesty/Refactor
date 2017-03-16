@@ -1,0 +1,54 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import static com.successfactors.unittest.TestUtils.setField;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMatchedParticipant;
+import com.successfactors.cdp.service.mentoring.SendMentoringProgramClosureEmail;
+import com.successfactors.cdp.service.util.mentoring.MentorshipStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailContent;
+import com.successfactors.cdp.service.util.mentoring.email.MentoringEmailUtils;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.service.LoadByObjectTypeExternalCode;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.platform.bean.MailInvalidAddressException;
+import com.successfactors.platform.bean.MailSendException;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+
+public interface ISendMentoringProgramClosureEmailImplTest {
+	ParamBean getDefaultParam();
+
+	void setUp();
+
+	void testInvalidMentorship();
+
+	void testSendClosureEmailMentorWithNote();
+
+	void testSendWithdrawEmailMentee();
+
+	void testSendEmailNoUser();
+
+	void testLoadUserBeans();
+
+	void testEscape2HTML();
+}

@@ -1,0 +1,103 @@
+package com.successfactors.arb.bean;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.successfactors.arb.exception.AnalyticsRuntimeException;
+
+/**
+ * Internal class to help the factories in the API invoke methods on classes in the service package. Copied from idl-logging, will be deprecated or deleted when
+ * idl-applicationcontext or idl-factory is released
+ * 
+ * @author I073141
+ * @since b1508
+ */
+final class ReflectiveInvoker {
+
+    private static final ConcurrentHashMap<String, Method> METHOD_CACHE = new ConcurrentHashMap<String, Method>();
+
+    /**
+     * Invoke the static method on thie specified class and return the value of the method.
+     * 
+     * @param className
+     *            the class to invoke the method on
+     * @param methodName
+     *            the static method to invoke
+     * @return the value returned from the method
+     * @since b1508
+     */
+    static Object invoke(final String className, final String methodName) {
+        return invoke(className, methodName, new Class[0], new Object[0]);
+    }
+
+    /**
+     * Invoke the static method on thie specified class and return the value of the method.
+     * 
+     * @param className
+     *            the class to invoke the method on
+     * @param methodName
+     *            the static method to invoke
+     * @param parameterTypes
+     *            the declared types of the parameters to the method
+     * @param parameterValues
+     *            the values to pass into the method invocation
+     * @return the value returned from the method
+     * @since b1508
+     */
+    static Object invoke(final String className, final String methodName, final Class<?>[] parameterTypes, final Object[] parameterValues) {
+        final Object result;
+        final String key = className + "." + methodName + "(" + arrayToString(parameterTypes) + ")";
+        try {
+            Method method = METHOD_CACHE.get(key);
+            if (method == null) {
+                final Class<?> c = Class.forName(className);
+                method = c.getDeclaredMethod(methodName, parameterTypes);
+                METHOD_CACHE.put(key, method);
+            }
+            result = method.invoke(null, parameterValues);
+        } catch (final ClassNotFoundException e) {
+            throw new AnalyticsRuntimeException("Unable to locate class " + className, e);
+        } catch (final NullPointerException e) {
+            throw new AnalyticsRuntimeException("Unable to use class " + className, e);
+        } catch (final NoSuchMethodException e) {
+            throw new AnalyticsRuntimeException("Unable to locate method " + key, e);
+        } catch (final IllegalAccessException e) {
+            throw new AnalyticsRuntimeException("Unable to access method " + key, e);
+        } catch (final SecurityException e) {
+            throw new AnalyticsRuntimeException("Unable to access method " + key, e);
+        } catch (final IllegalArgumentException e) {
+            throw new AnalyticsRuntimeException("Unable to invoke method " + key, e);
+        } catch (final InvocationTargetException e) {
+            throw new AnalyticsRuntimeException("Unable to invoke method " + key, e);
+        }
+        return result;
+    }
+
+    private static String arrayToString(final Class<?>[] array) {
+        final String result;
+        if (array == null) {
+            result = "";
+        } else if (array.length == 0) {
+            result = "";
+        } else {
+            final StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (final Class<?> c : array) {
+                final String className = c.getName();
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
+                }
+                sb.append(className);
+            }
+            result = sb.toString();
+        }
+        return result;
+    }
+
+    private ReflectiveInvoker() {
+        super();
+    }
+}

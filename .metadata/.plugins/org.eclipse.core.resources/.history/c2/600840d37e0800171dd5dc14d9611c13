@@ -1,0 +1,275 @@
+package com.successfactors.provisioningconfigframework.bean;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.util.type.SubDomainSchemaEnum;
+import com.successfactors.provisioningconfigframework.Constants;
+import com.successfactors.upgradecenter.utils.XMLUtils;
+
+public class Feature {
+
+  /**
+   * Feature Id
+   */
+  private String id;
+  
+  /**
+   * Feature Name
+   */
+  private String name;
+  
+  /**
+   * Feature description
+   */
+  private String desc;
+  
+  /**
+   * Security question
+   */
+  private String secuirtyQues;
+
+  /**
+   * User guide URL
+   */
+  private String userGuideUrl;
+  
+  /**
+   * Source
+   */
+  private String source;
+  
+  /**
+   * License
+   */
+  private boolean license;
+  
+  /**
+   * Addtional Info
+   */
+  private Map<String, String> additionalInfo = new HashMap<String, String>();
+  
+//  private Set<String> children = new TreeSet<String>();
+  
+  /**
+   * this is derived from dependees
+   */
+  private Set<String> dependents = new TreeSet<String>();
+  
+  /** 
+   * this is defined as <dependent-feature> in provisioning-config.xml
+   */
+  private Set<String> dependees = new TreeSet<String>();
+  
+  private IFeatureEnum featureEnum;
+  private SubDomainSchemaEnum subDomainSchemaEnum;
+  
+  private Action action;
+
+
+  
+
+  /**
+   * Updates the meta XML content to this bean
+   * 
+   * @param feature
+   *          xml element
+   */
+  public void updateContent(Element feature) {
+    Node idAttr = feature.getAttributes().getNamedItem(
+        Constants.ATTR_ID);
+    if (idAttr != null) {
+      this.id = XMLUtils.getValue(idAttr);
+    }
+
+    Node nameAttr = feature.getAttributes().getNamedItem(
+        Constants.ATTR_NAME);
+    if (nameAttr != null) {
+      this.name = XMLUtils.getValue(nameAttr);
+    }
+	
+	Node descAttr = feature.getAttributes().getNamedItem(
+        Constants.ATTR_DESC);
+    if (descAttr != null) {
+      this.desc = XMLUtils.getValue(descAttr);
+    }
+	
+    Node sourceAttr = feature.getAttributes().getNamedItem(
+        Constants.FEATURE_ATTR_SOURCE);
+    if (sourceAttr != null) {
+      this.setSource(XMLUtils.getValue(sourceAttr));
+     }
+    Node licenseAttr = feature.getAttributes().getNamedItem(
+        Constants.FEATURE_ATTR_LICENSE);
+    if (licenseAttr != null) {
+      this.license = new Boolean(XMLUtils.getValue(licenseAttr));
+    }
+    
+    Node secQuesAttr = feature.getAttributes().getNamedItem(
+        Constants.SECQURITY_QUESTION);
+    if (secQuesAttr != null) {
+      this.secuirtyQues = XMLUtils.getValue(secQuesAttr);
+    }
+    
+    Node userGuideLinkAttr = feature.getAttributes().getNamedItem(
+        Constants.USER_GUIDE_URL);
+    if (userGuideLinkAttr != null) {
+      this.userGuideUrl = XMLUtils.getValue(userGuideLinkAttr);
+    }
+    
+    List<Element> childList = XMLUtils.getChildElements(feature);
+    for (Element child : childList) {
+      String nodeName = child.getNodeName();
+      if (nodeName.equals(Constants.ACTION)) {
+        action = new Action();
+        action.updateContent(child);
+      }
+      if (nodeName.equals(Constants.DEPENDENT_FEATURE)) {
+        handleDependee(child);
+      }
+//      if (nodeName.equals(Constants.SUB_FEATURE)) {
+//        handleSubFeature(child);
+//      }
+    }
+
+  }
+  
+  
+  private void handleDependee(Element dependent) {
+    List<Element> childList = XMLUtils.getChildElements(dependent);
+    for (Element child : childList) {
+      String nodeName = child.getNodeName();
+      if (nodeName.equals(Constants.FEATURE_REF)) {
+        Node idAttr = child.getAttributes().getNamedItem(Constants.ATTR_ID);
+        if (idAttr != null) {
+          String refFeatureId = XMLUtils.getValue(idAttr);
+          dependees.add(refFeatureId);
+        }
+      }
+    }
+  }
+  
+//  private void handleSubFeature(Element subFeature) {
+//    List<Element> childList = XMLUtils.getChildElements(subFeature);
+//    for (Element child : childList) {
+//      String nodeName = child.getNodeName();
+//      if (nodeName.equals(Constants.FEATURE_REF)) {
+//        Node idAttr = child.getAttributes().getNamedItem(Constants.ATTR_ID);
+//        if (idAttr != null) {
+//          String refFeatureId = XMLUtils.getValue(idAttr);
+//          children.add(refFeatureId);
+//        }
+//      }
+//    }
+//  }
+
+  public String getId() {
+    return id;
+  }
+  
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+  
+  public String getDesc() {
+    return desc;
+  }
+
+  public void setDesc(String desc) {
+    this.desc = desc;
+  }
+
+  public String getSource() {
+    return source;
+  }
+
+  public void setSource(String source) {
+    this.source = source;
+
+    if (source.equals(Constants.FEATURE_ATTR_SOURCE_FEATUREENUM)){
+      featureEnum = FeatureEnum.valueOf(id);
+    }else if(source.equals(Constants.FEATURE_ATTR_SOURCE_SUBDOMAINSCHEMAENUM)){
+      subDomainSchemaEnum = SubDomainSchemaEnum.valueOf(id);
+    }
+      
+  }
+
+
+  public Map<String, String> getAdditionalInfo() {
+    return additionalInfo;
+  }
+
+//  public Set<String> getChildren() {
+//    return children;
+//  }
+
+
+  public Set<String> getDependents() {
+    return dependents;
+  }
+
+
+  public boolean isLicense() {
+    return license;
+  }
+
+  public Set<String> getDependees() {
+    return dependees;
+  }
+
+
+  public void setLicense(boolean license) {
+    this.license = license;
+  }
+
+
+  public FeatureEnum getFeatureEnum() {
+    return featureEnum;
+  }
+
+
+  public SubDomainSchemaEnum getSubDomainSchemaEnum() {
+    return subDomainSchemaEnum;
+  }
+
+
+  public Action getAction() {
+    return action;
+  }
+
+  public String getSecuirtyQues() {
+    return secuirtyQues;
+  }
+
+  public String getUserGuideUrl() {
+    return userGuideUrl;
+  }
+
+  @Override
+  public String toString() {
+    return "Feature [id=" + id + ", name=" + name + ", desc=" + desc
+        + ", secuirtyQues=" + secuirtyQues + ",  userGuideUrl=" + userGuideUrl
+        + ", source=" + source + ", license=" + license + ", additionalInfo="
+        + additionalInfo + ", dependees=" + dependees + ", dependents="
+        + dependents + ", featureEnum=" + featureEnum
+        + ", subDomainSchemaEnum=" + subDomainSchemaEnum + ", action=" + action
+        + "]";
+  }
+
+  
+}

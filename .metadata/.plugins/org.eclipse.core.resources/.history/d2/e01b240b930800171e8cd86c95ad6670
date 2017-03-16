@@ -1,0 +1,30 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.model.IWorkbenchAdapter;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+public interface IPackageFragmentRootContainer {
+	Object[] getChildren(Object o);
+
+	ImageDescriptor getImageDescriptor(Object o);
+
+	String getLabel(Object o);
+
+	Object getParent(Object o);
+
+	Object getAdapter(Class adapter);
+
+	IAdaptable[] getChildren();
+
+	IPackageFragmentRoot[] getPackageFragmentRoots();
+
+	String getLabel();
+
+	ImageDescriptor getImageDescriptor();
+
+	IJavaProject getJavaProject();
+}

@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.refactoring.nls.search;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.part.IShowInTargetList;
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+import org.eclipse.search.ui.text.Match;
+import org.eclipse.jdt.internal.ui.search.JavaSearchResultPage;
+import org.eclipse.jdt.internal.ui.search.TextSearchTableContentProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
+import org.eclipse.jdt.internal.ui.search.ITextSearchTableContentProvider;
+
+public interface INLSSearchResultPage {
+	Object getAdapter(Class adapter);
+}

@@ -1,0 +1,199 @@
+package com.successfactors.cdp.app.mentoring;
+
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.StandardElement;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionValueVO;
+import com.successfactors.cdp.service.util.mentoring.DMFieldWhiteListEnum;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.SignupFormSectionCategoryEnum;
+import com.successfactors.competency.bean.CompetencyBean;
+import com.successfactors.competency.service.GetCompetencyById;
+import com.successfactors.datamodel.api.DataModelFacade;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.xi.util.SeamEnvUtils;
+import com.successfactors.jdmng.JDAccessException;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.jdmng.app.core.DataService;
+import com.successfactors.jdmng.bean.SkillEntity;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.user.bean.UserBean;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+
+
+import javax.inject.Inject;
+import java.util.Iterator;
+import java.util.List;
+
+
+@Name("retrieveLabelService")
+@javax.inject.Named("retrieveLabelService")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope()
+public class RetrieveLabelService {
+  /** Parameter bean */
+  @Inject
+  @In
+  private ParamBean params;
+
+
+
+  /** Service command handler */
+  private ServiceCommandHandler scaHandler = ServiceCommandHandlerFactory.getSCAHandler();
+
+    @Inject
+  @In(create = true)
+  private ConfigurationProvider configurationProvider;
+
+  @Inject
+  @In(value = DataModelFacade.NAME, create = true)
+  private DataModelFacade dataModelFacade;  
+  
+  private static Logger logger = LogManager.getLogger();
+
+  private Messages msgs=(Messages)SeamEnvUtils.getInstance("v10msgs",true);
+
+
+  /**
+   * getSectionLabelbyId
+   * @param sectionId
+   * @return sectionId
+   * @throws ServiceApplicationException
+   */
+  public String getSectionLabelbyId(String sectionId) throws ServiceApplicationException {
+    if (sectionId == null) {
+      return null;
+    }
+    String sectionIdU = sectionId.toUpperCase();
+    if (SignupFormSectionCategoryEnum.COMPETENCY.name().equals(sectionIdU)) {
+      return msgs.getString("Competency");
+    } else if (sectionIdU.startsWith(SignupFormSectionCategoryEnum.FREE_TEXT.name())) {
+      return msgs.getString("DEVELOPMENT_MENTORING_FREE_TEXT_LABEL");
+    } else if (SignupFormSectionCategoryEnum.SKILLS.name().equals(sectionIdU)) {
+      return msgs.getString("Skills");
+    } else {
+      SuccessionDataModelBean dataModel = dataModelFacade.getDataModel();
+      StandardElement dmEle = dataModel.lookupStandardElementById(sectionId);
+      if (dmEle != null) {
+        return MentoringUtils.getStdEleLabel(dmEle, sectionId, params.getLocale());
+      }
+      return sectionId;
+    }
+  }
+
+  /** JD data service */
+  @Inject
+  @In(create = true)
+  private DataService jdDataService;
+
+  /**
+   * fillSectionValuesLabel
+   * @param sectionId
+   * @param valueVOs ProgramSignupFormSectionValueVOs
+   * @throws ServiceApplicationException
+   */
+  public void fillSectionValuesLabel(String sectionId, List<ProgramSignupFormSectionValueVO> valueVOs) throws ServiceApplicationException {
+    if (sectionId == null || valueVOs == null) {
+      return;
+    }
+    String sectionIdU = sectionId.toUpperCase();
+    if (SignupFormSectionCategoryEnum.COMPETENCY.name().equals(sectionIdU)) {
+      for (ProgramSignupFormSectionValueVO valueVO : valueVOs) {
+        CompetencyBean competencyBean = scaHandler.execute(new GetCompetencyById(Long.valueOf(valueVO.getItemId()), true, true, false, false, params
+            .getLocale()));
+        if (competencyBean != null) {
+          valueVO.setItemLabel(competencyBean.getCompetencyName());
+        }
+      }
+    } else if (sectionIdU.startsWith(SignupFormSectionCategoryEnum.FREE_TEXT.name())) {
+      for (ProgramSignupFormSectionValueVO valueVO : valueVOs) {
+        valueVO.setItemLabel(valueVO.getItemLabel());
+      }
+    }
+    
+    else if (SignupFormSectionCategoryEnum.SKILLS.name().equals(sectionIdU) && (params.isFeatureExist(FeatureEnum.JDM_NG))) {
+      for (ProgramSignupFormSectionValueVO valueVO : valueVOs) {
+        try {
+          SkillEntity skill = jdDataService.findEntityByExternalCode(SkillEntity.class, valueVO.getItemId());
+          String skilLabell = MentoringUtils.getSkillLabel(skill, params.getLocale());
+          valueVO.setItemLabel(skilLabell);
+        } catch (JDAccessException e) {
+          throw new ServiceApplicationException(e);
+        }
+      }
+    } else {
+      if (DMFieldWhiteListEnum.GENDER.name().equals(sectionIdU)) {
+        for (ProgramSignupFormSectionValueVO valueVO : valueVOs) {
+          String genderLabel = valueVO.getItemId().equalsIgnoreCase(UserBean.FEMALE) ? msgs.getString("COMMON_SUCCESSION_FEMALE") : msgs
+              .getString("COMMON_SUCCESSION_MALE");
+          valueVO.setItemLabel(genderLabel);
+        }
+      } else {
+        for (ProgramSignupFormSectionValueVO valueVO : valueVOs) {
+          valueVO.setItemLabel(valueVO.getItemId());
+        }
+      }
+    }
+  }
+/**
+ * fillSectionAllLabels
+ * @param sectionVO ProgramSignupFormSectionVO
+ * @throws ServiceApplicationException
+ */
+  public void fillSectionAllLabels(ProgramSignupFormSectionVO sectionVO) throws ServiceApplicationException {
+    if (sectionVO == null) {
+      return;
+    }
+    String sectionId = sectionVO.getSectionId();
+    if (!sectionId.startsWith(SignupFormSectionCategoryEnum.FREE_TEXT.toString())) {
+      String sectionLabel = getSectionLabelbyId(sectionId);
+      sectionVO.setSectionLabel(sectionLabel);
+      fillSectionValuesLabel(sectionId, sectionVO.getSectionValues());
+    }
+    this.deleteEmptySectionValueVOs(sectionVO.getSectionValues());
+  }
+
+/**
+ * fillSectionAllLabels
+ * @param sectionVOs ProgramSignupFormSectionVOs
+ * @throws ServiceApplicationException
+ */
+  public void fillSectionAllLabels(List<ProgramSignupFormSectionVO> sectionVOs) throws ServiceApplicationException {
+    if (sectionVOs == null) {
+      return;
+    }
+    for (ProgramSignupFormSectionVO sectionVO : sectionVOs) {
+      fillSectionAllLabels(sectionVO);
+    }
+  }
+/**
+ * deleteEmptyValueSections
+ * @param sectionVOs sectionVOs
+ * @return sectionVOs
+ * @throws ServiceApplicationException
+ */
+  private List<ProgramSignupFormSectionValueVO> deleteEmptySectionValueVOs (List<ProgramSignupFormSectionValueVO> sectionValueVOs) throws ServiceApplicationException
+  {
+      // filter empty sectionValues out
+      if (sectionValueVOs!= null) {
+        Iterator<ProgramSignupFormSectionValueVO> sectionValueVOIter = sectionValueVOs.iterator();
+        while (sectionValueVOIter.hasNext()) {
+          ProgramSignupFormSectionValueVO sectionValueVO = sectionValueVOIter.next();
+          if (sectionValueVO.getItemLabel() == null) {
+            sectionValueVOIter.remove();
+          }
+        }
+      }
+    return sectionValueVOs;
+  }
+  
+}

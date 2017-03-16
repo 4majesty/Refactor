@@ -1,0 +1,19 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.gm.service.objective.GetPermittedActiveTemplates;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.util.EJBList;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.preference.PreferenceBean;
+import com.successfactors.user.service.ejb.UserEJB;
+import com.successfactors.user.service.ejb.preference.Preferences;
+import com.successfactors.user.service.preference.GetPreferenceBean;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+
+public interface IGetDevPlanListImplTest {
+	void testGetDevPlanList();
+}

@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.corext.refactoring.nls;
+
+import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IAccessorClassModifier {
+}

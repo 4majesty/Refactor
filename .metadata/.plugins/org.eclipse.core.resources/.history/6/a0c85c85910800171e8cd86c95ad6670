@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.ui.IPageLayout;
+import org.eclipse.ui.texteditor.templates.TemplatesView;
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.jdt.ui.JavaUI;
+
+public interface IJavaHierarchyPerspectiveFactory {
+	void createInitialLayout(IPageLayout layout);
+}

@@ -1,0 +1,11 @@
+package com.successfactors.rbp.integration.grc.xml.binding;
+
+import java.util.List;
+
+public interface IUser {
+	String getId();
+
+	void setId(String value);
+
+	List<Role> getRole();
+}

@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.javaeditor.saveparticipant;
+
+import org.eclipse.core.runtime.Assert;
+
+public interface ISaveParticipantDescriptor {
+	IPostSaveListener getPostSaveListener();
+
+	ISaveParticipantPreferenceConfiguration createPreferenceConfiguration();
+
+	ISaveParticipantPreferenceConfiguration getPreferenceConfiguration();
+
+	String getId();
+}

@@ -1,0 +1,8 @@
+package package1;
+
+import package2.hello3;
+import package2.Ihello2;
+import package2.Ihello3;
+
+public interface Ihello1 {
+}

@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.text.spelling;
+
+import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary;
+
+public interface ITaskTagDictionary {
+	void propertyChange(final PropertyChangeEvent event);
+
+	void unload();
+}

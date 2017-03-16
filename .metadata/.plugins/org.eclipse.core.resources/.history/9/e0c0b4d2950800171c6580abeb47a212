@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure;
+
+import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+
+public interface IReferenceFinderUtil {
+}

@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.corext.refactoring.util;
+
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+
+public interface ITextEditUtil {
+}

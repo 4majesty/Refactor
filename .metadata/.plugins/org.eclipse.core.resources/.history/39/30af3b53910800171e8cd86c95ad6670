@@ -1,0 +1,48 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.reconciler.MonoReconciler;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.spelling.SpellingService;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+
+public interface IJavaReconciler {
+	void partActivated(IWorkbenchPart part);
+
+	void partBroughtToTop(IWorkbenchPart part);
+
+	void partClosed(IWorkbenchPart part);
+
+	void partDeactivated(IWorkbenchPart part);
+
+	void partOpened(IWorkbenchPart part);
+
+	void shellActivated(ShellEvent e);
+
+	void shellDeactivated(ShellEvent e);
+
+	void elementChanged(ElementChangedEvent event);
+
+	void resourceChanged(IResourceChangeEvent e);
+
+	void install(ITextViewer textViewer);
+
+	void uninstall();
+}

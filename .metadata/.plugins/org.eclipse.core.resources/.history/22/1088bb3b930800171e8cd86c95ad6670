@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
+
+public interface IMemberFilterAction {
+	int getFilterProperty();
+
+	void run();
+}

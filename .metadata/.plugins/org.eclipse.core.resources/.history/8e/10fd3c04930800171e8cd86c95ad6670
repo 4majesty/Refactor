@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.util;
+
+import java.util.Vector;
+
+public interface IStringMatcher {
+	int getStart();
+
+	int getEnd();
+
+	StringMatcher.Position find(String text, int start, int end);
+
+	boolean match(String text);
+
+	boolean match(String text, int start, int end);
+}

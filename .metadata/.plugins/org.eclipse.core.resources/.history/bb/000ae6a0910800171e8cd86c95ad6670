@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.ui.text.template.contentassist;
+
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.SurroundWith;
+
+public interface ISurroundWithTemplateProposal {
+	String getPreviewContent();
+
+	void apply(ITextViewer viewer, char trigger, int stateMask, int offset);
+
+	Point getSelection(IDocument document);
+
+	boolean validate(IDocument document, int offset, DocumentEvent event);
+}

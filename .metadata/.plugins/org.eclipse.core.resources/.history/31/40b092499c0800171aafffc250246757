@@ -1,0 +1,24 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import com.successfactors.cdp.app.mentoring.MatchingAlgorithmContext;
+import com.successfactors.cdp.app.mentoring.MatchingAlgorithmStrategy;
+import com.successfactors.cdp.app.mentoring.StandardMatchingAlgorithmStrategy;
+import com.successfactors.cdp.app.mentoring.WeightedMatchingAlgorithmStrategy;
+import com.successfactors.sca.ServiceApplicationException;
+
+public class MatchingAlgorithmFactory{
+
+    public MatchingAlgorithmStrategy getAlgorithm(String type, MatchingAlgorithmContext context) throws ServiceApplicationException {
+        if(type.equalsIgnoreCase("Standard")){
+            return new StandardMatchingAlgorithmStrategy(context);
+        }else if(type.equalsIgnoreCase("Weighted")){
+            return new WeightedMatchingAlgorithmStrategy(context);
+        }else{
+            throw new ServiceApplicationException("Bad pattern type!");
+        }
+    }
+    
+    public MatchingAlgorithmStrategy getDefaultAlgorithm(MatchingAlgorithmContext context) {
+        return new StandardMatchingAlgorithmStrategy(context);
+    }
+}

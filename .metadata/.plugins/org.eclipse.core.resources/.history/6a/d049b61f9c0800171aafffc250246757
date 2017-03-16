@@ -1,0 +1,1523 @@
+package com.successfactors.cdp.ui.controller.mentoring;
+
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.ajaxservice.annotation.AjaxMethod;
+import com.successfactors.ajaxservice.annotation.AjaxService;
+import com.successfactors.cdp.app.mentoring.MatchingAlgorithmContext;
+import com.successfactors.cdp.app.mentoring.MatchingFacade;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.app.mentoring.RetrieveLabelService;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramParticipant;
+import com.successfactors.cdp.bean.mentoring.vo.MatchedParticipantVO;
+import com.successfactors.cdp.bean.mentoring.vo.MatchingResult;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramVO;
+import com.successfactors.cdp.bean.mentoring.vo.UserProfileVO;
+import com.successfactors.cdp.bean.mentoring.vo.overview.ProgramDetailsTabVO;
+import com.successfactors.cdp.bean.mentoring.vo.overview.ProgramMenteesTabVO;
+import com.successfactors.cdp.bean.mentoring.vo.overview.ProgramMentorsTabVO;
+import com.successfactors.cdp.bean.mentoring.vo.overview.ProgramOverviewParentVO;
+import com.successfactors.cdp.service.mentoring.CheckJAMPermission;
+import com.successfactors.cdp.service.mentoring.CompleteProgram;
+import com.successfactors.cdp.service.mentoring.ConfirmMatchingResult;
+import com.successfactors.cdp.service.mentoring.DeleteProgram;
+import com.successfactors.cdp.service.mentoring.GetMatchingCounts;
+import com.successfactors.cdp.service.mentoring.GetMentoringRequest;
+import com.successfactors.cdp.service.mentoring.ProgramLaunchJamGroupActivityObserver;
+import com.successfactors.cdp.service.mentoring.SaveOverview;
+import com.successfactors.cdp.service.mentoring.SaveProgram;
+import com.successfactors.cdp.service.mentoring.SignUpMentees;
+import com.successfactors.cdp.service.mentoring.SignUpMentors;
+import com.successfactors.cdp.service.mentoring.StartMatching;
+import com.successfactors.cdp.service.mentoring.StartProgram;
+import com.successfactors.cdp.service.mentoring.SupervisedMatchJamGroupInviteObserver;
+import com.successfactors.cdp.service.mentoring.jam.GetJamGoToGroupURL;
+import com.successfactors.cdp.service.util.mentoring.CreateJAMGroupException;
+import com.successfactors.cdp.service.util.mentoring.FieldEditPermissionEnum;
+import com.successfactors.cdp.service.util.mentoring.MatchingScoreTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.MentoringConstants;
+import com.successfactors.cdp.service.util.mentoring.MentoringDateUtils;
+import com.successfactors.cdp.service.util.mentoring.MentoringPermissionChecker;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramParticipantTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.SectionDisplayTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormSectionCategoryEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormStatusEnum;
+import com.successfactors.cdp.ui.util.mentoring.MentoringProgramBeanUtil;
+import com.successfactors.cdp.ui.util.mentoring.MentoringProgramViewConstants;
+import com.successfactors.cdp.ui.util.mentoring.MentoringViewHelper;
+import com.successfactors.datamodel.api.DataModelFacade;
+import com.successfactors.dynamicgroups.util.group.GroupUtil;
+import com.successfactors.genericobject.api.model.ObjectDefinition;
+import com.successfactors.genericobject.api.sql.MDFCriteria;
+import com.successfactors.genericobject.api.sql.MDFResultSet;
+import com.successfactors.genericobject.api.sql.Projections;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.facade.MDFFacade;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.genericobject.app.sql.builder.Order;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.jdmng.JDAccessException;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.platform.util.constants.SessionConstants;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.util.UserFormatUtils;
+import com.successfactors.user.service.FindUsersByIds;
+import com.successfactors.xi.util.SeamEnvUtils;
+
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import org.json.JSONObject;
+
+import javax.inject.Inject;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import com.successfactors.cdp.app.mentoring.IRetrieveLabelService;
+
+/**
+ * Controller for Program Admin Setting
+ *
+ * @author I309618
+ */
+@AjaxService
+@Name("programAdminController")
+@javax.inject.Named("programAdminController")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+public class MentoringProgramAdminController {
+  private static Logger logger = LogManager.getLogger();
+
+  @Inject
+  @In
+  private ParamBean params;
+
+  @Inject
+  @In
+  private transient ServiceCommandHandler scaHandler;
+
+  @Inject
+  @In(create = true)
+  private ConfigurationProvider configurationProvider;
+
+  @Inject
+  @In(create = true)
+  MDFFacade mdfFacade;
+
+  @Inject
+  @In(value = PermissionUtils.PERMISSION_LIST_BEAN)
+  private PermissionListBean permList;
+
+  @Inject
+  @In(create = true, value = "v10msgs")
+  private IMessageBundle msgs;
+
+  private MentoringProgramBeanUtil beanUtil = new MentoringProgramBeanUtil();
+
+  private static final String USERID_SEPARATOR = "|||";
+
+  @Inject
+  @In(create = true)
+  private MentoringServiceBase mentoringServiceBase;
+
+  @Inject
+  @In(create = true)
+  private IRetrieveLabelService retrieveLabelService;
+
+  @Inject
+  @In(value = DataModelFacade.NAME, create = true)
+  private DataModelFacade dataModelFacade;
+
+  @Inject
+  @In(create = true)
+  private SupervisedMatchJamGroupInviteObserver supervisedMatchJamGroupInviteObserver;
+
+  @Inject
+  @In(create = true)
+  private ProgramLaunchJamGroupActivityObserver programLaunchJamGroupActivityObserver;
+
+  /**
+   * check whether the program with indicated name already exists
+   *
+   * @param programName
+   * @return
+   * @throws ServiceApplicationException
+   */
+  private boolean checkIfProgramExistByName(String programName, String externalId) throws ServiceApplicationException {
+    boolean result = false;
+    ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgram.class);
+    MDFCriteria search = new GOSQLGeneratorContext(def, params);
+    search.setProjection(Projections.all());
+    search.setMaxResults(1);
+    search.add(
+            Restrictions.and(
+                    Restrictions.eq("name", programName),
+                    Restrictions.notIn("status", ProgramStatusEnum.DELETED)
+            )
+    );
+    MDFResultSet resultSet;
+    resultSet = search.execute();
+    if (resultSet.getResultRows() != null && resultSet.getResultRows().size() > 0) {
+      MentoringProgram existProgram = (MentoringProgram) resultSet.getBeans().get(0);
+      //if current externalCode==null, means create new program and never saved before. So if records exist, means duplicated program name.
+      //if current externalCode!=null and existed externalCode!=current externalCode, means changed program name when editing draft. So if records exist, means duplicated program name.
+      //if current externalCode!=null and existed externalCode==current externalCode, means saved multiple times when editing draft. So it's always itself, do not need to check duplicated program name.
+      if (externalId == null || (externalId != null && !existProgram.getExternalId().equals(externalId))) {
+        result = true;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Save and active a program
+   *
+   * @param pvo
+   * @return Json object
+   */
+  @AjaxMethod
+  public JSONObjectOutput saveAndActiveProgram(ProgramVO pvo) {
+    if (pvo.getMatchingType() == ProgramMatchingTypeEnum.OPEN_ENDED) {
+      return saveProgram(pvo, ProgramStatusEnum.INPROGRESS);
+    } else if (pvo.getMatchingType() == ProgramMatchingTypeEnum.SUPERVISED || pvo.getMatchingType() == ProgramMatchingTypeEnum.UNSUPERVISED) {
+      return saveProgram(pvo, ProgramStatusEnum.CONFIRMED);
+    } else {
+      JSONObjectOutput output = new JSONObjectOutput();
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, "Should not happen. Probably being hacked.");
+      return output;
+    }
+  }
+
+  /**
+   * saveProgramDeleted
+   *
+   * @param programId
+   * @return Json object
+   */
+  @AjaxMethod
+  public JSONObjectOutput deleteProgram(String programId) {
+    JSONObjectOutput output=  new JSONObjectOutput();
+    try{
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      if (!MentoringPermissionChecker.hasMentoringAdminPermission(params, permList)) {
+        logger.info("User is not admin, can't delete a new program.");
+        output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+      scaHandler.execute(new DeleteProgram(programId,ProgramStatusEnum.DRAFT));
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    }catch(ServiceApplicationException e) {
+      logger.error("saveProgram error:", e);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_DELETED_FAILED"));
+    }
+    return output;
+  }
+
+
+  /**
+   * Save program as draft
+   *
+   * @param pvo
+   * @return
+   */
+  @AjaxMethod
+  public JSONObjectOutput saveProgramDraft(ProgramVO pvo) {
+    return saveProgram(pvo, ProgramStatusEnum.DRAFT);
+  }
+
+  private JSONObjectOutput saveProgram(ProgramVO pvo, ProgramStatusEnum status) {
+    JSONObjectOutput output = new JSONObjectOutput();
+
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      MentoringProgram p = new MentoringProgram();
+      if (pvo.getExternalCode() != null && (pvo.getExternalCode().length() != 0) && !pvo.getExternalCode().equals("0")) {// edit a program
+
+        p = mentoringServiceBase.getProgramById(pvo.getExternalCode());
+        if (p == null) {
+          logger.info("Should not happen. Probably being hacked. ");
+          output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+          return output;
+        }
+        if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, p)) {
+          logger.info("User is not admin or program owner, can't edit a program.");
+          output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+          return output;
+        }
+        if (!MentoringPermissionChecker.hasMentoringAdminPermission(params, permList)) {// program owners can't change Program Owners field
+          pvo.setOwners(null);
+        }
+
+      } else { // create a new program, only admin can create a new program.
+        if (!MentoringPermissionChecker.hasMentoringAdminPermission(params, permList)) {
+          logger.info("User is not admin, can't create a new program.");
+          output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+          return output;
+        }
+      }
+
+      // Since externalCode might be hacked, we need to verify program name as long as program name is passed into this method
+      if (pvo.getName() != null && checkIfProgramExistByName(pvo.getName(), pvo.getExternalCode())) {
+        output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+        output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_CompWizard_DuplicatedProgramName"));
+        return output;
+      }
+
+      // TODO: Until b1608, multiple language is not supported, so we use en_US to do saving and querying.
+      // In the future, UI side will integrate with localized component to support multiple language.
+      p = beanUtil.getProgram(p, pvo, params.getLocale().US.toString());
+      p.setStatus(status);
+      SaveProgram cmd = new SaveProgram();
+      cmd.setProgram(p);
+      cmd.setJamGroupName(pvo.getJamGroupName());
+      cmd.setJamDescription(pvo.getJamGroupDescription());
+      cmd = scaHandler.execute(cmd);
+
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+      output.put("programId", cmd.getProgram().getExternalId());
+
+      programLaunchJamGroupActivityObserver.onLaunchSuccess(cmd.getProgram());
+    } catch (CreateJAMGroupException cjge) {
+      logger.error("saveProgram error accessing JAM:", cjge);
+      //logged original error before
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, cjge.getMessage());
+      switch (cjge.getFailReason()) {
+      case DUPLICATE_NAME :
+        output.put("failType", "duplicateName");
+        break;
+      case INVALID_NAME :
+        output.put("failType", "overLengthNameDesc");
+        break;
+      case SYSTEM_FAIL :
+      default:
+        output.put("failType", "jamOther");
+        break;
+      }
+    } catch (ServiceApplicationException e) {
+      logger.error("saveProgram error:", e);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_FAILED"));
+    }
+
+    return output;
+
+  }
+
+  /**
+   * Get signup form template section items
+   *
+   * @return
+   */
+  @AjaxMethod
+  public JSONObjectOutput initWizard(String programId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    ProgramMatchingTypeEnum matchingType = null;
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      // check mentoring feature and permission
+      if (programId == null) {// create a new program, admin permission is required
+        if (!MentoringPermissionChecker.hasMentoringAdminPermission(params, permList)) {
+          output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+          return output;
+        }
+      } else {// edit a program, admin or program owner is required
+        MentoringProgram p = mentoringServiceBase.getProgramById(programId);
+        if (p == null) {
+          logger.info("Should not happen. Probably being hacked. ");
+          output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_INVALID_ID"));
+          output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+          return output;
+        }
+        if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, p)) {
+          logger.info("User is not admin or program owner, can't edit a program.");
+          output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_TRANSCRIPT_ERR_NO_ACTION_PERMISSION"));
+          output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+          return output;
+        }
+        matchingType = p.getMatchingType();
+      }
+      //can enable jam integration
+      output.put("hasJAMPermission", scaHandler.execute(new CheckJAMPermission()));
+      output.put("hasSuperAdminPermission", MentoringPermissionChecker.hasMentoringAdminPermission(params, permList));
+      // handle dynamic group permission flag
+      output.put("hasDGPermission", GroupUtil.hasOptionsDynamicGroupPrivilege(params, permList));
+
+      // handle sections
+
+      SuccessionDataModelBean dataModel = dataModelFacade.getDataModel();
+      List<Map<String, String>> sections = new ArrayList<>();
+      sections = MentoringUtils.getSectionsListInOrder(dataModel, params.getLocale());
+      sections.add(0, new HashMap<String, String>() {
+        {
+          put("id", SignupFormSectionCategoryEnum.COMPETENCY.toString());
+          put("label", msgs.getString("Competency"));
+        }
+      });
+      if (params.isFeatureExist(FeatureEnum.JDM_NG)) {
+        sections.add(2, new HashMap<String, String>() {
+          {
+            put("id", SignupFormSectionCategoryEnum.SKILLS.toString());
+            put("label", msgs.getString("Skill"));
+          }
+        });
+      }
+//      sections.add(new HashMap<String, String>() {
+//        {
+//          put("id", SignupFormSectionCategoryEnum.FREE_TEXT.toString());
+//          put("label", msgs.getString("DEVELOPMENT_MENTORING_FREE_TEXT_LABEL"));
+//        }
+//      });
+      output.put("sectionItems", sections);
+      output.put(MentoringProgramViewConstants.SECTION_DISPLAY_TYPE, getSectionAnswerTypes());
+      output.put("isOpenEndedProgramEnabled", MentoringConstants.IS_OPEN_ENDED_PROGRAM_ENABLED);
+      output.put("matchingType", matchingType==null?"":matchingType);
+    } catch (ServiceApplicationException e) {
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_INVALID_ID"));
+      return output;
+    }
+
+    // add user ID for photo upload
+    output.put("loginUser", params.getUserId());
+
+    output.put(MentoringProgramViewConstants.PERMISSION_CHECK_SUCCESS, true);
+    output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    return output;
+  }
+
+  @AjaxMethod
+  public JSONObjectOutput initOverview(String programId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    ProgramMatchingTypeEnum matchingType = null;
+
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      //if programId is invalid, return false and error message to UI
+      if (programId == null) {
+        output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+        output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_INVALID_ID"));
+        return output;
+      }
+
+      //retrieve program instance
+      MentoringProgram p = mentoringServiceBase.getProgramById(programId);
+      if (p == null) {
+        logger.info("Should not happen. Probably being hacked. ");
+        output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+        output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_INVALID_ID"));
+        return output;
+      }
+      if (ProgramStatusEnum.DELETED == p.getStatus() || ProgramStatusEnum.DRAFT == p.getStatus()) {
+        output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+        output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_SERVER_ERR"));
+        return output;
+      }
+      matchingType = p.getMatchingType();
+
+      //check program manage permission
+      if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, p)) {
+        logger.info("User is not admin or program owner, can't edit overview page.");
+        output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+        return output;
+      } else {
+        output.put("programManagementPermission", true);
+      }
+      // handle dynamic group permission flag
+      output.put("hasDGPermission", GroupUtil.hasOptionsDynamicGroupPrivilege(params, permList));
+      //check edit field permission
+      output.put("fieldPermissonMatrix", getAllFieldEditablePermission(p).replaceAll("'", "\""));
+      output.put("isOpenEndedProgramEnabled", MentoringConstants.IS_OPEN_ENDED_PROGRAM_ENABLED);
+      output.put("matchingType", matchingType==null?"":matchingType);
+
+      boolean hasJAMPermission = scaHandler.execute(new CheckJAMPermission());
+      output.put("hasJAMPermission", hasJAMPermission);
+
+      if(p.isJamEnabled() && hasJAMPermission) {
+        output.put("jamGroupURL", scaHandler.execute(new GetJamGoToGroupURL(p.getJamGroupId())));
+      }
+
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+
+    } catch (ServiceApplicationException e) {
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_SERVER_ERR"));
+    }
+
+    return output;
+  }
+
+  @AjaxMethod
+  public JSONObjectOutput saveOverviewMentorsTab(ProgramMentorsTabVO addedVOList,
+                                                 ProgramMentorsTabVO updatedVOList,
+                                                 ProgramMentorsTabVO deletedVOList) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      Map<String, Object> checkResultMap = overviewPresaveCheck(output, addedVOList);
+      if (!(Boolean) (checkResultMap.get("isCheckPassed"))) {
+        return output;
+      }
+      MentoringProgram program = (MentoringProgram) checkResultMap.get("mentoringProgram");
+      mentoringServiceBase.saveOverviewMentorsTabChange(program, addedVOList, updatedVOList, deletedVOList);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_SERVER_ERR"));
+    }
+    return output;
+  }
+
+  @AjaxMethod
+  public JSONObjectOutput saveOverviewMenteesTab(ProgramMenteesTabVO addedVOList,
+                                                 ProgramMenteesTabVO updatedVOList,
+                                                 ProgramMenteesTabVO deletedVOList) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      Map<String, Object> checkResultMap = overviewPresaveCheck(output, addedVOList);
+      if (!(Boolean) (checkResultMap.get("isCheckPassed"))) {
+        return output;
+      }
+      MentoringProgram program = (MentoringProgram) checkResultMap.get("mentoringProgram");
+      mentoringServiceBase.saveOverviewMenteesTabChange(program, addedVOList, updatedVOList, deletedVOList);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_SERVER_ERR"));
+    }
+    return output;
+  }
+
+  @AjaxMethod
+  public JSONObjectOutput saveOverviewDetailsTab(ProgramDetailsTabVO vo) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      Map<String, Object> checkResultMap = overviewPresaveCheck(output, vo);
+      if (!(Boolean) (checkResultMap.get("isCheckPassed"))) {
+        return output;
+      }
+      MentoringProgram program = (MentoringProgram) checkResultMap.get("mentoringProgram");
+      mentoringServiceBase.assignPropertyValueFromVO(program, vo);
+      scaHandler.execute(new SaveBean(MentoringProgram.class, program));
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_SERVER_ERR"));
+    }
+    return output;
+  }
+
+  private Map overviewPresaveCheck(JSONObjectOutput output, ProgramOverviewParentVO vo) throws ServiceApplicationException {
+    if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+      MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+      return output;
+    }
+
+    MentoringProgram program = mentoringServiceBase.getProgramById(vo.getExternalCode());
+    Map<String, Object> resultMap = new HashMap<String, Object>();
+    boolean isCheckPassed = true;
+    if (StringUtils.isBlank(vo.getExternalCode()) || vo.getExternalCode().trim().equals("0")) {
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_INVALID_ID"));
+      isCheckPassed = false;
+      resultMap.put("mentoringProgram", program);
+      resultMap.put("isCheckPassed", isCheckPassed);
+      return resultMap;
+    }
+
+    if (program == null) {
+      logger.info("Should not happen. Probably being hacked. ");
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      isCheckPassed = false;
+      resultMap.put("mentoringProgram", program);
+      resultMap.put("isCheckPassed", isCheckPassed);
+      return resultMap;
+    }
+    //check edit permission. If no permission, don't save
+    if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, program)) {
+      logger.info("User is not admin or program owner, can't edit a program.");
+      isCheckPassed = false;
+      resultMap.put("mentoringProgram", program);
+      resultMap.put("isCheckPassed", isCheckPassed);
+      return resultMap;
+    }
+    // Since externalCode might be hacked, we need to verify program name as long as program name is passed into this method
+    if (vo.getName() != null && checkIfProgramExistByName(vo.getName(), vo.getExternalCode())) {
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put("errorMessage", msgs.getString("DEVELOPMENT_CompWizard_DuplicatedProgramName"));
+      isCheckPassed = false;
+      resultMap.put("mentoringProgram", program);
+      resultMap.put("isCheckPassed", isCheckPassed);
+      return resultMap;
+    }
+    resultMap.put("mentoringProgram", program);
+    resultMap.put("isCheckPassed", isCheckPassed);
+    return resultMap;
+  }
+
+  /**
+   * DEPRECATED!!, use saveOverviewDetailsTab, saveOverviewMentorsTab instead.
+   *
+   * @param pvo
+   * @return
+   */
+  @Deprecated
+  @AjaxMethod
+  public JSONObjectOutput saveOverview(ProgramVO pvo) {
+    JSONObjectOutput output = new JSONObjectOutput();
+
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      //if programId is invalid, directly return
+      if (pvo.getExternalCode() == null || pvo.getExternalCode().length() == 0 || pvo.getExternalCode().equals("0")) {
+        output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+        output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_INVALID_ID"));
+        return output;
+      }
+
+      //retrieve program instance
+      MentoringProgram p = mentoringServiceBase.getProgramById(pvo.getExternalCode());
+      if (p == null) {
+        logger.info("Should not happen. Probably being hacked. ");
+        output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+        return output;
+      }
+
+      //check edit permission. If no permission, don't save
+      if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, p)) {
+        logger.info("User is not admin or program owner, can't edit a program.");
+        output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      // Since externalCode might be hacked, we need to verify program name as long as program name is passed into this method
+      if (pvo.getName() != null && checkIfProgramExistByName(pvo.getName(), pvo.getExternalCode())) {
+        output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+        output.put("errorMessage", msgs.getString("DEVELOPMENT_CompWizard_DuplicatedProgramName"));
+        return output;
+      }
+
+      // program owners can't change Program Owners field
+      if (!MentoringPermissionChecker.hasMentoringAdminPermission(params, permList)) {
+        pvo.setOwners(null);
+      }
+
+      // TODO: Until b1608, multiple language is not supported, so we use en_US to do saving and querying.
+      // In the future, UI side will integrate with localized component to support multiple language.
+      p = beanUtil.getMentoringProgramFromOverview(p, pvo, params.getLocale().US.toString());
+
+      SaveOverview cmd = new SaveOverview();
+      cmd.setProgram(p);
+      cmd = scaHandler.execute(cmd);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+      output.put("programId", cmd.getProgram().getExternalId());
+
+    } catch (ServiceApplicationException e) {
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_SERVER_ERR"));
+    }
+
+    return output;
+  }
+
+  /**
+   * check whether login user can access target program
+   *
+   * @param programs
+   * @param programId
+   * @return
+   */
+  private boolean hasAccessProgramPermission(List<MentoringProgram> programs, String programId) {
+    for (MentoringProgram program : programs) {
+      if (program.getExternalId().trim().equals(programId)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private List<Map<String, String>> getSectionAnswerTypes() {
+    List<Map<String, String>> types = new ArrayList<Map<String, String>>();
+    for (SectionDisplayTypeEnum displayTypeEnum : SectionDisplayTypeEnum.values()) {
+      if (displayTypeEnum == SectionDisplayTypeEnum.MULTIPLE_SELECT) {
+        Map<String, String> displayType = new HashMap<String, String>();
+        displayType.put("id", displayTypeEnum.name());
+        displayType.put("label", msgs.getString("DEVELOPMENT_MENTORING_PICK_LIST_LABEL"));
+        types.add(displayType);
+      } else if (displayTypeEnum == SectionDisplayTypeEnum.TEXT_AREA) {
+        Map<String, String> displayType = new HashMap<String, String>();
+        displayType.put("id", displayTypeEnum.name());
+        displayType.put("label", msgs.getString("DEVELOPMENT_MENTORING_FREE_TEXT_LABEL"));
+        types.add(displayType);
+      }
+    }
+    return types;
+  }
+
+  /**
+   * get all field editable permission
+   *
+   * @param p
+   * @return
+   */
+  private String getAllFieldEditablePermission(MentoringProgram p) {
+    JSONObject obj = new JSONObject();
+    boolean hasMentoringAdminPermission = MentoringPermissionChecker.hasMentoringAdminPermission(params, permList);
+
+    for (FieldEditPermissionEnum item : FieldEditPermissionEnum.values()) {
+
+      //if login user is admin, field owner can be edited, otherwise, field owner can not be edited
+      if (item.toString().toLowerCase().equals(FieldEditPermissionEnum.OWNERS.getFieldName()) && !hasMentoringAdminPermission) {
+        obj.put(item.getFieldName(), false);
+        continue;
+      }
+
+      //if five date exceed current date, don't allow to edit
+      //there is no matching date when under the unsupervisor mode.need to avoid null expection
+      if (p.getMatchingType() != ProgramMatchingTypeEnum.OPEN_ENDED) {
+        if ((item.toString().toLowerCase().equals(FieldEditPermissionEnum.MENTOR_SIGNUP_DATE.getFieldName()) && p.getMentorSignupDate().before(Calendar.getInstance().getTime())) ||
+                (item.toString().toLowerCase().equals(FieldEditPermissionEnum.MENTEE_SIGNUP_DATE.getFieldName()) && p.getMenteeSignupDate().before(Calendar.getInstance().getTime())) ||
+                (item.toString().toLowerCase().equals(FieldEditPermissionEnum.MATCHING_DATE.getFieldName()) && (p.getMatchingDate() == null || p.getMatchingDate().before(Calendar.getInstance().getTime()))) ||
+                (item.toString().toLowerCase().equals(FieldEditPermissionEnum.START_DATE.getFieldName()) && p.getStartDate().before(Calendar.getInstance().getTime())) ||
+                (item.toString().toLowerCase().equals(FieldEditPermissionEnum.END_DATE.getFieldName()) && p.getEndDate().before(Calendar.getInstance().getTime()))) {
+          obj.put(item.getFieldName(), false);
+          continue;
+        }
+      }
+
+      obj.put(item.getFieldName(), MentoringPermissionChecker.hasFieldEditPermission(item.getFieldName(), p.getStatus(), p.getMatchingType()));
+    }
+    return obj.toString().replaceAll("\"", "'");
+  }
+
+  /**
+   * get Supervised Matching Page
+   *
+   * @param programID
+   * @return Supervised Matching Page data
+   */
+  @AjaxMethod
+  public JSONObjectOutput getSupervisedMatchingPage(String programID) {
+    JSONObjectOutput result = new JSONObjectOutput();
+
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        result = MentoringViewHelper.getFeatureCheckFailureJSONOutput(result, msgs);
+        return result;
+      }
+
+      MentoringProgram program = mentoringServiceBase.getProgramById(programID);
+      // check mentoring feature and permission
+      if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, program)) {
+        result = MentoringViewHelper.getPermissionCheckFailureJSONOutput(result, msgs);
+        return result;
+      }
+
+      // check program status
+      if (program.getStatus() != ProgramStatusEnum.MATCHING) {
+        result.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+        result.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_MATCHING_WRONG_STATE"));
+        return result;
+      }
+
+      // create dummy category start
+      Map<MatchingScoreTypeEnum, Double> categoryConfigData = new LinkedHashMap<MatchingScoreTypeEnum, Double>();
+      categoryConfigData.put(MatchingScoreTypeEnum.EXCELLENT, new Double(0.25));
+      categoryConfigData.put(MatchingScoreTypeEnum.GOOD, new Double(0.25));
+      categoryConfigData.put(MatchingScoreTypeEnum.AVERAGE, new Double(0.5));
+
+      Map<Integer, Integer> scoreWeight = new HashMap<Integer, Integer>();
+      scoreWeight.put(1, 5);
+      scoreWeight.put(2, 3);
+      scoreWeight.put(3, 1);
+      scoreWeight.put(4, 1);
+
+      // create dummy category end
+      MatchingFacade facade = new MatchingFacade();
+      MatchingAlgorithmContext context = new MatchingAlgorithmContext();
+
+      MatchingResult matchedResult = null;
+
+      context.setMatchingType(program.getMatchingType());
+      context.setProgram(program);
+      context.setNeedLimitMenteeThreshold(true);
+
+      matchedResult = facade.getRecommendationList(context);
+      // Matching result, include Preferred but NOT include un-matched
+      Set<String> unavailableMentorsInMatchedResult = facade.getUnavailableMentorIdSet(matchedResult, program);
+      List<MatchedParticipantVO> flatResultPrefered = new ArrayList<MatchedParticipantVO>();
+      List<MatchedParticipantVO> flatResultRequireNormalization = new ArrayList<MatchedParticipantVO>();
+      prepareNormalizationData(matchedResult, flatResultPrefered, flatResultRequireNormalization, scoreWeight);
+      // normalization end
+      MentoringUtils.supervisedMatchNormalization(flatResultRequireNormalization, categoryConfigData);
+      // normalization end
+      // sectionsHeader
+      MatchingScoreTypeEnum[] matchingTypes = MatchingScoreTypeEnum.values();
+      List sectionsHeader = new ArrayList();
+      flatResultPrefered.addAll(flatResultRequireNormalization);
+      for (MatchingScoreTypeEnum type : matchingTypes) {
+        JSONObjectOutput item = new JSONObjectOutput();
+        item.put("matchingCategory", type);
+        item.put("matchingCategoryDescription", msgs.getString(type.getLabel()));
+        item.put("matchingCount", getMatchingCount(type, flatResultPrefered));
+        sectionsHeader.add(item);
+      }
+
+      saveMatchingResultsInCache(flatResultPrefered, programID);
+      // set output values
+      result.put("sectionsHeader", sectionsHeader);
+      result.put("mentoringMatching", flatResultPrefered);
+      fillUserProfileWithDisplayedInfo(matchedResult.getUserProfileMap());
+      result.put("mentoringUsers", MentoringViewHelper.getUserProfileMapJSON(matchedResult.getUserProfileMap()));
+      result.put("programDetails", populateMatchingPageProgramDetail(program));
+      result.put("unavailableMentors", unavailableMentorsInMatchedResult);
+      result.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      logger.error("getSupervisedMatchingPage failed due to " + e.getMessage(), e);
+      result.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      result.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+    } catch (JDAccessException e) {
+      logger.error("getSupervisedMatchingPage failed due to " + e.getMessage(), e);
+      result.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      result.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+    }
+    return result;
+  }
+
+  /**
+   * Generating program detail for mentoring matching interface
+   *
+   * @param program
+   * @return mentoring program detail in hashmap
+   */
+  private Map<String, Object> populateMatchingPageProgramDetail(MentoringProgram program) {
+    Map<String, Object> programDetailMap = new HashMap<String, Object>();
+    programDetailMap.put("programId", program.getExternalId());
+    programDetailMap.put("programName", program.getName());
+    programDetailMap.put("programMatchingType", program.getMatchingType());
+    programDetailMap.put("isNeedMentorApproval", program.isNeedMentorApproval());
+    return programDetailMap;
+  }
+
+
+  /**
+   * Mapping matchUser.mentoringProfile to mathcUser.displayProfile
+   *
+   * @return displayUserInfo
+   * @throws ServiceApplicationException
+   * @throws JDAccessException
+   */
+  private void fillUserProfileWithDisplayedInfo(Map<String, UserProfileVO> usersProfile) throws ServiceApplicationException, JDAccessException {
+    if (usersProfile != null && usersProfile.size() > 0) {
+      for (String key : usersProfile.keySet()) {
+        UserProfileVO matchUser = usersProfile.get(key);
+        Iterator<ProgramSignupFormSectionVO> sectionVOIter = matchUser.getPreferences().iterator();
+        while (sectionVOIter.hasNext()) {
+          ProgramSignupFormSectionVO sectionVO = sectionVOIter.next();
+          retrieveLabelService.fillSectionAllLabels(sectionVO);
+          if (sectionVO.getSectionValues() == null || sectionVO.getSectionValues().size() == 0) {
+            sectionVOIter.remove();
+
+          }
+        }
+
+      }
+    }
+
+  }
+
+
+  /**
+   * save MatchingResults In Cahce
+   *
+   * @param matchingUserVOs
+   * @param programId
+   */
+  private void saveMatchingResultsInCache(List<MatchedParticipantVO> matchingUserVOs,
+                                          String programId) {
+
+    String sessionKey = SessionConstants.MENTORING_MATCHING_RESULT + programId;
+    SeamEnvUtils.setContextVariable(ScopeType.SESSION, sessionKey,
+            matchingUserVOs);
+  }
+
+  /**
+   * get MatchingResults From Cache
+   *
+   * @param programId
+   * @return matchingCaches
+   */
+  private List<MatchedParticipantVO> getMatchingResultsFromCache(
+          String programId) {
+    String seesionKey = SessionConstants.MENTORING_MATCHING_RESULT + programId;
+    List<MatchedParticipantVO> matchingCaches = (List<MatchedParticipantVO>) SeamEnvUtils.getInstance(
+            seesionKey, false);
+    return matchingCaches;
+
+  }
+
+  /**
+   * @param matchedResult
+   * @param flatResultPrefered
+   * @param flatResultRequireNormalization
+   * @param scoreWeight
+   * @throws NumberFormatException
+   * @throws ServiceApplicationException
+   */
+  private void prepareNormalizationData(MatchingResult matchedResult, List<MatchedParticipantVO> flatResultPrefered,
+                                       List<MatchedParticipantVO> flatResultRequireNormalization, Map<Integer, Integer> scoreWeight) throws NumberFormatException, ServiceApplicationException {
+    Map<String, List<MatchedParticipantVO>> matchingUserMap = matchedResult.getMatchedParticipantMap();
+
+    for (String menteeId : matchingUserMap.keySet()) {
+      List<MatchedParticipantVO> mentorList = matchingUserMap.get(menteeId);
+
+      for (MatchedParticipantVO matchedParticipantVO : mentorList) {
+        if (matchedParticipantVO.getPriority() == 0) {
+          matchedParticipantVO.setMachingFinalScore(matchedParticipantVO.getScore());
+        } else {
+          float matchingFinalScore = matchedParticipantVO.getScore() * scoreWeight.get(matchedParticipantVO.getPriority());
+          matchedParticipantVO.setMachingFinalScore(matchingFinalScore);
+        }
+
+        retrieveLabelService.fillSectionAllLabels(matchedParticipantVO.getMatchedAreas());
+        if (0 == matchedParticipantVO.getPriority()) {
+          matchedParticipantVO.setMatchedCategory(MatchingScoreTypeEnum.PREFERRED);
+          flatResultPrefered.add(matchedParticipantVO);
+        } else {
+          flatResultRequireNormalization.add(matchedParticipantVO);
+        }
+      }
+    }
+  }
+
+  private int getMatchingCount(MatchingScoreTypeEnum type, List<MatchedParticipantVO> matchedMenteeList) {
+    int count = 0;
+    for (MatchedParticipantVO mentee : matchedMenteeList) {
+      MatchingScoreTypeEnum matchedCategory = mentee.getMatchedCategory();
+      if (matchedCategory != null) {
+        if (mentee.getMatchedCategory().equals(type)) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+
+  /**
+   * Confirm the specified program's matching result
+   *
+   * @param programId Mentoring program ID
+   * @param matchList Matching mentor/mentee list passed from UI
+   * @return output
+   */
+  @AjaxMethod
+  public JSONObjectOutput confirmMatchingResult(String programId, List<MatchedParticipantVO> matchList) {
+    JSONObjectOutput output = new JSONObjectOutput();
+
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      MentoringProgram program = mentoringServiceBase.getProgramById(programId);
+
+      // Check mentoring feature and permission
+      if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, program)) {
+        output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      ConfirmMatchingResult confirmCmd = new ConfirmMatchingResult();
+      confirmCmd.setProgram(program);
+      confirmCmd.setMatchList(matchList);
+      confirmCmd.setMatchresultsFromCache(getMatchingResultsFromCache(programId));
+      scaHandler.execute(confirmCmd);
+
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+
+      supervisedMatchJamGroupInviteObserver.onMatchSuccess(confirmCmd);
+    } catch (ServiceApplicationException e) {
+      logger.error("Confirm matching result error:", e);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+    }
+
+    return output;
+  }
+
+  /**
+   * Change Program status to complete
+   *
+   * @param programId
+   * @return
+   */
+  @AjaxMethod
+  public JSONObjectOutput completeProgram(String programId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      MentoringProgram program = mentoringServiceBase.getProgramById(programId);
+
+      // Check mentoring feature and permission
+      if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, program)) {
+        output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      CompleteProgram completeProgram = new CompleteProgram();
+      completeProgram.setMentoringProgram(program);
+      scaHandler.execute(completeProgram);
+      JSONObjectOutput programOut = new JSONObjectOutput();
+      programOut.put("programId", program.getExternalId());
+      programOut.put("programName", program.getName());
+      programOut.put("completedDate", MentoringDateUtils.formatDate(program.getCompletedDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+      programOut.put("photoId", program.getPhotoId());
+      output.put("program", programOut);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      logger.error("Complete program error:", e);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+    }
+    return output;
+  }
+
+  /**
+   * Return all mentoring programs not deleted
+   *
+   * @return Json object containing program list
+   */
+  @AjaxMethod
+  public JSONObjectOutput getProgramList() {
+    JSONObjectOutput output = new JSONObjectOutput();
+    JSONArrayOutput programList = new JSONArrayOutput();
+
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      List<MentoringProgram> programs = getMentoringProgramList();
+      //check mentoring feature and permission, if programs is null, means no permission.
+      if (programs == null) {
+        output.put(MentoringProgramViewConstants.PERMISSION_CHECK_SUCCESS, false);
+        output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+        output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_TRANSCRIPT_ERR_NO_ACTION_PERMISSION"));
+        return output;
+      }
+
+      for (MentoringProgram program : programs) {
+        JSONObjectOutput programCard = getProgramDetail(program);
+        if (program.getMatchingType() == ProgramMatchingTypeEnum.UNSUPERVISED || program.getMatchingType() == ProgramMatchingTypeEnum.SUPERVISED) {
+
+          // If program is in mentor sign-up, mentee sign-up or in progress status, get mentor and signed mentor count
+          if (ProgramStatusEnum.MENTOR_SIGNUP.equals(program.getStatus()) || ProgramStatusEnum.MENTEE_SIGNUP.equals(program.getStatus())
+                  || ProgramStatusEnum.INPROGRESS.equals(program.getStatus())) {
+            programCard.put("mentorCount", program.getMentors().size());
+            programCard.put("signedMentorCount", getParticipantCount(program.getMentors(), SignupFormStatusEnum.ACCEPTED));
+            programCard.put("rejectedMentorCount", getParticipantCount(program.getMentors(), SignupFormStatusEnum.REJECTED,
+                    SignupFormStatusEnum.SYSTEM_REJECTED));
+          }
+          // If program is in mentee sign-up or in progress status, get mentee and signed mentee count
+          if (ProgramStatusEnum.MENTEE_SIGNUP.equals(program.getStatus()) || ProgramStatusEnum.INPROGRESS.equals(program.getStatus())) {
+            programCard.put("menteeCount", program.getMentees().size());
+            programCard.put("signedMenteeCount", getParticipantCount(program.getMentees(), SignupFormStatusEnum.ACCEPTED));
+            programCard.put("rejectedMenteeCount", getParticipantCount(program.getMentees(), SignupFormStatusEnum.REJECTED,
+                    SignupFormStatusEnum.SYSTEM_REJECTED));
+          }
+          // If program is in matching or matched status, get matching counts and unmatched mentee count
+          if (ProgramStatusEnum.MATCHING.equals(program.getStatus()) || ProgramStatusEnum.MATCHED.equals(program.getStatus())
+                  || ProgramStatusEnum.MENTOR_APPROVAL.equals(program.getStatus())) {
+            GetMatchingCounts matchingCounts = scaHandler.execute(new GetMatchingCounts(program.getExternalId()));
+            programCard.put("matchingCounts", getMatchingCountsOutput(matchingCounts.getMatchingCounts()));
+            programCard.put("unmatchedMenteeCount", getParticipantCount(program.getMentees(), SignupFormStatusEnum.ACCEPTED)
+                    - matchingCounts.getMatchedMentees());
+          }
+        } else if (program.getMatchingType() == ProgramMatchingTypeEnum.OPEN_ENDED && program.getStatus() == ProgramStatusEnum.INPROGRESS) {
+          Map<ProgramParticipantTypeEnum, Set<String>> matchedParticipantMap = mentoringServiceBase.getProgramMatchedParticipantCount(program);
+          programCard.put("mentorCount", program.getMentors().size());
+          programCard.put("menteeCount", program.getMentees().size());
+          programCard.put("matchedMentorCount", matchedParticipantMap.get(ProgramParticipantTypeEnum.MENTOR).size());
+          programCard.put("matchedMenteeCount", matchedParticipantMap.get(ProgramParticipantTypeEnum.MENTEE).size());
+        }
+        programCard.put("photoId", program.getPhotoId());
+        programCard.put("matchingType", program.getMatchingType().name());
+        programList.add(programCard);
+      }
+      output.put("hasSuperAdminPermission", MentoringPermissionChecker.hasMentoringAdminPermission(params, permList));
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+      output.put(MentoringProgramViewConstants.PERMISSION_CHECK_SUCCESS, true);
+      output.put("isOpenEnededProgramEnabled", MentoringConstants.IS_OPEN_ENDED_PROGRAM_ENABLED);
+      output.put("programList", programList);
+    } catch (ServiceApplicationException sae) {
+      logger.error("Failed to get all programs: ", sae);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+    }
+
+    return output;
+  }
+
+  /*
+   * If the user has admin permission, return all programs;
+   * If the user has program owner permission, return his own programs;
+   * otherwise, return null, means No Manage Program permission
+   */
+  private List<MentoringProgram> getMentoringProgramList() throws ServiceApplicationException {
+    ObjectDefinition def = configurationProvider.getObjectDefinition(MentoringProgram.class);
+    MDFCriteria search = new GOSQLGeneratorContext(def, params);
+    search.setProjection(Projections.all());
+    search.addOrder(Order.desc("lastModifiedDate"));
+    search.add(
+            Restrictions.and(
+                    Restrictions.ne("status", SignupFormStatusEnum.DELETED)
+            )
+    );
+
+    //if no admin permission, return programs that belongs to owner
+    //if admin permission, return all programs
+    boolean isAdmin = true;
+    if (!MentoringPermissionChecker.hasMentoringAdminPermission(params, permList)) {
+      isAdmin = false;
+      String userId = params.getUserId();
+      search.add(
+              Restrictions.and(
+                      Restrictions.eq("owners.user", userId)
+              )
+      );
+    }
+
+    List<MentoringProgram> programs = search.execute().getBeans();
+    if (programs.isEmpty() && !isAdmin) {
+      return null;
+    } else {
+      return programs;
+    }
+  }
+
+  /**
+   * Change program to mentor sign-up phase
+   *
+   * @param programId Program ID
+   * @return Json object containing changed program
+   */
+  @AjaxMethod
+  public JSONObjectOutput signUpMentors(String programId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      SignUpMentors cmd = new SignUpMentors(programId);
+      MentoringProgram program = scaHandler.execute(cmd);
+
+      if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, program)) {
+        logger.info("User is not admin or program owner, can't trigger mentor signup.");
+        output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      JSONObjectOutput programCard = getProgramDetail(program);
+
+      // Get mentor and signed mentor count
+      programCard.put("mentorCount", program.getMentors().size());
+      programCard.put("signedMentorCount", getParticipantCount(program.getMentors(), SignupFormStatusEnum.ACCEPTED));
+      programCard.put("rejectedMentorCount", getParticipantCount(program.getMentors(), SignupFormStatusEnum.REJECTED,
+              SignupFormStatusEnum.SYSTEM_REJECTED));
+      programCard.put("photoId", program.getPhotoId());
+
+      output.put("program", programCard);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException sae) {
+      logger.error("Failed to sign up mentors: ", sae);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+    }
+
+    return output;
+  }
+
+  /**
+   * Change program to mentee sign-up phase
+   *
+   * @param programId Program ID
+   * @return Json object containing changed program
+   */
+  @AjaxMethod
+  public JSONObjectOutput signUpMentees(String programId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      SignUpMentees cmd = new SignUpMentees(programId);
+      MentoringProgram program = scaHandler.execute(cmd);
+
+      if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, program)) {
+        logger.info("User is not admin or program owner, can't trigger mentee signup.");
+        output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      JSONObjectOutput programCard = getProgramDetail(program);
+
+      // Get mentor and signed mentor count
+      programCard.put("mentorCount", program.getMentors().size());
+      programCard.put("signedMentorCount", getParticipantCount(program.getMentors(), SignupFormStatusEnum.ACCEPTED));
+      programCard.put("rejectedMentorCount", getParticipantCount(program.getMentors(), SignupFormStatusEnum.REJECTED,
+              SignupFormStatusEnum.SYSTEM_REJECTED));
+
+      // Get mentee and signed mentee count
+      programCard.put("menteeCount", program.getMentees().size());
+      programCard.put("signedMenteeCount", getParticipantCount(program.getMentees(), SignupFormStatusEnum.ACCEPTED));
+      programCard.put("rejectedMenteeCount", getParticipantCount(program.getMentees(), SignupFormStatusEnum.REJECTED,
+              SignupFormStatusEnum.SYSTEM_REJECTED));
+
+      programCard.put("photoId", program.getPhotoId());
+
+      output.put("program", programCard);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException sae) {
+      logger.error("Failed to sign up mentees: ", sae);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+    }
+
+    return output;
+  }
+
+  /**
+   * Change program to matching phase
+   *
+   * @param programId Program ID
+   * @return Json object
+   */
+  @AjaxMethod
+  public JSONObjectOutput startMatching(String programId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      MentoringProgram program = mentoringServiceBase.getProgramById(programId);
+
+      if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, program)) {
+        logger.info("User is not admin or program owner, can't start matching.");
+        output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      StartMatching cmd = new StartMatching(programId);
+      scaHandler.execute(cmd);
+
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException sae) {
+      logger.error("Failed to start matching: ", sae);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+
+    }
+
+    return output;
+  }
+
+  /**
+   * Change program to in progress status
+   *
+   * @param programId Program ID
+   * @return Json object containing changed program
+   */
+  @AjaxMethod
+  public JSONObjectOutput startProgram(String programId) {
+    JSONObjectOutput output = new JSONObjectOutput();
+
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      StartProgram cmd = scaHandler.execute(new StartProgram(programId));
+      MentoringProgram program = cmd.getProgram();
+
+      if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, program)) {
+        logger.info("User is not admin or program owner, can't start a program.");
+        output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      JSONObjectOutput programCard = getProgramDetail(program);
+      // Get mentor, signed mentor and rejected mentors count
+      programCard.put("mentorCount", program.getMentors().size());
+      programCard.put("signedMentorCount", getParticipantCount(program.getMentors(), SignupFormStatusEnum.ACCEPTED));
+      programCard.put("rejectedMentorCount", getParticipantCount(program.getMentors(), SignupFormStatusEnum.REJECTED,
+              SignupFormStatusEnum.SYSTEM_REJECTED));
+
+      // Get mentee, signed mentee and rejected mentee count
+      programCard.put("menteeCount", program.getMentees().size());
+      programCard.put("signedMenteeCount", getParticipantCount(program.getMentees(), SignupFormStatusEnum.ACCEPTED));
+      programCard.put("rejectedMenteeCount", getParticipantCount(program.getMentees(), SignupFormStatusEnum.REJECTED,
+              SignupFormStatusEnum.SYSTEM_REJECTED));
+      programCard.put("declineCount", cmd.getDeclineCount());
+      programCard.put("photoId", program.getPhotoId());
+      output.put("program", programCard);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException sae) {
+      logger.error("Failed to start program: ", sae);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+    }
+
+    return output;
+  }
+
+  private <T extends MentoringProgramParticipant> int getParticipantCount(List<T> participants, SignupFormStatusEnum... statuses) {
+    int count = 0;
+
+    for (MentoringProgramParticipant participant : participants) {
+      if (participant.getSignupForm() == null) {
+        continue;
+      }
+
+      for (SignupFormStatusEnum status : statuses) {
+        if (status.equals(participant.getSignupForm().getStatus())) {
+          count++;
+
+          continue;
+        }
+      }
+    }
+
+    return count;
+  }
+
+  /**
+   * Get program detail
+   *
+   * @param program Mentoring program
+   * @return output
+   */
+  private JSONObjectOutput getProgramDetail(MentoringProgram program) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    ProgramStatusEnum currentStatus = program.getStatus();
+
+    output.put("programId", program.getExternalId());
+    output.put("programName", program.getName());
+    output.put("programStatus", currentStatus);
+    output.put("programStatusLabel", msgs.getString(currentStatus.getLabel()));
+    output.put("nextStatus", currentStatus.getNextStatus(program));
+    output.put("mentorSignupDate", MentoringDateUtils.formatDate(program.getMentorSignupDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+    output.put("menteeSignupDate", MentoringDateUtils.formatDate(program.getMenteeSignupDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+    output.put("matchingDate", MentoringDateUtils.formatDate(program.getMatchingDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+    output.put("programStartDate", MentoringDateUtils.formatDate(program.getStartDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+    output.put("programEndDate", MentoringDateUtils.formatDate(program.getEndDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+    output.put("programCompletedDate", MentoringDateUtils.formatDate(program.getCompletedDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+    output.put("jamEnabled", program.isJamEnabled());
+
+    if (program.getStatus() == ProgramStatusEnum.COMPLETED) {
+      output.put("programCompletedDate", MentoringDateUtils.formatDate(program.getCompletedDate(), MentoringConstants.DEFAULT_DATE_FORMAT));
+    }
+
+    return output;
+  }
+
+  /**
+   * calculate each matched category number
+   *
+   * @param matchingCounts
+   * @return
+   */
+  private JSONArrayOutput getMatchingCountsOutput(Map<MatchingScoreTypeEnum, Integer> matchingCounts) {
+    JSONArrayOutput output = new JSONArrayOutput();
+
+    JSONObjectOutput preferred = new JSONObjectOutput();
+    preferred.put("label", msgs.getString(MatchingScoreTypeEnum.PREFERRED.getLabel()));
+    preferred.put("count", matchingCounts.get(MatchingScoreTypeEnum.PREFERRED));
+    JSONObjectOutput excellent = new JSONObjectOutput();
+    excellent.put("label", msgs.getString(MatchingScoreTypeEnum.EXCELLENT.getLabel()));
+    excellent.put("count", matchingCounts.get(MatchingScoreTypeEnum.EXCELLENT));
+    JSONObjectOutput good = new JSONObjectOutput();
+    good.put("label", msgs.getString(MatchingScoreTypeEnum.GOOD.getLabel()));
+    good.put("count", matchingCounts.get(MatchingScoreTypeEnum.GOOD));
+    JSONObjectOutput average = new JSONObjectOutput();
+    average.put("label", msgs.getString(MatchingScoreTypeEnum.AVERAGE.getLabel()));
+
+    // Currently we treat manual matching as average matching
+    average.put("count", matchingCounts.get(MatchingScoreTypeEnum.AVERAGE)
+            + matchingCounts.get(MatchingScoreTypeEnum.MANUAL));
+
+    output.add(preferred);
+    output.add(excellent);
+    output.add(good);
+    output.add(average);
+
+    return output;
+  }
+
+  @AjaxMethod
+  public boolean hasMentoringAdminPermission() {//TODO: to be removed when rewriting MentoringProgramOverview.js
+    return MentoringPermissionChecker.hasMentoringAdminPermission(params, permList);
+  }
+
+  @AjaxMethod
+  public JSONObjectOutput getAllPreferredMentoringUsers(String programId, String mentoringUserId, String mentoringUserType) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    List<MatchedParticipantVO> result = new ArrayList<>();
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      MentoringProgram program = mentoringServiceBase.getProgramById(programId);
+
+      if (!MentoringPermissionChecker.hasProgramManagePermission(params, permList, program)) {
+        logger.info("User is not admin or program owner, can't view preferred mentors of this program.");
+        output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      //As of b1608, only request whose status=DRAFT is considered preferred request
+      GetMentoringRequest cmd = new GetMentoringRequest();
+      cmd.setProgramId(programId);
+      cmd.setStatus(MentorRequestStatusEnum.DRAFT);
+
+      if (ProgramParticipantTypeEnum.MENTOR.name().equalsIgnoreCase(mentoringUserType)) {
+        cmd.setMentorIds(mentoringUserId);
+      } else {
+        cmd.setMenteeIds(mentoringUserId);
+      }
+
+      List<MentoringProgramMentorRequest> requests = scaHandler.execute(cmd);
+
+      //generate matching users
+      for (MentoringProgramMentorRequest request : requests) {
+        if (ProgramParticipantTypeEnum.MENTEE.name().equalsIgnoreCase(mentoringUserType) && !mentoringServiceBase.isMentorAvailable(programId, request.getMentor())) {
+          continue;
+        }
+        MatchedParticipantVO matchedParticipant = new MatchedParticipantVO();
+        matchedParticipant.setPriority(0);
+        matchedParticipant.setScore(request.getMatchingScore());
+        matchedParticipant.setMentorId(request.getMentor());
+        matchedParticipant.setMenteeId(request.getMentee());
+        matchedParticipant.setMatchedCategory(MatchingScoreTypeEnum.PREFERRED);
+        result.add(matchedParticipant);
+      }
+      output.put("mentoringMatches", result);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+    } catch (ServiceApplicationException e) {
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+    }
+    return output;
+  }
+
+  /**
+   * getUserNameByUserIds
+   *
+   * @param userIds
+   * @return output
+   */
+  @AjaxMethod
+  public JSONObjectOutput getUserNameByUserIds(String programId, List<String> userIds) {
+    JSONObjectOutput output = new JSONObjectOutput();
+    JSONArrayOutput users = new JSONArrayOutput();
+    List<UserBean> userBeans;
+    try {
+      if(!MentoringPermissionChecker.isMentoringFeatureEnabled(params)){
+        output = MentoringViewHelper.getFeatureCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+      MentoringProgram program = mentoringServiceBase.getProgramById(programId);
+      if (program == null || !MentoringPermissionChecker.hasProgramManagePermission(params, permList, program)) {
+        logger.info("User is not admin, can't retrieve participants of program.");
+        output = MentoringViewHelper.getPermissionCheckFailureJSONOutput(output, msgs);
+        return output;
+      }
+
+      userBeans = scaHandler.execute(new FindUsersByIds(userIds));
+      for (UserBean userBean : userBeans) {
+        JSONObjectOutput user = new JSONObjectOutput();
+        user.put("userId", userBean.getUserId());
+        user.put("firstName", userBean.getFullNameBean().getFirstName());
+        user.put("lastName", userBean.getFullNameBean().getLastName());
+        user.put("fullName", UserFormatUtils.formatFullName(msgs, userBean.getFullNameBean()));
+        user.put("invalid", userBean.isInvalidUser());
+        users.add(user);
+      }
+      output.put("users", users);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, true);
+
+    } catch (ServiceApplicationException e) {
+      logger.error("Failed to getUserNameByUserIds due to " + e.getMessage(), e);
+      output.put(MentoringProgramViewConstants.JSON_KEY_SUCCESS, false);
+      output.put(MentoringProgramViewConstants.ERROR_MESSAGE, msgs.getString("DEVELOPMENT_MENTORING_HOME_SERVER_ERR"));
+    }
+    return output;
+  }
+}

@@ -1,0 +1,34 @@
+package com.successfactors.legacy.bean.provisioning;
+
+import java.util.List;
+import com.successfactors.legacy.bean.FeatureReadinessEnum;
+
+public interface IFeatureEnum {
+	int getId();
+
+	String getProduct();
+
+	String getConstantName();
+
+	String getMessageKey();
+
+	String getKey();
+
+	int hashCode();
+
+	FeatureReadinessEnum getReadiness();
+
+	List getObsoletedFeatures();
+
+	boolean isObsolete();
+
+	FeatureEnum getObsoletedBy();
+
+	List getRequiredFeatures();
+
+	List getCompleteRequiredFeatureList();
+
+	boolean isVisible();
+
+	Object readResolve();
+}

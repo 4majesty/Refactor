@@ -1,0 +1,35 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+import java.util.ArrayList;
+import java.util.List;
+import com.successfactors.cdp.service.util.mentoring.MatchingScoreTypeEnum;
+
+public interface IMatchedParticipantVO {
+	float getScore();
+
+	void setScore(float score);
+
+	MatchingScoreTypeEnum getMatchedCategory();
+
+	void setMatchedCategory(MatchingScoreTypeEnum matchedCategory);
+
+	List<ProgramSignupFormSectionVO> getMatchedAreas();
+
+	void setMatchedAreas(List<ProgramSignupFormSectionVO> matchedAreas);
+
+	String getMenteeId();
+
+	void setMenteeId(String menteeId);
+
+	String getMentorId();
+
+	void setMentorId(String mentorId);
+
+	float getMachingFinalScore();
+
+	void setMachingFinalScore(float machingFinalScore);
+
+	int getPriority();
+
+	void setPriority(int priority);
+}

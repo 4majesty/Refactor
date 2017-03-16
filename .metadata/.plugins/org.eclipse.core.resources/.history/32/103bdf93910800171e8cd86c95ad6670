@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.CompareUI;
+import org.eclipse.compare.CompareViewerSwitchingPane;
+import org.eclipse.compare.structuremergeviewer.ICompareInput;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface ICompareDialog {
+	void setImage(Image image);
+}

@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.ui.dialogs.IWorkingSetEditWizard;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IEditWorkingSetAction {
+	void run();
+}

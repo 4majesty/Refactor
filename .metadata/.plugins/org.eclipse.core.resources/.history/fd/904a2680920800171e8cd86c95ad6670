@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+public interface IJavaStructureDiffViewer {
+	void run();
+
+	void setChecked(boolean state);
+
+	void setCompareConfiguration(CompareConfiguration cc);
+
+	void elementChanged(ElementChangedEvent event);
+}

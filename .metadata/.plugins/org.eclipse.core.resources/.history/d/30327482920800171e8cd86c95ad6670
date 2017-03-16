@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.ui.SharedASTProvider;
+
+public interface IFindOccurrencesEngine {
+	String run(ITypeRoot input, int offset, int length) throws JavaModelException;
+}

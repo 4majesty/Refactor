@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
+
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
+
+public interface ICovariantTypeConstraint {
+	boolean equals(final Object object);
+
+	ConstraintVariable2 getLeft();
+
+	ConstraintVariable2 getRight();
+
+	int hashCode();
+
+	String toString();
+}

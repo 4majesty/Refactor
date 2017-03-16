@@ -1,0 +1,36 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+import java.io.Serializable;
+import java.util.List;
+
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+
+public class ProgramSignupTemplateVO implements Serializable {
+  private Long rowId;
+  private List<ProgramSignupTemplateSectionVO> sections;
+  private ProgramMatchingTypeEnum matching;
+
+  public Long getRowId() {
+    return rowId;
+  }
+
+  public void setRowId(Long rowId) {
+    this.rowId = rowId;
+  }
+
+  public List<ProgramSignupTemplateSectionVO> getSections() {
+    return sections;
+  }
+
+  public void setSections(List<ProgramSignupTemplateSectionVO> sections) {
+    this.sections = sections;
+  }
+
+  public ProgramMatchingTypeEnum getMatching() {
+    return matching;
+  }
+
+  public void setMatching(ProgramMatchingTypeEnum matching) {
+    this.matching = matching;
+  }
+}

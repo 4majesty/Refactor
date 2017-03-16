@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.ui.IMemento;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+
+public interface IMembersView {
+	Object getAdapter(Class key);
+
+	void saveState(IMemento memento);
+
+	void propertyChange(PropertyChangeEvent event);
+
+	void dispose();
+}

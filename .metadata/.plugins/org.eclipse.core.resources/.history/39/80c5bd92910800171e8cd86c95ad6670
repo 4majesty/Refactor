@@ -1,0 +1,19 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.CutAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
+
+public interface ICCPActionGroup {
+	IAction getDeleteAction();
+
+	void fillActionBars(IActionBars actionBars);
+
+	void fillContextMenu(IMenuManager menu);
+
+	void dispose();
+}

@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.corext.refactoring.rename;
+
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
+
+public interface IRenamingNameSuggestor {
+	String suggestNewFieldName(IJavaProject project, String oldFieldName, boolean isStatic, String oldTypeName, String newTypeName);
+
+	String suggestNewLocalName(IJavaProject project, String oldLocalName, boolean isArgument, String oldTypeName, String newTypeName);
+
+	String suggestNewMethodName(String oldMethodName, String oldTypeName, String newTypeName);
+
+	String suggestNewVariableName(String[] prefixes, String[] suffixes, String oldVariableName, String oldTypeName, String newTypeName);
+}

@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
+
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType;
+
+public interface IArrayTypeVariable2 {
+}

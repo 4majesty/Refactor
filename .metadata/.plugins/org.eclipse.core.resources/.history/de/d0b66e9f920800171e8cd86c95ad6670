@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.text.javadoc;
+
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
+
+public interface IJavadocCompletionProposalComputer {
+}

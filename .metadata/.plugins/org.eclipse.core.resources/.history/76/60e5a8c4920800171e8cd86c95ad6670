@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
+
+public interface ICallHierarchyLabelDecorator {
+	String decorateText(String text, Object element);
+
+	Image decorateImage(Image image, Object element);
+
+	void addListener(ILabelProviderListener listener);
+
+	void dispose();
+
+	boolean isLabelProperty(Object element, String property);
+
+	void removeListener(ILabelProviderListener listener);
+}

@@ -1,0 +1,25 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSection;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupTemplateSection;
+import com.successfactors.cdp.bean.mentoring.vo.MatchedParticipantVO;
+import com.successfactors.cdp.service.util.mentoring.MentoringUtils;
+
+public interface IMentoringUtilsTest {
+	void setup();
+
+	void testSupervisedMatchNormalization1();
+
+	void testSupervisedMatchNormalization2();
+
+	void testSupervisedMatchNormalization3();
+
+	void testSupervisedMatchNormalization4();
+
+	void testSortSignupSectionsSameWithWizard();
+
+	void testIsProgramInMatchingType();
+}

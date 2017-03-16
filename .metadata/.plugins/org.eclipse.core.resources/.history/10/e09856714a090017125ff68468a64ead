@@ -1,0 +1,60 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.ajaxservice.annotation.AjaxMethod;
+import com.successfactors.ajaxservice.annotation.AjaxService;
+import com.successfactors.cdp.service.GetDevPlanList;
+import com.successfactors.competency.bean.CompetencyBean;
+import com.successfactors.edu.ui.controller.exception.AjaxInternalServerError;
+import com.successfactors.edu.ui.controller.exception.ProfileAjaxException;
+import com.successfactors.empfile.util.scorecard.EmployeeDevelopmentObjectivesPortletHelper;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjBeanWrap;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.bean.ObjTemplateBean.Column;
+import com.successfactors.gm.bean.ObjTemplateBean.EnumValue;
+import com.successfactors.gm.bean.ObjTemplateBean.Field;
+import com.successfactors.gm.util.TGMCalcUtil;
+import com.successfactors.gm.util.TGMCommonUtils;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.legacy.util.JSONUtils;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.legacy.util.type.ProfileInfoCategoryEnum;
+import com.successfactors.legacy.util.type.ProfileInfoSourceEnum;
+import com.successfactors.legacy.util.type.ProfileInfoTypeEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.pmcommon.util.ClientDateFormat;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.serialization.SerializationException;
+import com.successfactors.serialization.json.JSONSerializationUtils;
+import com.successfactors.sfutil.util.FormatUtils;
+import com.successfactors.sfutil.util.XMLUtils;
+import com.successfactors.user.bean.preference.PreferenceBean;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+public interface IDevPlanPortletController {
+	String get(String selectedUserId, String selectedPlanId, int pageNum) throws ProfileAjaxException;
+
+	String getGoalListWithoutPagination(String selectedUserId, String selectedPlanId)
+			throws ProfileAjaxException, SerializationException;
+
+	void saveSelectedPlanId(long planId);
+}

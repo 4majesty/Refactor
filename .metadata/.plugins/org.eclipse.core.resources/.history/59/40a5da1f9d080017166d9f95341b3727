@@ -1,0 +1,28 @@
+package com.successfactors.cdp.bean;
+
+import org.testng.annotations.Test;
+
+import com.successfactors.unittest.AbstractComparatorTest;
+
+@Test(groups = "compare")
+public class CareerWorksheetSuggestedRoleVOComparableTest extends AbstractComparatorTest<CareerWorksheetSuggestedRoleVO> {
+
+    public CareerWorksheetSuggestedRoleVOComparableTest() {
+        super();
+        comparatorT = new SuggestedRoleVOComparator();
+        
+        a = new CareerWorksheetSuggestedRoleVO();
+        a.setScore(10);
+        a.setRoleName("a");
+        a.setRoleId(1);
+        
+        b = new CareerWorksheetSuggestedRoleVO();
+        b.setScore(9);
+        b.setRoleName("b");
+        
+        c = new CareerWorksheetSuggestedRoleVO();
+        c.setScore(10);
+        c.setRoleName("a");
+        c.setRoleId(1);
+    }
+}

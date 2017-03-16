@@ -1,0 +1,16 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.cdp.service.util.mentoring.ProgramParticipantTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SectionDisplayTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.SignupFormSectionCategoryEnum;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramVO;
+import com.successfactors.cdp.ui.util.mentoring.MentoringProgramBeanUtil;
+
+public interface IMentoringProgramBeanUtilTest {
+	void testGetMentoringProgramFromOverview();
+
+	void testGetProgram();
+}

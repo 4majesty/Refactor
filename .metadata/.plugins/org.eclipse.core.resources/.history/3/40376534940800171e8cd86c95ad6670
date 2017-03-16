@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.ui.fix;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IUnimplementedCodeCleanUp {
+	String[] getStepDescriptions();
+
+	String getPreview();
+
+	CleanUpRequirements getRequirements();
+
+	boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem);
+
+	int computeNumberOfFixes(CompilationUnit compilationUnit);
+}

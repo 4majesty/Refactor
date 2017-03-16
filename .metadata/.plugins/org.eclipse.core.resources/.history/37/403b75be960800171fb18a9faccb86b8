@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+
+public interface ITextInputWizardPage {
+	String getInitialValue();
+
+	void dispose();
+
+	void setVisible(boolean visible);
+}

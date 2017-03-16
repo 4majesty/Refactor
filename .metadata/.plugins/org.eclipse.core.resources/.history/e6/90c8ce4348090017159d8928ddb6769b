@@ -1,0 +1,29 @@
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Created by Frank on 12/13/16.
+ */
+public class CompleteProgram implements ServiceCommand<CompleteProgram> {
+  private MentoringProgram mentoringProgram;
+
+  private String autoForwardJobToken;
+
+  public MentoringProgram getMentoringProgram() {
+    return mentoringProgram;
+  }
+
+  public void setMentoringProgram(MentoringProgram mentoringProgram) {
+    this.mentoringProgram = mentoringProgram;
+  }
+
+  public String getAutoForwardJobToken() {
+    return autoForwardJobToken;
+  }
+
+  public void setAutoForwardJobToken(String autoForwardJobToken) {
+    this.autoForwardJobToken = autoForwardJobToken;
+  }
+}

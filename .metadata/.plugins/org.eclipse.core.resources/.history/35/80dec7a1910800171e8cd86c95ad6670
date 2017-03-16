@@ -1,0 +1,66 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
+import org.eclipse.jface.text.templates.persistence.TemplateReaderWriter;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
+
+public interface ICodeTemplateBlock {
+	void customButtonPressed(TreeListDialogField field, int index);
+
+	void selectionChanged(TreeListDialogField field);
+
+	void doubleClicked(TreeListDialogField field);
+
+	Object[] getChildren(TreeListDialogField field, Object element);
+
+	Object getParent(TreeListDialogField field, Object element);
+
+	boolean hasChildren(TreeListDialogField field, Object element);
+
+	void dialogFieldChanged(DialogField field);
+
+	void keyPressed(TreeListDialogField field, KeyEvent event);
+
+	int category(Object element);
+
+	Image getImage(Object element);
+
+	String getText(Object element);
+
+	void postSetSelection(Object element);
+
+	boolean hasProjectSpecificOptions(IProject project);
+
+	void useProjectSpecificSettings(boolean enable);
+
+	void performDefaults();
+
+	boolean performOk(boolean enabled);
+
+	void performCancel();
+}

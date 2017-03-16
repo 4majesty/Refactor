@@ -1,0 +1,1190 @@
+/*
+ * $Id: CompanyBean.java 1169351 2017-01-27 18:37:57Z csharma $
+ */
+package com.successfactors.platform.bean;
+
+
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+import java.util.Locale;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.db.CompanyDatabaseContext;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.util.SFConfig;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.pmcommon.bean.FeatureSet;
+import com.successfactors.pmcommon.util.type.ObjMgtEnum;
+import com.successfactors.proxy.bean.ProxyPermissionEnum;
+import com.successfactors.proxy.bean.ProxyPermissions;
+import com.successfactors.sca.CacheServiceQueryResult;
+
+/*
+ * This class implements a bean that captures all the fields in a SF_COMPANIES
+ * record.
+ *
+ */
+@javax.inject.Named("companybean")
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+public class CompanyBean implements Serializable, Cloneable, CompanyDatabaseContext, CacheServiceQueryResult<CompanyBean> {
+
+  /** Mainly for seam in/out jection. */
+  public static final String NAME = "companybean";
+  
+  /** This is the global schema for the application. */
+  private static final String GLOBAL_SCHEMA = SFConfig.getString("sf.sfv4.schema");
+  private static final String GLOBAL_AUDIT_SCHEMA = 
+    SFConfig.getString(SFConfig.GLOBAL_AUDIT_SCHEMA_PROP_NAME);
+  /**
+   * the switch to determine if audit need to be on or not globally.
+   */
+//  private static final boolean GLOBAL_AUDIT_SWITCH = SFConfig.getBoolean(SFConfig.SFV4_AUDIT_ON,false);
+  /** This is the option to enable the new single-package design or not. */
+  private static final boolean globalPackageOn = (!"true".equals(SFConfig.getString("sf.sfv4.globalPackages.off")));
+
+  public static final int STATUS_INSTALL_STARTED = 0x0001;
+  public static final int STATUS_DATABASE_CREATED = 0x0002;
+  public static final int STATUS_ADMIN_USER_CREATED = 0x0004;
+  public static final int STATUS_DEACTIVATED = 0x0008;
+  public static final int STATUS_TOTALSEATS_ENFORCED = 0x0010;
+  public static final int STATUS_EXPIRATION_ENFORCED = 0x0020;
+  public static final int STATUS_TRIAL = 0x0040;
+  public static final int STATUS_TOTALSEATS_ALERT = 0x0080;
+  // Please note these Company Edition Status Types are currently
+  // used for PE Self Service to distinguish PE/SPRAC/EXPRESS
+  // But can be extended to Enterprise as well.
+  public static final int STATUS_COMPANY_EDITION_TYPE_PE = 0x0100;
+  public static final int STATUS_COMPANY_EDITION_TYPE_SPRAC = 0x0200;
+  public static final int STATUS_COMPANY_EDITION_TYPE_EXPRESS = 0x0400;
+  public static final int STATUS_COMPANY_EDITION_TYPE_ENTERPRISE = 0x0800;
+  public static final int STATUS_MASTER_COMPANY = 0x1000;                       // a master company to be used for cloning an SMB instance
+  public static final int STATUS_MAINTENANCE_MODEL = 0x2000;    // Maintenance Status Bit
+
+
+  ////////////////////////////////////////////////////////////////////////
+  // If you add more features, please update LicenseBean.java accordingly.
+  ////////////////////////////////////////////////////////////////////////
+  public static final IFeatureEnum FEATURE_PMSMARTFORM = FeatureEnum.PMREVIEW; // 0x0001;
+  public static final IFeatureEnum FEATURE_WACA = FeatureEnum.WRITING_ASSIST; // 0x0002;
+  public static final IFeatureEnum FEATURE_ADMINCONFIG = FeatureEnum.ADMIN_CONFIG; // 0x0004;
+  public static final IFeatureEnum FEATURE_USERDIR = FeatureEnum.USER_DIRECTORY; // 0x0008;
+  public static final IFeatureEnum FEATURE_WORKFLOW = FeatureEnum.WORKFLOW; // 0x0010;
+  public static final IFeatureEnum FEATURE_MGRDASH = FeatureEnum.MANAGER_DASHBOARD; // 0x0020;
+  public static final IFeatureEnum FEATURE_OBJMANG = FeatureEnum.OBJECTIVE_MANAGEMENT; // 0x0040;
+  public static final IFeatureEnum FEATURE_COMPMANG = FeatureEnum.COMPETENCY_LIBRARY_MANAGEMENT; // 0x0080;
+  public static final IFeatureEnum FEATURE_REPORT = FeatureEnum.REPORTS; // 0x0100;
+  public static final IFeatureEnum FEATURE_GAPANALYSIS = FeatureEnum.GAP_ANALYSIS; // 0x0200;
+  public static final IFeatureEnum FEATURE_360FORM = FeatureEnum.PM360; // 0x0400;
+  public static final IFeatureEnum FEATURE_GRAPHICRPT = FeatureEnum.PM360_REPORTS; // 0x0800;
+  public static final IFeatureEnum FEATURE_LEGALSCAN = FeatureEnum.LEGAL_SCAN; // 0x1000;
+  public static final IFeatureEnum FEATURE_SPELLCHK = FeatureEnum.SPELL_CHECK; // 0x2000;
+  public static final IFeatureEnum FEATURE_ADVOBJ = FeatureEnum.ADVANCED_OBJECTIVES; // 0x4000;
+  public static final IFeatureEnum FEATURE_LIVEPROFILE = FeatureEnum.LIVE_PROFILE; // 0x8000;
+  public static final IFeatureEnum FEATURE_OFFLINE = FeatureEnum.OFFLINE; // 0x10000;
+  public static final FeatureEnum FEATURE_SUCCPLAN = FeatureEnum.PMSUCCESSION; // 0x20000;
+  public static final FeatureEnum FEATURE_NOTE = FeatureEnum.PMNOTE; // 0x40000;
+  public static final FeatureEnum FEATURE_DEVPLAN = FeatureEnum.IDP; // 0x80000;
+  public static final FeatureEnum FEATURE_HIERARCHCAL_REPORTS = FeatureEnum.HIERARCHICAL_REPORTS; // 0x100000;
+  public static final FeatureEnum FEATURE_LOCALE_PACK = FeatureEnum.LANGUAGE_PACKS; // 0x200000;
+  public static final FeatureEnum FEATURE_PLANOBJ = FeatureEnum.TGM; // 0x400000;
+  public static final FeatureEnum FEATURE_SURVEYFORM = FeatureEnum.SURVEY;
+  public static final FeatureEnum FEATURE_RECRUITING = FeatureEnum.RECRUITING_V2;
+  public static final FeatureEnum FEATURE_DISABLE_EXPORT_TO_EXCEL = FeatureEnum.DISABLE_EXPORT_TO_EXCEL;
+  public static final FeatureEnum FEATURE_SCHEDULE_REPORTS = FeatureEnum.SCHEDULE_REPORTS;
+  public static final FeatureEnum PROVISIONING_STANDARD_REPORT = FeatureEnum.STANDARD_REPORT;
+  public static final FeatureEnum FEATURE_PROCESSFORM = FeatureEnum.PROCESS; // this variable is used  for bpp product 
+  public static final FeatureEnum FEATURE_ENABLE_SMART_SUITE = FeatureEnum.ENABLE_SMART_SUITE; // this variable is used for Intelligent service 
+  public static final FeatureEnum FEATURE_ENABLE_INTELLIGENT_SERVICES_EDITOR = FeatureEnum.ENABLE_INTELLIGENT_SERVICES_EDITOR; // this variable is used for Intelligent services editor 
+  public static final FeatureEnum FEATURE_BPE_CONFIG = FeatureEnum.ENABLE_BPE_SERVICE;// this variable is used for Business Process Engine
+
+  /**
+   * Left Navigation bar (Treeview).
+   *
+   * When activated a treestyle navigation piece will be rendered in
+   * the left part of the interface.
+   */
+  public static final FeatureEnum FEATURE_LEFTNAV = FeatureEnum.LEFTNAV; // (1<<26);
+
+  /**
+   * Compensation management
+   */
+  public static final FeatureEnum FEATURE_COMPENSATION = FeatureEnum.COMPENSATION; // (1<<27); // compensation managerment
+  public static final FeatureEnum FEATURE_COMPENSATION_MANAGER_HIERARCHY = FeatureEnum.COMPENSATION_MANAGER_HIERARCHY;
+
+  /**
+   * Variable Pay
+   */
+  public static final FeatureEnum FEATURE_VARIABLE_PAY = FeatureEnum.VARIABLE_PAY;
+
+  /**
+   * Reports version 2
+   */
+  public static final FeatureEnum FEATURE_REPORTS_V2 = FeatureEnum.REPORTS_V2; // (1<<28); // Reports version 2
+
+  /**
+   * Development flag for turning on all of the V2 consolidation work.
+   */
+  public static final FeatureEnum FEATURE_UI_CONSOLIDATION = FeatureEnum.UI_CONSOLIDATION; // (1<<29);
+
+  /**
+   * Matrix Grid Report (aka 9-box).  (at this time, FEATURE_SUCCMAN
+   * is required as well)
+   */
+  public static final FeatureEnum FEATURE_MATRIX_GRID_REPORT = FeatureEnum.MATRIX_GRID_REPORT; // (1<<30);
+
+  public static final FeatureEnum FEATURE_EMPLOYEE_SCORECARD = FeatureEnum.EMPLOYEE_SCORECARD; // (1<<30);
+
+  public static final FeatureEnum FEATURE_CALIBRATION = FeatureEnum.ENABLE_CALIBRATION; // (1<<31);
+
+  public static final FeatureEnum FEATURE_PLATEAU = FeatureEnum.ENABLE_PLATEAU_INTEGRATION; // (1<<32);
+  /**
+   * Matrix Grid Report for How vs. What (aka 9-box).
+   */
+  public static final FeatureEnum FEATURE_MATRIX_GRID_HOW_VS_WHAT_REPORT = FeatureEnum.MATRIX_GRID_REPORT_HOW_VS_WHAT;
+  
+  /**
+   * Healthcare: performance profile
+   */
+  public static final FeatureEnum FEATURE_PERF_PRO = FeatureEnum.PERF_PRO;
+
+
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  // do NOT add more FEATURE_ constants.  new ones belong in FeatureEnum!!!
+  //
+  // Read the documentation in FeatureEnum for details on adding a new
+  // feature constant.
+  //
+  // (the FEATURE_ constants are backwards compatible for migration
+  // purposes only.  Enum constants need to be defined in their class
+  // in order to provide some of the static methods.  And there is no
+  // reason to define them twice... or worse yet, give them two
+  // different names, like what happened between LicenceBean and
+  // CompanyBean... AND YOU CAN JAVADOC IN JUST ONE PLACE!!! hint hint
+  // hint) -JI
+
+  ////////////////////////////////////////////////////////////////////////
+  // Non-static Fields
+  ////////////////////////////////////////////////////////////////////////
+
+  private String immutableCompanyID = "";
+  private String companyId = "";
+  private String companyName = "";
+  private int companyStatus = 0;
+  private String oraclePoolId = "";
+  private String provisionerId = "";
+  private int provisionerPermissionFlag;
+  private Locale locale = Locale.US;
+  private int totalSeats = 0;
+  private Date licenseExpirationDate = null;
+  private Date creationDate = null;
+  private Date lastModified = null;
+  // public int featureList = 0;
+  private FeatureSet featureSet = new FeatureSet();
+  private long featureEncrypted = 0;
+  private long licenseUserEncrypted = 0;
+  private String companySchema = null;
+  private String internalCompanySchema = null;
+  private String externalCompanySchema = null;
+  private String auditSchema = null;
+  //TODO need more security check
+  private boolean isVpd = false;
+  private String companyDomain = null;
+  //boolean to indicate if the company is in the current server domain
+  //true if SFConfig.SFV4_DOMAIN_KEY value equals the companyDoamin
+  private boolean isInLocalDomain = false;
+
+  // Proxy Permissions should be filled upon a user is proxied, otherwise null.
+  // Proxy Permissions affects module access privileges(the company feature set).
+  private ProxyPermissions proxyPermissions = null;
+  
+  private String accountId;
+  private String auditPoolId;
+  //TODO:
+  private String hanaPoolId;
+  
+  //CRM custom account ID
+  private String crmCustomerId;
+  
+  private String lastTxnId;
+  
+  public CompanyBean(String companyId,
+                      String companyName,
+                      int    companyStatus,
+                      String oraclePoolId,
+                      String provisionerId,
+                      Locale locale,
+                      int    totalSeats,
+                      Date   licenseExpirationDate,
+                      Date   creationDate,
+                      Date   lastModified,
+                      FeatureSet featureSet,
+                      long featureEncrypted,
+                      long licenseUserEncrypted,
+                      String companySchema,
+                      String companyDomain,
+                      boolean isVpd,
+                      String accountId,
+                      String auditPoolId,
+                      String auditSchema,
+                      String hanaPoolId)
+  {
+      this.setCompanySchema(companySchema);
+      this.setInternalCompanySchema(companySchema);
+      this.setCompanyDomain(companyDomain);
+      this.setCompanyId(companyId);
+      this.setCompanyName(companyName);
+      this.setCompanyStatus(companyStatus);
+      this.setOraclePoolId(oraclePoolId);
+      this.setProvisionerId(provisionerId);
+      if (locale != null)
+        this.setLocale(locale);
+      this.setTotalSeats(totalSeats);
+      this.setLicenseExpirationDate(licenseExpirationDate);
+      this.setCreationDate(creationDate);
+      this.setLastModified(lastModified);
+      this.setFeatureSet(featureSet);
+      this.setFeatureEncrypted(featureEncrypted);
+      this.setLicenseUserEncrypted(licenseUserEncrypted);
+      this.setVpd(isVpd);
+      this.setAccountId(accountId);
+      this.setAuditPoolId(auditPoolId);
+      this.setAuditSchema(auditSchema);
+      this.setHanaPoolId(hanaPoolId);
+    
+  }
+  
+  public CompanyBean(String companyId,
+                     String companyName,
+                     int    companyStatus,
+                     String oraclePoolId,
+                     String provisionerId,
+                     Locale locale,
+                     int    totalSeats,
+                     Date   licenseExpirationDate,
+                     Date   creationDate,
+                     Date   lastModified,
+                     FeatureSet featureSet,
+                     long featureEncrypted,
+                     long licenseUserEncrypted,
+                     String companySchema,
+                     String externalCompanySchema,
+                     String companyDomain,
+                     boolean isVpd,
+                     String accountId,
+                     String auditPoolId,
+                     String auditSchema,
+                     String hanaPoolId,
+                     String crmCustomerId)
+  {
+    this.setCompanySchema(companySchema);
+    this.setInternalCompanySchema(companySchema);
+    this.setExternalCompanySchema(externalCompanySchema);
+    setCompanyDomain(companyDomain);
+    this.setCompanyId(companyId);
+    this.setCompanyName(companyName);
+    this.setCompanyStatus(companyStatus);
+    this.setOraclePoolId(oraclePoolId);
+    this.setProvisionerId(provisionerId);
+    if (locale != null)
+      this.setLocale(locale);
+    this.setTotalSeats(totalSeats);
+    this.setLicenseExpirationDate(licenseExpirationDate);
+    this.setCreationDate(creationDate);
+    this.setLastModified(lastModified);
+    this.setFeatureSet(featureSet);
+    this.setFeatureEncrypted(featureEncrypted);
+    this.setLicenseUserEncrypted(licenseUserEncrypted);
+    this.setVpd(isVpd);
+    this.setAccountId(accountId);
+    this.setAuditPoolId(auditPoolId);
+    this.setAuditSchema(auditSchema);
+    this.setHanaPoolId(hanaPoolId);
+    this.setCrmCustomerId(crmCustomerId);
+  }
+
+  public CompanyBean()
+  {
+  }
+
+  public boolean isVpd() {
+    return isVpd;
+  }
+
+  /**
+   * Check whether company is v10 or not.
+   * @return
+   */
+  @JsonIgnore
+  public boolean isV10UI() {
+    return isFeatureExist(FeatureEnum.V10_UI) && !isFeatureExist(FeatureEnum.V11_UI);
+  }
+  
+  /**
+   * Check whether company should fall back to classic UI
+   * 
+   * @return
+   */
+  public boolean useClassicUI(){
+	  return !(isFeatureExist(FeatureEnum.V10_UI) || isFeatureExist(FeatureEnum.V11_UI));
+  }
+  
+  public void setVpd(boolean isVpd) {
+    this.isVpd = isVpd;
+  }
+  
+  /**
+   * @return Returns the companySchema.
+   */
+  public String getCompanySchema() {
+    return companySchema;
+  }
+  
+  /**
+   * @param companySchema The companySchema to set.
+   */
+  public void setCompanySchema(String companySchema) {
+    this.companySchema = companySchema;
+  }
+  
+  /**
+   * Getter method of internalCompanySchema
+   * @return internalCompanySchema
+   */
+  public String getInternalCompanySchema() {
+    return internalCompanySchema;
+  }
+
+  /**
+   * Setter method of internalCompanySchema
+   * @param internalCompanySchema internalCompanySchema
+   */
+  public void setInternalCompanySchema(String internalCompanySchema) {
+    this.internalCompanySchema = internalCompanySchema;
+  }
+
+  /**
+   * @return Returns the externalCompanySchema.
+   */
+  public String getExternalCompanySchema() {
+    return externalCompanySchema;
+  }
+  
+  /**
+   * @param externalCompanySchema The externalCompanySchema to set.
+   */
+  public void setExternalCompanySchema(String externalCompanySchema) {
+    this.externalCompanySchema = externalCompanySchema;
+  }
+
+  /**
+   * 
+   * @return returns value of company domain name
+   */
+  public String getCompanyDomain() {
+    return companyDomain;
+  }
+
+  /**
+   * 
+   * @param companyDomain the value of company domain name.
+   */
+  public void setCompanyDomain(String companyDomain) {
+    this.companyDomain = companyDomain;
+    isInLocalDomain = isCompanyInThisDomain(companyDomain);
+  }
+
+  @JsonIgnore
+  public boolean isInLocalDomain() {
+    return isInLocalDomain;
+  }
+
+  public static boolean isCompanyInThisDomain(String companyDomain) {
+    if (StringUtils.isBlank(companyDomain) || SFConfig.getString(SFConfig.SFV4_DOMAIN_KEY).equals(companyDomain)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * @return Returns the immutable company ID.
+   */
+  public String getImmutableCompanyId() {
+    return this.immutableCompanyID;
+  }
+  
+  /**
+   * @param immutableCompanyId The Immutable companyId to set.
+   */
+  public void setImmutableCompanyId(String immutableCompanyID) {
+    this.immutableCompanyID = immutableCompanyID;
+  }
+
+  /**
+   * @return Returns the companyId.
+   */
+  public String getCompanyId() {
+    return companyId;
+  }
+  
+  /**
+   * @param companyId The companyId to set.
+   */
+  public void setCompanyId(String companyId) {
+    this.companyId = companyId;
+  }
+
+  /**
+   * @return Returns the companyName.
+   */
+  public String getCompanyName() {
+    return companyName;
+  }
+
+  /**
+   * @param companyName The companyName to set.
+   */
+  public void setCompanyName(String companyName) {
+    this.companyName = companyName;
+  }
+
+  /**
+   * @return Returns the companyStatus.
+   */
+  public int getCompanyStatus() {
+    return companyStatus;
+  }
+
+  @JsonIgnore
+  public String getSchema() { return getCompanySchema(); }
+  @JsonIgnore
+  public String getPoolId() { return getOraclePoolId(); }
+  
+  /**
+   * @param companyStatus The companyStatus to set.
+   */
+  public void setCompanyStatus(int companyStatus) {
+    this.companyStatus = companyStatus;
+  }
+
+  @JsonIgnore
+  public void setCompanyEdition(int companyEdition) {
+    // First clear all the companyEdition types - only one can be set at a time
+    companyStatus = companyStatus & (~CompanyBean.STATUS_COMPANY_EDITION_TYPE_ENTERPRISE);
+    companyStatus = companyStatus & (~CompanyBean.STATUS_COMPANY_EDITION_TYPE_PE);
+    companyStatus = companyStatus & (~CompanyBean.STATUS_COMPANY_EDITION_TYPE_SPRAC);
+    companyStatus = companyStatus & (~CompanyBean.STATUS_COMPANY_EDITION_TYPE_EXPRESS);
+
+    // now set the company type
+    this.setCompanyStatus(companyStatus | companyEdition);
+  }
+
+  @JsonIgnore
+  public int getCompanyEdition() {
+    
+    if((companyStatus & STATUS_COMPANY_EDITION_TYPE_SPRAC) == STATUS_COMPANY_EDITION_TYPE_SPRAC) {
+      return STATUS_COMPANY_EDITION_TYPE_SPRAC;
+    } else if((companyStatus & STATUS_COMPANY_EDITION_TYPE_EXPRESS) == STATUS_COMPANY_EDITION_TYPE_EXPRESS) {
+      return STATUS_COMPANY_EDITION_TYPE_EXPRESS;
+    } else if((companyStatus & STATUS_COMPANY_EDITION_TYPE_PE) == STATUS_COMPANY_EDITION_TYPE_PE) {
+      return STATUS_COMPANY_EDITION_TYPE_PE;
+    } else if((companyStatus & STATUS_COMPANY_EDITION_TYPE_ENTERPRISE) == STATUS_COMPANY_EDITION_TYPE_ENTERPRISE) {
+      return STATUS_COMPANY_EDITION_TYPE_ENTERPRISE;
+    } else {
+      return -1; 
+    }
+  }
+  
+  /**
+   * @return Returns the oraclePoolId.
+   */
+  public String getOraclePoolId() {
+    return oraclePoolId;
+  }
+  
+  /**
+   * @param oraclePoolId The oraclePoolId to set.
+   */
+  public void setOraclePoolId(String oraclePoolId) {
+    this.oraclePoolId = oraclePoolId;
+  }
+  
+  /**
+   * @return Returns the provisionerId.
+   */
+  public String getProvisionerId() {
+    return provisionerId;
+  }
+  
+  /**
+   * @param provisionerId The provisionerId to set.
+   */
+  public void setProvisionerId(String provisionerId) {
+    this.provisionerId = provisionerId;
+  }
+
+  /**
+   * @return Returns the provisionerPermissionFlag.
+   */
+  public int getProvisionerPermissionFlag() {
+    return provisionerPermissionFlag;
+  }
+  
+  /**
+   * @param provisionerPermissionFlag The provisionerPermissionFlag to set.
+   */
+  public void setProvisionerPermissionFlag(int provisionerPermissionFlag) {
+    this.provisionerPermissionFlag = provisionerPermissionFlag;
+  }
+  
+  /**
+   * @return Returns the locale.
+   */
+  public Locale getLocale() {
+    return locale;
+  }
+
+  /**
+   * @param locale The locale to set.
+   */
+  public void setLocale(Locale locale) {
+    this.locale = locale;
+  }
+
+  /**
+   * @return Returns the totalSeats.
+   */
+  public int getTotalSeats() {
+    return totalSeats;
+  }
+  
+  /**
+   * @param totalSeats The totalSeats to set.
+   */
+  public void setTotalSeats(int totalSeats) {
+    this.totalSeats = totalSeats;
+  }
+  
+  /**
+   * @return Returns the licenseExpirationDate.
+   */
+  public Date getLicenseExpirationDate() {
+    return licenseExpirationDate;
+  }
+
+  /**
+   * @param licenseExpirationDate The licenseExpirationDate to set.
+   */
+  public void setLicenseExpirationDate(Date licenseExpirationDate) {
+    this.licenseExpirationDate = licenseExpirationDate;
+  }
+
+  /**
+   * @return Returns the creationDate.
+   */
+  public Date getCreationDate() {
+    return creationDate;
+  }
+
+  /**
+   * @param creationDate The creationDate to set.
+   */
+  public void setCreationDate(Date creationDate) {
+    this.creationDate = creationDate;
+  }
+  
+  /**
+   * @return Returns the lastModified.
+   */
+  public Date getLastModified() {
+    return lastModified;
+  }
+  
+  /**
+   * @param lastModified The lastModified to set.
+   */
+  public void setLastModified(Date lastModified) {
+    this.lastModified = lastModified;
+  }
+
+  /**
+   * @return Returns the featureSet.
+   */
+  public FeatureSet getFeatureSet() {
+    return featureSet;
+  }
+
+  /**
+   * @param featureSet The featureSet to set.
+   */
+  public void setFeatureSet(FeatureSet featureSet) {
+    this.featureSet = featureSet;
+  }
+  
+  /**
+   * Sets the feature bit
+   * @param feature The feature to set
+   */
+  public void setFeature(FeatureEnum feature) {
+    getFeatureSet().set(feature, true);
+  }
+  
+  /**
+   * Unsets the feature bit
+   * @param feature The feature to unset
+   */
+  public void removeFeature(FeatureEnum feature) {
+    getFeatureSet().set(feature, false);
+  }
+
+  /**
+   * @return Returns the featureEncrypted.
+   */
+  public long getFeatureEncrypted() {
+    return featureEncrypted;
+  }
+  
+  /**
+   * @param featureEncrypted The featureEncrypted to set.
+   */
+  public void setFeatureEncrypted(long featureEncrypted) {
+    this.featureEncrypted = featureEncrypted;
+  }
+
+  /**
+   * @return Returns the licenseUserEncrypted.
+   */
+  public long getLicenseUserEncrypted() {
+    return licenseUserEncrypted;
+  }
+
+  /**
+   * @param licenseUserEncrypted The licenseUserEncrypted to set.
+   */
+  public void setLicenseUserEncrypted(long licenseUserEncrypted) {
+    this.licenseUserEncrypted = licenseUserEncrypted;
+  }
+
+  /**
+    * This method verify the internal feature list with the encrypted key.
+    *
+    * @throws NoSuchAlgorithmException No encryption algorithm was found
+    *
+    * @return true or false
+    */
+  public boolean verifyFeatureMap()
+  throws NoSuchAlgorithmException
+  {
+    // String currTime = Long.toString(System.currentTimeMillis());
+    BigInteger featureKey = new BigInteger(crypt(getCompanyId()+getFeatureSet().getOldStyleBits()+getCompanyId()));
+    if ( featureKey.longValue() == getFeatureEncrypted() )
+      return true;
+    else
+      return false;
+  }
+
+  /**
+    * This method verify the license user count with the encrypted key.
+    *
+    * @throws NoSuchAlgorithmException No encryption algorithm was found
+    *
+    * @return true or false
+    */
+  public boolean verifyLicenseUser()
+  throws NoSuchAlgorithmException
+  {
+    // String currTime = Long.toString(System.currentTimeMillis());
+    BigInteger userKey = new BigInteger(crypt(getTotalSeats()+getCompanyId()+getTotalSeats()+getCompanyId()));
+    if ( userKey.longValue() == getLicenseUserEncrypted() )
+      return true;
+    else
+      return false;
+  }
+
+  /**
+    * This method generate feature list encrypted key.
+    *
+    * @throws NoSuchAlgorithmException No encryption algorithm was found
+    *
+    * @return long ( generated Key )
+    */
+  public long generateFeatureKey()
+  throws NoSuchAlgorithmException
+  {
+    // String currTime = Long.toString(System.currentTimeMillis());
+    BigInteger featureKey = new BigInteger(crypt(getCompanyId()+getFeatureSet().getOldStyleBits()+getCompanyId()));
+    return featureKey.longValue();
+  }
+
+  /**
+    * This method generate the license user encrypted key.
+    *
+    * @throws NoSuchAlgorithmException No encryption algorithm was found
+    *
+    * @return long ( generated key )
+    */
+  public long generateLicenseUser()
+  throws NoSuchAlgorithmException
+  {
+    // String currTime = Long.toString(System.currentTimeMillis());
+    BigInteger userKey = new BigInteger(crypt(getTotalSeats()+getCompanyId()+getTotalSeats()+getCompanyId()));
+    return userKey.longValue();
+  }
+
+  /**
+    * This method encrypts a given string and returns the encrypted bytes.
+    *
+    * @param text A given text string
+    *
+    * @throws NoSuchAlgorithmException No encryption algorithm was found
+    *
+    * @return digest The encrypted bytes
+    */
+  public static byte[] crypt(String text)
+  throws NoSuchAlgorithmException
+  {
+    byte[] digest = new byte[1];
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA-1");
+      digest = md.digest(StringUtils.toBytes(text));
+    } catch (NoSuchAlgorithmException e) {
+      throw e;
+    }
+    return digest;
+  }
+
+  /**
+    * This method verify if the feature is enabled for
+    * the company as well as the user who has proxy permission.
+    *
+    * @param feature the Company Feature
+    *
+    * @return true or false
+    */
+  public boolean isFeatureExist(FeatureEnum feature)
+  {
+    return (isFeatureEnabledForCompany(feature) && checkProxyPermissions(feature));
+  }
+
+  /**
+   * This method verify if the feature is enabled for the company.
+   * @param feature the Company Feature
+   * @return <code>true</code> if feature is enabled.
+   *         <code>false</code> otherwise.
+   */
+  public boolean isFeatureEnabledForCompany(FeatureEnum feature) {
+    try {
+      return getFeatureSet().contains(feature) && this.verifyFeatureMap();
+    } catch ( NoSuchAlgorithmException nse ) {
+      // Error on encryption
+      return false;
+    }
+  }
+
+//  public boolean isAuditEnabled() {
+//    try {
+//      return getFeatureSet().contains(FeatureEnum.EMPLOYEE_PROFILE_AUDIT) && this.verifyFeatureMap();
+//    } catch ( NoSuchAlgorithmException nse ) {
+//      // Error on encryption
+//      return false;
+//    }
+//  }
+//
+//  public boolean isAuditEnabled(FeatureEnum feature) {
+//    assert feature != null : "isAuditEnabled(feature) must be provided with a valid feature enum.";
+//    try {
+//      return getFeatureSet().contains(feature) && this.verifyFeatureMap();
+//    } catch ( NoSuchAlgorithmException nse ) {
+//      // Error on encryption
+//      return false;
+//    }
+//  }
+//
+  public void setProxyPermissions(ProxyPermissions proxyPermissions) {
+	  this.proxyPermissions = proxyPermissions;
+  }
+  
+  public ProxyPermissions getProxyPermissions() {
+	  return proxyPermissions;
+  }
+
+  /**
+   * Checks if the proxy user has the given feature right.
+   * Each proxy user has a list of proxy permissions associated with company features.
+   * No all company features are mapped, but if the given feature is mapped to a proxy rights,
+   * then it will check if such right is enabled.
+   * @param feature the <code>FeatureEnum</code>
+   * @return <code>true</code> if the proxy right is enabled or the <code>FeatureEnum</code> is NOT mapped.
+   * 	     <code>false</code> if the proxy user doesn't have such right.
+   */
+  protected boolean checkProxyPermissions(FeatureEnum feature) {
+	  if (proxyPermissions != null) {
+		  ProxyPermissionEnum proxyPerm = ProxyPermissionEnum.Of(feature);
+		  if (proxyPerm != null && !proxyPermissions.contains(proxyPerm)) {
+			  return false;
+		  }
+	  }
+
+	  return true;
+  }
+ 
+  public boolean checkProxyPermissions(String acmeState) {
+    if (proxyPermissions != null) {
+      ProxyPermissionEnum proxyPerm = ProxyPermissionEnum.Of(acmeState);
+      if (proxyPerm != null && !proxyPermissions.contains(proxyPerm)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+  
+  /**
+   * Checks if the user is a proxy and if the passed proxy permission is disabled.
+   * @param perm the given proxy permission
+   * @return <code>true</code> if the proxy user does not have such proxy permission. 						   
+   * 		 <code>false</code> if the proxy permission is not applied 
+   * 							-or- 
+   *                            the proxy user do have such permission.
+   */
+  public boolean isRestrictedByProxyPermission(ProxyPermissionEnum perm) {
+	  if (proxyPermissions!=null && !proxyPermissions.contains(perm)) {
+		  return true;
+	  }
+	  return false;
+  }
+
+  /**
+   * @return the currently enabled objective management suite based on
+   * the feature bit settings.
+   * <ul>
+   * <li>NONE.  Equivalent to having FEATURE_OBJMANG off.</li>
+   * <li>BASIC.  Equivalent to having FEATURE_OBJMANG on, FEATURE_ADVOBJ off, and FEATURE_PLANOBJ off.</li>
+   * <li>ADVANCED (obsolete).  Equivalent to
+   * having FEATURE_OBJMANG on, FEATURE_ADVOBJ on, and FEATURE_PLANOBJ
+   * off.</li>
+   * <li>PLAN (aka "Objective Plans").
+   * Equivalent to having FEATURE_OBJMANG on, and FEATURE_PLANOBJ on.</li>
+   * </ul>
+   */
+  @JsonIgnore
+  public ObjMgtEnum getObjMgt()
+  {
+    if (!isFeatureExist(FeatureEnum.OBJECTIVE_MANAGEMENT))
+      return ObjMgtEnum.NONE;
+
+    if (isFeatureExist(FeatureEnum.TGM))
+      return ObjMgtEnum.PLAN;
+
+    if (isFeatureExist(FeatureEnum.ADVANCED_OBJECTIVES))
+      return ObjMgtEnum.ADVANCED;
+
+    return ObjMgtEnum.BASIC;
+  }
+
+  /**
+   * Sets the feature bits based upon the OBJMGT_ parameter and
+   * returns the value.
+   *
+   * @param featureSet - the original feature set
+   * @param objMgt - an ObjMgtEnum
+   * @return the featureList parameter with the appropriate bits set
+   */
+  public static FeatureSet setObjMgtBits(FeatureSet featureSet, ObjMgtEnum objMgt)
+  {
+    switch (objMgt.getId()) {
+    case ObjMgtEnum.NONE_ORDINAL:
+      featureSet.remove(FeatureEnum.OBJECTIVE_MANAGEMENT);
+      break;
+    case ObjMgtEnum.BASIC_ORDINAL:
+      featureSet.add(FeatureEnum.OBJECTIVE_MANAGEMENT);
+      featureSet.remove(FeatureEnum.ADVANCED_OBJECTIVES);
+      featureSet.remove(FeatureEnum.TGM);
+      break;
+    case ObjMgtEnum.ADVANCED_ORDINAL:
+      featureSet.add(FeatureEnum.OBJECTIVE_MANAGEMENT);
+      featureSet.add(FeatureEnum.ADVANCED_OBJECTIVES);
+      featureSet.remove(FeatureEnum.TGM);
+      break;
+    case ObjMgtEnum.PLAN_ORDINAL:
+      featureSet.add(FeatureEnum.OBJECTIVE_MANAGEMENT);
+      featureSet.remove(FeatureEnum.ADVANCED_OBJECTIVES);
+      featureSet.add(FeatureEnum.TGM);
+      break;
+    // note: there is still enough bits for "ADVANCED PLANNING" :)
+    default:
+      throw new IllegalArgumentException("bad parameter, objMgt="+objMgt+" invalid");
+    }
+
+    return featureSet;
+  }
+
+  /**
+   * Sets the featureList bits.
+   */
+  @JsonIgnore
+  public void setObjMgt(ObjMgtEnum objMgt)
+  {
+    setObjMgtBits(getFeatureSet(), objMgt);
+  }
+
+  /**
+   * This method returns the global schema used in the application.
+   *
+   * @return Global Schema
+   */
+  public static String fetchGlobalSchema() {
+    return GLOBAL_SCHEMA+".";
+  }
+
+  /**
+   * This method return global schema - name only without the suffix ".", differing from fetchGlobalSchema()
+   *
+   * @return Global Schema
+   */
+  public static String getGlobalSchemaName() {
+    return GLOBAL_SCHEMA;
+  }
+
+  /**
+   * This method returns true if the global package is enabled.
+   *
+   * @return true if Global Package is enabled.
+   */
+  public static boolean isGlobalPackageOn() {
+    return globalPackageOn;
+  }
+
+  /**
+   * This mehod returns the global schema who owns the global package.
+   *
+   * @param companySchema  Company Schema; will be returned if global packages are not enabled.
+   *
+   * @return Global Schema who owns the global package or the company schema.
+   */
+  public static String fetchGlobalPackageSchema(String companySchema) {
+    return (globalPackageOn?GLOBAL_SCHEMA+".":companySchema);
+  }
+
+  /**
+   * This method constructs the appropriate company schema using the company Id.
+   *
+   * @return Company Schema
+   */
+  public static String generateCompanySchema(String companyId)
+  {
+    return GLOBAL_SCHEMA + "_" + companyId + ".";
+  }
+  
+  /**
+   * This method constructs the appropriate external company schema using the company Id.
+   *
+   * @return Company Schema
+   */
+  public static String generateExternalCompanySchema(String companyId)
+  {
+    return GLOBAL_SCHEMA + "_" + companyId + "_e" + ".";
+  }
+
+  public static String generateAuditCompanySchema(String companyId)
+  {
+    return  GLOBAL_AUDIT_SCHEMA + "_" + companyId + ".";
+  }
+  /**
+   * This method constructs the appropriate company schema using the company Id and shcema name.
+   *
+   * @return Company Schema
+   */
+  public static String generateCompanySchema(String companyId, String schemaName)
+  {
+    return schemaName + "_" + companyId + ".";
+  }
+
+  /**
+   * This method constructs the appropriate company schema using the company Id and shcema name.
+   *
+   * @return Company Schema
+   */
+  public static String generateExternalCompanySchema(String companyId, String schemaName)
+  {
+    return schemaName + "_" + companyId + "_e" + ".";
+  }
+
+  /**
+   * This method correctly formats the given schema to a valid Oracle schema.
+   *
+   * @param schema  A schema
+   *
+   * @return a schema in a valid format.
+   */
+  public static String formatSchema(String schema) {
+    if (schema != null) {
+      int index = schema.indexOf(".");
+      if (index > 0) {
+        return schema.substring(0,index);
+      } else {
+        return schema;
+      }
+    } else {
+      return schema;
+    }
+  }
+
+  public String toString()
+  {
+    return getCompanyId() + "," +
+           getCompanyName() + "," +
+           getCompanyStatus() + "," +
+           getCompanySchema() + "," +
+           getExternalCompanySchema() + "," +
+           getOraclePoolId() + "," +
+           getProvisionerId() + "," +
+           getLocale() + "," +
+           getTotalSeats() + "," +
+           getLicenseExpirationDate() + "," +
+           getCreationDate() + "," +
+           getLastModified() + "," +
+           getFeatureSet() + "," +
+           getFeatureEncrypted() + "," +
+           getLicenseUserEncrypted() + "," +
+           getProvisionerPermissionFlag() + "," +
+           getCompanyDomain() + "," +
+           isVpd() + "," +
+           getProxyPermissions()+","+
+           getAccountId()+","+
+           getHanaPoolId()+","+
+           getCrmCustomerId();
+  }
+
+  public boolean equals(Object obj) {
+    return obj instanceof CompanyBean && hashCode() == obj.hashCode();
+  }
+
+  /**
+   * a very brute force hashcode
+   *
+   * @return    a string hashcode of all the attributes.
+   */
+  public int hashCode()
+  {
+    return this.toString().hashCode();
+  }
+
+  /**
+   * Basic shallow clone implementation.
+   * 
+   * @return a shallow clone of this bean 
+   * @throws UnsupportedOperationException if cloning is not supported.
+   */
+  public Object clone(){	  
+	  try {
+		  return super.clone();
+	  } catch (CloneNotSupportedException e) {
+		  // CloneNotSupportedException should not be thrown
+		  // since CompanyBean extends Cloneable and it's just doing a shallow clone.
+		  // Throw an UnsupportedOperationException, a runtime exception, upon
+		  // cloning is not supported.
+		  throw new UnsupportedOperationException(e.toString());
+	  }
+  }
+  
+  /**
+   * @return the accountId
+   */
+  public String getAccountId() {
+    return accountId;
+  }
+
+  /**
+   * @param accountId the accountId to set
+   */
+  public void setAccountId(String accountId) {
+    this.accountId = accountId;
+  }  
+  
+  @JsonIgnore
+  public boolean isComprehensiveAudit(){
+    return isFeatureEnabledForCompany(FeatureEnum.ENABLE_COMPREHENSIVE_AUDITING);   
+  }
+  
+  @JsonIgnore
+  public boolean isBasicAudit(){
+    return isFeatureEnabledForCompany(FeatureEnum.ENABLE_BASIC_AUDITING);   
+  }
+  
+  @JsonIgnore
+  public boolean isCompOnlyAudit(){
+    return isFeatureEnabledForCompany(FeatureEnum.ENABLE_COMP_ONLY_AUDITING);
+  }
+  
+  @JsonIgnore
+  public boolean isCandidateForDelta(){
+    return isComprehensiveAudit() || isCompOnlyAudit();
+  }
+
+  @JsonIgnore
+  public boolean isAuditOn(){
+    return isBasicAudit() || isComprehensiveAudit() || isCompOnlyAudit() || isFeatureEnabledForCompany(FeatureEnum.ENABLE_MDF_AUDITING);
+  }
+
+  public String getAuditSchema() {
+    return auditSchema;
+  }
+
+  public void setAuditSchema(String auditSchema) {
+    this.auditSchema = auditSchema;
+  }
+
+  public String getAuditPoolId() {
+    return auditPoolId;
+  }
+
+  public void setAuditPoolId(String auditPoolId) {
+    this.auditPoolId = auditPoolId;
+  }
+
+  public String getHanaPoolId() {
+    return hanaPoolId;
+  }
+
+  public void setHanaPoolId(String hanaPoolId) {
+    this.hanaPoolId = hanaPoolId;
+  }
+
+  public String getCrmCustomerId() {
+    return crmCustomerId;
+  }
+
+  public void setCrmCustomerId(String crmCustomerId) {
+    this.crmCustomerId = crmCustomerId;
+  }
+
+  public String getLastTxnId() {
+    return lastTxnId;
+  }
+
+  public void setLastTxnId(String lastTxnId) {
+    this.lastTxnId = lastTxnId;
+  }
+
+  @Override
+  public boolean isCacheNullObject() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+}

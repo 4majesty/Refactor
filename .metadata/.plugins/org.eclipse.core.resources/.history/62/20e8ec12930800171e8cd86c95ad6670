@@ -1,0 +1,53 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.util.ElementValidator;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitEditor;
+
+public interface IAddDelegateMethodsAction {
+	IStatus validate(Object[] selection);
+
+	void dispose();
+
+	Object[] getChildren(Object element);
+
+	int getCount();
+
+	Object[] getElements(Object inputElement);
+
+	IVariableBinding[] getExpandedElements();
+
+	IVariableBinding[] getInitiallySelectedElements();
+
+	Object getParent(Object element);
+
+	boolean hasChildren(Object element);
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+
+	Image getImage(Object element);
+
+	String getText(Object element);
+
+	int category(Object element);
+
+	int compare(Viewer viewer, Object o1, Object o2);
+
+	void run(IStructuredSelection selection);
+
+	void run(ITextSelection selection);
+
+	void selectionChanged(IStructuredSelection selection);
+
+	void selectionChanged(ITextSelection selection);
+}

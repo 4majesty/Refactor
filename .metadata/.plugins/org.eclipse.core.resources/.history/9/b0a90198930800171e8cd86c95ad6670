@@ -1,0 +1,8 @@
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+public interface IWorkingSetFindAction {
+	void run(IJavaElement element);
+}

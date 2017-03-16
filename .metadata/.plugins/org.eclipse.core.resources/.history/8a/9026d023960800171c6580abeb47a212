@@ -1,0 +1,111 @@
+package org.eclipse.jdt.internal.corext.refactoring.generics;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.GenericType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ParameterizedType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ArrayElementVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ArrayTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ImmutableTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterizedTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SubTypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ITypeEnvironment;
+
+public interface IInferTypeArgumentsTCModel {
+	List getUsedIn(ConstraintVariable2 cv);
+
+	void newCu();
+
+	ConstraintVariable2[] getAllConstraintVariables();
+
+	ITypeConstraint2[] getAllTypeConstraints();
+
+	CastVariable2[] getCastVariables();
+
+	void createSubtypeConstraint(ConstraintVariable2 cv1, ConstraintVariable2 cv2);
+
+	void createEqualsConstraint(ConstraintVariable2 leftElement, ConstraintVariable2 rightElement);
+
+	TType createTType(ITypeBinding typeBinding);
+
+	VariableVariable2 makeVariableVariable(IVariableBinding variableBinding);
+
+	VariableVariable2 makeDeclaredVariableVariable(IVariableBinding variableBinding, ICompilationUnit cu);
+
+	TypeVariable2 makeTypeVariable(Type type);
+
+	IndependentTypeVariable2 makeIndependentTypeVariable(TypeVariable type);
+
+	ParameterizedTypeVariable2 makeParameterizedTypeVariable(ITypeBinding typeBinding);
+
+	ArrayTypeVariable2 makeArrayTypeVariable(ITypeBinding typeBinding);
+
+	ParameterTypeVariable2 makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex);
+
+	ParameterTypeVariable2 makeDeclaredParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, ICompilationUnit cu);
+
+	ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding);
+
+	ReturnTypeVariable2 makeDeclaredReturnTypeVariable(IMethodBinding methodBinding, ICompilationUnit cu);
+
+	ImmutableTypeVariable2 makeImmutableTypeVariable(ITypeBinding typeBinding, Expression expression);
+
+	ImmutableTypeVariable2 makeImmutableTypeVariable(TType type);
+
+	CastVariable2 makeCastVariable(CastExpression castExpression, ConstraintVariable2 expressionCv);
+
+	TypeEnvironment getTypeEnvironment();
+
+	CollectionElementVariable2 getElementVariable(ConstraintVariable2 constraintVariable, ITypeBinding typeVariable);
+
+	Map getElementVariables(ConstraintVariable2 constraintVariable);
+
+	ArrayElementVariable2 getArrayElementVariable(ConstraintVariable2 constraintVariable);
+
+	void makeArrayElementVariable(ConstraintVariable2 constraintVariable2);
+
+	void makeElementVariables(ConstraintVariable2 expressionCv, TType type);
+
+	void makeFixedElementVariables(ConstraintVariable2 expressionCv, TType type);
+
+	void createTypeVariablesEqualityConstraints(ConstraintVariable2 expressionCv, Map methodTypeVariables, ConstraintVariable2 referenceCv, TType reference);
+
+	CollectionElementVariable2 getElementVariable(ConstraintVariable2 constraintVariable, TypeVariable typeVariable);
+
+	void createElementEqualsConstraints(ConstraintVariable2 cv, ConstraintVariable2 initializerCv);
+
+	void createAssignmentElementConstraints(ConstraintVariable2 cv, ConstraintVariable2 initializerCv);
+
+	ConstraintVariable2 getMethodReceiverCv(ConstraintVariable2 expressionVariable);
+
+	void setMethodReceiverCV(ConstraintVariable2 expressionVariable, ConstraintVariable2 methodReceiverCV);
+}

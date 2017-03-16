@@ -1,0 +1,10 @@
+package com.successfactors.cdp.app.mentoring;
+
+import java.util.List;
+import com.successfactors.platform.di.SFContextConstant;
+
+public interface IMentoringEntitiesRegisterer {
+	List<Class> getEntitiesToBeRegistered();
+
+	boolean isFeatureEnabled();
+}

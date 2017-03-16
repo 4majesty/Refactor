@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.propertiesfileeditor;
+
+import org.eclipse.jface.text.rules.WordPatternRule;
+
+public interface IArgumentRule {
+	boolean isWordStart(char c);
+
+	boolean isWordPart(char c);
+}

@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.compare;
+
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.dialogs.DialogSettings;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.TrayDialog;
+import org.eclipse.compare.CompareUI;
+
+public interface IResizableDialog {
+	boolean close();
+}

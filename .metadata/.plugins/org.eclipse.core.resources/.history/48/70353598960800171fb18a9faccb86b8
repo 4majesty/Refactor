@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.MessageWizardPage;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
+public interface IDeleteWizard {
+	int getMessageLineWidthInChars();
+
+	boolean needsProgressMonitor();
+
+	void createControl(Composite parent);
+
+	void dispose();
+}

@@ -1,0 +1,39 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import java.lang.reflect.InvocationTargetException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IRegion;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ITypeHierarchyLifeCycle {
+	ITypeHierarchy getHierarchy();
+
+	IJavaElement getInputElement();
+
+	void freeHierarchy();
+
+	void removeChangedListener(ITypeHierarchyLifeCycleListener listener);
+
+	void addChangedListener(ITypeHierarchyLifeCycleListener listener);
+
+	void ensureRefreshedTypeHierarchy(final IJavaElement element, IRunnableContext context) throws InvocationTargetException, InterruptedException;
+
+	void doHierarchyRefresh(IJavaElement element, IProgressMonitor pm) throws JavaModelException;
+
+	void typeHierarchyChanged(ITypeHierarchy typeHierarchy);
+
+	void elementChanged(ElementChangedEvent event);
+}

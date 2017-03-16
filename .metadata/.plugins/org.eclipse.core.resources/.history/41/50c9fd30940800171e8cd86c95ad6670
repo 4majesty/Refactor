@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jdt.internal.corext.callhierarchy.CallerMethodWrapper;
+import org.eclipse.jdt.internal.corext.callhierarchy.RealCallers;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public interface IExpandWithConstructorsAction {
+	void run();
+
+	boolean canActionBeAdded();
+}

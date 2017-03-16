@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.preferences.cleanup;
+
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
+import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
+
+public interface IUnnecessaryCodeTabPage {
+}

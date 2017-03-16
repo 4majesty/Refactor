@@ -1,0 +1,42 @@
+package org.eclipse.jdt.internal.ui.wizards.dialogfields;
+
+import java.util.Collection;
+import java.util.List;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.TableViewer;
+
+public interface ICheckedListDialogField {
+	void setCheckAllButtonIndex(int checkAllButtonIndex);
+
+	void setUncheckAllButtonIndex(int uncheckAllButtonIndex);
+
+	Control getListControl(Composite parent);
+
+	void dialogFieldChanged();
+
+	List getCheckedElements();
+
+	int getCheckedSize();
+
+	boolean isChecked(Object obj);
+
+	boolean isGrayed(Object obj);
+
+	void setCheckedElements(Collection list);
+
+	void setChecked(Object object, boolean state);
+
+	void setCheckedWithoutUpdate(Object object, boolean state);
+
+	void setGrayedWithoutUpdate(Object object, boolean state);
+
+	void checkAll(boolean state);
+
+	void replaceElement(Object oldElement, Object newElement) throws IllegalArgumentException;
+
+	void refresh();
+}

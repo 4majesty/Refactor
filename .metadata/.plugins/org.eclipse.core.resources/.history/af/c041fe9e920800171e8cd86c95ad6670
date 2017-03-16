@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.dialogs;
+
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IOpenTypeSelectionDialog {
+}

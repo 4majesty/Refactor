@@ -1,0 +1,20 @@
+package com.successfactors.cdp.app.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionVO;
+import com.successfactors.cdp.bean.mentoring.vo.ProgramSignupFormSectionValueVO;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import javax.inject.Inject;
+import java.util.Iterator;
+import java.util.List;
+
+public interface IRetrieveLabelService {
+	String getSectionLabelbyId(String sectionId) throws ServiceApplicationException;
+
+	void fillSectionValuesLabel(String sectionId, List<ProgramSignupFormSectionValueVO> valueVOs)
+			throws ServiceApplicationException;
+
+	void fillSectionAllLabels(ProgramSignupFormSectionVO sectionVO) throws ServiceApplicationException;
+
+	void fillSectionAllLabels(List<ProgramSignupFormSectionVO> sectionVOs) throws ServiceApplicationException;
+}

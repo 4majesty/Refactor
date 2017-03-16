@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.corext.refactoring.reorg;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+public interface IMonitoringNewNameQueries {
+	INewNameQuery createNewCompilationUnitNameQuery(final ICompilationUnit cu, final String initialSuggestedName);
+
+	INewNameQuery createNewPackageFragmentRootNameQuery(final IPackageFragmentRoot root, final String initialSuggestedName);
+
+	INewNameQuery createNewPackageNameQuery(final IPackageFragment pack, final String initialSuggestedName);
+
+	INewNameQuery createNewResourceNameQuery(final IResource res, final String initialSuggestedName);
+
+	INewNameQuery createNullQuery();
+
+	INewNameQuery createStaticQuery(String newName);
+}

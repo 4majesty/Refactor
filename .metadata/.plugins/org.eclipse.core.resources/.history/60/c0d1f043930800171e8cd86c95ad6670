@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.ui.commands.ICommandService;
+import org.eclipse.ui.handlers.IHandlerActivation;
+import org.eclipse.ui.handlers.IHandlerService;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+
+public interface ICorrectionCommandInstaller {
+	void registerCommands(CompilationUnitEditor editor);
+
+	void deregisterCommands();
+}

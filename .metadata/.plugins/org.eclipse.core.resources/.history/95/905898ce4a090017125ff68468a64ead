@@ -1,0 +1,24 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.service.mentoring.impl.SaveProgramImpl;
+import com.successfactors.cdp.service.util.mentoring.ProgramEmailTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.genericobject.bean.model.impl.GOLocalizedData;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+
+public interface ISaveProgramImplTest {
+	void setup();
+
+	void mergeProgram();
+
+	void updateSignupTemplateTest();
+
+	void testValidateParticipants();
+
+	void testInvalidParticipants();
+
+	void mergeEmailTemplateTest();
+}

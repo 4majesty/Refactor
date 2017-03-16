@@ -1,0 +1,30 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import java.text.CharacterIterator;
+import org.eclipse.core.runtime.Assert;
+
+public interface IJavaWordIterator {
+	int first();
+
+	int last();
+
+	int next(int n);
+
+	int next();
+
+	int previous();
+
+	int preceding(int offset);
+
+	int following(int offset);
+
+	int current();
+
+	CharacterIterator getText();
+
+	void setText(CharSequence newText);
+
+	void setText(CharacterIterator newText);
+
+	void setText(String newText);
+}

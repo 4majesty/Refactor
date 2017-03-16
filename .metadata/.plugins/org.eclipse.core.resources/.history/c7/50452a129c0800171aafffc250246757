@@ -1,0 +1,25 @@
+/*
+ * $Id$
+ */
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.sca.ServiceCommand;
+
+/**
+ * Service Command to add program photo to jam group
+ * 
+ * @author ricardo.saito
+ *
+ */
+public class AddMentoringJamPicture implements ServiceCommand<Void> {
+  private MentoringProgram program;
+
+  public AddMentoringJamPicture(MentoringProgram program) {
+    this.program = program;
+  }
+
+  public MentoringProgram getProgram() {
+    return program;
+  }
+}

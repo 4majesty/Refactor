@@ -1,0 +1,36 @@
+package org.eclipse.jdt.internal.ui.javaeditor.saveparticipant;
+
+import java.util.Iterator;
+import java.util.Map;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IScopeContext;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPostSaveListener;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.fix.CleanUpSaveParticipantPreferenceConfiguration;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
+
+public interface ISaveParticipantRegistry {
+	SaveParticipantDescriptor[] getSaveParticipantDescriptors();
+
+	SaveParticipantDescriptor getSaveParticipantDescriptor(String id);
+
+	void dispose();
+
+	boolean hasSettingsInScope(IScopeContext context);
+
+	IPostSaveListener[] getEnabledPostSaveListeners(IProject project);
+
+	IPostSaveListener[] getEnabledPostSaveListeners(IScopeContext context);
+}

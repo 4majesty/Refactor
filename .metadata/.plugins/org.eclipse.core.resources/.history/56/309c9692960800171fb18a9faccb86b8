@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.refactoring.IStubTypeContext;
+import org.eclipse.jdt.internal.corext.refactoring.IParameterInfo;
+
+public interface IParameterEditDialog {
+}

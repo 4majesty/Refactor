@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.refactoring.binary;
+
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
+public interface IBinaryRefactoringHistoryWizard {
+	boolean performCancel();
+}

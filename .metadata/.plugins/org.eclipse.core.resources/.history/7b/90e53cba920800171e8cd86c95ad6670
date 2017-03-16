@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.jdt.internal.ui.IResourceLocator;
+
+public interface IClassFileMarkerRulerAction {
+}

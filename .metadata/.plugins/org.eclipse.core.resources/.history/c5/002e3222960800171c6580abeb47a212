@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
+
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+
+public interface IImmutableTypeVariable2 {
+	int hashCode();
+
+	boolean equals(Object other);
+
+	String toString();
+}

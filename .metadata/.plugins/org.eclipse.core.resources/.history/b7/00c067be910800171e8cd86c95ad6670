@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+
+public interface IJavaViewerFilter {
+	void filteringStart();
+
+	void filteringEnd();
+
+	Object[] filter(Viewer viewer, Object parent, Object[] elements);
+}

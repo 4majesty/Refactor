@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+public interface IEnableMemberFilterAction {
+	void run();
+}

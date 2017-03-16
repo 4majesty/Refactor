@@ -1,0 +1,8 @@
+package org.eclipse.jdt.internal.ui.fix;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
+
+public interface ISaveActionSelectionDialog {
+}

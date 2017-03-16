@@ -1,0 +1,253 @@
+package com.successfactors.cdp.ui.controller;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.bean.CareerWorksheetSuggestedRoleVO;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean;
+import com.successfactors.cdp.service.GetCareerWorksheetRoles;
+//import com.successfactors.cdp.ui.util.CWSV12ViewConstants;
+import com.successfactors.cdp.ui.util.CWSV12ViewHelper;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.util.JSONUtils;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+//import com.successfactors.legacy.util.type.ProfileInfoCategoryEnum;
+//import com.successfactors.legacy.util.type.ProfileInfoSourceEnum;
+import com.successfactors.unittest.TestUtils;
+//import com.successfactors.user.bean.preference.PreferenceBean;
+//import com.successfactors.user.service.preference.GetPreferenceBean;
+import com.successfactors.xi.ui.messages.SFMessages;
+
+/***
+ * CWS V12 Controller Unit Test
+ *
+ * @author haixunlu
+ *
+ */
+public class CWSV12ControllerTest {
+
+  private ICWSV12Controller controller;
+  private ParamBean params;
+  private PermissionListBean permList;
+  private SFMessages msgs;
+  /** service command handler */
+  protected ServiceCommandHandler scaHandler;
+  /** service command handler */
+  private LocalContextSCAHandler localHandler;
+  /** context */
+  private Mockery context;
+  /**
+   * initiate object
+   * @throws Exception exception
+   */
+  @BeforeClass(groups = {"checkin"})
+  public void setUp() throws Exception {
+    params = new ParamBean();
+    controller = new CWSV12Controller();
+    context = new Mockery();
+    context.setImposteriser(ClassImposteriser.INSTANCE);
+
+    permList = context.mock(PermissionListBean.class);
+    msgs = context.mock(SFMessages.class);
+    scaHandler = context.mock(ServiceCommandHandler.class);
+    localHandler = context.mock(LocalContextSCAHandler.class);
+    TestUtils.setField(controller,"scaHandler",scaHandler);
+    TestUtils.setField(controller,"params",params);
+    TestUtils.setField(controller,"permList",permList);
+    TestUtils.setField(controller,"msgs",msgs);
+  }
+
+  @Test(groups = {"checkin"})
+  public void testAddBehaviors() {
+    JSONObjectOutput output = new JSONObjectOutput();
+    List behaviorList = new ArrayList();
+    ObjTemplateBean objTemplateBean = new ObjTemplateBean();
+    ObjTemplateBean goalPlan = new ObjTemplateBean();
+    CareerWorksheetBean careerWorksheetBean = new CareerWorksheetBean();
+    long roleId=1;
+    long parentId=-1;
+    Object[] args = {output, behaviorList, objTemplateBean, goalPlan, roleId,careerWorksheetBean,
+        true, params.getUserId(), parentId, true, true, true, true,
+        true, true, true, true};
+    try{
+      Method method = getAddBehaviorsMethod();
+      method.invoke(controller, args);
+      JSONArrayOutput rtnArrayObject = (JSONArrayOutput)output.get("behaviors");
+      Assert.assertNotNull(rtnArrayObject);
+      Assert.assertEquals(rtnArrayObject.size(), 0);
+    }catch(Exception e){
+      e.printStackTrace();
+      Assert.fail("Exception in addBehaviors");
+    }
+  }
+
+  private Method getAddBehaviorsMethod() throws NoSuchMethodException{
+    Class[] parameterTypes = new Class[17];
+    int i = 0;
+    parameterTypes[i++] = JSONObjectOutput.class;
+    parameterTypes[i++] = List.class;
+    parameterTypes[i++] = ObjTemplateBean.class;
+    parameterTypes[i++] = ObjTemplateBean.class;
+    parameterTypes[i++] = long.class;
+    parameterTypes[i++] = CareerWorksheetBean.class;
+    parameterTypes[i++] = boolean.class;
+    parameterTypes[i++] = String.class;
+    parameterTypes[i++] = long.class;
+    parameterTypes[i++] = boolean.class;
+    parameterTypes[i++] = boolean.class;
+    parameterTypes[i++] = boolean.class;
+    parameterTypes[i++] = boolean.class;
+    parameterTypes[i++] = boolean.class;
+    parameterTypes[i++] = boolean.class;
+    parameterTypes[i++] = boolean.class;
+    parameterTypes[i++] = boolean.class;
+    Method method = controller.getClass().getDeclaredMethod("addBehaviors", parameterTypes);
+    method.setAccessible(true);
+    return method;
+  }
+
+  @Test(groups = {"checkin"}, enabled = false)
+  public void testGetSuggestedRoleListWithNoPermission(){
+    String userId = "cgrant";
+    long templateId = 5001l;
+    final String errorMsg = "Internal Error";
+    params.setUserId(userId);
+    context.checking(new Expectations() {
+      {
+        one(permList).hasPermission(PermissionBean.CDP_ACCESS, PermissionBean.CDP_CWS_RECOMMENDATION_ENGINE_ACCESS, 0l);
+        will(returnValue(false));
+
+        one(msgs).getString("DEVELOPMENT_ERR_INTERNAL");
+        will(returnValue(errorMsg));
+      }
+    });
+    JSONObjectOutput expected = new JSONObjectOutput();
+    expected.put("success", false);
+    expected.put("msg", errorMsg);
+    String actual = controller.getSuggestedRoleList(userId, templateId);
+    Assert.assertEquals(JSONUtils.toJSON(expected), actual);
+  }
+
+  @Test(groups = {"checkin"}, enabled = false)
+  public void testGetSuggestedRoleListWithNoSameUser(){
+    String userId = "cgrant";
+    long templateId = 5001l;
+    final String errorMsg = "Internal Error";
+    params.setUserId("athompson");
+    context.checking(new Expectations() {
+      {
+        one(msgs).getString("DEVELOPMENT_ERR_INTERNAL");
+        will(returnValue(errorMsg));
+      }
+    });
+    JSONObjectOutput expected = new JSONObjectOutput();
+    expected.put("success", false);
+    expected.put("msg", errorMsg);
+    String actual = controller.getSuggestedRoleList(userId, templateId);
+    Assert.assertEquals(JSONUtils.toJSON(expected), actual);
+  }
+
+  @Test(groups = {"checkin"}, enabled = false)
+  public void testGetSuggestedRoleList(){
+    String userId = "cgrant";
+    long templateId = 5001l;
+    
+    params.setUserId(userId);
+    final List<CareerWorksheetSuggestedRoleVO> finalResult = new ArrayList<CareerWorksheetSuggestedRoleVO>();
+    CareerWorksheetSuggestedRoleVO vo = new CareerWorksheetSuggestedRoleVO();
+    vo.setRoleId(21l);
+    vo.setRoleName("Sales");
+    vo.setRoleDesc("Sale SuccessFactors cloud product");
+    vo.setFamilyId(1l);
+    vo.setFamilyName("SuccessFactors");
+    finalResult.add(vo);
+    context.checking(new Expectations() {
+      {
+        try {
+          one(permList).hasPermission(PermissionBean.CDP_ACCESS, PermissionBean.CDP_CWS_RECOMMENDATION_ENGINE_ACCESS, 0l);
+          will(returnValue(true));
+
+          one(scaHandler).execute(with(aNonNull(GetCareerWorksheetRoles.class)));
+          will(returnValue(finalResult));
+
+        } catch (ServiceApplicationException e) {
+          Assert.fail("ServiceApplicationException in setup");
+        }
+      }
+    });
+    JSONObjectOutput expected = CWSV12ViewHelper.getSuggestedRoleVOList(finalResult);
+    expected.put("success", true);
+    String actual = controller.getSuggestedRoleList(userId, templateId);
+    Assert.assertEquals(JSONUtils.toJSON(expected), actual);
+  }
+
+  @Test(groups = {"checkin"}, enabled = false)
+  public void testGetSuggestedRoleListWithNoRoles(){
+    String userId = "cgrant";
+    long templateId = 5001l;
+    
+    params.setUserId(userId);
+    final List<CareerWorksheetSuggestedRoleVO> finalResult = new ArrayList<CareerWorksheetSuggestedRoleVO>();
+    context.checking(new Expectations() {
+      {
+        try {
+          one(permList).hasPermission(PermissionBean.CDP_ACCESS, PermissionBean.CDP_CWS_RECOMMENDATION_ENGINE_ACCESS, 0l);
+          will(returnValue(true));
+
+          one(scaHandler).execute(with(aNonNull(GetCareerWorksheetRoles.class)));
+          will(returnValue(finalResult));
+
+        } catch (ServiceApplicationException e) {
+          Assert.fail("ServiceApplicationException in setup");
+        }
+      }
+    });
+    JSONObjectOutput expected = CWSV12ViewHelper.getSuggestedRoleVOList(finalResult);
+    expected.put("success", true);
+    String actual = controller.getSuggestedRoleList(userId, templateId);
+    Assert.assertEquals(JSONUtils.toJSON(expected), actual);
+  }
+  
+/*  @Test(groups = {"checkin"})
+  public void testUpdateCWSInstructionDisplayPreference(){
+      String userId = "admin";      
+      params.setUserId(userId);
+      String isShown = "false";
+      JSONObjectOutput expected = new JSONObjectOutput();
+      expected.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+      
+      String actual = controller.updateCWSInstructionDisplayPreference(isShown);
+      
+      
+      Assert.assertEquals(JSONUtils.toJSON(expected), actual);
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testGetCWSInstructionDisplayPreference(){
+      String userId = "admin";      
+      params.setUserId(userId);
+      JSONObjectOutput expected = new JSONObjectOutput();
+      expected.put("showInstruction", "false");
+      expected.put(CWSV12ViewConstants.JSON_KEY_SUCCESS, true);
+      
+      String actual = controller.getCWSInstructionDisplayPreference();
+      
+      
+      Assert.assertEquals(JSONUtils.toJSON(expected), actual);
+  }*/
+}

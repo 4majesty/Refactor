@@ -1,0 +1,17 @@
+package com.successfactors.cdp.service.impl;
+
+import com.successfactors.gm.api.dao.ObjDAO;
+import com.successfactors.cdp.service.GetCareerWorksheetSuggestedRoles;
+import com.successfactors.cdp.service.transcript.impl.DeleteTranscriptByIdImpl;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerRoleBean;
+import com.successfactors.competency.bean.FamilyBean;
+import com.successfactors.cdp.service.impl.IGetCareerWorksheetSuggestedRolesImpl;
+
+public interface IGetCareerWorksheetSuggestedRolesImplTest {
+	void setup();
+
+	void testGetLeadingFromRoles();
+}

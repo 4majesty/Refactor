@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
+
+public interface IRemoveFromBuildpathAction {
+	String getDetailedDescription();
+
+	void run();
+}

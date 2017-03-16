@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IBufferedDocumentScanner {
+	void setRange(IDocument document, int offset, int length);
+
+	int read();
+
+	void unread();
+
+	int getColumn();
+
+	char[][] getLegalLineDelimiters();
+}

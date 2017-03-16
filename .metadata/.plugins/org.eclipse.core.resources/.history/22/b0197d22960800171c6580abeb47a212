@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.corext.refactoring.binary;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+public interface IStubCreationOperation {
+}

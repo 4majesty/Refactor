@@ -1,0 +1,110 @@
+package com.successfactors.platform.ui.topnav.tabcreator;
+
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
+
+import org.jboss.seam.mock.SeamTest;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.legacy.bean.PermissionBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.bean.LegacyPermissionListBean;
+import com.successfactors.xi.ui.controller.topnav.TopNavBarViewEnum;
+
+public class PayrollTabCreatorTest extends SeamTest {
+  
+  ParamBean params = new ParamBean();
+  PermissionListBean permListBean;
+
+  FeatureEnum selectedFeature = null;
+
+  @BeforeMethod(groups={"checkin"})
+  public void beforeMethod() throws Exception {
+    params.setCompanyBean(new CompanyBean(){            @Override
+      public boolean isFeatureExist(FeatureEnum feature) {
+          return getFeatureSet().contains(feature);
+      }
+    });
+  }
+
+  @BeforeClass(groups={"checkin"})
+  public void beforeClass() throws Exception {
+    params.setCompanyName("testCompany");        
+    permListBean = new LegacyPermissionListBean() 
+    {
+        public boolean hasPermission(String permType, String permSubtype, long formIdOrPlanId)
+        {
+            return true;
+        }
+    };
+  }
+
+
+  @Test(groups={"checkin"})
+  public void testCompanyNoViews() throws Exception 
+  {
+
+    PayrollTabCreator creator = new PayrollTabCreator();
+    setField(creator, "params", params);
+    setField(creator, "permList", permListBean);
+    
+    assert !creator.isDisplayed(TopNavBarViewEnum.PAYROLL);
+    assert !creator.isDisplayed(TopNavBarViewEnum.PAYROLL_WORKLIST);
+    assert !creator.isDisplayed(TopNavBarViewEnum.PAYROLL_PROCESS);
+  }
+
+
+  @Test(groups={"checkin"})
+  public void testCompanyViewPayrollWorklist() throws Exception
+  {
+
+    PayrollTabCreator creator = new PayrollTabCreator();
+    params.getCompanyBean().setFeature(FeatureEnum.V12_TOP_NAV);
+    params.getCompanyBean().setFeature(FeatureEnum.PAYROLL_CONTROL_CENTER);
+    permListBean.hasPermission(PermissionBean.PAYROLL_CONTROL_CENTER, PermissionBean.PAYROLL_WORKLIST, 0);
+    setField(creator, "params", params);
+    setField(creator, "permList", permListBean);
+    assert creator.isDisplayed(TopNavBarViewEnum.PAYROLL);
+    assert creator.isDisplayed(TopNavBarViewEnum.PAYROLL_WORKLIST);
+    assert creator.isDisplayed(TopNavBarViewEnum.PAYROLL_PROCESS);
+
+   }
+
+  @Test(groups={"checkin"})
+  public void testCompanyViewPayrollProcess() throws Exception
+  {
+
+    PayrollTabCreator creator = new PayrollTabCreator();
+    params.getCompanyBean().setFeature(FeatureEnum.V12_TOP_NAV);
+    params.getCompanyBean().setFeature(FeatureEnum.PAYROLL_CONTROL_CENTER);
+    permListBean.hasPermission(PermissionBean.PAYROLL_CONTROL_CENTER, PermissionBean.PAYROLL_PROCESS, 0);
+    setField(creator, "params", params);
+    setField(creator, "permList", permListBean);
+    assert creator.isDisplayed(TopNavBarViewEnum.PAYROLL);
+    assert creator.isDisplayed(TopNavBarViewEnum.PAYROLL_WORKLIST);
+    assert creator.isDisplayed(TopNavBarViewEnum.PAYROLL_PROCESS);
+
+  }
+
+  @Test(groups={"checkin"})
+  public void testCompanyViewAll() throws Exception
+  {
+    PayrollTabCreator creator = new PayrollTabCreator(); 
+    params.getCompanyBean().setFeature(FeatureEnum.V12_TOP_NAV);
+    params.getCompanyBean().setFeature(FeatureEnum.PAYROLL_INTEGRATION);
+    params.getCompanyBean().setFeature(FeatureEnum.PAYROLL_CONTROL_CENTER);
+    permListBean.hasPermission(PermissionBean.PAYROLL_CONTROL_CENTER, PermissionBean.PAYROLL_WORKLIST, 0);
+    permListBean.hasPermission(PermissionBean.PAYROLL_CONTROL_CENTER, PermissionBean.PAYROLL_PROCESS, 0);
+    setField(creator, "params", params);
+    setField(creator, "permList", permListBean);
+    assert creator.isDisplayed(TopNavBarViewEnum.PAYROLL);
+    assert creator.isDisplayed(TopNavBarViewEnum.PAYROLL_WORKLIST);
+    assert creator.isDisplayed(TopNavBarViewEnum.PAYROLL_PROCESS);
+
+  }
+}
+ 
+

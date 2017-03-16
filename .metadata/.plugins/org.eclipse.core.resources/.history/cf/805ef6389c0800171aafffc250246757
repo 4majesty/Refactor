@@ -1,0 +1,39 @@
+package com.successfactors.cdp.service.mentoring.jam.exception;
+
+import com.successfactors.sca.ServiceApplicationException;
+
+/**
+ * JamAuthenticationException.
+ *
+ *
+ */
+public class JamAuthenticationException extends ServiceApplicationException {
+
+  /**
+   * Creates a new <code>JamAuthenticationException</code> with the specified detail message.
+   *
+   * @param message the detail message
+   */
+  public JamAuthenticationException(String message) {
+    super(message);
+  }
+
+  /**
+   * Creates a new <code>JamAuthenticationException</code> with the specified detail message and cause.
+   *
+   * @param message the detail mesage
+   * @param cause the cause
+   */
+  public JamAuthenticationException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  /**
+   * Creates a new <code>JamAuthenticationException</code> with the specified cause.
+   *
+   * @param cause the cause
+   */
+  public JamAuthenticationException(Throwable cause) {
+    super(cause);
+  }
+}

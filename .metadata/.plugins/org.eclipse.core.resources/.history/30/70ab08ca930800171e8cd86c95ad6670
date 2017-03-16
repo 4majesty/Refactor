@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.presentation.PresentationReconciler;
+
+public interface IJavaPresentationReconciler {
+	TextPresentation createRepairDescription(IRegion damage, IDocument document);
+}

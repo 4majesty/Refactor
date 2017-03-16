@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.text;
+
+import org.eclipse.jface.text.rules.IWhitespaceDetector;
+
+public interface IJavaWhitespaceDetector {
+	boolean isWhitespace(char c);
+}

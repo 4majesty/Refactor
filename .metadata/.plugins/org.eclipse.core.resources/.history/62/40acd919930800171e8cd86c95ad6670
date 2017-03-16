@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.dialogs;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
+
+public interface IMainTypeSelectionDialog {
+	Image getImage(Object element);
+
+	String getText(Object element);
+
+	int open();
+}

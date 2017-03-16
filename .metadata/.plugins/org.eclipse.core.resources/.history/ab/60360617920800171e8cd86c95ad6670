@@ -1,0 +1,39 @@
+package org.eclipse.jdt.internal.ui.workingsets;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IPageListener;
+import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IWindowListener;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
+
+public interface IEditorTracker {
+	void windowActivated(IWorkbenchWindow window);
+
+	void windowDeactivated(IWorkbenchWindow window);
+
+	void windowClosed(IWorkbenchWindow window);
+
+	void windowOpened(IWorkbenchWindow window);
+
+	void pageActivated(IWorkbenchPage page);
+
+	void pageClosed(IWorkbenchPage page);
+
+	void pageOpened(IWorkbenchPage page);
+
+	void partActivated(IWorkbenchPart part);
+
+	void partBroughtToTop(IWorkbenchPart part);
+
+	void partClosed(IWorkbenchPart part);
+
+	void partDeactivated(IWorkbenchPart part);
+
+	void partOpened(IWorkbenchPart part);
+
+	void editorOpened(IEditorPart part);
+
+	void editorClosed(IEditorPart part);
+}

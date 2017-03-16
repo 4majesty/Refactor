@@ -1,0 +1,15 @@
+package org.eclipse.jdt.internal.ui.wizards.dialogfields;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
+public interface ISeparator {
+	Control[] doFillIntoGrid(Composite parent, int nColumns, int height);
+
+	Control[] doFillIntoGrid(Composite parent, int nColumns);
+
+	int getNumberOfControls();
+
+	Control getSeparator(Composite parent);
+}

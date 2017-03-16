@@ -1,0 +1,34 @@
+package org.eclipse.jdt.internal.corext.refactoring.reorg;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
+import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
+
+public interface ICopyModifications {
+	void copy(IResource resource, CopyArguments args);
+
+	void copy(IJavaElement element, CopyArguments javaArgs, CopyArguments resourceArgs) throws CoreException;
+
+	void copy(IPackageFragmentRoot sourceFolder, CopyArguments javaArgs, CopyArguments resourceArgs);
+
+	void copy(IPackageFragment pack, CopyArguments javaArgs, CopyArguments resourceArgs) throws CoreException;
+
+	void copy(ICompilationUnit unit, CopyArguments javaArgs, CopyArguments resourceArgs);
+
+	void buildDelta(IResourceChangeDescriptionFactory builder);
+
+	RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared);
+}

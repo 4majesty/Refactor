@@ -1,0 +1,27 @@
+package org.eclipse.jdt.internal.ui.wizards;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.ui.IPackagesViewPart;
+import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
+import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.ui.wizards.INewJavaProjectWizardPageTwo;
+import org.eclipse.jdt.ui.wizards.INewJavaProjectWizardPageOne;
+
+public interface IJavaProjectWizard {
+	void addPages();
+
+	boolean performFinish();
+
+	void setInitializationData(IConfigurationElement cfig, String propertyName, Object data);
+
+	boolean performCancel();
+
+	IJavaElement getCreatedElement();
+}

@@ -1,0 +1,31 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import javax.inject.Inject;
+import org.jboss.seam.annotations.In;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean;
+import com.sf.sfv4.bean.succession.SuccessionDataModelBean.StandardElement;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramSignupFormSectionValue;
+import com.successfactors.cdp.service.mentoring.GetStandardElementValue;
+import com.successfactors.cdp.service.util.mentoring.DMFieldWhiteListEnum;
+import com.successfactors.datamodel.api.DataModelFacade;
+import com.successfactors.i18n.util.L10nUtils;
+import com.successfactors.legacy.service.GetSysConfigListV2;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.util.Messages;
+import com.successfactors.platform.util.TimeZoneUtils;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.service.FetchAllUserInfoValues;
+import com.successfactors.user.service.FindUserById;
+import com.successfactors.user.service.GetAllJobCodes;
+
+public interface IGetStandardElementValueImpl {
+	GetStandardElementValue execute(GetStandardElementValue cmd) throws ServiceApplicationException;
+}

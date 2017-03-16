@@ -1,0 +1,12 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import static org.testng.Assert.assertNotEquals;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+import org.testng.annotations.Test;
+
+public interface IMentoringDateUtilsTest {
+	void testCalculateDate0Hours();
+}

@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
+
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
+
+public interface ITypeSetEnvironment {
+	TType getJavaLangObject();
+
+	TypeUniverseSet getUniverseTypeSet();
+
+	EmptyTypeSet getEmptyTypeSet();
+
+	SubTypesOfSingleton createSubTypesOfSingleton(TType superType);
+
+	SubTypesSet createSubTypesSet(TypeSet superTypes);
+
+	SuperTypesOfSingleton createSuperTypesOfSingleton(TType subType);
+
+	SuperTypesSet createSuperTypesSet(TType subType);
+
+	SuperTypesSet createSuperTypesSet(TypeSet subTypes);
+
+	void dumpStats();
+}

@@ -1,0 +1,106 @@
+package com.successfactors.cdp.ui.controller.mentoring;
+
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.gm.bean.ObjBean;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.bean.ObjTemplateBean.EnumValue;
+import com.successfactors.gm.bean.ObjTemplateBean.Field;
+import com.successfactors.gm.service.objective.GetDefaultTemplate;
+import com.successfactors.gm.util.type.ObjPlanTypeEnum;
+import com.successfactors.i18n.service.IMessageBundle;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.legacy.bean.FindUserBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.service.ejb.SysConfig;
+import com.successfactors.legacy.ui.servlet.js.AutoCompleteHelper;
+import com.successfactors.legacy.ui.tag.widget.AutoCompTag;
+import com.successfactors.legacy.util.json.JSONArrayOutput;
+import com.successfactors.legacy.util.json.JSONObjectOutput;
+import com.successfactors.legacy.util.permission.PermissionUtils;
+import com.successfactors.legacy.util.type.ProfileInfoCategoryEnum;
+import com.successfactors.legacy.util.type.ProfileInfoSourceEnum;
+import com.successfactors.legacy.util.type.ProfileInfoTypeEnum;
+import com.successfactors.listviews.app.EmpListColumnEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.quickcard.bean.vo.QuickCardSearchCriteriaVO;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sfutil.util.HexUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.preference.PreferenceBean;
+import com.successfactors.user.bean.util.UserFormatUtils;
+import com.successfactors.user.service.FindUserById;
+import com.successfactors.user.service.FindUsersByIds;
+import com.successfactors.user.service.FindUsersGenericV3;
+import com.successfactors.user.service.UserAutoCompleteSearch;
+import com.successfactors.user.service.preference.GetPreferenceBean;
+import com.successfactors.user.service.preference.UpdatePreferenceBeans;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import javax.inject.Inject;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import com.successfactors.cdp.app.mentoring.IRetrieveLabelService;
+import com.successfactors.cdp.service.mentoring.IDevGoalService;
+import com.successfactors.cdp.service.mentoring.IUnsupervisedMatchJamGroupInviteObserver;
+
+public interface IMentoringProgramController {
+	JSONObjectOutput getMentoringProgramList(String programId);
+
+	JSONObjectOutput getNewMenteeRequestCountFromMentor();
+
+	JSONObjectOutput getMentorProgramDataById(String programId);
+
+	JSONObjectOutput getMenteeProgramDataById(String programId);
+
+	JSONObjectOutput getSignupForm(String mentorOrMentee, String programId);
+
+	JSONObjectOutput saveMentorSignupForm(String programId, String formId, Map<String, List<String>> sectionValues,
+			String status, Integer threshold);
+
+	JSONObjectOutput checkTokenValid(String programId, String token);
+
+	JSONObjectOutput updateMenteeRequest(String programId, String mentoringRequestStatus, String id,
+			String rejectComment) throws ServiceApplicationException;
+
+	JSONObjectOutput getMatchingMentorList(String programId, Map<String, Set<String>> sectionValues);
+
+	JSONObjectOutput findMentorsByName(String programId, String name);
+
+	List userAutoSearch(String name, Integer maxResults, Integer pageNumber) throws ServiceApplicationException;
+
+	JSONObjectOutput saveMenteeSignupForm(String programId, String formId, String status,
+			Map<String, List<String>> sectionValues, String mentors);
+
+	JSONObjectOutput updateMentorUnavailableEndDate(String programId, String mentorExternalId,
+			String updatedUnavailableEndDate);
+
+	JSONObjectOutput getJamFeedWidgetInfo(String programId);
+}

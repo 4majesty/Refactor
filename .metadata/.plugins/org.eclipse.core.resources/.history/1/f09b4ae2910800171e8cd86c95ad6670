@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+
+public interface IContributedProcessorDescriptor {
+	IStatus checkSyntax();
+
+	Object getProcessor(ICompilationUnit cunit, Class expectedType);
+
+	boolean canHandleMarkerType(String markerType);
+}

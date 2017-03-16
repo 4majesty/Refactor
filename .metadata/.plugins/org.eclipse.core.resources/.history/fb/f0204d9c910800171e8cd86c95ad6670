@@ -1,0 +1,12 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+
+public interface ISerialVersionSubProcessor {
+	boolean isDefaultProposal();
+
+	Object getAdditionalProposalInfo(IProgressMonitor monitor);
+}

@@ -1,0 +1,27 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentor;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.ui.controller.mentoring.MentoringProgramController;
+import com.successfactors.cdp.ui.util.mentoring.MentoringProgramViewConstants;
+import com.successfactors.competency.service.GetRolesByJobCode;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.handler.ejb.LocalContextSCAHandler;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.user.service.FindUserById;
+import com.successfactors.xi.ui.messages.SFMessages;
+
+public interface IMentoringProgramControllerTest {
+	void setUp();
+
+	void testgenerateCardInfo();
+
+	void testGetLastDay();
+
+	void testGetMentoringProgramCompletedDate();
+}

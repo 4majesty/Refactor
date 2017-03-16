@@ -1,0 +1,13 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.service.mentoring.SignUpMentors;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import java.util.Date;
+
+public interface ISignUpMentorsImpl {
+	MentoringProgram execute(SignUpMentors cmd) throws ServiceApplicationException;
+}

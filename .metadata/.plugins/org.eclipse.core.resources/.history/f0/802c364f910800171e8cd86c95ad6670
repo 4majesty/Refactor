@@ -1,0 +1,33 @@
+package org.eclipse.jdt.internal.ui.wizards.dialogfields;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.core.runtime.Assert;
+
+public interface IDialogField {
+	void setLabelText(String labeltext);
+
+	void setDialogFieldListener(IDialogFieldListener listener);
+
+	void dialogFieldChanged();
+
+	boolean setFocus();
+
+	void postSetFocusOnDialogField(Display display);
+
+	Control[] doFillIntoGrid(Composite parent, int nColumns);
+
+	int getNumberOfControls();
+
+	Label getLabelControl(Composite parent);
+
+	void setEnabled(boolean enabled);
+
+	void refresh();
+
+	boolean isEnabled();
+}

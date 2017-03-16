@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.corext.refactoring.code.flow;
+
+import org.eclipse.jdt.core.dom.ReturnStatement;
+
+public interface IReturnFlowInfo {
+	void merge(FlowInfo info, FlowContext context);
+}

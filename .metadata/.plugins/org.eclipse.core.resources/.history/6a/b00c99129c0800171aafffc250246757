@@ -1,0 +1,133 @@
+package com.successfactors.cdp.bean.mentoring;
+
+import java.util.List;
+
+import javax.persistence.Column;
+import javax.persistence.OneToMany;
+
+import com.sf.sfv4.util.Tables.GENERIC_OBJECT_T;
+import com.successfactors.cdp.service.util.mentoring.SignupFormStatusEnum;
+import com.successfactors.genericobject.api.model.DataType;
+import com.successfactors.genericobject.bean.model.impl.AssociationType;
+import com.successfactors.genericobject.bean.model.impl.AuditFields;
+import com.successfactors.genericobject.bean.model.impl.Field;
+import com.successfactors.genericobject.api.model.Visibility;
+import com.successfactors.genericobject.api.model.Type;
+
+/**
+ * Program Signup Form Entity 
+ * @author I309618
+ *
+ */
+public class MentoringProgramSignupForm extends AuditFields{
+  //System Fields
+  /** External Code. */
+  @Column(name = GENERIC_OBJECT_T.EXTERNAL_CODE, nullable = false)
+  @Field(visibility = Visibility.READ_ONLY, dataType = DataType.AUTO_NUMBER)
+  protected String externalId;
+ 
+  /** Internal Id. */
+  @Column(name = GENERIC_OBJECT_T.INTERNAL_ID)
+  @Field(visibility = Visibility.NOT_VISIBLE)
+  protected Long internalId;
+  
+  // Business Fields
+  /** sections */
+  @OneToMany()
+  @AssociationType(type = Type.COMPOSITE)
+  @Field(visibility = Visibility.EDITABLE)
+  private List<MentoringProgramSignupFormSection> sections;
+  /** userId */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD1, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.USER)
+  private String user;
+  /** programId */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD2, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType = DataType.STRING)
+  private String programId;
+  /** status */
+  @Column(name = GENERIC_OBJECT_T.SF_FIELD3, nullable = true)
+  @Field(visibility = Visibility.EDITABLE, dataType=DataType.ENUM)
+  private SignupFormStatusEnum status;
+  /**
+   * getExternalId
+   * @return externalId
+   */
+  public String getExternalId() {
+    return externalId;
+  }
+
+  public void setExternalId(String externalId) {
+    this.externalId = externalId;
+  }
+  /**
+   * getInternalId
+   * @return internalId
+   */
+  public Long getInternalId() {
+    return internalId;
+  }
+  /**
+   * setInternalId
+   * @param internalId internalId
+   */
+  public void setInternalId(Long internalId) {
+    this.internalId = internalId;
+  }
+  /**
+   * getSections
+   * @return sections
+   */
+  public List<MentoringProgramSignupFormSection> getSections() {
+    return sections;
+  }
+  /**
+   * setSections
+   * @param sections sections
+   */
+  public void setSections(List<MentoringProgramSignupFormSection> sections) {
+    this.sections = sections;
+  }
+ /**
+  * getUser
+  * @return userId
+  */
+  public String getUser() {
+    return user;
+  }
+/**
+ * setUser
+ * @param userId userId
+ */
+  public void setUser(String userId) {
+    this.user = userId;
+  }
+/**
+ * getProgramId
+ * @return programId
+ */
+  public String getProgramId() {
+    return programId;
+  }
+/**
+ * setProgramId
+ * @param programId  programId
+ */
+  public void setProgramId(String programId) {
+    this.programId = programId;
+  }
+/**
+ * getStatus
+ * @return status
+ */
+  public SignupFormStatusEnum getStatus() {
+    return status;
+  }
+/**
+ * setStatus
+ * @param status status
+ */
+  public void setStatus(SignupFormStatusEnum status) {
+    this.status = status;
+  }
+}

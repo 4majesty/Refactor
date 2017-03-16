@@ -1,0 +1,138 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang.StringUtils;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramOwner;
+import com.successfactors.cdp.service.mentoring.jam.ScheduleProgramLaunchJamGroupActivityJob;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupAddAdminFailureEmail;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupPhotoFailureEmail;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+import com.successfactors.cdp.service.util.mentoring.ProgramStatusEnum;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceSystemException;
+
+/**
+ * Program Launch Jam group Activity Observer
+ * 
+ * @author rsrigiri
+ *
+ */
+@Name("programLaunchJamGroupActivityObserver")
+@javax.inject.Named("programLaunchJamGroupActivityObserver")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+public class ProgramLaunchJamGroupActivityObserver {
+
+  /** logger */
+  private static final Logger log = LogManager.getLogger(); 
+
+  /** SCA Handler */ 
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+
+  @Inject
+  @In
+  private ParamBean params;
+
+  // TBD - to make it an annoted observer (@Observer?) supported for both seam / spring
+  public void onLaunchSuccess(final MentoringProgram program) {
+    if(program == null) {
+      log.error("Invalid input program.");
+      return;
+    }
+
+    if(log.isDebugEnabled()) {
+      log.debug("Program Id:" + program.getExternalId());
+    }
+
+    if (isJamActivityRequired(program)) {
+      scheduleJamGroupActivityJob(program);
+    }
+  }
+
+  private boolean isJamActivityRequired(MentoringProgram program) {
+    return (program.isJamEnabled() 
+             && !StringUtils.isBlank(program.getJamGroupId())
+             && isValidProgramStatus(program)
+             && (hasPhoto(program) || hasOwners(program)));
+  }
+
+  private boolean isValidProgramStatus(MentoringProgram program) {
+    return (program.getStatus() == ProgramStatusEnum.CONFIRMED  // for supervised / unsupervised
+             || (program.getMatchingType() == ProgramMatchingTypeEnum.OPEN_ENDED
+                  && program.getStatus() == ProgramStatusEnum.INPROGRESS)); // for open-ended
+  }
+
+  private void scheduleJamGroupActivityJob(MentoringProgram program) {
+    try {
+      scaHandler.execute(new ScheduleProgramLaunchJamGroupActivityJob(program.getExternalId()));
+    } catch (ServiceApplicationException e) {
+      log.error("Exception occured while scheduling program launch jam group activity job.",e);
+      sendPhotoFailureEmail(program);
+      sendAddAdminFailureEmail(program);
+    } catch (ServiceSystemException e) {
+      log.error("Exception occured while scheduling program launch jam group activity job.",e);
+      sendPhotoFailureEmail(program);
+      sendAddAdminFailureEmail(program);
+    }
+  }
+
+  private void sendPhotoFailureEmail(MentoringProgram program) {
+    try {
+      scaHandler.execute(new SendJamGroupPhotoFailureEmail(program));
+    } catch (ServiceApplicationException e) {
+      log.error("Exception occured while invoking SendJamGroupPhotoFailureEmail SCA.",e);
+    } catch (ServiceSystemException e) {
+      log.error("Exception occured while invoking SendJamGroupPhotoFailureEmail SCA.",e);
+    }
+  }
+
+  private boolean hasPhoto(MentoringProgram program) {
+    return !(StringUtils.isEmpty(program.getPhotoId()));
+  }
+
+  private void sendAddAdminFailureEmail(MentoringProgram program) {
+    try {
+      scaHandler.execute(new SendJamGroupAddAdminFailureEmail(program, getProgramOwners(program)));
+    } catch (ServiceApplicationException e) {
+      log.error("Exception occured while invoking SendJamGroupAddAdminFailureEmail SCA.",e);
+    } catch (ServiceSystemException e) {
+      log.error("Exception occured while invoking SendJamGroupAddAdminFailureEmail SCA.",e);
+    }
+  }
+
+  private boolean hasOwners(MentoringProgram program) {
+    return (program.getOwners() != null 
+             && !program.getOwners().isEmpty());
+  }
+
+  private List<String> getProgramOwners(MentoringProgram program) {
+    List<String> users = new ArrayList<String>();
+
+    if (program.getOwners() != null && !program.getOwners().isEmpty()) {
+      for (MentoringProgramOwner owner : program.getOwners()) {
+        if(owner != null) {
+          users.add(owner.getUser());
+        }
+      }
+    }
+
+    return users;
+  }
+}

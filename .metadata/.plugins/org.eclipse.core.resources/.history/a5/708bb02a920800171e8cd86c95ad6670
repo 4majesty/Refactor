@@ -1,0 +1,134 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.osgi.framework.BundleContext;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.TemplateVariableResolver;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.FormColors;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.navigator.ICommonMenuConstants;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.themes.IThemeManager;
+import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
+import org.eclipse.ui.texteditor.ConfigurationElementSorter;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
+import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
+import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry;
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
+import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
+import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
+import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
+import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
+import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantRegistry;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileStore;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentProvider;
+import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
+import org.eclipse.jdt.internal.ui.text.folding.JavaFoldingStructureProviderRegistry;
+import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
+import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jdt.internal.ui.viewsupport.ImagesOnFileSystemRegistry;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathAttributeConfigurationDescriptors;
+import org.eclipse.jdt.ui.text.IJavaTextTools;
+import org.eclipse.jdt.internal.ui.viewsupport.IProblemMarkerManager;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.IClasspathAttributeConfigurationDescriptors;
+import org.eclipse.jdt.internal.ui.text.java.IContentAssistHistory;
+import org.eclipse.jdt.internal.ui.preferences.IMembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.ui.javaeditor.IASTProvider;
+
+public interface IJavaPlugin {
+	void start(BundleContext context) throws Exception;
+
+	void stop(BundleContext context) throws Exception;
+
+	org.eclipse.jdt.core.IBufferFactory getBufferFactory();
+
+	ICompilationUnitDocumentProvider getCompilationUnitDocumentProvider();
+
+	IDocumentProvider getPropertiesFileDocumentProvider();
+
+	ClassFileDocumentProvider getClassFileDocumentProvider();
+
+	WorkingCopyManager getWorkingCopyManager();
+
+	ProblemMarkerManager getProblemMarkerManager();
+
+	JavaTextTools getJavaTextTools();
+
+	ASTProvider getASTProvider();
+
+	MembersOrderPreferenceCache getMemberOrderPreferenceCache();
+
+	TypeFilter getTypeFilter();
+
+	FormToolkit getDialogsFormToolkit();
+
+	JavaEditorTextHoverDescriptor[] getJavaEditorTextHoverDescriptors();
+
+	void resetJavaEditorTextHoverDescriptors();
+
+	ContextTypeRegistry getTemplateContextRegistry();
+
+	TemplateStore getTemplateStore();
+
+	ContextTypeRegistry getCodeTemplateContextRegistry();
+
+	TemplateStore getCodeTemplateStore();
+
+	IPreferenceStore getCombinedPreferenceStore();
+
+	JavaFoldingStructureProviderRegistry getFoldingStructureProviderRegistry();
+
+	SaveParticipantRegistry getSaveParticipantRegistry();
+
+	CleanUpRegistry getCleanUpRegistry();
+
+	ContentAssistHistory getContentAssistHistory();
+
+	IDialogSettings getDialogSettingsSection(String name);
+
+	ClasspathAttributeConfigurationDescriptors getClasspathAttributeConfigurationDescriptors();
+
+	ImagesOnFileSystemRegistry getImagesOnFSRegistry();
+}

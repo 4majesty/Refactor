@@ -1,0 +1,14 @@
+package com.successfactors.cdp.test;
+
+import org.hamcrest.Factory;
+import org.hamcrest.Matcher;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.annotations.BeforeMethod;
+import com.successfactors.platform.bean.ParamBean;
+
+public interface IAbstractMockeryTest {
+	void setUpMockery();
+
+	ParamBean getDefaultParam();
+}

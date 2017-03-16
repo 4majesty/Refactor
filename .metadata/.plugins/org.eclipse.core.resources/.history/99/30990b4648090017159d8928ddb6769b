@@ -1,0 +1,18 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import java.util.List;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.service.mentoring.GetMentoringRequest;
+import com.successfactors.genericobject.api.sql.Restrictions;
+import com.successfactors.genericobject.app.datamodel.ConfigurationProvider;
+import com.successfactors.genericobject.app.sql.GOSQLGeneratorContext;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+public interface IGetMentoringRequestImpl {
+	List<MentoringProgramMentorRequest> execute(GetMentoringRequest cmd) throws ServiceApplicationException;
+}

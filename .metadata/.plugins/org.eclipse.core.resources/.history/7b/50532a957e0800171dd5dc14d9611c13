@@ -1,0 +1,63 @@
+/*
+ * $Id: ProvisionedTag.java 340726 2013-09-04 07:55:11Z dhu $
+ *
+ * Copyright (c) 2004 SuccessFactors, Inc.
+ * All Rights Reserved
+ */
+package com.successfactors.legacy.ui.tag;
+
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.platform.ui.servlet.SessionConstants;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.TagSupport;
+import javax.servlet.jsp.PageContext;
+
+/**
+ * ProvisionedTag is a JSP tag that only include the JSP body if the
+ * specified provisioning criteria are met.  Currently only feature
+ * bit testing is enabled.
+ *
+ * <p>Example usage:
+ *
+ * <pre>
+ *   &lt;provisioned feature="&lt;%=CompanyBean.FEATURE_MATRIX_GRID_REPORT%>">
+ *     &lt;a href="...">Matrix Grid Report&lt;/a>
+ *   &lt;/provisioned>
+ * </pre>
+ *
+ * @jsp.tag name="provisioned" body-content="JSP"
+ *
+ * @author Jeffrey Ichnowski
+ * @version $Revision: 340726 $
+ */
+public class ProvisionedTag
+  extends TagSupport
+{
+  private FeatureEnum _feature;
+
+  /**
+   * @jsp.attribute required="true" rtexprvalue="true"
+   */
+  public FeatureEnum getFeature() {
+    return _feature;
+  }
+
+  public void setFeature(FeatureEnum feature) {
+    _feature = feature;
+  }
+
+  public int doStartTag()
+    throws JspException
+  {
+    CompanyBean companyBean = (CompanyBean)pageContext.getAttribute(
+        SessionConstants.COMPANY_BEAN, PageContext.SESSION_SCOPE);
+
+    // companyBean == null possible?
+    if (companyBean != null && companyBean.isFeatureExist(_feature)) {
+      return EVAL_BODY_INCLUDE;
+    } else {
+      return SKIP_BODY;
+    }
+  }
+} // ProvisionedTag

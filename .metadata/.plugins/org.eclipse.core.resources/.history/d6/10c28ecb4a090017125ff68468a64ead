@@ -1,0 +1,20 @@
+package com.successfactors.cdp.service.impl;
+
+import org.testng.annotations.Test;
+import com.successfactors.cdp.bean.CareerWorksheetSuggestedRoleVO;
+import com.successfactors.competency.dao.CompetencyDAO;
+import com.successfactors.db.dao.DAOException;
+import com.successfactors.gm.api.dao.ObjDAO;
+import com.successfactors.cdp.service.GetCareerWorksheetSuggestedRoles;
+import com.successfactors.cdp.service.transcript.impl.DeleteTranscriptByIdImpl;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerRoleBean;
+import com.successfactors.competency.bean.FamilyBean;
+
+public interface IGetCareerWorksheetSuggestedRolesImplTest {
+	void setup();
+
+	void testGetLeadingFromRoles();
+}

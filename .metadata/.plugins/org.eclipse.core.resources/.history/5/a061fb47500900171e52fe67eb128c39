@@ -1,0 +1,16 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.unittest.TestUtils;
+
+public interface IMentoringProgramAdminControllerTest {
+	void setUp();
+
+	void calculateSizeOfObject();
+
+	void testGetSignedParticipantCount();
+
+	void testGetAllFieldEditablePermission();
+
+	void testHasAccessProgramPermission();
+}

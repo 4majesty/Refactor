@@ -1,0 +1,120 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IWidgetTokenKeeper;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.formatter.IFormattingContext;
+import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
+import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.ResourceAction;
+import org.eclipse.ui.texteditor.TextOperationAction;
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
+import org.eclipse.ui.texteditor.templates.ITemplatesPage;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.AddBlockCommentAction;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.IndentAction;
+import org.eclipse.jdt.internal.ui.actions.RemoveBlockCommentAction;
+import org.eclipse.jdt.internal.ui.actions.SurroundWithActionGroup;
+import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
+import org.eclipse.jdt.internal.ui.preferences.SaveParticipantPreferencePage;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
+import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
+import org.eclipse.jdt.internal.ui.text.Symbols;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandInstaller;
+import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
+import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
+
+public interface ICompilationUnitEditor {
+	IContentAssistant getContentAssistant();
+
+	void doOperation(int operation);
+
+	boolean requestWidgetToken(IWidgetTokenKeeper requester);
+
+	boolean requestWidgetToken(IWidgetTokenKeeper requester, int priority);
+
+	IFormattingContext createFormattingContext();
+
+	ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length);
+
+	void update(DocumentEvent event);
+
+	void setCloseBracketsEnabled(boolean enabled);
+
+	void setCloseStringsEnabled(boolean enabled);
+
+	void setCloseAngularBracketsEnabled(boolean enabled);
+
+	void verifyKey(VerifyEvent event);
+
+	void left(LinkedModeModel environment, int flags);
+
+	void suspend(LinkedModeModel environment);
+
+	void resume(LinkedModeModel environment, int flags);
+
+	void remember();
+
+	void restore();
+
+	void setOffset(int offset);
+
+	int getOffset();
+
+	int getRememberedOffset(IJavaElement newElement);
+
+	int getRevealOffset(IJavaElement element, int offset);
+
+	IJavaElement getElement();
+
+	void clear();
+
+	void editorContextMenuAboutToShow(IMenuManager menu);
+
+	void doSave(IProgressMonitor progressMonitor);
+
+	boolean isSaveAsAllowed();
+
+	void dispose();
+
+	void createPartControl(Composite parent);
+
+	void aboutToBeReconciled();
+
+	void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor);
+
+	Object getAdapter(Class required);
+
+	Object getReconcilerLock();
+}

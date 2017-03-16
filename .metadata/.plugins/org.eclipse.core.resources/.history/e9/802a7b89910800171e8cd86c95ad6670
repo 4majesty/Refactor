@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.javaeditor;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IMarkerDelta;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.JavaCore;
+
+public interface IClassFileMarkerAnnotationModel {
+	void setClassFile(IClassFile classFile);
+
+	void resourceChanged(IResourceChangeEvent e);
+}

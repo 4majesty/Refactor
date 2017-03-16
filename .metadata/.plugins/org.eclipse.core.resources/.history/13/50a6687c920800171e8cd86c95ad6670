@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
+
+public interface IWorkingSetDropAdapter {
+	Transfer getTransfer();
+
+	boolean isEnabled(DropTargetEvent event);
+
+	boolean validateDrop(Object target, int operation, TransferData transferType);
+
+	boolean performDrop(Object data);
+
+	int internalTestValidateTarget(Object target, int operation);
+
+	void internalTestDrop(Object target, int eventDetail);
+
+	void internalTestSetLocation(int location);
+}

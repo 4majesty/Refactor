@@ -1,0 +1,34 @@
+package org.eclipse.jdt.internal.ui.text.spelling;
+
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
+import org.eclipse.ui.texteditor.spelling.SpellingProblem;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
+import org.eclipse.jdt.internal.ui.text.spelling.engine.RankedWordProposal;
+
+public interface IJavaSpellingProblem {
+	int getOffset();
+
+	int getLength();
+
+	String getMessage();
+
+	ICompletionProposal[] getProposals();
+
+	ICompletionProposal[] getProposals(IQuickAssistInvocationContext originalContext);
+
+	String[] getArguments();
+
+	boolean isDictionaryMatch();
+
+	boolean isSentenceStart();
+}

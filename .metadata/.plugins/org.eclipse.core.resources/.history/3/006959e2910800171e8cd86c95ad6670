@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.text.correction;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+
+public interface IContributedProcessorDescriptor {
+	IStatus checkSyntax();
+
+	Object getProcessor(ICompilationUnit cunit, Class expectedType);
+
+	boolean canHandleMarkerType(String markerType);
+}

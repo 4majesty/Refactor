@@ -1,0 +1,26 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
+public interface IClasspathFixSelectionDialog {
+	ClasspathFixProposal getSelectedClasspathFix();
+
+	void doubleClick(DoubleClickEvent event);
+
+	void selectionChanged(SelectionChangedEvent event);
+
+	void widgetDefaultSelected(SelectionEvent e);
+
+	void widgetSelected(SelectionEvent e);
+
+	Image getImage(Object element);
+
+	String getText(Object element);
+}

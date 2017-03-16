@@ -1,0 +1,19 @@
+package org.eclipse.jdt.internal.ui.browsing;
+
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ILogicalPackagesProvider {
+	LogicalPackage findLogicalPackage(IPackageFragment fragment);
+
+	void propertyChange(PropertyChangeEvent event);
+
+	void dispose();
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+
+	void elementChanged(ElementChangedEvent event);
+}

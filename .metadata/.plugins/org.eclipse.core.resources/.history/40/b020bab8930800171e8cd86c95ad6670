@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.wizards;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.resources.IResourceProxy;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IClassPathDetector {
+	int compare(Object o1, Object o2);
+
+	boolean visit(IResourceProxy proxy);
+
+	IPath getOutputLocation();
+
+	IClasspathEntry[] getClasspath();
+}

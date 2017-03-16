@@ -1,0 +1,18 @@
+package org.eclipse.jdt.ui.text.java;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
+
+public interface ICompletionProposalLabelProvider {
+	String createParameterList(CompletionProposal proposal);
+
+	String createLabel(CompletionProposal proposal);
+
+	StyledString createStyledLabel(CompletionProposal proposal);
+
+	ImageDescriptor createImageDescriptor(CompletionProposal proposal);
+}

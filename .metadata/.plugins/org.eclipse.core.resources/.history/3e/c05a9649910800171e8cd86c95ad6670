@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jface.dialogs.StatusDialog;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+
+public interface IFiltersDialog {
+}

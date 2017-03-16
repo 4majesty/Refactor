@@ -1,0 +1,32 @@
+package org.eclipse.jdt.internal.ui.text.correction.proposals;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.UnresolvedElementsSubProcessor;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
+import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
+import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
+import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
+import org.eclipse.jdt.internal.ui.wizards.NewEnumCreationWizard;
+import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
+
+public interface INewCUUsingWizardProposal {
+	void apply(IDocument document);
+
+	Object getAdditionalProposalInfo(IProgressMonitor monitor);
+
+	boolean isShowDialog();
+
+	void setShowDialog(boolean showDialog);
+
+	IType getCreatedType();
+
+	int getTypeKind();
+}

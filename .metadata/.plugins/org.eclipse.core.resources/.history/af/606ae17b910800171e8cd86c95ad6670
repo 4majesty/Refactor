@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+
+public interface IJavadocConfigurationPropertyPage {
+	void createControl(Composite parent);
+
+	boolean performOk();
+
+	void statusChanged(IStatus status);
+}

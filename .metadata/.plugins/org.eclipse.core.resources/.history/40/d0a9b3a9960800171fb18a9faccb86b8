@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+
+public interface IJavaStatusContextViewer {
+	void createControl(Composite parent);
+
+	void setInput(RefactoringStatusContext context);
+}

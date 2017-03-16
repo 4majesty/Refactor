@@ -1,0 +1,6 @@
+package org.eclipse.jdt.internal.corext.refactoring.code;
+
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface ICodeRefactoringUtil {
+}

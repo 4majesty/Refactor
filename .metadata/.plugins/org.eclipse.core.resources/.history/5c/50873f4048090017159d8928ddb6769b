@@ -1,0 +1,163 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.jam.Group;
+import com.successfactors.cdp.bean.mentoring.jam.JamFeedWidgetInfo;
+import com.successfactors.cdp.service.mentoring.CheckJAMPermission;
+import com.successfactors.cdp.service.mentoring.jam.GetJamAuthToken;
+import com.successfactors.cdp.service.mentoring.jam.GetJamBaseURL;
+import com.successfactors.cdp.service.mentoring.jam.GetJamFeedWidgetInfo;
+import com.successfactors.cdp.service.mentoring.jam.GetJamGroup;
+import com.successfactors.cdp.service.mentoring.jam.GetJamSingleUseToken;
+import com.successfactors.cdp.service.mentoring.jam.exception.JamGroupPermissionException;
+import com.successfactors.cdp.service.mentoring.jam.util.JamConstants;
+import com.successfactors.cdp.service.mentoring.jam.util.JamUtil;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+
+@Service
+public class GetJamFeedWidgetInfoImpl 
+   implements ServiceQueryImpl<JamFeedWidgetInfo, GetJamFeedWidgetInfo> {
+
+  /** logger. */
+  private static Logger log = LogManager.getLogger();
+
+  /** sca handler */
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+
+  @Inject
+  @In
+  private ParamBean params;
+  
+  @Inject
+  @In(create = true)
+  private MentoringServiceBase mentoringServiceBase;
+
+  @Override
+  public JamFeedWidgetInfo execute(GetJamFeedWidgetInfo cmd) throws ServiceApplicationException {
+    MentoringProgram program = getMentoringProgram(cmd.getProgramId());
+
+    if(program == null) { // should not happen
+      throw new ServiceApplicationException("Invalid program id:"+cmd.getProgramId());
+    }
+
+    if(!program.isJamEnabled()) {
+      throw new JamGroupPermissionException("Jam switch is not enabled for "
+          + "program id:"+cmd.getProgramId()+". program name:"+program.getName());
+    }
+
+    if(!hasJamFeaturePermission()) {
+      throw new JamGroupPermissionException("Login User does not have access to Jam feature."
+          + " program id:"+cmd.getProgramId()+". program name:"+program.getName());
+    }
+
+    String groupId = program.getJamGroupId();
+
+    if(StringUtils.isEmpty(groupId)) { // should not happen
+      throw new ServiceApplicationException("Empty Jam Group Id found for "
+          + "program id:"+cmd.getProgramId()+". program name:"+program.getName());
+    }
+
+    String accessToken = getAuthToken(); // reuse token for group perm check & singleusetoken generation
+
+    if(StringUtils.isEmpty(accessToken)) {
+      throw new ServiceApplicationException("Unable to generate jam oauth access token for login user, "
+          + "to fetch group feed widget info. Jam Group Id:" + groupId
+          + ", program id:"+cmd.getProgramId()+". program name:"+program.getName());
+    }
+
+    if(!hasJamGroupPermission(groupId, accessToken)) {
+      throw new JamGroupPermissionException("No permission to access Jam group id:"
+          + groupId + ", for program id:"+cmd.getProgramId()+". program name:"+program.getName());
+    }
+
+    JamFeedWidgetInfo feedInfo = new JamFeedWidgetInfo();
+
+    String singleUseToken = getSingleUseToken(accessToken);
+    
+    if(StringUtils.isEmpty(singleUseToken)) {
+      throw new ServiceApplicationException("Unable to generate jam single use token for login user, "
+          + "to fetch group feed widget info. Jam Group Id:" + groupId
+          + ", program id:"+cmd.getProgramId()+". program name:"+program.getName());
+    }
+
+    feedInfo.setSingleUseToken(singleUseToken);
+
+    String baseURL = getJamBaseURL();
+
+    feedInfo.setScriptURL(getScriptURL(baseURL));
+    feedInfo.setApiURL(getApiURL(baseURL));
+    feedInfo.setGroupId(groupId);
+    feedInfo.setGroupURL(getGoToGroupUrl(baseURL, groupId));
+
+    return feedInfo;
+  }
+
+  private MentoringProgram getMentoringProgram(String programId) 
+      throws ServiceApplicationException {
+    return mentoringServiceBase.getProgramById(programId);
+  }
+
+  private boolean hasJamFeaturePermission() throws ServiceApplicationException {
+    return scaHandler.execute(new CheckJAMPermission());
+  }
+
+  private String getAuthToken() throws ServiceApplicationException {
+    return scaHandler.execute(new GetJamAuthToken(params.getUserId()));
+  }
+
+  private boolean hasJamGroupPermission(String groupId, String accessToken) {
+    boolean hasGroupAcess = false;
+
+    try {
+      Group group = scaHandler.execute(new GetJamGroup(groupId,accessToken));
+
+      hasGroupAcess = (group != null && !(StringUtils.isEmpty(group.getGroupId())));
+    } catch (ServiceApplicationException e) {
+      log.error( "Exception occured during get jam group for groupId:"+groupId+". Root Cause:"+e);
+    }
+
+    return hasGroupAcess;
+  }
+
+  private String getSingleUseToken(String accessToken) throws ServiceApplicationException {
+    return scaHandler.execute(new GetJamSingleUseToken(accessToken));
+  }
+
+  private String getJamBaseURL() throws ServiceApplicationException {
+    return scaHandler.execute(new GetJamBaseURL());
+  }
+
+  private String getScriptURL(String baseURL) {
+    StringBuilder urlBuilder = new StringBuilder();
+
+    urlBuilder.append(baseURL).append(JamConstants.JAM_FEED_WIDGET_SCRIPT_URL);
+
+    return urlBuilder.toString();
+  }
+
+  private String getApiURL(String baseURL) {
+    StringBuilder urlBuilder = new StringBuilder();
+
+    urlBuilder.append(baseURL).append(JamConstants.JAM_FEED_WIDGET_API_URL);
+
+    return urlBuilder.toString();
+  }
+
+  private String getGoToGroupUrl(String baseURL, String groupId) {
+    return JamUtil.getGoToGroupUrl(baseURL, groupId);
+  }
+}

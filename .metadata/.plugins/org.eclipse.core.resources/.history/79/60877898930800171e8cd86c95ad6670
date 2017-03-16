@@ -1,0 +1,36 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+import org.eclipse.search.ui.text.IEditorMatchAdapter;
+import org.eclipse.search.ui.text.IFileMatchAdapter;
+import org.eclipse.search.ui.text.Match;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+
+public interface IOccurrencesSearchResult {
+	Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file);
+
+	Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor);
+
+	IFile getFile(Object element);
+
+	boolean isShownInEditor(Match match, IEditorPart editor);
+
+	String getLabel();
+
+	String getTooltip();
+
+	ImageDescriptor getImageDescriptor();
+
+	ISearchQuery getQuery();
+
+	IFileMatchAdapter getFileMatchAdapter();
+
+	IEditorMatchAdapter getEditorMatchAdapter();
+}

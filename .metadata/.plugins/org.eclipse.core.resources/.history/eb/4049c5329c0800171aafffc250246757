@@ -1,0 +1,9 @@
+package com.successfactors.cdp.service.mentoring.jam.util;
+
+import org.apache.http.util.EntityUtils;
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+
+public interface IHttpClientUtil {
+}

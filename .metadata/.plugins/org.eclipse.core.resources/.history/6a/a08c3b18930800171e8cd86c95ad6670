@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+public interface IImageDescriptorRegistry {
+	Image get(ImageDescriptor descriptor);
+
+	void dispose();
+}

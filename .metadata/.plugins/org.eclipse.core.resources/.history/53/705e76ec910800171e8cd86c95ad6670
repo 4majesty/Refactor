@@ -1,0 +1,26 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPropertyPage;
+import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+
+public interface IPropertyAndPreferencePage {
+	void init(IWorkbench workbench);
+
+	IAdaptable getElement();
+
+	void setElement(IAdaptable element);
+
+	void applyData(Object data);
+}

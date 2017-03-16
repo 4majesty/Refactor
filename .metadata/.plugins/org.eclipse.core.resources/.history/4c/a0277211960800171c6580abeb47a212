@@ -1,0 +1,11 @@
+package org.eclipse.jdt.internal.corext.refactoring.changes;
+
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IRenameJavaProjectChange {
+	String getName();
+}

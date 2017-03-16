@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.fix;
+
+import java.util.Map;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.ConvertLoopFix;
+import org.eclipse.jdt.ui.cleanup.CleanUpContext;
+import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
+import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
+
+public interface IConvertLoopCleanUp {
+	CleanUpRequirements getRequirements();
+
+	ICleanUpFix createFix(CleanUpContext context) throws CoreException;
+
+	String[] getStepDescriptions();
+
+	String getPreview();
+}

@@ -1,0 +1,18 @@
+/*
+ * $Id$
+ */
+package com.successfactors.cdp.service.mentoring;
+
+import com.successfactors.sca.ServiceQuery;
+
+/**
+ * Service to check if the JAM is enabled and user has permission to access it.
+ * @author ricardo.saito
+ * Success Factors
+ */
+public class CheckJAMPermission implements ServiceQuery<Boolean> {
+
+  public CheckJAMPermission() {
+  }
+
+}

@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui;
+
+import org.eclipse.jdt.internal.ui.search.SearchUtil;
+
+public interface IMarkerAdapterFactory {
+	Class[] getAdapterList();
+
+	Object getAdapter(Object element, Class key);
+}

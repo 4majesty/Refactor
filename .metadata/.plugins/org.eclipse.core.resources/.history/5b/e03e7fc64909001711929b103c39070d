@@ -1,0 +1,18 @@
+package com.successfactors.cdp.bean.mentoring.vo;
+
+import java.util.List;
+import com.successfactors.cdp.service.util.mentoring.ProgramMatchingTypeEnum;
+
+public interface IProgramSignupTemplateVO {
+	Long getRowId();
+
+	void setRowId(Long rowId);
+
+	List<ProgramSignupTemplateSectionVO> getSections();
+
+	void setSections(List<ProgramSignupTemplateSectionVO> sections);
+
+	ProgramMatchingTypeEnum getMatching();
+
+	void setMatching(ProgramMatchingTypeEnum matching);
+}

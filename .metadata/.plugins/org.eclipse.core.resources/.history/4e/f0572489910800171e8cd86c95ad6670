@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.commands;
+
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
+
+public interface IShowElementInTypeHierarchyViewHandler {
+	Object execute(ExecutionEvent event) throws ExecutionException;
+}

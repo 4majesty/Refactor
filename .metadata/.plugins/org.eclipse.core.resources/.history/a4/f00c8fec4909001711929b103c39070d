@@ -1,0 +1,23 @@
+package com.successfactors.cdp.service.util.mentoring;
+
+import com.successfactors.cdp.service.mentoring.GetMentoringProgramByUserID;
+import com.successfactors.cdp.service.mentoring.GetSkillList;
+import com.successfactors.cdp.service.mentoring.GetUserActiveProgram;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.xi.util.SeamEnvUtils;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public interface IMentoringProgramUtilsImpl {
+	List hasActivePrograms();
+
+	List<String> getProgramsByUserID();
+
+	Map<String, String> getLabelsBySectionIDs();
+
+	Map<String, String> getAllSkillLabels();
+}

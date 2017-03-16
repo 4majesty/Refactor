@@ -1,0 +1,61 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface ICompilationUnitRewrite {
+	void rememberContent();
+
+	void setResolveBindings(boolean resolve);
+
+	void setStatementsRecovery(boolean statementsRecovery);
+
+	void setBindingRecovery(boolean bindingsRecovery);
+
+	void clearASTRewrite();
+
+	void clearImportRewrites();
+
+	void clearASTAndImportRewrites();
+
+	CategorizedTextEditGroup createCategorizedGroupDescription(String name, GroupCategorySet set);
+
+	TextEditGroup createGroupDescription(String name);
+
+	CompilationUnitChange createChange();
+
+	CompilationUnitChange createChange(boolean generateGroups, IProgressMonitor monitor) throws CoreException;
+
+	CompilationUnitChange createChange(String name, boolean generateGroups, IProgressMonitor monitor) throws CoreException;
+
+	CompilationUnitChange attachChange(CompilationUnitChange cuChange, boolean generateGroups, IProgressMonitor monitor) throws CoreException;
+
+	ICompilationUnit getCu();
+
+	CompilationUnit getRoot();
+
+	AST getAST();
+
+	ASTRewrite getASTRewrite();
+
+	ImportRewrite getImportRewrite();
+
+	ImportRemover getImportRemover();
+
+	void clearGroupDescriptions();
+}

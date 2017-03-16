@@ -1,0 +1,47 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.jface.util.SafeRunnable;
+import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
+
+public interface IJavaUILabelProvider {
+	void addLabelDecorator(ILabelDecorator decorator);
+
+	void setTextFlags(long textFlags);
+
+	void setImageFlags(int imageFlags);
+
+	int getImageFlags();
+
+	long getTextFlags();
+
+	Image getImage(Object element);
+
+	String getText(Object element);
+
+	StyledString getStyledText(Object element);
+
+	void dispose();
+
+	void addListener(ILabelProviderListener listener);
+
+	boolean isLabelProperty(Object element, String property);
+
+	void removeListener(ILabelProviderListener listener);
+
+	Color getForeground(Object element);
+
+	Color getBackground(Object element);
+}

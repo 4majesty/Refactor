@@ -1,0 +1,26 @@
+package com.successfactors.cdp.test;
+
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+
+/** 
+ * This class substitutes any, because the matcher is not working for ANY
+ * @author Ricardo Saito
+ */
+public class ClassMatcher<T> extends BaseMatcher<T> implements IClassMatcher {
+	private Class<T> clazz;
+
+	public ClassMatcher(Class<T> clazzMatch) {
+		this.clazz = clazzMatch;
+	}
+
+	@Override
+	public void describeTo(Description description) {
+		description.appendText("matches a class " + clazz);
+	}
+
+	@Override
+	public boolean matches(Object obj) {
+		return obj != null && clazz.isInstance(obj);
+	}
+}

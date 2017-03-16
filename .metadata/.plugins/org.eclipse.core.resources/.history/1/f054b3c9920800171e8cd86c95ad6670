@@ -1,0 +1,16 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.search.ui.text.AbstractTextSearchResult;
+
+public interface ITextSearchTableContentProvider {
+	Object[] getElements(Object inputElement);
+
+	void dispose();
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+
+	void elementsChanged(Object[] updatedElements);
+
+	void clear();
+}

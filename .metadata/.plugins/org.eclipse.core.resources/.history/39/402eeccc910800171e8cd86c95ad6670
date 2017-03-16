@@ -1,0 +1,42 @@
+package org.eclipse.jdt.internal.ui.model;
+
+import java.util.Set;
+import org.eclipse.team.core.diff.IDiffChangeEvent;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.ui.navigator.PipelinedShapeModification;
+import org.eclipse.ui.navigator.PipelinedViewerUpdate;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
+import org.eclipse.ltk.ui.refactoring.model.AbstractSynchronizationContentProvider;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavaSynchronizationContentProvider {
+	void diffsChanged(final IDiffChangeEvent event, final IProgressMonitor monitor);
+
+	Object[] getElements(Object parent);
+
+	void getPipelinedChildren(final Object parent, final Set children);
+
+	void getPipelinedElements(final Object element, final Set elements);
+
+	Object getPipelinedParent(final Object element, final Object parent);
+
+	boolean hasChildren(final Object element);
+
+	PipelinedShapeModification interceptAdd(final PipelinedShapeModification modification);
+
+	boolean interceptRefresh(final PipelinedViewerUpdate update);
+
+	PipelinedShapeModification interceptRemove(final PipelinedShapeModification modification);
+
+	boolean interceptUpdate(final PipelinedViewerUpdate anUpdateSynchronization);
+}

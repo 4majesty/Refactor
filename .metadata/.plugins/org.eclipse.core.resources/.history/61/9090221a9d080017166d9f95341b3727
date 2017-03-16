@@ -1,0 +1,23 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.cdp.service.util.mentoring.email.IMentoringEmailUtils;
+import com.successfactors.cdp.service.mentoring.impl.ISendMentoringProgramClosureEmailImpl;
+
+public interface ISendMentoringProgramClosureEmailImplTest {
+	ParamBean getDefaultParam();
+
+	void setUp();
+
+	void testInvalidMentorship();
+
+	void testSendClosureEmailMentorWithNote();
+
+	void testSendWithdrawEmailMentee();
+
+	void testSendEmailNoUser();
+
+	void testLoadUserBeans();
+
+	void testEscape2HTML();
+}

@@ -1,0 +1,36 @@
+package org.eclipse.jdt.internal.ui.wizards;
+
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuCreator;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.INewWizard;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
+import org.eclipse.jdt.ui.actions.OpenNewClassWizardAction;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
+public interface INewTypeDropDownAction {
+	void dispose();
+
+	Menu getMenu(Menu parent);
+
+	Menu getMenu(Control parent);
+
+	void run();
+
+	void init(IWorkbenchWindow window);
+
+	void run(IAction action);
+
+	void selectionChanged(IAction action, ISelection selection);
+}

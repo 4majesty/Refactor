@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.jarpackagerfat;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IFatJarPackagerUtil {
+}

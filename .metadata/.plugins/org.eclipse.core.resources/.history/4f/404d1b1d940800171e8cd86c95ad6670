@@ -1,0 +1,25 @@
+package org.eclipse.jdt.internal.ui.search;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.text.Match;
+import org.eclipse.search.ui.text.MatchFilter;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavaSearchResult {
+	ImageDescriptor getImageDescriptor();
+
+	String getLabel();
+
+	String getTooltip();
+
+	void setActiveMatchFilters(MatchFilter[] filters);
+
+	MatchFilter[] getAllMatchFilters();
+
+	ISearchQuery getQuery();
+
+	void removeAll();
+
+	void removeMatch(Match match);
+}

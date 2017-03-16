@@ -1,0 +1,51 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import java.util.List;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.ui.contentassist.ContentAssistHandler;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
+import org.eclipse.jdt.internal.ui.dialogs.TableTextCellEditor;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.VariableNamesProcessor;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
+import org.eclipse.jdt.internal.corext.refactoring.IStubTypeContext;
+
+public interface IChangeParametersControl {
+	String toString();
+
+	boolean canChangeTypes();
+
+	boolean canAddParameters();
+
+	boolean canChangeDefault();
+
+	Object[] getElements(Object inputElement);
+
+	void dispose();
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+
+	Image getColumnImage(Object element, int columnIndex);
+
+	String getColumnText(Object element, int columnIndex);
+
+	Font getFont(Object element, int columnIndex);
+
+	boolean canModify(Object element, String property);
+
+	Object getValue(Object element, String property);
+
+	void modify(Object element, String property, Object value);
+
+	void setInput(List parameterInfos);
+
+	void editParameter(ParameterInfo info);
+}

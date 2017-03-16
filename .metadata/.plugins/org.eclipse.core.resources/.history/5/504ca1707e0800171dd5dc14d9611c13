@@ -1,0 +1,207 @@
+/*
+ * $Id: FeatureSet.java 825974 2015-08-25 07:34:36Z haixunlu $
+ *
+ * Copyright � 2004 SuccessFactors, Inc.
+ * All Rights Reserved
+ */
+package com.successfactors.pmcommon.bean;
+
+import java.io.Serializable;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.BitSet;
+import com.successfactors.logging.api.Logger;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.logging.api.LogManager;
+
+/**
+ * Implementation of a set of feature bits.  Currently backed by a
+ * bitfield, but users need not be aware of it.
+ *
+ * @author Jeffrey Ichnowski
+ * @version $Revision: 825974 $
+ */
+public class FeatureSet
+  implements Serializable, Cloneable
+{
+  /**
+   * serialVersionUID
+   */
+  private static final long serialVersionUID = 1L;
+
+  private transient Logger logger = LogManager.getLogger();
+  
+  /**
+   * Bits backing the set.  If we exceed 64 bits, maybe we should
+   * switch to java.util.BitSet or something similar
+   */
+ // private long _bits=0;
+  private BitSet _bits = new BitSet();
+
+  /**                     
+   * Creates an initially empty feature set.
+   */
+  public FeatureSet() {
+  }
+  
+  private FeatureSet(BitSet bits){
+    this._bits = bits;
+  }
+
+  /**
+   * Returns the 32-bits for backwards compatibility applications.  DO
+   * NOT USE for any other reason!!!
+   */
+  @JsonIgnore
+  public int getOldStyleBits() {
+    int retVal = 0;
+    for (int i = 0; i < 32; i++) {
+      if (_bits.get(i)) {
+        retVal |= 1 << i;
+      }
+    }
+    return retVal;    
+  }
+
+
+
+  /**
+   * Sets the features using the old-style 32-bits for backwards
+   * compatibility with old database bitset.  DO NOT USE for any other
+   * reason!!!
+   */
+  public void setOldStyleBits(int bits) {
+    _bits.clear();
+    for (int i = 0; i < 32; i++) {
+      if ((bits & (1 << i)) != 0) {
+        _bits.set(i);
+      }     
+    }    
+  }
+
+  public String getBitsString() {
+    return _bits.toString();    
+  }
+
+  public void setBitsString(String bitsString) {
+    if(bitsString == null || bitsString.length() <= "{}".length()){
+      return;
+    }
+    
+    
+    bitsString = bitsString.substring(1, bitsString.length()-1);
+    String[] bits = bitsString.split(", ");
+     
+    _bits.clear();
+    for(int i = 0; i< bits.length; i++){
+      String bitString = bits[i];
+      try{
+        int bit = Integer.valueOf(bitString);
+        _bits.set(bit);        
+      }catch(NumberFormatException e){
+        logger.error("bit: " + bitString + " is not an integer!");
+      }
+    }    
+  }
+
+  /**
+   * Adds a feature to this set.
+   */
+  public void add(FeatureEnum argEnum) {
+    _bits.set(argEnum.getId());
+  }
+
+  /**
+   * Removes a feature from this set.
+   */
+  public void remove(FeatureEnum argEnum) {
+    _bits.clear(argEnum.getId());
+  }
+
+  /**
+   * Adds or removes a feature.
+   */
+  public void set(FeatureEnum feature, boolean b) {
+    if (b) {
+      add(feature);
+    } else {
+      remove(feature);
+    }
+  }
+
+  /**
+   * Returns true if the specific feature is contained in this set.
+   */
+  public boolean contains(FeatureEnum argEnum) {
+    return _bits.get(argEnum.getId());
+  }
+
+
+  /**
+   * Returns an iterator over all the enabled features in this feature
+   * set.
+   */
+  public Iterator iterator() {
+    return new Iterator() {
+      Iterator _iter = FeatureEnum.iterator();
+      IFeatureEnum _next;
+      IFeatureEnum _curr;
+
+      public boolean hasNext() {
+        if (_next != null) {
+          return true;
+        }
+
+        while (_iter.hasNext()) {
+          FeatureEnum e = (FeatureEnum)_iter.next();
+          if (contains(e)) {
+            _next = e;
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      public Object next() {
+        if (!hasNext()) {
+          throw new NoSuchElementException();
+        }
+
+        _curr = _next;
+        _next = null;
+        return _curr;
+      }
+
+      public void remove() {
+        if (_curr == null) {
+          throw new IllegalStateException("remove called without calling next()");
+        }
+
+        FeatureSet.this.remove(_curr);
+        _curr = null;
+      }
+    };
+  }
+
+  /**
+   * Two FeatureSets are equivalent iff they have contain the exact
+   * same features.
+   */
+  public boolean equals(Object other) {
+    if (other == null || !(other instanceof FeatureSet))
+      return false;
+
+    return ((FeatureSet)other)._bits.equals(_bits);
+  }  
+
+  public String toString() {
+    return "" + _bits; // for backward compatibility with CompanyBean.toString
+  }
+
+  public Object clone() {
+      return new FeatureSet((BitSet)this._bits.clone());
+  }
+} // FeatureSet

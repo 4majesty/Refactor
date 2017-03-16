@@ -1,0 +1,64 @@
+package org.eclipse.jdt.internal.corext.refactoring.structure;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+public interface IMoveStaticMembersProcessor {
+	boolean visit(TypeDeclaration node);
+
+	boolean visit(SimpleName node);
+
+	boolean visit(AnnotationTypeDeclaration node);
+
+	boolean visit(EnumDeclaration node);
+
+	boolean isApplicable();
+
+	Object[] getElements();
+
+	String getIdentifier();
+
+	RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants sharedParticipants) throws CoreException;
+
+	boolean canEnableDelegateUpdating();
+
+	boolean getDelegateUpdating();
+
+	void setDelegateUpdating(boolean updating);
+
+	boolean getDeprecateDelegates();
+
+	void setDeprecateDelegates(boolean deprecate);
+
+	String getProcessorName();
+
+	IType getDestinationType();
+
+	void setDestinationTypeFullyQualifiedName(String fullyQualifiedTypeName) throws JavaModelException;
+
+	IMember[] getMembersToMove();
+
+	IType getDeclaringType();
+
+	RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException;
+
+	RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException;
+
+	Change createChange(IProgressMonitor pm) throws CoreException;
+
+	String getDelegateUpdatingTitle(boolean plural);
+}

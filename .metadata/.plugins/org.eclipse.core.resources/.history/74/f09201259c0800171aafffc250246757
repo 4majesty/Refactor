@@ -1,0 +1,16 @@
+package com.successfactors.cdp.service.impl;
+
+import java.util.List;
+import com.successfactors.cdp.bean.AutoCompleteRoleSearchVO;
+import com.successfactors.cdp.service.AutoCompleteRoleSearch;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.logging.api.LogManager;
+import javax.inject.Inject;
+
+public interface IAutoCompleteRoleSearchImpl {
+	List<AutoCompleteRoleSearchVO> execute(AutoCompleteRoleSearch cmd) throws ServiceApplicationException;
+}

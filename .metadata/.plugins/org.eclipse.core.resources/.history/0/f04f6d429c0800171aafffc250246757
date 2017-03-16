@@ -1,0 +1,152 @@
+package com.successfactors.cdp.service.mentoring.impl;
+
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.testng.Assert.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.app.mentoring.MentoringServiceBase;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.MentoringProgramMentorRequest;
+import com.successfactors.cdp.bean.mentoring.vo.MatchedParticipantVO;
+import com.successfactors.cdp.service.mentoring.ConfirmMatchingResult;
+import com.successfactors.cdp.service.mentoring.GetMentoringRequest;
+import com.successfactors.cdp.service.mentoring.ProcessMentoringRequest;
+import com.successfactors.cdp.service.util.mentoring.MentorRequestStatusEnum;
+import com.successfactors.cdp.service.util.mentoring.MentoringProgramMDFException;
+import com.successfactors.genericobject.api.processor.ValidationContext;
+import com.successfactors.genericobject.service.SaveBean;
+import com.successfactors.i18n.service.MessageBundle;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.unittest.TestUtils;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.bean.impl.UserBeanImpl;
+import com.successfactors.cdp.service.mentoring.IConfirmMatchingResult;
+
+public class ConfirmMatchingResultImplTest  {
+  private IConfirmMatchingResult cmd;
+  private IConfirmMatchingResultImpl impl;
+  private ServiceCommandHandler scaHandler = null;
+  private MentoringServiceBase mentoringServiceBase;
+  private ValidationContext validationContext;
+  private Mockery context;
+
+  @BeforeMethod(groups = { "checkin" })
+  public void setup() {
+    context = new Mockery();
+    context.setImposteriser(ClassImposteriser.INSTANCE);
+    impl = new ConfirmMatchingResultImpl();
+    scaHandler = context.mock(ServiceCommandHandler.class);
+    TestUtils.setField(impl, "scaHandler", scaHandler);
+    mentoringServiceBase = context.mock(MentoringServiceBase.class);
+    TestUtils.setField(impl, "mentoringServiceBase", mentoringServiceBase);
+    validationContext = context.mock(ValidationContext.class);
+    TestUtils.setField(impl, "msgs", new MessageBundle());
+  }
+
+  @Test(groups = {"checkin"})
+  public void testConfirmWithException() throws ServiceApplicationException {
+    cmd = new ConfirmMatchingResult();
+    MentoringProgram program = new MentoringProgram();
+    program.setExternalId("1111");
+    List<MatchedParticipantVO> matchList = new ArrayList<MatchedParticipantVO>();
+    matchList.add(new MatchedParticipantVO());
+    cmd.setProgram(program);
+    cmd.setMatchList(matchList);
+
+    
+    final GetMentoringRequest getMentorRequestCmd = new GetMentoringRequest();
+    List<MentorRequestStatusEnum> status = new ArrayList<MentorRequestStatusEnum>();
+    status.add(MentorRequestStatusEnum.DRAFT);
+    status.add(MentorRequestStatusEnum.ACCEPTED);    
+    status.add(MentorRequestStatusEnum.CONFIRMED);    
+    getMentorRequestCmd.setProgramId("1111");      
+    getMentorRequestCmd.setStatus(status);
+    
+    context.checking(new Expectations() {
+      {
+        one(scaHandler).execute((GetMentoringRequest)with(instanceOf(GetMentoringRequest.class)));
+        will(returnValue(new ArrayList<MentoringProgramMentorRequest>()));
+        allowing(mentoringServiceBase).getUsernameMapByIds(with(any(List.class)));
+        will(returnValue(new HashMap()));
+        never(scaHandler).execute((ProcessMentoringRequest)with(instanceOf(ProcessMentoringRequest.class)));
+        one(scaHandler).execute((SaveBean)with(instanceOf(SaveBean.class)));
+        will(throwException(new ServiceApplicationException()));
+      }
+    });
+    
+    try {
+      impl.execute(cmd);
+      Assert.fail("Should throw exception because of failing MDF save");
+    } catch (ServiceApplicationException e) {      
+      Assert.assertTrue(e instanceof MentoringProgramMDFException);
+    }
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testValidateUser() throws ServiceApplicationException {
+    MatchedParticipantVO participant = new MatchedParticipantVO();
+    participant.setMenteeId("mentee");
+    participant.setMentorId("mentor");
+    
+    context.checking(new Expectations() {
+      {
+        allowing(mentoringServiceBase).getUsernameMapByIds(with(any(List.class)));
+        will(returnValue(createUserMap(true, "mentee", "mentor")));
+      }
+    });
+    
+    impl.validateUsers(Collections.singletonList(participant));
+  }
+  
+  
+  @Test(groups = {"checkin"})
+  public void testValidEmptyUsers() throws ServiceApplicationException {
+    impl.validateUsers(Collections.EMPTY_LIST);
+    impl.validateUsers(null);
+  }
+  
+  @Test(groups = {"checkin"})
+  public void testInvalidUsers() throws ServiceApplicationException {
+    MatchedParticipantVO participant = new MatchedParticipantVO();
+    participant.setMenteeId("mentee");
+    participant.setMentorId("mentor");
+    
+    context.checking(new Expectations() {
+      {
+        allowing(mentoringServiceBase).getUsernameMapByIds(with(any(List.class)));
+        will(returnValue(createUserMap(false, "mentee", "mentor")));
+      }
+    });
+    
+    try {
+      impl.validateUsers(Collections.singletonList(participant));
+      fail("Invalid users should not pass through validation");
+    } catch (ServiceApplicationException expected) {
+    }
+  }
+ 
+ 
+  private Map<String, UserBean> createUserMap(boolean valid, String... users) {
+    Map<String, UserBean> map = new HashMap();
+    for (String id  : users) {
+      UserBeanImpl impl = new UserBeanImpl();
+      impl.setUserIsValid(valid? UserBean.FLAG_VALID_USER : UserBean.FLAG_INVALID_USER );
+      map.put(id, impl);
+    }
+    return map;
+  }
+}

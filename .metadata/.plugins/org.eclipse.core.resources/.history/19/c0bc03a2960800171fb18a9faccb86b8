@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.jdt.internal.corext.refactoring.changes.MultiStateCompilationUnitChange;
+
+public interface IRefactoringAdapterFactory {
+	Class[] getAdapterList();
+
+	Object getAdapter(Object object, Class key);
+}

@@ -1,0 +1,30 @@
+package com.successfactors.cdp.app.mentoring;
+
+import com.successfactors.cdp.bean.mentoring.vo.MatchingResult;
+import com.successfactors.sca.ServiceApplicationException;
+
+public class WeightedMatchingAlgorithmStrategy extends MatchingAlgorithmTemplate implements MatchingAlgorithmStrategy {
+  public WeightedMatchingAlgorithmStrategy(MatchingAlgorithmContext context) {
+    this.context = context;
+  }
+
+  @Override
+  protected void loadConfiguration() {
+
+  }
+
+  @Override
+  protected void loadEntitiesWithinCalc() {
+
+  }
+
+  @Override
+  protected MatchingResult calcMatchingScore() {
+    return null;
+  }
+
+  @Override
+  public MatchingResult getMatchingResult() throws ServiceApplicationException {
+    return getMatchingScore();
+  }
+}

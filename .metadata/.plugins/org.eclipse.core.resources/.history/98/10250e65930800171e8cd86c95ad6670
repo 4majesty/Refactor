@@ -1,0 +1,10 @@
+package org.eclipse.jdt.internal.ui.callhierarchy;
+
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
+
+public interface ILocationCopyAction {
+	void run();
+}

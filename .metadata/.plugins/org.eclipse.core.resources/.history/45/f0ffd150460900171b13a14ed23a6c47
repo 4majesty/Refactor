@@ -1,0 +1,9 @@
+package com.successfactors.cdp.ui.controller;
+
+import com.successfactors.cdp.ui.util.mentoring.MentoringProgramBeanUtil;
+
+public interface IMentoringProgramBeanUtilTest {
+	void testGetMentoringProgramFromOverview();
+
+	void testGetProgram();
+}

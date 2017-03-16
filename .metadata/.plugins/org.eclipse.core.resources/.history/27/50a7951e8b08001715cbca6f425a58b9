@@ -1,0 +1,18 @@
+package com.successfactors.rbp.integration.grc.xml.binding;
+
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+public interface INoneAllOtherPermission {
+	AllPermission getAllPermission();
+
+	void setAllPermission(AllPermission value);
+
+	OtherPermissions getOtherPermissions();
+
+	void setOtherPermissions(OtherPermissions value);
+
+	Message getMessage();
+
+	void setMessage(Message value);
+}

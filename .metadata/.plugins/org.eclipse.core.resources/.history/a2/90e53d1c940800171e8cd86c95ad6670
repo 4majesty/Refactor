@@ -1,0 +1,6 @@
+package org.eclipse.jdt.ui;
+
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
+
+public interface IJavadocContentAccess {
+}

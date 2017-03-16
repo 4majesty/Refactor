@@ -1,0 +1,41 @@
+package com.successfactors.cdp.service.scheduledjob;
+
+import com.successfactors.cdp.service.GetMentoringProgramsForMentorUnavailabilityExpirationCheck;
+import com.successfactors.cdp.service.mentoring.ForwardUnsupervisedMentoringProgramStatus;
+import com.successfactors.jobscheduler.ScheduledJobExecutionException;
+import com.successfactors.jobscheduler.jobimpl.SimpleJob;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.service.ServiceCommandHandlerFactory;
+import com.successfactors.cdp.service.IGetMentoringProgramsForMentorUnavailabilityExpirationCheck;
+
+/**
+ * Mentor unavailability notification Job
+ * @author C5250713
+ */
+public class MentorUnavailabilityNotificationJob extends SimpleJob {
+
+    private IGetMentoringProgramsForMentorUnavailabilityExpirationCheck getMentoringProgramsForMentorUnavailabilityExpirationCheck
+            = new GetMentoringProgramsForMentorUnavailabilityExpirationCheck();
+
+    private IForwardUnsupervisedMentoringProgramStatus forwardMentoringProgramStatus = new ForwardUnsupervisedMentoringProgramStatus();
+
+    public ServiceCommandHandler scaHandler = ServiceCommandHandlerFactory.getSCAHandler();
+
+    private static Logger logger = LogManager.getLogger();
+
+    @Override
+    public void executeJob() throws ScheduledJobExecutionException {
+
+        try {
+            scaHandler.execute(getMentoringProgramsForMentorUnavailabilityExpirationCheck);
+            scaHandler.execute(forwardMentoringProgramStatus);
+        } catch (ServiceApplicationException e) {
+            logger.error("MentorUnavailabilityNotificationJob executeJob(...) error occurs", e);
+        }
+
+    }
+
+}

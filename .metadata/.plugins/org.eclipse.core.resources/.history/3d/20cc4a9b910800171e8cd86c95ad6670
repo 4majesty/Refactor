@@ -1,0 +1,25 @@
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+public interface IJavadocProjectContentProvider {
+	Object[] getChildren(Object parentElement);
+
+	Object[] getElements(Object inputElement);
+
+	Object getParent(Object element);
+
+	boolean hasChildren(Object element);
+
+	void dispose();
+
+	void inputChanged(Viewer viewer, Object oldInput, Object newInput);
+}

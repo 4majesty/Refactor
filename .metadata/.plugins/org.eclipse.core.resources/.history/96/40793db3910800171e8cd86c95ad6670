@@ -1,0 +1,24 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths;
+
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+
+public interface IAccessRulesDialog {
+	void customButtonPressed(ListDialogField field, int index);
+
+	void selectionChanged(ListDialogField field);
+
+	void doubleClicked(ListDialogField field);
+
+	void dialogFieldChanged(DialogField field);
+
+	IAccessRule[] getAccessRules();
+
+	boolean doCombineAccessRules();
+
+	void performPageSwitch(IWorkbenchPreferenceContainer pageContainer);
+}

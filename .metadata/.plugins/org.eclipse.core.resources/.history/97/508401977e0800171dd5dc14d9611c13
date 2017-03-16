@@ -1,0 +1,211 @@
+/*
+ * $Id: CompanyTabCreatorTest.java 608208 2014-06-13 11:56:54Z dhu $
+ */
+package com.successfactors.platform.ui.topnav.tabcreator;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+
+import org.jboss.seam.mock.SeamTest;
+
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.platform.bean.CompanyBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.legacy.bean.PermissionListBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.bean.LegacyPermissionListBean;
+import com.successfactors.legacy.service.ejb.SysConfig;
+import com.successfactors.helptraining.ui.util.HelpPermission;
+import com.successfactors.xi.ui.controller.topnav.TopNavBarViewEnum;
+import com.successfactors.platform.ui.controller.GrantedAdminPermissionsController;
+
+
+public class CompanyTabCreatorTest extends SeamTest {
+
+    ParamBean params = new ParamBean();
+    SysConfig config;
+    
+    GrantedAdminPermissionsController noAdminPermMBean;
+    GrantedAdminPermissionsController adminPermMBean;
+    PermissionListBean permListBean;
+    HelpPermission helpPermissionWOCompanyInfo;
+
+    FeatureEnum selectedFeature = null;
+
+    @BeforeMethod(groups={"checkin"}) 
+    public void beforeTest(){
+
+        params.setCompanyBean(new CompanyBean(){
+            @Override
+            public boolean isFeatureExist(FeatureEnum feature) {
+                return getFeatureSet().contains(feature);
+            }
+        });
+    }
+    
+    @BeforeClass(groups={"checkin"})
+    public void setup() throws Exception {
+        
+        params.setCompanyName("testCompany");
+        
+        
+        config = (SysConfig)Proxy.newProxyInstance(
+                Thread.currentThread().getContextClassLoader(),
+                new Class<?>[] { SysConfig.class },
+                new InvocationHandler() {
+                    public Object invoke(Object proxy, Method method, Object[] args) {
+                        return null;
+                    }
+                });
+
+        // Setup permissions
+        noAdminPermMBean = 
+            new GrantedAdminPermissionsController(){
+            @Override
+            public boolean isGeneralAdmin() {
+                return false;
+            }
+	            
+	          @Override
+            public boolean isCompanyResourcesAdmin(){
+		            return false;
+	          }       
+
+
+						@Override
+						public boolean isHelpPortletAdmin(){
+								return false;
+						}
+
+        };
+
+        // Setup permissions
+        adminPermMBean = 
+            new GrantedAdminPermissionsController(){
+            @Override
+            public boolean isGeneralAdmin() {
+                return true;
+            }
+
+						@Override
+						public boolean isCompanyResourcesAdmin(){
+								return true;
+						}
+
+
+						@Override
+						public boolean isHelpPortletAdmin(){
+								return true;
+						}
+
+        };
+        permListBean = new LegacyPermissionListBean() 
+        {
+            public boolean hasPermission(String permType, String permSubtype, long formIdOrPlanId)
+            {
+                return true;
+            }
+        };
+        // override to exclude COMPANY_HELP_TRAINING from HelpPermission.
+        helpPermissionWOCompanyInfo = new HelpPermission(){
+          @Override
+          public Boolean get(Object key) {
+            if (TopNavBarViewEnum.COMPANY_HELP_TRAINING == key)
+              return Boolean.FALSE;
+            else 
+              return Boolean.TRUE;
+          }
+        }; 
+       
+    }
+    
+
+
+   @Test(groups={"checkin", "broken", "scaconverter"})
+   public void testCompanyViewNoFeaturesNoAdmin() throws Exception
+   {
+
+       CompanyTabCreator creator = new CompanyTabCreator();
+       setField(creator, "params", params);
+       setField(creator, "sysConfigService", config);
+       setField(creator, "permList", permListBean);
+       setField(creator, "grantedAdminPermissionsController", noAdminPermMBean);
+       setField(creator, "helpPermission", helpPermissionWOCompanyInfo);
+
+       
+       assert !creator.isDisplayed(TopNavBarViewEnum.COMPANY_DIR);
+       assert !creator.isDisplayed(TopNavBarViewEnum.COMPANY_ORG_CHART);
+       assert !creator.isDisplayed(TopNavBarViewEnum.COMPANY_RESOURCE);
+       assert !creator.isDisplayed(TopNavBarViewEnum.COMPANY_HELP_TRAINING);
+       assert !creator.isDisplayed(TopNavBarViewEnum.COMPANY_INFO);
+   }
+
+
+   @Test(groups={"checkin", "broken", "scaconverter"})
+   public void testCompanyViewUserDir() throws Exception
+   {
+
+       CompanyTabCreator creator = new CompanyTabCreator();
+
+       params.getCompanyBean().setFeature(FeatureEnum.USER_DIRECTORY);
+
+       setField(creator, "params", params);
+       setField(creator, "sysConfigService", config);
+       setField(creator, "permList", permListBean);
+       setField(creator, "grantedAdminPermissionsController", noAdminPermMBean);
+       setField(creator, "helpPermission", helpPermissionWOCompanyInfo);
+
+       assert creator.isDisplayed(TopNavBarViewEnum.COMPANY_DIR);
+       assert !creator.isDisplayed(TopNavBarViewEnum.COMPANY_ORG_CHART);
+       assert !creator.isDisplayed(TopNavBarViewEnum.COMPANY_RESOURCE);
+       assert creator.isDisplayed(TopNavBarViewEnum.COMPANY_INFO);
+
+   }
+
+   @Test(groups={"checkin", "broken", "scaconverter"})
+   public void testCompanyViewAdminAccess() throws Exception
+   {
+
+       CompanyTabCreator creator = new CompanyTabCreator(); 
+       setField(creator, "params", params);
+       setField(creator, "sysConfigService", config);
+       setField(creator, "permList", permListBean);
+       setField(creator, "grantedAdminPermissionsController", adminPermMBean);
+       setField(creator, "helpPermission", helpPermissionWOCompanyInfo);
+
+       assert !creator.isDisplayed(TopNavBarViewEnum.COMPANY_DIR);
+       assert !creator.isDisplayed(TopNavBarViewEnum.COMPANY_ORG_CHART);
+       assert creator.isDisplayed(TopNavBarViewEnum.COMPANY_RESOURCE);
+       assert creator.isDisplayed(TopNavBarViewEnum.COMPANY_INFO);
+
+
+   }
+
+   @Test(groups={"checkin", "broken", "scaconverter"})
+   public void testCompanyViewOrgChartNoAdmin() throws Exception
+   {
+
+
+       CompanyTabCreator creator = new CompanyTabCreator();
+
+       params.getCompanyBean().setFeature(FeatureEnum.ORGANIZATION_CHART_V3);
+
+       setField(creator, "params", params);
+       setField(creator, "sysConfigService", config);
+       setField(creator, "permList", permListBean);
+       setField(creator, "grantedAdminPermissionsController", noAdminPermMBean);
+       setField(creator, "helpPermission", helpPermissionWOCompanyInfo);
+
+       assert !creator.isDisplayed(TopNavBarViewEnum.COMPANY_DIR);
+       assert creator.isDisplayed(TopNavBarViewEnum.COMPANY_ORG_CHART);
+       assert !creator.isDisplayed(TopNavBarViewEnum.COMPANY_RESOURCE);
+       assert creator.isDisplayed(TopNavBarViewEnum.COMPANY_INFO);
+
+   }
+}

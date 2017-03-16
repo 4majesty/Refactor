@@ -1,0 +1,13 @@
+package org.eclipse.jdt.internal.ui.preferences.formatter;
+
+import java.util.Observable;
+import java.util.Observer;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+public interface IIndentationTabPage {
+	void initializePage();
+}

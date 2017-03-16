@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
+import org.eclipse.jdt.internal.ui.packageview.HierarchicalDecorationContext;
+
+public interface IDecoratingJavaLabelProvider {
+	void setFlatPackageMode(boolean enable);
+}

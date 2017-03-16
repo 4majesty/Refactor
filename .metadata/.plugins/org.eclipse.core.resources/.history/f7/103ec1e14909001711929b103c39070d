@@ -1,0 +1,133 @@
+package com.successfactors.cdp.service.scheduledjob;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.bean.mentoring.MentoringProgram;
+import com.successfactors.cdp.bean.mentoring.jam.ProgramLaunchJamActivityJobPayload;
+import com.successfactors.cdp.service.mentoring.AddMentoringJamAdmins;
+import com.successfactors.cdp.service.mentoring.AddMentoringJamPicture;
+import com.successfactors.cdp.service.mentoring.GetProgramById;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupAddAdminFailureEmail;
+import com.successfactors.cdp.service.mentoring.jam.SendJamGroupPhotoFailureEmail;
+import com.successfactors.jobscheduler.JobSchedulerException;
+import com.successfactors.jobscheduler.ScheduledJobExecutionException;
+import com.successfactors.jobscheduler.jobimpl.StandardJob;
+import com.successfactors.jobscheduler.service.JobScheduleFacade;
+import com.successfactors.legacy.util.Serializer;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceSystemException;
+
+/**
+ * Job to invoke post launch jam group api calls (photo / add owners as group admin's)
+ * Failure to those API calls will send an email to Job owner.
+ * 
+ * @author rsrigiri
+ * 
+ * SAP SuccessFactors
+ */
+public class MentoringProgramLaunchJamActivityJob extends StandardJob {
+
+    private static Logger logger = LogManager.getLogger();
+
+    private ServiceCommandHandler scaHandler;
+
+    @Override
+    public void executeJob() throws ScheduledJobExecutionException {
+      init();
+
+      ProgramLaunchJamActivityJobPayload payload = getPayload();
+
+      MentoringProgram program = getProgram(payload.getProgramId());
+
+      if(program != null) {
+        addJamGroupPhoto(program);
+        addJamAdmins(program);
+      }
+    }
+
+    protected void init() {
+      scaHandler = jobContextBean.getScaHandler();
+    }
+
+    private ProgramLaunchJamActivityJobPayload getPayload() throws ScheduledJobExecutionException {
+      byte[] data = null;
+
+      try {
+        data = getXMLPayload();
+      } catch (JobSchedulerException e) {
+        throw new ScheduledJobExecutionException(e);
+      }
+
+      return deserialize(data);
+    }
+
+    protected byte[] getXMLPayload() throws JobSchedulerException {
+      return JobScheduleFacade.getJobPayload(requestId);
+    }
+
+    private ProgramLaunchJamActivityJobPayload deserialize(byte[] payload) {
+      Serializer ser = Serializer.getInstanceFor(ProgramLaunchJamActivityJobPayload.class);
+      return (ProgramLaunchJamActivityJobPayload) ser.deserialize(payload);
+    }
+
+   private MentoringProgram getProgram(String programId) throws ScheduledJobExecutionException {
+     try {
+       return scaHandler.execute(new GetProgramById(programId));
+     } catch (ServiceApplicationException e) {
+       throw new ScheduledJobExecutionException(e);
+     }
+   }
+
+   private void addJamGroupPhoto(MentoringProgram program) {
+     try {
+       scaHandler.execute(new AddMentoringJamPicture(program));
+     } catch (ServiceApplicationException e) {
+       logger.error("Exception occured while invoking AddMentoringJamPicture SCA.",e);
+       sendPhotoFailureEmail(program);
+     } catch (ServiceSystemException e) {
+       logger.error("Exception occured while invoking AddMentoringJamPicture SCA.",e);
+       sendPhotoFailureEmail(program);
+     }
+   }
+
+   private void sendPhotoFailureEmail(MentoringProgram program) {
+     try {
+       scaHandler.execute(new SendJamGroupPhotoFailureEmail(program));
+     } catch (ServiceApplicationException e) {
+       logger.error("Exception occured while invoking sendPhotoFailureEmail SCA.",e);
+     }
+   }
+
+   private void addJamAdmins(MentoringProgram program) {
+     boolean failed = false;
+     List<String> failedUsers = new ArrayList<String>();
+
+     try {
+       failedUsers = scaHandler.execute(new AddMentoringJamAdmins(program));
+       failed = (failedUsers != null && !failedUsers.isEmpty());
+     } catch (ServiceApplicationException e) {
+       logger.error("Exception occured while invoking AddMentoringJamAdmins SCA.",e);
+       failed = true;
+     } catch (ServiceSystemException e) { // catch runtime exception as well for email sending.
+       logger.error("Exception occured while invoking AddMentoringJamAdmins SCA.",e);
+       failed = true;
+     }
+
+     if(failed) {
+       sendAddAdminFailureEmail(program, failedUsers);
+     }
+   }
+
+   private void sendAddAdminFailureEmail(MentoringProgram program, List<String> failedUsers) {
+     try {
+       scaHandler.execute(new SendJamGroupAddAdminFailureEmail(program, failedUsers));
+     } catch (ServiceApplicationException e) {
+       logger.error("Exception occured while invoking SendJamGroupAddAdminFailureEmail SCA.",e);
+     }
+   }
+}

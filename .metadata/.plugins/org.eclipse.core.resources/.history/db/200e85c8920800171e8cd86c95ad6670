@@ -1,0 +1,22 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+
+public interface IHierarchyLabelProvider {
+	int hashCode();
+
+	boolean equals(Object object);
+
+	ViewerFilter getFilter();
+
+	void setFilter(ViewerFilter filter);
+
+	Image getImage(Object element);
+
+	Color getForeground(Object element);
+}

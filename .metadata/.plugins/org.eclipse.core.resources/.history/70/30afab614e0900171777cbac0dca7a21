@@ -1,0 +1,35 @@
+package com.successfactors.cdp.bean;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
+public interface ISuggestedRolesSettingBean {
+	String getWeightKey();
+
+	void setWeightKey(String weightKey);
+
+	double getWeightValue();
+
+	void setWeightValue(double weightValue);
+
+	boolean isEnabled();
+
+	void setEnabled(boolean enabled);
+
+	int getDispOrder();
+
+	void setDispOrder(int dispOrder);
+
+	Map<String, SuggestedRolesSubItemBean> getSubItems();
+
+	void setSubItems(Map<String, SuggestedRolesSubItemBean> subItems);
+
+	boolean addSubItem(String itemKey, boolean isEnabled);
+
+	boolean addSubItem(SuggestedRolesSubItemBean item);
+
+	String getDisplayName();
+
+	void setDisplayName(String displayName);
+}

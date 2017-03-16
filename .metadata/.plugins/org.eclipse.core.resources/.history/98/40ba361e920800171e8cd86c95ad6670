@@ -1,0 +1,20 @@
+package org.eclipse.jdt.internal.ui.preferences.cleanup;
+
+import java.util.Map;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
+import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
+import org.eclipse.jdt.internal.ui.fix.CodeFormatCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ImportsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.SortMembersCleanUp;
+import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
+
+public interface ICodeFormatingTabPage {
+	void setWorkingValues(Map workingValues);
+}

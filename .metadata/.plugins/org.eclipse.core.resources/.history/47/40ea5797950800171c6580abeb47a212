@@ -1,0 +1,18 @@
+package org.eclipse.jdt.internal.corext.refactoring.rename;
+
+import org.eclipse.jface.text.Region;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+
+public interface ITempDeclarationFinder {
+	boolean visitNode(ASTNode node);
+
+	ASTNode[] getSelectedNodes();
+}

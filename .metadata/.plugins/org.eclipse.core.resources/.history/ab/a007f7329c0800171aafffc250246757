@@ -1,0 +1,18 @@
+package com.successfactors.cdp.service;
+
+import com.successfactors.sca.ServiceCommand;
+import java.util.Date;
+
+public interface IUpdateMentorUnavailableEndDate {
+	String getProgramId();
+
+	void setProgramId(String programId);
+
+	String getMentorId();
+
+	void setMentorId(String mentorId);
+
+	Date getUnavailableEndDate();
+
+	void setUnavailableEndDate(Date unavailableEndDate);
+}

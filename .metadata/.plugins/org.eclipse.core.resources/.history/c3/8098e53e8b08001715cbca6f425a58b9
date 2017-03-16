@@ -1,0 +1,466 @@
+/*
+ * $Id: FBAcmeFrame.java 1086300 2016-09-23 12:09:57Z I325328 $
+ */
+
+package com.successfactors.legacy.ui.fb;
+
+import com.successfactors.legacy.ui.servlet.acme.FBQuickLinks;
+import com.successfactors.platform.ui.servlet.FB2;
+import com.successfactors.legacy.ui.servlet.FBLeftNav;
+import com.successfactors.legacy.ui.servlet.HtmlUtils;
+import com.successfactors.platform.ui.servlet.SessionConstants;
+import com.successfactors.pmcommon.ui.fb.FBCompleted;
+import com.successfactors.workflow.api.fb.IFBToolbar;
+import com.successfactors.legacy.api.servlet.acme.AcmeFrameStateEnum;
+import com.successfactors.legacy.ui.servlet.util.html.FBLink;
+
+/**
+ * This is the abstract super class for the Acme UI pages.
+ * <p>
+ * It contains common attributes and methods used to contract pages within the
+ * Acme UI framework.
+ */
+public abstract class FBAcmeFrame extends FBAcmeSimple{
+
+  public static final String OLD_STATE = "os";
+  public static final String NEW_STATE = "ns";
+  public static final String SUB_STATE = "ss";
+  public static final String PROC_MODE = "mode";
+
+  // Private Attributes
+  private boolean _showOuterNav = true;
+  private AcmeFrameStateEnum _oldState;
+  private AcmeFrameStateEnum _newState;
+  private String _subState;
+  private String _procMode;
+  private FB2 _childFB;
+  private FBLeftNav _leftNav;
+  private FBQuickLinks _quickLinks;
+  private Class _stateEnumClass;
+  private boolean skipToolbar = false;
+  private boolean skipQuickLink = false;
+  private boolean skipLeftNav = false;
+
+  protected IFBToolbar _toolbar = null;
+  /**for navigation the form to back */
+  protected FBLink _backLink = null;
+  
+  // Abstract Methods
+  protected abstract void processOldState() throws Exception;
+  protected abstract FB2 processNewChildFB() throws Exception;
+  protected abstract void buildLeftNav();
+  protected abstract AcmeFrameStateEnum getDefaultState();
+  protected abstract String getPrefix();
+
+  // Constructors
+  public FBAcmeFrame(FB2Context ctx, String urlPrefix, Class stateEnumClass) {
+    super(ctx, "", urlPrefix);
+    setShowOuterNav(true);
+    _stateEnumClass = stateEnumClass;
+  }
+
+  public final String getOldStateParam() {
+    return getPrefix() + OLD_STATE;
+  }
+
+  public final String getNewStateParam() {
+    return getPrefix() + NEW_STATE;
+  }
+
+  public final String getSubStateParam() {
+    return getPrefix() + SUB_STATE;
+  }
+
+  public final String getProcModeParam() {
+    return getPrefix() + PROC_MODE;
+  }
+
+  public final AcmeFrameStateEnum getJspState() { return _newState; }
+
+  public final AcmeFrameStateEnum getOldState() {return _oldState; }
+
+  public final String getSubState() { 
+	  if(_subState!=null)
+		  _subState=_subState.trim();  
+	  return _subState; }
+
+  public final String getProcMode() { return _procMode; }
+
+  public final void setSubState(String subState) { _subState = subState; }
+
+  public final void setProcMode(String procMode) { _procMode = procMode; }
+
+  public final void setOldState(AcmeFrameStateEnum _oldState) {this._oldState = _oldState;}
+
+  public final AcmeFrameStateEnum getNewState() { return _newState; }
+
+  public final void setNewState(AcmeFrameStateEnum _newState) { this._newState = _newState; }
+
+  public final FB2 getChildFB() { return _childFB; }
+
+  public final void setShowOuterNav(boolean showOuterNav) {_showOuterNav = showOuterNav;}
+
+  public final boolean isShowOuterNav() {
+    return _showOuterNav;
+  }
+
+  public final FBLeftNav getLeftNav() {
+    return _leftNav;
+  }
+
+  /**
+   * @return the QuickLinks box
+   */
+  public final FBQuickLinks getQuickLinks() {
+    return _quickLinks;
+  }
+
+  /** 
+   * Can be overloaded to return a different toolbar title based on state.
+   * @return
+   */
+  public String getToolbarTitle(String newState) 
+  {
+      return null;
+  }
+  
+  public final IFBToolbar getToolbar() { return _toolbar; }
+
+  public final void process() throws Exception {
+
+    // 1) Get old state, with null as default.
+    _oldState = getOldStateFromRequest();
+
+    // 2) Set new state to be non-null old state,
+    //    or child-class-defined default.
+    if (_oldState == null) {
+      _newState = getDefaultState();
+    } else {
+      _newState = _oldState;
+    }
+
+    // 3) Process old state, which may change new state.
+    if (_oldState != null) {
+      processOldState();
+    }
+
+    // 4) Get nav-button clicks that would change new state.
+    processNavClicks();
+
+    // 5) get the subSteate used to track custom folders
+    _subState = getSubStateFromRequest();
+
+   _procMode = getProcModeFromRequest();
+
+
+    // create left nav and select appropriate sect/item based on state.
+    _childFB = processNewChildFB();
+  }
+
+
+
+  public String renderBodyURL() {
+    if (!skipLeftNav) {
+      createLeftNav();
+    }
+    if (!skipQuickLink) {
+      _quickLinks = new FBQuickLinks(this);
+    }
+    return super.renderBodyURL();
+  }
+
+
+  //////////////////////
+  // protected methods
+  //////////////////////
+
+  /**
+   * @return the urlPrefix that can be passed to the child FB constructor.
+   */
+  protected final String getUrlPrefixForChild() {
+    StringBuffer urlSB = new StringBuffer(urlPrefix);
+    HtmlUtils.appendQueryFragment(urlSB, getOldStateParam(),_newState.getName());
+    HtmlUtils.appendQueryFragment(urlSB, getSubStateParam(),getSubState());
+    HtmlUtils.appendQueryFragment(urlSB, getProcModeParam(),getProcMode());
+    return urlSB.toString();
+  }
+  
+  protected final String getUrlPrefixForChild(String viewMode) {
+    StringBuffer urlSB = new StringBuffer(urlPrefix);
+    HtmlUtils.appendQueryFragment(urlSB, getOldStateParam(),_newState.getName());
+    HtmlUtils.appendQueryFragment(urlSB, getSubStateParam(),getSubState());
+    HtmlUtils.appendQueryFragment(urlSB, getProcModeParam(),viewMode);
+    return urlSB.toString();
+  }
+
+  ///////////////////////////////////////////////
+  // convenience methods for adding to left nav
+
+  protected final void addLeftNavSectionForA11Y(AcmeFrameStateEnum state) {
+    if (getNewState() == state) {
+      _leftNav.addSection(getSelectedLinkHtmlForA11Y(state));
+      _leftNav.select();
+    } else {
+      _leftNav.addSection(getLinkHtmlForA11Y(state));
+    }
+  }
+  
+  protected final void addLeftNavSection(AcmeFrameStateEnum state) {
+    if (getNewState() == state) {
+      _leftNav.addSection(HtmlUtils.escapeContent(state.getLabel(getMessages())));
+      _leftNav.select();
+    } else {
+      _leftNav.addSection(getLinkHtml(state));
+    }
+  }
+
+  protected final void addLeftNavSection(AcmeFrameStateEnum state, String text) {
+    if (getNewState() == state) {
+      _leftNav.addSection(HtmlUtils.escapeContent(text));
+      //_leftNav.select();
+    } else {
+      _leftNav.addSection(getLinkHtml(state, text));
+    }
+  }
+
+   protected final void addLeftNavSection(AcmeFrameStateEnum state, String procMode, String substate, String text) {
+    if (getNewState() == state) {
+      _leftNav.addSection(HtmlUtils.escapeContent(text));
+      //_leftNav.select();
+    } else {
+      _leftNav.addSection(getLinkHtml(state, procMode, substate, text));
+    }
+  }
+
+  protected final void addLeftNavItem(AcmeFrameStateEnum state) {
+    if (getNewState() == state) {
+      _leftNav.addItem(HtmlUtils.escapeContent(state.getLabel(getMessages())));
+      _leftNav.select();
+    } else {
+      _leftNav.addItem(getLinkHtml(state));
+    }
+  }
+
+
+
+  protected final void addLeftNavItem(AcmeFrameStateEnum state, String text) {
+    if (getNewState() == state) {
+      _leftNav.addItem(HtmlUtils.escapeContent(text));
+      //_leftNav.select();
+    } else {
+      _leftNav.addItem(getLinkHtml(state, text));
+    }
+  }
+
+ protected final void addLeftNavActionItem(AcmeFrameStateEnum state) {
+    if (getNewState() == state) {
+      _leftNav.addActionItem(HtmlUtils.escapeContent(state.getLabel(getMessages())));
+      _leftNav.select();
+    } else {
+      _leftNav.addActionItem(getLinkHtml(state));
+    }
+  }
+
+
+
+  protected final void addLeftNavActionItem(AcmeFrameStateEnum state, String text) {
+    if (getNewState() == state) {
+      _leftNav.addActionItem(HtmlUtils.escapeContent(text));
+      //_leftNav.select();
+    } else {
+      _leftNav.addActionItem(getLinkHtml(state, text));
+    }
+  }
+
+  //create folder list under completed
+  protected final void addLeftNavItem(AcmeFrameStateEnum state, String procMode, String subState, String selectedSubState) {
+    if (getNewState() == state && subState.equals(selectedSubState)) {
+      _leftNav.addItem(HtmlUtils.escapeContent(subState));
+      _leftNav.select();
+    } else {
+      _leftNav.addItem(getLinkHtml(state, procMode, subState));
+    }
+  }
+
+  protected final void addLeftNavActionItem(AcmeFrameStateEnum state, String procMode, String subState, String selectedSubState) {
+    if (getNewState() == state && subState.equals(selectedSubState)) {
+      _leftNav.addActionItem(HtmlUtils.escapeContent(selectedSubState));
+      _leftNav.select();
+    } else {
+      _leftNav.addActionItem(getLinkHtml(state, procMode, selectedSubState, subState));
+    }
+  }
+
+  protected final String getLinkHtml(AcmeFrameStateEnum stateEnum, String procMode, String substate, String text) {
+    StringBuffer sb = new StringBuffer();
+    sb.append("<a href=\"javascript:void(0)\" onclick=\"setField('")
+      .append(getNewStateParam())
+      .append("', '")
+      .append(stateEnum)
+      .append("')")
+      .append(";setField('")
+      .append(getSubStateParam())
+      .append("', '")
+      .append(HtmlUtils.escapeAttributeJS(substate))
+      .append("')")
+      .append(";setFieldAndSubmit('")
+      .append(getProcModeParam())
+      .append("', '")
+      .append(HtmlUtils.escapeAttributeJS(procMode))
+      .append("');return false;\">")
+      .append(HtmlUtils.escapeContent(text))
+      .append("</a>");
+    return sb.toString();
+  }
+
+
+  protected final String getLinkHtml(AcmeFrameStateEnum stateEnum, String procMode, String substate) {
+    StringBuffer sb = new StringBuffer();
+    sb.append("<a href=\"javascript:void(0)\" onclick=\"setField('")
+      .append(getNewStateParam())
+      .append("', '")
+      .append(stateEnum)
+      .append("')")
+      .append(";setField('")
+      .append(getProcModeParam())
+      .append("', '")
+      .append(HtmlUtils.escapeAttributeJS(procMode))
+      .append("')")
+      .append(";setFieldAndSubmit('")
+      .append(getSubStateParam())
+      .append("', '")
+      .append(HtmlUtils.escapeAttributeJS(substate))
+      .append("');return false;\">")
+      .append(HtmlUtils.escapeContent(substate))
+      .append("</a>");
+    return sb.toString();
+  }
+
+  // end convenience methods
+  /////////////////////////////
+
+  protected final String getLinkHtml(AcmeFrameStateEnum stateEnum, String text) {
+    StringBuffer sb = new StringBuffer();
+    sb.append("<a href=\"javascript:void(0)\" onclick=\"setFieldAndSubmit('")
+      .append(getNewStateParam())
+      .append("', '")
+      .append(stateEnum)
+      .append("');return false;\">")
+      .append(HtmlUtils.escapeContent(text))
+      .append("</a>");
+    return sb.toString();
+  }
+
+  protected final String getLinkHtml(AcmeFrameStateEnum stateEnum) {
+    StringBuffer sb = new StringBuffer();
+    sb.append("<a href=\"javascript:void(0)\" onclick=\"setFieldAndSubmit('")
+      .append(getNewStateParam())
+      .append("', '")
+      .append(stateEnum)
+      .append("');return false\">")
+      .append(HtmlUtils.escapeContent(stateEnum.getLabel(getMessages())))
+      .append("</a>");
+    return sb.toString();
+  }
+  
+  protected final String getLinkHtmlForA11Y(AcmeFrameStateEnum stateEnum) {
+    StringBuffer sb = new StringBuffer();
+    sb.append("<a href=\"javascript:void(0)\" role=\"tab\" aria-selected=\"false\" aria-expanded=\"false\" onclick=\"setFieldAndSubmit('")
+      .append(getNewStateParam())
+      .append("', '")
+      .append(stateEnum)
+      .append("');return false\">")
+      .append(HtmlUtils.escapeContent(stateEnum.getLabel(getMessages())))
+      .append("</a>");
+    return sb.toString();
+  }
+
+  protected final String getSelectedLinkHtmlForA11Y(AcmeFrameStateEnum stateEnum) {
+    StringBuffer sb = new StringBuffer();
+    sb.append("<a id=\"selectedNavTab\" href=\"#itemContent\" role=\"tab\" aria-selected=\"true\" aria-expanded=\"true\">")
+      .append(HtmlUtils.escapeContent(stateEnum.getLabel(getMessages())))
+      .append("</a>");
+    return sb.toString();
+  }
+
+  ///////////////////
+  // private methods
+  ///////////////////
+
+  private AcmeFrameStateEnum  getOldStateFromRequest() {
+      String s = request.getParameter(getOldStateParam());
+      AcmeFrameStateEnum oldState;
+      if (s == null || "".equals(s)) {
+        oldState = null;
+      } else {
+        oldState = (AcmeFrameStateEnum) AcmeFrameStateEnum.parseEnum(s, _stateEnumClass);
+      }
+      return oldState;
+  }
+
+  //this stores the user create folder name for completed folder
+  private String  getSubStateFromRequest() {
+    return request.getParameter(getSubStateParam());
+  }
+
+  //This is used by completed folder for view/create folder/rename folder
+  private String  getProcModeFromRequest() {
+    return request.getParameter(getProcModeParam());
+  }
+
+  private void processNavClicks() {
+    
+    if ( processPasswordExpiration() ) {
+      return;
+    }
+      
+    String s = request.getParameter(getNewStateParam());
+    if (s != null && !"".equals(s)) {
+      _newState = (AcmeFrameStateEnum) AcmeFrameStateEnum.parseEnum(s, _stateEnumClass);
+    }
+  }
+  
+  private boolean processPasswordExpiration() {    
+    // if password expired, then go to set new state to password change page
+    if ("false".equals(request.getSession(false).getAttribute(SessionConstants.PASSWORD_OK))) {
+      _newState = (AcmeFrameStateEnum) AcmeFrameStateEnum.parseEnum("password", _stateEnumClass);
+      return true;
+    }
+    
+    return false;
+  }
+
+  private void createLeftNav() {
+    _leftNav = new FBLeftNav(getFB2Context(), getPrefix() + "lnav", urlPrefix);
+    buildLeftNav();
+  }
+
+  public boolean isSkipToolbar() {
+    return skipToolbar;
+  }
+
+  public void setSkipToolbar(boolean skipToolbar) {
+    this.skipToolbar = skipToolbar;
+  }
+
+  public boolean isSkipQuickLink() {
+    return skipQuickLink;
+  }
+
+  public void setSkipQuickLink(boolean skipQuickLink) {
+    this.skipQuickLink = skipQuickLink;
+  }
+
+  public boolean isSkipLeftNav() {
+    return skipLeftNav;
+  }
+
+  public void setSkipLeftNav(boolean skipLeftNav) {
+    this.skipLeftNav = skipLeftNav;
+  }
+  
+  public FBLink getBackLink() {
+    return _backLink;
+  }
+}
+

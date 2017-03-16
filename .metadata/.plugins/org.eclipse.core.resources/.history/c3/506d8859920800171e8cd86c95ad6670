@@ -1,0 +1,9 @@
+package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
+
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+
+public interface IAddSelectedLibraryToBuildpathAction {
+	String getDetailedDescription();
+
+	void run();
+}

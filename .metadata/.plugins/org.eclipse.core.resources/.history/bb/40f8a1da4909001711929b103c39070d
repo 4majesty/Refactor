@@ -1,0 +1,106 @@
+package com.successfactors.cdp.service.mentoring;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang.StringUtils;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
+
+import com.successfactors.cdp.service.mentoring.jam.ScheduleProgramJamGroupInviteJob;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.di.SFContextConstant;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceSystemException;
+
+/**
+ * Supervised Match Jam group invite Observer
+ * 
+ * @author rsrigiri
+ *
+ */
+@Name("supervisedMatchJamGroupInviteObserver")
+@javax.inject.Named("supervisedMatchJamGroupInviteObserver")
+@Scope(ScopeType.EVENT)
+@org.springframework.context.annotation.Scope(SFContextConstant.SCOPE_EVENT)
+public class SupervisedMatchJamGroupInviteObserver extends AbstractJamGroupInviteObserver {
+
+  /** logger */
+  private static final Logger log = LogManager.getLogger(); 
+
+  /** SCA Handler */ 
+  @Inject
+  @In
+  private ServiceCommandHandler scaHandler;
+
+  // TBD - to make it an annoted observer (@Observer?) supported for both seam / spring
+  public void onMatchSuccess(final ConfirmMatchingResult cmd) {
+    if(log.isDebugEnabled()) {
+      log.debug("Program Id:" + cmd.getProgram().getExternalId());
+      log.debug("Matched Participants:" + cmd.getMatchedParticipants());
+    }
+
+    if(cmd.getProgram() == null) {
+      log.error("Invalid input program.");
+      return;
+    }
+
+    if(cmd.getMatchedParticipants() == null 
+        || cmd.getMatchedParticipants().isEmpty()) {
+      log.error("No Matched Participants found for program id."+cmd.getProgram().getExternalId());
+      return;
+    }
+
+    if (isJamGroupInviteRequired(cmd)) {
+      scheduleJamGroupInvite(cmd.getProgram().getExternalId(), getParticipantSet(cmd.getMatchedParticipants()));
+    }
+  }
+
+  private boolean isJamGroupInviteRequired(ConfirmMatchingResult cmd) {
+    return (cmd.getProgram().isJamEnabled() 
+             && !StringUtils.isBlank(cmd.getProgram().getJamGroupId())
+             && !cmd.getProgram().isNeedMentorApproval()
+             && !cmd.getMatchedParticipants().isEmpty());
+  }
+
+  private Collection<String> getParticipantSet(Map<String, Set<String>> participantsMap) {
+    Collection<String> participantSet = new LinkedHashSet<String>();
+
+    for (String mentor : participantsMap.keySet()) {
+      participantSet.add(mentor);
+
+      Set<String> mentees = participantsMap.get(mentor);
+
+      if(mentees != null && !mentees.isEmpty()) {
+        participantSet.addAll(mentees);
+      }
+    }
+
+    return participantSet;
+  }
+
+  private void scheduleJamGroupInvite(String programId, Collection<String> participants) {
+    try {
+      getSCAHandler().execute(new ScheduleProgramJamGroupInviteJob(programId, participants));
+    } catch (ServiceApplicationException e) {
+      log.error("Exception occured while scheduling jam group invite job.",e);
+      sendFailureEmail(programId, participants);
+    } catch (ServiceSystemException e) {
+      log.error("Exception occured while scheduling jam group invite job.",e);
+      sendFailureEmail(programId, participants);
+    }
+  }
+
+  @Override
+  protected ServiceCommandHandler getSCAHandler() {
+    return scaHandler;
+  }
+}

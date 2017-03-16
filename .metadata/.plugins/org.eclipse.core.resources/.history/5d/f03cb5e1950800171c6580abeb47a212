@@ -1,0 +1,21 @@
+package org.eclipse.jdt.internal.corext.refactoring.util;
+
+import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+
+public interface ITextEditBasedChangeManager {
+	void manage(ICompilationUnit cu, TextEditBasedChange change);
+
+	TextEditBasedChange get(ICompilationUnit cu);
+
+	TextEditBasedChange remove(ICompilationUnit unit);
+
+	TextEditBasedChange[] getAllChanges();
+
+	ICompilationUnit[] getAllCompilationUnits();
+
+	void clear();
+
+	boolean containsChangesIn(ICompilationUnit cu);
+}

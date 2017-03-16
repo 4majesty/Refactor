@@ -1,0 +1,7 @@
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+
+public interface ITreeHierarchyLayoutProblemsDecorator {
+	void setIsFlatLayout(boolean state);
+}

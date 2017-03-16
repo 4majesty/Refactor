@@ -1,0 +1,16 @@
+package com.successfactors.cdp.service.mentoring;
+import com.successfactors.sca.ServiceCommand;
+
+import java.util.List;
+
+/**
+ * Created by I324657 on 2/2/17.
+ */
+public class MentoringScheduleJob implements ServiceCommand<Void> {
+
+    public MentoringScheduleJob() {
+
+
+
+    }
+}

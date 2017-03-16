@@ -1,0 +1,160 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import static com.successfactors.unittest.TestUtils.setField;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+import org.apache.http.HttpStatus;
+import org.apache.http.message.BasicNameValuePair;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.successfactors.cdp.service.mentoring.jam.GetJamSingleUseToken;
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.unittest.TestUtils;
+
+public class GetJamSingleUseTokenImplTest {
+  private Mockery context;
+
+  private ParamBean params;
+
+  private ServiceCommandHandler scaHandler;
+
+  private static final String JAM_BASE_URL = "https://stage.sapjam.com";
+  
+  private static final String ACCESS_TOKEN = "test_access_token";
+  
+  private static final String TEST_SINGLEUSETOKEN_FILE_PATH = "jam/test-singleusetoken.xml";
+
+  final public ParamBean getDefaultParam() {
+    if (params == null) {
+        params = new ParamBean();
+        params.setCompanyId("ABCINC");
+        params.setUserId("user1");
+        params.setDateFormat("mm/dd/yyyy");
+        params.setLocale(Locale.ENGLISH);
+    }
+
+    return params;
+  }
+  
+  @BeforeMethod(groups = { "checkin" })
+  public void setUp() throws Exception {
+    context = new Mockery();
+    context.setImposteriser(ClassImposteriser.INSTANCE);
+
+    this.params = this.getDefaultParam();
+    this.scaHandler = context.mock(ServiceCommandHandler.class);
+  }
+
+  private void setAttributes(MockGetJamSingleUseTokenImpl service) {
+    setField(service, "params", this.params);
+    setField(service, "scaHandler", this.scaHandler);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testSuccessResponse() throws ServiceApplicationException  {
+    MockGetJamSingleUseTokenImpl service = new MockGetJamSingleUseTokenImpl(HttpStatus.SC_CREATED);
+
+    setAttributes(service);
+    String singleUseToken = service.execute(new GetJamSingleUseToken());
+
+    Assert.assertTrue(singleUseToken != null);
+    Assert.assertTrue(singleUseToken.trim().length() > 0);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testwithAccessToken() throws ServiceApplicationException  {
+    MockGetJamSingleUseTokenImpl service = new MockGetJamSingleUseTokenImpl(HttpStatus.SC_CREATED);
+
+    setAttributes(service);
+    String singleUseToken = service.execute(new GetJamSingleUseToken(ACCESS_TOKEN));
+
+    Assert.assertTrue(singleUseToken != null);
+    Assert.assertTrue(singleUseToken.trim().length() > 0);
+  }
+
+  @Test(groups = { "checkin" })
+  public void testServiceUnavailable() {
+    MockGetJamSingleUseTokenImpl service = new MockGetJamSingleUseTokenImpl(HttpStatus.SC_SERVICE_UNAVAILABLE);
+
+    setAttributes(service);
+
+    boolean serviceUnavailableException = false;
+
+    try {
+      service.execute(new GetJamSingleUseToken(ACCESS_TOKEN));
+    } catch(ServiceApplicationException e) {
+      serviceUnavailableException = true;
+    }
+
+    Assert.assertTrue(serviceUnavailableException);
+  }
+
+  private class MockGetJamSingleUseTokenImpl extends GetJamSingleUseTokenImpl {
+    
+    private int responseCode;
+
+    public MockGetJamSingleUseTokenImpl(int responseCode) {
+      this.responseCode = responseCode;
+    }
+
+    @Override
+    protected BasicHttpResponse invoke(String url, String requestType,
+        List<BasicNameValuePair> headers) {
+      return mockInvoke();
+    }
+
+    @Override
+    protected BasicHttpResponse invoke(String url,String requestType,
+      List<BasicNameValuePair> headers,String body) {
+      return mockInvoke();
+    }
+
+    private BasicHttpResponse mockInvoke() {
+      switch (responseCode) {
+      case HttpStatus.SC_CREATED:
+        return getMockSuccessResponse();
+      default:
+        return getMockDefaultFailureResponse();
+      }
+    }
+
+    private BasicHttpResponse getMockSuccessResponse() {
+      byte[] payloadBytes;
+
+      try {
+        payloadBytes = TestUtils.readTestData(TEST_SINGLEUSETOKEN_FILE_PATH);
+      } catch (IOException e) {
+        e.printStackTrace();
+        return null;
+      }
+
+      String payload = new String(payloadBytes);
+
+      return new BasicHttpResponse(HttpStatus.SC_CREATED,null,payload);
+    }
+
+    private BasicHttpResponse getMockDefaultFailureResponse() {
+      return new BasicHttpResponse(HttpStatus.SC_SERVICE_UNAVAILABLE,null,null);
+    }
+
+    @Override
+    protected String getJamBaseURL() throws ServiceApplicationException {
+      return JAM_BASE_URL;
+    }
+    
+    @Override
+    protected String getAccessToken() throws ServiceApplicationException {
+      return ACCESS_TOKEN;
+    }
+  }
+}

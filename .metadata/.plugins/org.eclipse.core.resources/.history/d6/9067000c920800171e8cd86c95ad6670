@@ -1,0 +1,14 @@
+package org.eclipse.jdt.internal.ui.preferences;
+
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
+
+public interface IComplianceConfigurationBlock {
+	void enablePreferenceContent(boolean enable);
+
+	void refreshComplianceSettings();
+
+	void useProjectSpecificSettings(boolean enable);
+}

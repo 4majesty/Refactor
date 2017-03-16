@@ -1,0 +1,559 @@
+/**
+ * 
+ */
+package com.successfactors.cdp.service.impl;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.jboss.seam.annotations.In;
+
+import com.successfactors.cdp.app.helper.CareerPathV2Helper;
+import com.successfactors.cdp.bean.CareerWorksheetRolePathGraph;
+import com.successfactors.cdp.bean.CareerWorksheetScoreCriteriaBean;
+import com.successfactors.cdp.bean.CareerWorksheetSuggestedRoleVO;
+import com.successfactors.cdp.bean.SuggestedRolesSettingBean;
+import com.successfactors.cdp.bean.SuggestedRolesSubItemBean;
+import com.successfactors.cdp.bean.idp.CareerWorkSheetTemplateBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerBehaviorBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerEntryBean;
+import com.successfactors.cdp.bean.idp.CareerWorksheetBean.CareerRoleBean;
+import com.successfactors.cdp.bean.idp.ReadinessMeterInfoBean;
+import com.successfactors.cdp.dao.RolePathMapDAO;
+import com.successfactors.cdp.service.GetCareerWorksheetSuggestedRoles;
+import com.successfactors.cdp.service.GetCompetencyAndRatingForRoles;
+import com.successfactors.cdp.service.GetSuggestedRolesWeight;
+import com.successfactors.cdp.util.CareerWorksheetUtils;
+import com.successfactors.competency.bean.FamilyBean;
+import com.successfactors.competency.dao.CompetencyDAO;
+import com.successfactors.db.dao.DAOException;
+import com.successfactors.gm.api.bean.IField;
+import com.successfactors.gm.bean.ObjTemplateBean;
+import com.successfactors.gm.api.dao.ObjDAO;
+import com.successfactors.jdm.bean.RoleBean;
+import com.successfactors.legacy.bean.FeedbackBean;
+import com.successfactors.legacy.bean.provisioning.FeatureEnum;
+import com.successfactors.legacy.service.GetSysConfig;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.platform.bean.SystemBean;
+import com.successfactors.platform.dao.DAOFactory;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceQueryImpl;
+import com.successfactors.sca.config.Service;
+import com.successfactors.user.bean.UserBean;
+import com.successfactors.user.dao.UserDAO;
+
+/**
+ * get career worksheet suggested roles
+ * @author haixunlu
+ */
+@Service
+public class GetCareerWorksheetSuggestedRolesImpl implements ServiceQueryImpl<List<CareerWorksheetSuggestedRoleVO>,GetCareerWorksheetSuggestedRoles> {
+
+  /** params */
+  @Inject
+  @In
+  ParamBean params;
+
+  @Inject
+  @In
+  Connection dbConnection;
+  
+  private ObjDAO objDAO=(ObjDAO)DAOFactory.getDAOFactory().getObjDAO();
+  
+  private CompetencyDAO competencyDAO=DAOFactory.getDAOFactory().getCompetencyDAO();
+  
+  private RolePathMapDAO rolePathDAO=DAOFactory.getDAOFactory().getRolePathMapDAO();
+  
+  private UserDAO userDAO = DAOFactory.getDAOFactory().getUserDAO();
+  
+  @Inject
+  @In(create = true, value = CareerPathV2Helper.SEAM_NAME)
+  private CareerPathV2Helper careerPathV2Helper;
+  /**
+   * scahandler .
+   */
+  @Inject
+  @In
+  private transient ServiceCommandHandler scaHandler;
+
+  /** log . */
+  private static Logger logger = LogManager.getLogger();
+  
+  /*total peers related with user id*/
+  private long totalPeers = 0;
+  
+  private List<CareerRoleBean> careerRoleBeanList = new ArrayList<CareerRoleBean>();
+  
+  private static final Double DEFAULT_DOUBLE_VALUE=0.0;
+  /**
+   * execute method
+   * @param cmd input
+   * @return cmd
+   * @throws ServiceApplicationException .
+   */
+  public List<CareerWorksheetSuggestedRoleVO> execute(GetCareerWorksheetSuggestedRoles cmd)
+      throws ServiceApplicationException {
+    String userId = cmd.getUserId();
+    long templateId = cmd.getTemplateId();
+    Map<Long, Long> currentRoleFamilyMap = new HashMap<Long, Long>();
+    List<Long[]> allRolePathMapEntries = null;
+    if(params.isFeatureExist(FeatureEnum.CAREER_PATH_V2)){
+      try{
+        allRolePathMapEntries = careerPathV2Helper.getAllCareerPathMapRoles();
+      }catch(ServiceApplicationException e){
+        logger.error("GetSuggestedRoles failed due to CareerPath V2 error.Error msg:"
+            + e.getMessage(), e);
+        // log error msg and don't throw exception outside to avoid block the whole tab
+        //throw new ServiceApplicationException(e);
+      }
+    }else{
+      allRolePathMapEntries = rolePathDAO.getAllMapping(params.getCompanySchema(), dbConnection);
+    }
+    // fix NPE
+    if(allRolePathMapEntries == null){
+      allRolePathMapEntries = new ArrayList<Long[]>();
+    }
+    List<CareerWorksheetSuggestedRoleVO> roleVOList = initProcessingRoles(userId, templateId, currentRoleFamilyMap,
+        allRolePathMapEntries);
+    if(!roleVOList.isEmpty()){
+      this.calculate(userId, templateId, currentRoleFamilyMap, allRolePathMapEntries, roleVOList);
+    }
+    return roleVOList;
+  }
+
+  private List<CareerWorksheetSuggestedRoleVO> initProcessingRoles(String userId, long templateId, Map<Long, Long> currentRoleFamilyMap,
+      List<Long[]> allRolePathMapEntries) {
+    List<CareerWorksheetSuggestedRoleVO> roleVOList = new ArrayList<CareerWorksheetSuggestedRoleVO>();
+    // get all roles in system
+    List<RoleBean> allRoles = competencyDAO.getAllRoles(params.getCompanySchema(), dbConnection);
+    if(allRoles==null || allRoles.isEmpty()){
+      return roleVOList;
+    }
+    Set<Long> filterRoleIdSet = new HashSet<Long>();
+    // filter out target roles
+    List<CareerRoleBean> targetRoles = objDAO.getCareerWorksheetRoles(params.getCompanySchema(),
+            dbConnection, userId, templateId);
+    if(null!=targetRoles && !targetRoles.isEmpty()){
+      for(CareerRoleBean targetRole:targetRoles){
+        if(targetRole.getRoleBean()!=null){
+          filterRoleIdSet.add(targetRole.getRoleBean().getRoleId());
+        }
+      }
+    }
+    // filter out "lead from", loop current roles in case current user has multiple
+    // family id is not retrieve, get in below from allRoles()
+    Collection<RoleBean> currentRoleSet = competencyDAO.getRolesByUserId(params.getCompanySchema(), dbConnection, userId);
+    Set<Long> currentRoleIdSet = new HashSet<Long>();
+    if(currentRoleSet!=null&& !currentRoleSet.isEmpty()){
+      CareerWorksheetRolePathGraph rolePathGraph = new CareerWorksheetRolePathGraph();
+      for(Long[] rolePath:allRolePathMapEntries){
+        rolePathGraph.addEdge(rolePath[0], rolePath[1]);
+      }
+      Set<Long> allLeadningFromRoles = new HashSet<Long>();
+      Set<Long> allLeadingToRoles = new HashSet<Long>();
+      for(Iterator<RoleBean> it=currentRoleSet.iterator();it.hasNext();){
+        Long startRoleId = it.next().getRoleId();
+        currentRoleIdSet.add(startRoleId);
+        Set<Long> fromRoles = rolePathGraph.getAllRolesByDirection(startRoleId, true);
+        Set<Long> toRoles = rolePathGraph.getAllRolesByDirection(startRoleId, false);
+        allLeadningFromRoles.addAll(fromRoles);
+        allLeadingToRoles.addAll(toRoles);
+      }
+      allLeadningFromRoles.removeAll(allLeadingToRoles);
+      filterRoleIdSet.addAll(allLeadningFromRoles);
+    }
+    Map<Long, FamilyBean> familyMap = new HashMap<Long, FamilyBean>();
+    for(RoleBean role:allRoles){
+      Long roleId = role.getRoleId();
+      if(filterRoleIdSet.contains(roleId)){
+        continue;
+      }
+      if(currentRoleIdSet.contains(roleId)){
+        currentRoleFamilyMap.put(roleId, role.getFamilyId());
+        continue;
+      }
+      CareerWorksheetSuggestedRoleVO vo = new CareerWorksheetSuggestedRoleVO();
+      vo.setRoleId(roleId);
+      vo.setRoleName(role.getRoleName());
+      vo.setRoleDesc(role.getRoleDesc());
+      long familyId = role.getFamilyId();
+      vo.setFamilyId(familyId);
+      FamilyBean familyBean = familyMap.get(familyId);
+      if(familyBean==null){
+        familyBean = competencyDAO.getFamilyById(params.getCompanySchema(), dbConnection, familyId);
+        familyMap.put(familyId, familyBean);
+      }
+      vo.setFamilyName(familyBean!=null?familyBean.getFamilyName():"");
+      roleVOList.add(vo);
+      // prepare for role readiness calculation
+      CareerRoleBean careerRoleBean = new CareerRoleBean();
+      careerRoleBean.setRoleBean(role);
+      careerRoleBean.setCurrentRole(false);
+      this.careerRoleBeanList.add(careerRoleBean);
+    }
+    return roleVOList;
+  }
+
+  private boolean isTroubleShootingEnabled(){
+    boolean enableLogForTroubleShooting = false;
+    try{
+      GetSysConfig cmd = new GetSysConfig(SystemBean.ENABLE_LOG_FOR_TROUBLE_SHOOTING_KEY,
+          SystemBean.ENABLE_LOG_FOR_TROUBLE_SHOOTING_TYPE);
+      enableLogForTroubleShooting = scaHandler.execute(cmd) != null;
+    }catch(ServiceApplicationException e){
+      logger.error("check enable log for trouble shooting failed");
+      enableLogForTroubleShooting=false;
+    }
+    return enableLogForTroubleShooting;
+  }
+  
+  private void calculate(String userId, long templateId, Map<Long, Long> currentRoleFamilyMap, 
+      List<Long[]> allRolePathMapEntries, List<CareerWorksheetSuggestedRoleVO> roleVOList) throws ServiceApplicationException{
+    // init data
+    Map<Long, Double> roleReadienssMap = null;
+    Set<CareerWorksheetRolePathGraph> graphSet = null;
+    Map<Long, Integer> jobOpeningsMap = null;
+    Map<Long, Set<UserBean>> roleInPeers = null;
+    boolean enableLogForTroubleShooting = this.isTroubleShootingEnabled();
+    Map<String, SuggestedRolesSettingBean> settingBeans = scaHandler.execute(new GetSuggestedRolesWeight());
+    if(settingBeans == null) {
+      settingBeans = new HashMap<String, SuggestedRolesSettingBean>();
+    }
+    CareerWorksheetScoreCriteriaBean compScoreCriteria = new CareerWorksheetScoreCriteriaBean(
+        CareerWorksheetScoreCriteriaBean.COMPETENCY, settingBeans.get(CareerWorksheetScoreCriteriaBean.COMPETENCY));
+    CareerWorksheetScoreCriteriaBean familyScoreCriteria = new CareerWorksheetScoreCriteriaBean(
+        CareerWorksheetScoreCriteriaBean.FAMILY, settingBeans.get(CareerWorksheetScoreCriteriaBean.FAMILY));
+    CareerWorksheetScoreCriteriaBean careerPathScoreCriteria = new CareerWorksheetScoreCriteriaBean(
+        CareerWorksheetScoreCriteriaBean.CAREERPATH, settingBeans.get(CareerWorksheetScoreCriteriaBean.CAREERPATH));
+    CareerWorksheetScoreCriteriaBean jobOpeningScoreCriteria = new CareerWorksheetScoreCriteriaBean(
+        CareerWorksheetScoreCriteriaBean.JOBOPENINGS, settingBeans.get(CareerWorksheetScoreCriteriaBean.JOBOPENINGS));
+    CareerWorksheetScoreCriteriaBean peerScoreCriteria = new CareerWorksheetScoreCriteriaBean(
+        CareerWorksheetScoreCriteriaBean.PEER, settingBeans.get(CareerWorksheetScoreCriteriaBean.PEER));
+    
+    if(compScoreCriteria.isEnabled()) {
+      roleReadienssMap = initRoleReadinessMap(userId, templateId, compScoreCriteria.getSubItemSettings());
+    }
+    if(careerPathScoreCriteria.isEnabled()) {
+      graphSet = initRolePathGraph(currentRoleFamilyMap.keySet(), allRolePathMapEntries);
+    }
+    if(jobOpeningScoreCriteria.isEnabled()) {
+      jobOpeningsMap = initJobOpenings(roleVOList);
+    }
+    if(peerScoreCriteria.isEnabled()) {
+      roleInPeers = initRoleInPeers(userId, templateId);
+    }
+
+    for(CareerWorksheetSuggestedRoleVO vo: roleVOList){
+      Long roleId = vo.getRoleId();
+      List<CareerWorksheetScoreCriteriaBean> scoreCriteriaList = new ArrayList<CareerWorksheetScoreCriteriaBean>();
+      prepareScoreCriteriaList(currentRoleFamilyMap, roleReadienssMap,
+          graphSet, jobOpeningsMap, roleInPeers, compScoreCriteria,
+          familyScoreCriteria, careerPathScoreCriteria,
+          jobOpeningScoreCriteria, peerScoreCriteria, vo, roleId,
+          scoreCriteriaList);
+      // sum total calculation
+      StringBuffer scoreSB = new StringBuffer();
+      double score = 0;
+      for(CareerWorksheetScoreCriteriaBean criteriaBean:scoreCriteriaList){
+        if(enableLogForTroubleShooting){
+          scoreSB.append("[").append(criteriaBean).append("]");
+        }
+        score+=criteriaBean.getWeight()*criteriaBean.getScore();
+      }
+      if(enableLogForTroubleShooting){
+        logger.info("roleId:"+vo.getRoleId()+",score:"+scoreSB);
+      }
+      vo.setScore(score);
+    }
+  }
+
+  private void prepareScoreCriteriaList(Map<Long, Long> currentRoleFamilyMap,
+      Map<Long, Double> roleReadienssMap,
+      Set<CareerWorksheetRolePathGraph> graphSet,
+      Map<Long, Integer> jobOpeningsMap, Map<Long, Set<UserBean>> roleInPeers,
+      CareerWorksheetScoreCriteriaBean compScoreCriteria,
+      CareerWorksheetScoreCriteriaBean familyScoreCriteria,
+      CareerWorksheetScoreCriteriaBean careerPathScoreCriteria,
+      CareerWorksheetScoreCriteriaBean jobOpeningScoreCriteria,
+      CareerWorksheetScoreCriteriaBean peerScoreCriteria,
+      CareerWorksheetSuggestedRoleVO vo, Long roleId,
+      List<CareerWorksheetScoreCriteriaBean> scoreCriteriaList) {
+    // [Competency] get role percent, between 0 and 1
+    {
+      if(compScoreCriteria.isEnabled()) {
+        Double readinessPercent = roleReadienssMap.get(roleId);
+        if(readinessPercent!=null){
+          compScoreCriteria.setScore(readinessPercent.doubleValue());
+        }else{
+          compScoreCriteria.setScore(CareerWorksheetScoreCriteriaBean.SCORE_0);
+        }
+        scoreCriteriaList.add(compScoreCriteria);
+      }
+    }
+    // [Family] assign 1 for same family,otherwise assign 0
+    {
+      
+      if(familyScoreCriteria.isEnabled()) {
+        if(currentRoleFamilyMap.values()!=null && currentRoleFamilyMap.values().contains(vo.getFamilyId())){
+          familyScoreCriteria.setScore(CareerWorksheetScoreCriteriaBean.SCORE_1);
+        }else {
+          familyScoreCriteria.setScore(CareerWorksheetScoreCriteriaBean.SCORE_0);
+        }
+        scoreCriteriaList.add(familyScoreCriteria);
+      }
+    }
+    // [Career Path Distance] formula is f(x)=1/x
+    {
+      if(careerPathScoreCriteria.isEnabled()) {
+        int distance = Integer.MAX_VALUE;
+        for(CareerWorksheetRolePathGraph graph:graphSet){
+          int tempDistance = graph.getDistance(roleId);
+          // ignore one of the current role if it is 0
+          if(tempDistance!=0 && tempDistance<distance){
+            distance = tempDistance;
+          }
+        }
+        double score = CareerWorksheetScoreCriteriaBean.SCORE_0;
+        if(distance!=Integer.MAX_VALUE && distance!=0){
+          careerPathScoreCriteria.setScore((new BigDecimal(CareerWorksheetScoreCriteriaBean.SCORE_1).divide(
+              new BigDecimal(distance), BigDecimal.TEN.intValue(),  RoundingMode.HALF_UP)).doubleValue());
+        }else{
+          careerPathScoreCriteria.setScore(CareerWorksheetScoreCriteriaBean.SCORE_0);
+        }
+        scoreCriteriaList.add(careerPathScoreCriteria);
+      }
+    }
+    // [Job Opening] assign 1 if open;otherwise assign 0
+    {
+      if(jobOpeningScoreCriteria.isEnabled()) {
+        Integer openingCount = jobOpeningsMap.get(roleId);
+        if(openingCount!=null&& openingCount>0){
+          jobOpeningScoreCriteria.setScore(CareerWorksheetScoreCriteriaBean.SCORE_1);
+        }else{
+          jobOpeningScoreCriteria.setScore(CareerWorksheetScoreCriteriaBean.SCORE_0);
+        }
+        scoreCriteriaList.add(jobOpeningScoreCriteria);
+      }
+    }
+    // [Peer Score] formula is f(x)=n/p
+    {
+      if(peerScoreCriteria.isEnabled()) {
+        Set<UserBean> peers = roleInPeers.get(roleId);
+        if(this.totalPeers!=0 && peers!=null){
+          peerScoreCriteria.setScore((new BigDecimal(peers.size()).divide(
+              new BigDecimal(this.totalPeers), BigDecimal.TEN.intValue(),  RoundingMode.HALF_UP)).doubleValue());
+        }else{
+          peerScoreCriteria.setScore(CareerWorksheetScoreCriteriaBean.SCORE_0);
+        }
+        scoreCriteriaList.add(peerScoreCriteria);
+      }
+    }
+  }
+
+  private Set<CareerWorksheetRolePathGraph> initRolePathGraph(Set<Long> currentRoleSet, List<Long[]> allRolePathMapEntries) {
+    Set<CareerWorksheetRolePathGraph> rolePathGraphSet = new HashSet<CareerWorksheetRolePathGraph>();
+    if(null!=currentRoleSet&&!currentRoleSet.isEmpty()){
+      if(allRolePathMapEntries!=null && !allRolePathMapEntries.isEmpty()){
+        for(Long roleId:currentRoleSet){
+          CareerWorksheetRolePathGraph rolePathGraph = new CareerWorksheetRolePathGraph();
+          for(Long[] rolePath:allRolePathMapEntries){
+            rolePathGraph.addEdge(rolePath[0], rolePath[1]);
+          }
+          rolePathGraph.generateAllDistances(roleId);
+          rolePathGraphSet.add(rolePathGraph);
+        }
+      }
+    }
+    return rolePathGraphSet;
+  }
+
+  private Map<Long, Double> initRoleReadinessMap(String userId, long templateId, Set<SuggestedRolesSubItemBean> librarySettings) 
+      throws ServiceApplicationException{
+    Map<Long, Double> roleReadienssMap = new HashMap<Long, Double>();
+    boolean useCompanyScale = false;
+    boolean isTroubleShootingEnabled = this.isTroubleShootingEnabled();
+    
+    // init excluded library and category list
+    Set<String> excludedLibraries = new HashSet<String>();
+    Map<String, Set<String>> excludedCategories = new HashMap<String, Set<String>>();
+    setExcludedLibAndCat(librarySettings, excludedLibraries, excludedCategories);
+    
+    // reverse the gap if needed to
+    try{
+      GetSysConfig cmd = new GetSysConfig(SystemBean.COMPANYWIDE_SCALE_KEY, SystemBean.COMPANYWIDE_SCALE_TYPE);
+      SystemBean systemBean = scaHandler.execute(cmd);
+      useCompanyScale = systemBean!=null;
+    } catch(ServiceApplicationException e){
+      useCompanyScale = false;
+    }
+    ObjTemplateBean planBean = objDAO.getTemplateById(params.getCompanySchema(), dbConnection,
+        templateId, true, true);
+    IField lastRatingField = planBean.getField(CareerWorkSheetTemplateBean.FIELD_LAST_RATING);
+    boolean isUseBehaviorInReadiness = true;
+    CareerBehaviorBean careerBehaviorBean = planBean.getCareerBehaviorBean();
+    if (careerBehaviorBean != null) {
+      isUseBehaviorInReadiness = careerBehaviorBean.isUseInReadiness();
+    }
+
+    GetCompetencyAndRatingForRoles compCmd = new GetCompetencyAndRatingForRoles(careerRoleBeanList, userId, planBean);
+    compCmd = scaHandler.execute(compCmd);
+    for (CareerWorksheetBean.CareerRoleBean careerRole : compCmd.getRoleBeanList()) {
+      long roleId = careerRole.getRoleBean().getRoleId();
+      if (careerRole.getEntryList() == null || careerRole.getEntryList().isEmpty()) {
+        roleReadienssMap.put(roleId, DEFAULT_DOUBLE_VALUE);
+        continue;
+      }
+      // calculate readiness for each role
+      int requiredCompetencies = 0;
+      ReadinessMeterInfoBean meterInfoBean = new ReadinessMeterInfoBean();
+      for (Object entry : careerRole.getEntryList()) {
+        CareerWorksheetBean.CareerEntryBean entryBean = (CareerWorksheetBean.CareerEntryBean) entry;
+        if (checkIsExcluded(entryBean, roleId, isTroubleShootingEnabled, excludedLibraries, excludedCategories)) {
+          continue;
+        }
+        double actualRating = lastRatingField!=null?CareerWorksheetUtils.adjustLastRating(lastRatingField, entryBean.getLastRating(),
+              entryBean.getMinScale(), entryBean.getMaxScale()):0;
+        double percent = entryBean.getExpectedRating();
+        double expectedRating = lastRatingField!=null?CareerWorksheetUtils.getExpectedRating(lastRatingField, percent):DEFAULT_DOUBLE_VALUE;
+        meterInfoBean.calculation(actualRating,expectedRating, useCompanyScale);// calculate filledCompetencies
+        if(entryBean.getCompetencyType() == FeedbackBean.TYPE_COMPETENCY){
+          requiredCompetencies++;
+        }
+        if(isUseBehaviorInReadiness){
+          // add behavior support
+          List subEntryList = entryBean.getSubEntryList();
+          if(null!=subEntryList && !subEntryList.isEmpty()){
+            for(Iterator it2 = subEntryList.iterator();it2.hasNext();){
+              CareerEntryBean subEntry = (CareerEntryBean)it2.next();
+              long behaviorId = subEntry.getCompetencyId();
+              double behaviorActualRating = lastRatingField!=null?
+                CareerWorksheetUtils.adjustLastRating(lastRatingField,
+                    subEntry.getLastRating(), subEntry.getMinScale(), subEntry.getMaxScale()):DEFAULT_DOUBLE_VALUE;
+              double behaviorExpectedRating = lastRatingField!=null?
+                CareerWorksheetUtils.getExpectedRating(lastRatingField,
+                      entryBean.getExpectedRating()):0;
+              // if behavior expected rating is not set, use competency's.
+              if(FeedbackBean.NOT_APPLICABLE == behaviorExpectedRating){
+                behaviorExpectedRating = expectedRating;
+              }
+              // calculation only support includeBehavior=true or competency
+              meterInfoBean.calculation(behaviorActualRating,behaviorExpectedRating, useCompanyScale);
+              requiredCompetencies++;
+            }
+          }
+        }
+      }
+      double roleReadiness = CareerWorksheetUtils.getReadinessMeter(meterInfoBean, requiredCompetencies, 0);
+      roleReadienssMap.put(roleId, roleReadiness/CareerWorksheetUtils.NUMBER_100);
+    }
+    return roleReadienssMap;
+  }
+
+  private boolean checkIsExcluded(CareerEntryBean entryBean,
+      long roleId, boolean isTroubleShootingEnabled, Set<String> excludedLibraries,
+      Map<String, Set<String>> excludedCategories) {
+    if(excludedLibraries.contains(entryBean.getCompetencySource())) {
+      if(isTroubleShootingEnabled) {
+        logger.info("Competency skip: roleId=" + roleId + " compName:" + entryBean.getCompName() + " library:" + entryBean.getCompetencySource());
+      }
+      return true;
+    } else{
+      Set<String> excludedCategoriesSet =excludedCategories.get(entryBean.getCompetencySource());
+      if (excludedCategoriesSet!=null && excludedCategoriesSet.contains(entryBean.getCategoryName())) {
+        if(isTroubleShootingEnabled) {
+          logger.info("Competency skip: roleId=" + roleId + " compName:" + entryBean.getCompName() + " category:" + entryBean.getCategoryName());
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private void setExcludedLibAndCat(
+      Set<SuggestedRolesSubItemBean> librarySettings,
+      Set<String> excludedLibraries, Map<String, Set<String>> excludedCategories) {
+    if(librarySettings != null && librarySettings.size() > 0) {
+      for(SuggestedRolesSubItemBean librarySetting : librarySettings) {
+        if(!librarySetting.isEnabled()) {
+          excludedLibraries.add(librarySetting.getItemKey());
+          continue;
+        }
+        Set<String> categoriesList = new HashSet<String>();
+        for (SuggestedRolesSubItemBean categorySetting : librarySetting.getSubItems()) {
+          if (!categorySetting.isEnabled()) {
+            categoriesList.add(categorySetting.getItemKey());
+          }
+        }
+        excludedCategories.put(librarySetting.getItemKey(), categoriesList);
+      }
+    }
+    
+  }
+
+  private Map<Long, Set<UserBean>> initRoleInPeers(String userId, long templateId){
+    Map<Long, Set<UserBean>> roleInPeersMap = new HashMap<Long, Set<UserBean>>();
+    // find user's manager
+    UserBean userBean = userDAO.findUserById(params.getCompanySchema(), dbConnection, userId, true);
+    if(!userBean.NO_MANAGER.equals(userBean.getUserManagerId())){
+      boolean actualAssignedOnly = params.isFeatureExist(FeatureEnum.ECT_GLOBAL_ASSIGNMENT);
+      boolean validUserOnly = true;
+      List<UserBean> directReports = userDAO.getDirectReportList(params.getCompanySchema(), dbConnection,
+          userBean.getUserManagerId(), validUserOnly, actualAssignedOnly);
+      if(directReports!=null && directReports.size()>1){
+        // find role in peers
+        for(UserBean peer:directReports){
+          if(userId.equals(peer.getUserId())){
+            continue;
+          }
+          this.totalPeers++;
+          List<CareerRoleBean> targetRoles = objDAO.getCareerWorksheetRoles(params.getCompanySchema(),dbConnection,
+              peer.getUserId(), templateId);
+          if(targetRoles!=null && !targetRoles.isEmpty()){
+            for(CareerRoleBean careerRoleBean: targetRoles){
+              long roleId = careerRoleBean.getRoleBean().getRoleId();
+              Set<UserBean> peerList = roleInPeersMap.get(roleId);
+              if(peerList==null){
+                peerList = new HashSet<UserBean>();
+                roleInPeersMap.put(roleId, peerList);
+              }
+              peerList.add(peer);
+            }
+          }
+        }
+      }
+    }
+    return roleInPeersMap;
+  }
+
+  private Map<Long, Integer> initJobOpenings(List<CareerWorksheetSuggestedRoleVO> roleVOList) {
+    Map<Long, Integer> jobOpeningsMap = new HashMap<Long, Integer>();
+    // CDP-3342 reduce the number of DB call
+    List<Long> roleIds = new ArrayList<Long>();
+    for(CareerWorksheetSuggestedRoleVO vo:roleVOList){
+      long roleId = vo.getRoleId();
+      roleIds.add(roleId);
+    }
+    try {
+      jobOpeningsMap = userDAO.countJobOpeningByRoleIds(params.getCompanySchema(), dbConnection, roleIds);
+    } catch (DAOException e) {
+      logger.error("DAOException caught", e);
+    }
+    return jobOpeningsMap;
+  }
+}

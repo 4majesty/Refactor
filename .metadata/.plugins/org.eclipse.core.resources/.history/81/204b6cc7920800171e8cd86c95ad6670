@@ -1,0 +1,17 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+
+public interface IPackageExplorerLabelProvider {
+	StyledString getStyledText(Object element);
+
+	String getText(Object element);
+
+	Image getImage(Object element);
+
+	void setIsFlatLayout(boolean state);
+
+	void dispose();
+}

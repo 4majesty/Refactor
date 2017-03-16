@@ -1,0 +1,53 @@
+package org.eclipse.jdt.internal.ui.typehierarchy;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.ScrollBar;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter;
+import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
+import org.eclipse.jdt.ui.actions.IMemberFilterActionGroup;
+
+public interface IMethodsViewer {
+	void showInheritedMethods(boolean on);
+
+	void sortByDefiningType(boolean on);
+
+	boolean isShowInheritedMethods();
+
+	boolean isShowDefiningTypes();
+
+	void saveState(IMemento memento);
+
+	void restoreState(IMemento memento);
+
+	void initContextMenu(IMenuListener menuListener, String popupId, IWorkbenchPartSite viewSite);
+
+	void contributeToContextMenu(IMenuManager menu);
+
+	void contributeToToolBar(ToolBarManager tbm);
+
+	void dispose();
+}

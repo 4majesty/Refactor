@@ -1,0 +1,25 @@
+package com.successfactors.cdp.service.mentoring.jam.impl;
+
+import org.json.JSONObject;
+import com.sf.sfv4.util.StringUtils;
+import com.successfactors.cdp.bean.mentoring.jam.Group;
+import com.successfactors.cdp.service.mentoring.jam.CreateJamGroup;
+import com.successfactors.cdp.service.mentoring.jam.exception.DuplicateJamGroupException;
+import com.successfactors.cdp.service.mentoring.jam.exception.JamAuthenticationException;
+import com.successfactors.cdp.service.mentoring.jam.util.BasicHttpResponse;
+import com.successfactors.cdp.service.mentoring.jam.util.CreateGroupConstants;
+import com.successfactors.logging.api.LogManager;
+import com.successfactors.logging.api.Logger;
+import com.successfactors.platform.bean.ParamBean;
+import com.successfactors.sca.ServiceApplicationException;
+import com.successfactors.sca.ServiceCommandHandler;
+import com.successfactors.sca.ServiceCommandImpl;
+import com.successfactors.sca.config.Service;
+
+public interface ICreateJamGroupImpl {
+	Group execute(CreateJamGroup cmd) throws ServiceApplicationException;
+
+	ServiceCommandHandler getSCAHandler();
+
+	ParamBean getParams();
+}

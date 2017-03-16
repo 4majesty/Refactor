@@ -1,0 +1,35 @@
+package org.eclipse.jdt.internal.ui.packageview;
+
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgDestinationFactory;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgCopyStarter;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveStarter;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+public interface ISelectionTransferDropAdapter {
+	Transfer getTransfer();
+
+	boolean isEnabled(DropTargetEvent event);
+
+	void dragEnter(DropTargetEvent event);
+
+	void dragLeave(DropTargetEvent event);
+
+	boolean validateDrop(Object target, int operation, TransferData transferType);
+
+	boolean performDrop(Object data);
+}
